@@ -10,7 +10,8 @@ Fonte dos requisitos: DRS v0.6, transcrito em [`docs/requisitos/`](docs/requisit
 
 Duas aplicações: `server` (back-end) e `web` (front-end, stack a definir).
 
-Stack do `server`: Java 21, Spring Boot 4.1.x, Maven, Spring Data JPA, Spring Security (JWT), Hibernate Envers.
+Stack do `server`: Java 21, Spring Boot 4.1.x, Maven, Spring Data JPA, Spring Security (JWT), Hibernate Envers,
+Lombok.
 Bancos PostgreSQL e H2, escolhidos por profile (`h2` padrão, `postgres`). Sem migrations: schema gerado pelo ORM e
 seed por scripts executados na inicialização. Arquitetura hexagonal por módulo, com uma regra/validação/operação por
 arquivo; leia [`docs/arquitetura.md`](docs/arquitetura.md) antes de implementar no `server`.

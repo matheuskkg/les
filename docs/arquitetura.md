@@ -8,6 +8,7 @@ Back-end do e-commerce de livros. A aplicação `web` é tratada à parte e não
 - Spring Web, Spring Data JPA (Hibernate), Spring Security (JWT, papéis `CLIENTE` e `ADMIN`), Hibernate Envers.
 - Bancos suportados: **PostgreSQL** e **H2**, escolhidos por profile. Sem ferramenta de migrations: o schema é gerado
   pelo ORM e os dados vêm de scripts de seed executados na inicialização.
+- Lombok.
 - MapStruct (mapeamento domínio ↔ persistência ↔ DTO).
 - Testes: JUnit 5, AssertJ, ArchUnit.
 
@@ -31,16 +32,17 @@ Monólito modular. Cada grupo do DRS é um módulo (pacote de topo), e cada mód
 infraestrutura  ──▶  aplicacao  ──▶  dominio
 ```
 
-- **`dominio`**: modelos, value objects, regras puras e cálculos. Java puro, sem Spring e sem JPA.
+- **`dominio`**: modelos, value objects, regras puras e cálculos. Pode usar Spring (`@Component`, injeção) e
+  Lombok; não usa JPA.
 - **`aplicacao`**: casos de uso, regras que precisam consultar dados e **portas** (interfaces) de saída:
   repositórios, operadora de cartão, frete, IA. O caso de uso é a própria porta de entrada (não há interface
-  separada para ele).
+  separada para ele). A transação é demarcada no caso de uso (`@Transactional`).
 - **`infraestrutura`**: adapters. Os de entrada são controllers e DTOs, e os de saída são persistência JPA, serviços
   fake e clientes externos.
 
 Hexagonal estrita: as entidades JPA (`*Jpa`) ficam em `infraestrutura/persistencia`, separadas dos modelos de
-domínio, com mappers MapStruct. Um teste ArchUnit faz o build falhar se `dominio` importar Spring, JPA ou outra
-camada, ou se `aplicacao` importar `infraestrutura`.
+domínio, com mappers MapStruct. Um teste ArchUnit faz o build falhar se `dominio` importar JPA, `aplicacao` ou
+`infraestrutura`, ou se `aplicacao` importar `infraestrutura`.
 
 Módulos se comunicam pelos casos de uso ou portas públicas do outro módulo, nunca acessando a persistência dele.
 Exemplo: `vendas` chama `estoque` para reservar e baixar itens.
@@ -82,7 +84,7 @@ server/
 
 | Tipo | Onde | Forma | Exemplo |
 |---|---|---|---|
-| Regra/validação pura | `dominio/regra` | implementa `Regra<T>`, sem dependências | `SenhaForte` (RNF-CLI-001), `ValorMinimoPorCartao` (RN-VEN-004) |
+| Regra/validação pura | `dominio/regra` | implementa `Regra<T>`, não consulta dados | `SenhaForte` (RNF-CLI-001), `ValorMinimoPorCartao` (RN-VEN-004) |
 | Regra que consulta dados | `aplicacao/regra` | implementa `Regra<T>`, recebe portas no construtor | `CpfUnico`, `BandeiraRegistrada` (RN-CLI-005), `EstoqueDisponivelParaCarrinho` (RN-VEN-001) |
 | Cálculo de negócio | `dominio/...` | classe com um único método público | `CalcularPrecoVenda` (RF-EST-002, RN-EST-002), `DistribuirPagamento` (RN-VEN-005, RN-VEN-006) |
 | Operação | `aplicacao/casodeuso` | uma classe com `executar(Comando)` | `CadastrarCliente`, `AlterarSenha`, `SolicitarTroca` |
@@ -98,7 +100,8 @@ public interface Regra<T> {
 
 - `T` é o que a operação valida: um modelo de domínio ou um comando ou record de entrada, por exemplo
   `PagamentoProposto` com o total, os cartões e os cupons.
-- Cada regra é um bean Spring (o registro é feito na infraestrutura, então a regra continua sem anotações).
+- Regras, cálculos e casos de uso são beans anotados com `@Component`. A injeção é preferencialmente por construtor
+  (Lombok `@RequiredArgsConstructor`), o que permite instanciá-los com `new` nos testes unitários.
 - **Regras são agrupadas por operação, não por entidade.** O caso de uso recebe pelo construtor exatamente as regras
   que aplica. Não se injeta `List<Regra<Cliente>>` genericamente, porque cadastro, alteração e inativação usam
   conjuntos diferentes.
@@ -112,21 +115,20 @@ public interface Regra<T> {
 Esboço de caso de uso:
 
 ```java
+@Component
+@RequiredArgsConstructor
 public class CadastrarCliente {
-    private final List<Regra<NovoCliente>> regras;
+    private final DadosObrigatoriosCliente dadosObrigatorios; // RN-CLI-006
+    private final SenhaForte senhaForte;                      // RNF-CLI-001
+    private final ConfirmacaoDeSenha confirmacaoDeSenha;      // RNF-CLI-002
+    private final CpfUnico cpfUnico;
     private final ClienteRepositorio clientes;
     private final CodificadorDeSenha senhas;
 
-    public CadastrarCliente(SenhaForte senhaForte, ConfirmacaoDeSenha confirmacao, CpfUnico cpfUnico,
-                            DadosObrigatoriosCliente obrigatorios, ClienteRepositorio clientes,
-                            CodificadorDeSenha senhas) {
-        this.regras = List.of(obrigatorios, senhaForte, confirmacao, cpfUnico);
-        this.clientes = clientes;
-        this.senhas = senhas;
-    }
-
+    @Transactional
     public ClienteId executar(NovoCliente comando) {
-        Violacoes.verificar(comando, regras); // lança ExcecaoDeNegocio se houver violações
+        // lança ExcecaoDeNegocio com todas as violações, se houver
+        Violacoes.verificar(comando, dadosObrigatorios, senhaForte, confirmacaoDeSenha, cpfUnico);
         // monta o Cliente, codifica a senha, salva
     }
 }
