@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:${DB_PORTA:5432}/livraria}
+    username: ${DB_USUARIO:livraria}
+    password: ${DB_SENHA:livraria}
+  jpa:
+    hibernate:
+      ddl-auto: update

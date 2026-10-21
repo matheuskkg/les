@@ -50,8 +50,9 @@ Exemplo: `vendas` chama `estoque` para reservar e baixar itens.
 ### Estrutura de pacotes
 
 ```
-server/
+apps/server/
 ├── pom.xml
+├── docker-compose.yml          Postgres de desenvolvimento
 └── src/
     ├── main/
     │   ├── java/br/fatec/les/livraria/
@@ -59,7 +60,7 @@ server/
     │   │   ├── compartilhado/
     │   │   │   ├── dominio/            Dinheiro, Regra, Violacoes, Violacao, ExcecaoDeNegocio, Cpf, Email
     │   │   │   ├── aplicacao/porta/    UsuarioAtual, Relogio
-    │   │   │   └── infraestrutura/     seed/, auditoria/, seguranca/, web/TratadorDeErros
+    │   │   │   └── infraestrutura/     seed/, tempo/, auditoria/, seguranca/, web/TratadorDeErros
     │   │   └── vendas/                 (mesma forma em todos os módulos)
     │   │       ├── dominio/
     │   │       │   ├── modelo/         Pedido, ItemPedido, StatusPedido, Carrinho, Reserva, CupomTroca ...
@@ -151,7 +152,8 @@ banco Postgres de desenvolvimento (não há dados reais).
 
 ### Seed
 
-- Scripts em `resources/seed/NNN_descricao.sql`, executados em ordem lexicográfica.
+- Scripts em `resources/seed/NNN_descricao.sql`, executados em ordem lexicográfica. O local é configurável em
+  `livraria.seed.local`, e `livraria.seed.habilitado=false` desliga a execução.
 - `ExecutorDeSeeds` (`compartilhado/infraestrutura/seed`) é um `ApplicationRunner`, portanto roda depois de o
   Hibernate criar o schema.
 - Ele mantém a tabela `seed_execucao (arquivo, checksum, executado_em)`. Cada arquivo roda em uma transação e é

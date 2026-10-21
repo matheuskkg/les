@@ -8,7 +8,7 @@ E-commerce de livros **single-tenant** (uma única loja), trabalho da disciplina
 Fonte dos requisitos: DRS v0.6, transcrito em [`docs/requisitos/`](docs/requisitos/README.md) — um arquivo por grupo
 (`GER`, `LIV`, `CLI`, `VEN`, `EST`, `ANA`, `REC`). Leia o arquivo do grupo antes de implementar algo dele.
 
-Duas aplicações: `server` (back-end) e `web` (front-end, stack a definir).
+Duas aplicações em `apps/`: `apps/server` (back-end) e `apps/web` (front-end, stack a definir).
 
 Stack do `server`: Java 21, Spring Boot 4.1.x, Maven, Spring Data JPA, Spring Security (JWT), Hibernate Envers,
 Lombok.
@@ -16,7 +16,18 @@ Bancos PostgreSQL e H2, escolhidos por profile (`h2` padrão, `postgres`). Sem m
 seed por scripts executados na inicialização. Arquitetura hexagonal por módulo, com uma regra/validação/operação por
 arquivo; leia [`docs/arquitetura.md`](docs/arquitetura.md) antes de implementar no `server`.
 
-Comandos de build/teste/execução: a definir quando o projeto `server` for criado.
+Comandos do `server` (rodar em `apps/server`):
+
+```bash
+mvn test                                    # testes (unitários, integração em H2 e ArchUnit)
+mvn spring-boot:run                         # executa com H2 em memória (profile padrão)
+docker compose up -d                        # Postgres local
+mvn spring-boot:run -Dspring-boot.run.profiles=postgres
+```
+
+Variáveis do profile `postgres`: `DB_PORTA` (padrão `5432`, usada pelo Compose e pela aplicação; exporte, por
+exemplo, `DB_PORTA=5433` se a 5432 estiver ocupada), `DB_USUARIO` e `DB_SENHA` (padrão `livraria`) e `DB_URL`
+(sobrescreve a URL inteira).
 
 ## Escopo do MVP
 

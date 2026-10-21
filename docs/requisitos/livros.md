@@ -45,7 +45,7 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 | RF-LIV-005 | ❌ |  |  |
 | RF-LIV-006 | ❌ |  |  |
 | RNF-LIV-001 | ❌ |  |  |
-| RNF-LIV-002 | ❌ |  |  |
+| RNF-LIV-002 | 🟡 | `apps/server/src/main/java/br/fatec/les/livraria/compartilhado/infraestrutura/seed/ExecutorDeSeeds.java` | Executor de seeds pronto; os scripts com as tabelas de domínio vêm no INF-05. |
 | RN-LIV-001 | ❌ |  |  |
 | RN-LIV-002 | ❌ |  |  |
 | RN-LIV-003 | ❌ |  |  |
