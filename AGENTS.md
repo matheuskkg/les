@@ -8,8 +8,14 @@ E-commerce de livros **single-tenant** (uma única loja), trabalho da disciplina
 Fonte dos requisitos: DRS v0.6, transcrito em [`docs/requisitos/`](docs/requisitos/README.md) — um arquivo por grupo
 (`GER`, `LIV`, `CLI`, `VEN`, `EST`, `ANA`, `REC`). Leia o arquivo do grupo antes de implementar algo dele.
 
-Stack: **a definir**. Ao escolher/introduzir a stack, atualize esta seção (linguagem, framework, banco, comandos de
-build/teste/execução).
+Duas aplicações: `server` (back-end) e `web` (front-end, stack a definir).
+
+Stack do `server`: Java 21, Spring Boot 4.1.x, Maven, Spring Data JPA, Spring Security (JWT), Hibernate Envers.
+Bancos PostgreSQL e H2, escolhidos por profile (`h2` padrão, `postgres`). Sem migrations: schema gerado pelo ORM e
+seed por scripts executados na inicialização. Arquitetura hexagonal por módulo, com uma regra/validação/operação por
+arquivo; leia [`docs/arquitetura.md`](docs/arquitetura.md) antes de implementar no `server`.
+
+Comandos de build/teste/execução: a definir quando o projeto `server` for criado.
 
 ## Escopo do MVP
 
