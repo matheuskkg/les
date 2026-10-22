@@ -59,7 +59,7 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 | RN-CLI-001 | ❌ |  |  |
 | RN-CLI-002 | ❌ |  |  |
 | RN-CLI-003 | ❌ |  |  |
-| RN-CLI-004 | ❌ |  |  |
+| RN-CLI-004 | ❌ |  | Estendido por [DEC-06](../decisoes/DEC-06-validade-do-cartao.md): o cartão também tem data de validade (mês/ano), obrigatória e não vencida no cadastro. |
 | RN-CLI-005 | ❌ |  |  |
 | RN-CLI-006 | ❌ |  |  |
-| RN-CLI-007 | ❌ |  |  |
+| RN-CLI-007 | ❌ |  | Fórmula definida em [DEC-04](../decisoes/DEC-04-ranking-de-cliente.md): RFM 0–100 (valor 50%, frequência 30%, recência 20%) sobre pedidos dos últimos 12 meses, calculado sob demanda. |

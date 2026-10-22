@@ -58,7 +58,7 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 | RF-VEN-001 | ❌ |  |  |
 | RF-VEN-002 | ❌ |  |  |
 | RF-VEN-003 | ❌ |  |  |
-| RF-VEN-004 | ❌ |  |  |
+| RF-VEN-004 | ❌ |  | Frete fake definido em [DEC-05.3](../decisoes/DEC-05.3-frete.md): base pela região do CEP + R$ 2,00 por 0,5 kg adicional (maior entre peso real e cúbico). |
 | RF-VEN-005 | ❌ |  |  |
 | RF-VEN-006 | ❌ |  |  |
 | RF-VEN-007 | ❌ |  |  |
@@ -77,13 +77,13 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 | RN-VEN-004 | ❌ |  |  |
 | RN-VEN-005 | ❌ |  |  |
 | RN-VEN-006 | ❌ |  |  |
-| RN-VEN-007 | ❌ |  |  |
+| RN-VEN-007 | ❌ |  | Operadora fake definida em [DEC-05.2](../decisoes/DEC-05.2-operadora-de-cartao.md): reprova cartão vencido ([DEC-06](../decisoes/DEC-06-validade-do-cartao.md)), terminado em `0000` ou com CVV `000`. |
 | RN-VEN-008 | ❌ |  |  |
 | RN-VEN-009 | ❌ |  |  |
 | RN-VEN-010 | ❌ |  |  |
 | RN-VEN-011 | ❌ |  |  |
 | RN-VEN-012 | ❌ |  |  |
 | RN-VEN-013 | ❌ |  |  |
-| RN-VEN-014 | ❌ |  |  |
+| RN-VEN-014 | ❌ |  | Prazo parametrizado em [DEC-05.1](../decisoes/DEC-05.1-bloqueio-do-carrinho.md): `livraria.carrinho.prazo-bloqueio` (padrão 30 min), aviso 5 min antes. |
 | RN-VEN-015 | ❌ |  |  |
 | RN-VEN-016 | ❌ |  |  |

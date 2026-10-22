@@ -8,13 +8,20 @@ E-commerce de livros **single-tenant** (uma única loja), trabalho da disciplina
 Fonte dos requisitos: DRS v0.6, transcrito em [`docs/requisitos/`](docs/requisitos/README.md) — um arquivo por grupo
 (`GER`, `LIV`, `CLI`, `VEN`, `EST`, `ANA`, `REC`). Leia o arquivo do grupo antes de implementar algo dele.
 
-Duas aplicações em `apps/`: `apps/server` (back-end) e `apps/web` (front-end, stack a definir).
+Duas aplicações em `apps/`: `apps/server` (back-end) e `apps/web` (front-end).
+Decisões do projeto ficam em [`docs/decisoes/`](docs/decisoes/README.md), uma por arquivo (estilo MADR): escolhas de
+tecnologia e regras de negócio que o DRS não define ou que o estendem. Consulte antes de implementar e registre lá
+novas decisões.
 
 Stack do `server`: Java 21, Spring Boot 4.1.x, Maven, Spring Data JPA, Spring Security (JWT), Hibernate Envers,
 Lombok.
 Bancos PostgreSQL e H2, escolhidos por profile (`h2` padrão, `postgres`). Sem migrations: schema gerado pelo ORM e
 seed por scripts executados na inicialização. Arquitetura hexagonal por módulo, com uma regra/validação/operação por
 arquivo; leia [`docs/arquitetura.md`](docs/arquitetura.md) antes de implementar no `server`.
+
+Stack do `web`: Preact + Vite + TypeScript, com `preact-iso` (rotas) e `uplot` (gráficos), CSS puro e formulários
+nativos. Mantenha as dependências mínimas (lista fechada em `docs/decisoes/DEC-01-stack-do-web.md`). E2E com
+Playwright usando o Chrome instalado (`channel: 'chrome'`), sem baixar navegadores.
 
 Comandos do `server` (rodar em `apps/server`):
 
