@@ -10,6 +10,7 @@ Back-end do e-commerce de livros. A aplicação `web` é tratada à parte e não
   pelo ORM e os dados vêm de scripts de seed executados na inicialização.
 - Lombok.
 - MapStruct (mapeamento domínio ↔ persistência ↔ DTO).
+- springdoc (especificação OpenAPI, fonte dos tipos do `web`; ver [DEC-07](decisoes/DEC-07-convencoes-da-api-rest.md)).
 - Testes: JUnit 5, AssertJ, ArchUnit.
 
 ## Estilo: hexagonal por módulo
@@ -60,7 +61,7 @@ apps/server/
     │   │   ├── compartilhado/
     │   │   │   ├── dominio/            Dinheiro, Regra, Violacoes, Violacao, ExcecaoDeNegocio, Cpf, Email
     │   │   │   ├── aplicacao/porta/    UsuarioAtual, Relogio
-    │   │   │   └── infraestrutura/     seed/, tempo/, auditoria/, seguranca/, web/TratadorDeErros
+    │   │   │   └── infraestrutura/     seed/, tempo/, auditoria/, seguranca/, web/ (TratadorDeErros, JSON, OpenAPI)
     │   │   └── vendas/                 (mesma forma em todos os módulos)
     │   │       ├── dominio/
     │   │       │   ├── modelo/         Pedido, ItemPedido, StatusPedido, Carrinho, Reserva, CupomTroca ...
@@ -107,7 +108,8 @@ public interface Regra<T> {
   que aplica. Não se injeta `List<Regra<Cliente>>` genericamente, porque cadastro, alteração e inativação usam
   conjuntos diferentes.
 - O caso de uso executa todas as regras e, se houver violações, lança `ExcecaoDeNegocio`. O `TratadorDeErros`
-  responde HTTP 422 com a lista completa (código do requisito + mensagem).
+  responde HTTP 422 em `ProblemDetail`, com a lista completa (código do requisito + mensagem) na extensão `violacoes`
+  ([DEC-07](decisoes/DEC-07-convencoes-da-api-rest.md)).
 - O ID do requisito fica no Javadoc da classe e no nome do teste. A coluna "Onde no código" da matriz de
   rastreabilidade aponta para o arquivo.
 - Os modelos de domínio protegem os próprios invariantes. Por exemplo, `Pedido` recusa uma transição de status

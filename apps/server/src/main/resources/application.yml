@@ -8,6 +8,12 @@ spring:
   sql:
     init:
       mode: never
+  jackson:
+    default-property-inclusion: non_null
+
+springdoc:
+  writer-with-default-pretty-printer: true
+  writer-with-order-by-keys: true
 
 livraria:
   seed:

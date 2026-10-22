@@ -23,5 +23,5 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 
 | ID | Status | Onde no código | Observação |
 |---|---|---|---|
-| RNF-GER-001 | ❌ |  |  |
+| RNF-GER-001 | ❌ |  | Consultas sempre paginadas, com no máximo 100 itens por página ([DEC-07](../decisoes/DEC-07-convencoes-da-api-rest.md)). |
 | RNF-GER-002 | ❌ |  |  |

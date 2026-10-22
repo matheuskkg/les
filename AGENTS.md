@@ -19,9 +19,11 @@ Bancos PostgreSQL e H2, escolhidos por profile (`h2` padrão, `postgres`). Sem m
 seed por scripts executados na inicialização. Arquitetura hexagonal por módulo, com uma regra/validação/operação por
 arquivo; leia [`docs/arquitetura.md`](docs/arquitetura.md) antes de implementar no `server`.
 
-Stack do `web`: Preact + Vite + TypeScript, com `preact-iso` (rotas) e `uplot` (gráficos), CSS puro e formulários
-nativos. Mantenha as dependências mínimas (lista fechada em `docs/decisoes/DEC-01-stack-do-web.md`). E2E com
-Playwright usando o Chrome instalado (`channel: 'chrome'`), sem baixar navegadores.
+Stack do `web`: Preact + Vite + TypeScript, com `preact-iso` (rotas), `uplot` (gráficos) e `openapi-fetch` (cliente
+da API, com tipos gerados do OpenAPI do `server`), CSS puro e formulários nativos. Mantenha as dependências mínimas
+(lista fechada em `docs/decisoes/DEC-01-stack-do-web.md`, ampliada por
+`docs/decisoes/DEC-07-convencoes-da-api-rest.md`). E2E com Playwright usando o Chrome instalado
+(`channel: 'chrome'`), sem baixar navegadores.
 
 Comandos do `server` (rodar em `apps/server`):
 

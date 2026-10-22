@@ -46,7 +46,7 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 | RF-CLI-001 | ❌ |  |  |
 | RF-CLI-002 | ❌ |  |  |
 | RF-CLI-003 | ❌ |  |  |
-| RF-CLI-004 | ❌ |  |  |
+| RF-CLI-004 | ❌ |  | Filtros por query params combinados com E, via `Specification` no adapter ([DEC-07](../decisoes/DEC-07-convencoes-da-api-rest.md)). |
 | RF-CLI-005 | ❌ |  |  |
 | RF-CLI-006 | ❌ |  |  |
 | RF-CLI-007 | ❌ |  |  |
