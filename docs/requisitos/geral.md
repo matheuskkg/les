@@ -24,4 +24,4 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 | ID | Status | Onde no código | Observação |
 |---|---|---|---|
 | RNF-GER-001 | ❌ |  | Consultas sempre paginadas, com no máximo 100 itens por página ([DEC-07](../decisoes/DEC-07-convencoes-da-api-rest.md)). |
-| RNF-GER-002 | ❌ |  |  |
+| RNF-GER-002 | ❌ |  | A revisão do Envers guarda `usuarioId` e `usuario` (e-mail, `anonimo` ou `sistema`) ([DEC-08](../decisoes/DEC-08-autenticacao-e-sessao.md)). |

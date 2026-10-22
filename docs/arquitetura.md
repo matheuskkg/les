@@ -25,6 +25,7 @@ Monólito modular. Cada grupo do DRS é um módulo (pacote de topo), e cada mód
 | `estoque` | `EST` |
 | `analise` | `ANA` |
 | `recomendacao` | `REC` |
+| `acesso` | `GER`: usuários, login e sessão ([DEC-08](decisoes/DEC-08-autenticacao-e-sessao.md)) |
 | `compartilhado` | `GER` e infraestrutura transversal |
 
 ### Camadas e dependências

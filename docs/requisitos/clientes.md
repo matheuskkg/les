@@ -45,15 +45,15 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 |---|---|---|---|
 | RF-CLI-001 | ❌ |  |  |
 | RF-CLI-002 | ❌ |  |  |
-| RF-CLI-003 | ❌ |  |  |
+| RF-CLI-003 | ❌ |  | A situação fica no `Usuario`: inativo não loga e perde a sessão na requisição seguinte ([DEC-08](../decisoes/DEC-08-autenticacao-e-sessao.md)). |
 | RF-CLI-004 | ❌ |  | Filtros por query params combinados com E, via `Specification` no adapter ([DEC-07](../decisoes/DEC-07-convencoes-da-api-rest.md)). |
 | RF-CLI-005 | ❌ |  |  |
 | RF-CLI-006 | ❌ |  |  |
 | RF-CLI-007 | ❌ |  |  |
-| RF-CLI-008 | ❌ |  |  |
+| RF-CLI-008 | ❌ |  | Caso de uso do módulo `acesso`; mantém a sessão atual ([DEC-08](../decisoes/DEC-08-autenticacao-e-sessao.md)). |
 | RNF-CLI-001 | ❌ |  |  |
 | RNF-CLI-002 | ❌ |  |  |
-| RNF-CLI-003 | ❌ |  |  |
+| RNF-CLI-003 | ❌ |  | BCrypt pela porta `CodificadorDeSenha` ([DEC-08](../decisoes/DEC-08-autenticacao-e-sessao.md)). |
 | RNF-CLI-004 | ❌ |  |  |
 | RNF-CLI-005 | ❌ |  |  |
 | RN-CLI-001 | ❌ |  |  |
