@@ -32,12 +32,12 @@ class ApiNoContextoTest {
     @RestController
     static class ControllerDeTeste {
 
-        @GetMapping("/api/teste/oferta")
+        @GetMapping("/api/exemplo/oferta")
         Oferta oferta() {
             return new Oferta("Livro", Dinheiro.de("10"), YearMonth.of(2027, 8), null);
         }
 
-        @GetMapping("/api/teste/regras")
+        @GetMapping("/api/exemplo/regras")
         Oferta violarRegras() {
             throw new ExcecaoDeNegocio("RN-VEN-004", "Valor mínimo de R$ 10,00 por cartão.");
         }
@@ -64,7 +64,7 @@ class ApiNoContextoTest {
 
     @Test
     void jsonUsaDinheiroComoStringEOmiteNulos() throws Exception {
-        mvc.perform(get("/api/teste/oferta"))
+        mvc.perform(get("/api/exemplo/oferta"))
                 .andExpect(jsonPath("$.preco").value("10.00"))
                 .andExpect(jsonPath("$.validade").value("2027-08"))
                 .andExpect(jsonPath("$.observacao").doesNotExist());
@@ -72,7 +72,7 @@ class ApiNoContextoTest {
 
     @Test
     void violacoesFicamNoTopoDoProblemDetail() throws Exception {
-        mvc.perform(get("/api/teste/regras"))
+        mvc.perform(get("/api/exemplo/regras"))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes[0].codigo").value("RN-VEN-004"))
                 .andExpect(jsonPath("$.properties").doesNotExist());

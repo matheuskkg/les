@@ -11,7 +11,9 @@ import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 @Component
 public class RelogioDoSistema implements Relogio {
 
-    private final Clock clock = Clock.system(ZoneId.of("America/Sao_Paulo"));
+    public static final ZoneId FUSO = ZoneId.of("America/Sao_Paulo");
+
+    private final Clock clock = Clock.system(FUSO);
 
     @Override
     public LocalDateTime agora() {

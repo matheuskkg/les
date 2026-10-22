@@ -62,7 +62,7 @@ apps/server/
     │   │   ├── compartilhado/
     │   │   │   ├── dominio/            Dinheiro, Regra, Violacoes, Violacao, ExcecaoDeNegocio, Cpf, Email
     │   │   │   ├── aplicacao/porta/    UsuarioAtual, Relogio
-    │   │   │   └── infraestrutura/     seed/, tempo/, auditoria/, seguranca/, web/ (TratadorDeErros, JSON, OpenAPI)
+    │   │   │   └── infraestrutura/     seed/, tempo/, auditoria/, seguranca/, web/, e2e/
     │   │   └── vendas/                 (mesma forma em todos os módulos)
     │   │       ├── dominio/
     │   │       │   ├── modelo/         Pedido, ItemPedido, StatusPedido, Carrinho, Reserva, CupomTroca ...
