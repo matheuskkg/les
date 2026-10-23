@@ -40,11 +40,12 @@ cookie da sessão funciona com `SameSite=Strict`.
 
 | Rota | Efeito |
 |---|---|
-| `POST /api/sessao` | login com `{ email, senha }`; grava o cookie e devolve `{ usuarioId, email, papel }` |
+| `POST /api/sessao` | login com `{ email, senha }` (alterado pelo [DEC-10](DEC-10-cliente-enderecos-e-cartoes.md): `{ login, senha }`, por e-mail ou telefone); grava o cookie e devolve `{ usuarioId, email, papel }` |
 | `GET /api/sessao` | usuário logado `{ usuarioId, email, papel }`, ou 401 |
 | `DELETE /api/sessao` | logout: apaga o cookie (`Max-Age=0`) |
 
-Login inválido responde 401 com a mensagem "E-mail ou senha inválidos.", sem dizer qual dos dois errou.
+Login inválido responde 401 com a mensagem "E-mail ou senha inválidos." (alterada pelo [DEC-10](DEC-10-cliente-enderecos-e-cartoes.md): "Login ou senha
+inválidos."), sem dizer qual dos dois errou.
 
 ### Autorização
 
@@ -60,7 +61,8 @@ Login inválido responde 401 com a mensagem "E-mail ou senha inválidos.", sem d
 ### Modelo de usuário
 
 - Módulo `acesso` (grupo `GER`), com a entidade **`Usuario`**: e-mail (único, usado no login), hash da senha,
-  papel e situação (ativo/inativo). É a identidade de login.
+  papel e situação (ativo/inativo). É a identidade de login. (Alterado pelo [DEC-10](DEC-10-cliente-enderecos-e-cartoes.md): o `Usuario` também tem o
+  telefone, que serve de login; a unicidade vale entre as contas em uso; e há `inativadoEm`.)
 - `Cliente` referencia o seu `Usuario` (1:1). O e-mail existe só no `Usuario`: o cadastro e a alteração do cliente
   (RF-CLI-001, RF-CLI-002) o gravam lá, pelos casos de uso do `acesso`.
 - O administrador é um `Usuario` com papel `ADMIN`, sem `Cliente`, criado só pelo seed.
@@ -70,7 +72,9 @@ Login inválido responde 401 com a mensagem "E-mail ou senha inválidos.", sem d
 ### Cliente inativo (RF-CLI-003)
 
 - A situação fica no `Usuario`; inativar o cliente inativa o seu usuário.
-- O login de usuário inativo responde 401 com "Cadastro inativo.".
+- O login de usuário inativo responde 401 com "Cadastro inativo.". (Alterado pelo [DEC-10](DEC-10-cliente-enderecos-e-cartoes.md): em até 7 dias após a
+  inativação, o login reativa a conta; depois disso ela fica encerrada e o login responde como identificador
+  desconhecido.)
 - A cada requisição autenticada, o conversor do JWT carrega o usuário pelo `sub` (consulta pela chave primária). Se
   ele não existir mais ou estiver inativo, responde 401, e o `web` volta ao login. O papel usado na autorização é o do
   banco, não o do token.

@@ -28,6 +28,7 @@ Escopos:
 | [DEC-05.2](DEC-05.2-operadora-de-cartao.md) | Operadora de cartão simulada | Aceita |
 | [DEC-05.3](DEC-05.3-frete.md) | Cálculo de frete simulado | Aceita |
 | [DEC-06](DEC-06-validade-do-cartao.md) | Data de validade no cartão de crédito | Aceita |
+| [DEC-10](DEC-10-cliente-enderecos-e-cartoes.md) | Modelo de cliente, endereços e cartões | Aceita |
 
 ## Modelo
 

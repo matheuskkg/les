@@ -43,23 +43,23 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 
 | ID | Status | Onde no código | Observação |
 |---|---|---|---|
-| RF-CLI-001 | ❌ |  |  |
+| RF-CLI-001 | ❌ |  | Cadastro com ao menos um endereço; CPF, e-mail e telefone únicos entre as contas em uso ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
 | RF-CLI-002 | ❌ |  |  |
-| RF-CLI-003 | ❌ |  | A situação fica no `Usuario`: inativo não loga e perde a sessão na requisição seguinte ([DEC-08](../decisoes/DEC-08-autenticacao-e-sessao.md)). |
-| RF-CLI-004 | ❌ |  | Filtros por query params combinados com E, via `Specification` no adapter ([DEC-07](../decisoes/DEC-07-convencoes-da-api-rest.md)). |
+| RF-CLI-003 | ❌ |  | Só o próprio cliente inativa; login em até 7 dias reativa; depois a conta fica encerrada e libera CPF, e-mail e telefone. A situação fica no `Usuario` e é calculada no `acesso` ([DEC-08](../decisoes/DEC-08-autenticacao-e-sessao.md), [DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). Desvio: o DRS não diz quem inativa. |
+| RF-CLI-004 | ❌ |  | Filtros por query params combinados com E, via `Specification` no adapter ([DEC-07](../decisoes/DEC-07-convencoes-da-api-rest.md)). O filtro de situação (`ATIVA`, `INATIVA`, `ENCERRADA`) vem do `acesso` ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
 | RF-CLI-005 | ❌ |  |  |
-| RF-CLI-006 | ❌ |  |  |
-| RF-CLI-007 | ❌ |  |  |
+| RF-CLI-006 | ❌ |  | Endereço sem papel fixo: entrega e cobrança são escolhidas na compra. Nome curto obrigatório em todo endereço ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
+| RF-CLI-007 | ❌ |  | Cartão opcional; havendo algum, exatamente um preferencial; excluir o preferencial promove o mais recente ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
 | RF-CLI-008 | ❌ |  | Caso de uso do módulo `acesso`; mantém a sessão atual ([DEC-08](../decisoes/DEC-08-autenticacao-e-sessao.md)). |
 | RNF-CLI-001 | ❌ |  |  |
 | RNF-CLI-002 | ❌ |  |  |
 | RNF-CLI-003 | ❌ |  | BCrypt pela porta `CodificadorDeSenha` ([DEC-08](../decisoes/DEC-08-autenticacao-e-sessao.md)). |
 | RNF-CLI-004 | ❌ |  |  |
-| RNF-CLI-005 | ❌ |  |  |
-| RN-CLI-001 | ❌ |  |  |
-| RN-CLI-002 | ❌ |  |  |
-| RN-CLI-003 | ❌ |  |  |
-| RN-CLI-004 | ❌ |  | Estendido por [DEC-06](../decisoes/DEC-06-validade-do-cartao.md): o cartão também tem data de validade (mês/ano), obrigatória e não vencida no cadastro. |
-| RN-CLI-005 | ❌ |  |  |
-| RN-CLI-006 | ❌ |  |  |
+| RNF-CLI-005 | ❌ |  | O código é o id do cliente ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
+| RN-CLI-001 | ❌ |  | Desvio: sem endereço de cobrança fixo; basta ao menos um endereço, e a cobrança é escolhida na compra ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
+| RN-CLI-002 | ❌ |  | Desvio: sem endereço de entrega fixo; basta ao menos um endereço, e a entrega é escolhida na compra ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
+| RN-CLI-003 | ❌ |  | Desvio: o tipo de residência é o tipo de endereço `CASA`/`TRABALHO`. Só Brasil: país fixo, estado por UF, CEP com 8 dígitos ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
+| RN-CLI-004 | ❌ |  | Estendido por [DEC-06](../decisoes/DEC-06-validade-do-cartao.md): o cartão também tem data de validade (mês/ano), obrigatória e não vencida no cadastro. Desvio: o código de segurança não é gravado, é pedido a cada compra ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
+| RN-CLI-005 | ❌ |  | Bandeiras em tabela do seed ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
+| RN-CLI-006 | ❌ |  | Desvio: o endereço residencial vira "ao menos um endereço" (`CASA` ou `TRABALHO`). Telefone único, também usado no login ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
 | RN-CLI-007 | ❌ |  | Fórmula definida em [DEC-04](../decisoes/DEC-04-ranking-de-cliente.md): RFM 0–100 (valor 50%, frequência 30%, recência 20%) sobre pedidos dos últimos 12 meses, calculado sob demanda. |

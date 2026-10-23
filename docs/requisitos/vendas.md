@@ -59,8 +59,8 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 | RF-VEN-002 | ❌ |  |  |
 | RF-VEN-003 | ❌ |  |  |
 | RF-VEN-004 | ❌ |  | Frete fake definido em [DEC-05.3](../decisoes/DEC-05.3-frete.md): base pela região do CEP + R$ 2,00 por 0,5 kg adicional (maior entre peso real e cúbico). |
-| RF-VEN-005 | ❌ |  |  |
-| RF-VEN-006 | ❌ |  |  |
+| RF-VEN-005 | ❌ |  | O checkout também pede o endereço de cobrança (padrão: igual à entrega); o pedido guarda cópia dos dois ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
+| RF-VEN-006 | ❌ |  | O CVV de cada cartão é pedido a cada compra, inclusive dos salvos, e nunca é gravado ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
 | RF-VEN-007 | ❌ |  |  |
 | RF-VEN-008 | ❌ |  |  |
 | RF-VEN-009 | ❌ |  |  |
