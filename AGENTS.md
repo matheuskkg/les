@@ -70,7 +70,8 @@ Não há nada em produção. Consequências:
 - Idioma: domínio, requisitos e textos da UI em **português**; identificadores de código seguem a convenção da stack
   (preferência por nomes de domínio em português, consistentes com o DRS: `Cliente`, `Pedido`, `CupomTroca`...).
 - Status de pedido exatamente como no DRS: `EM PROCESSAMENTO`, `APROVADA`, `REPROVADA`, `EM TRANSPORTE`, `ENTREGUE`,
-  `EM TROCA`, `TROCA AUTORIZADA`, `TROCADO`.
+  `EM TROCA`, `TROCA AUTORIZADA`, `TROCADO`. O pedido usa só os cinco primeiros; os de troca, mais `TROCA RECUSADA`,
+  ficam na entidade `Troca` (`docs/decisoes/DEC-12-pedido-checkout-e-trocas.md`).
 - Regras de negócio ficam na camada de domínio/serviço, não em controllers nem na UI; cada validação deve ser
   testável isoladamente.
 - Valores monetários com tipo decimal exato (nunca float); formatação `R$ 1.234,56` na UI.

@@ -44,8 +44,8 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 | RF-LIV-004 | ❌ |  |  |
 | RF-LIV-005 | ❌ |  | Filtros por query params combinados com E, via `Specification` no adapter ([DEC-07](../decisoes/DEC-07-convencoes-da-api-rest.md)). |
 | RF-LIV-006 | ❌ |  |  |
-| RNF-LIV-001 | ❌ |  |  |
-| RNF-LIV-002 | 🟡 | `apps/server/src/main/java/br/fatec/les/livraria/compartilhado/infraestrutura/seed/ExecutorDeSeeds.java` | Executor de seeds pronto; os scripts com as tabelas de domínio vêm no INF-05. |
+| RNF-LIV-001 | ❌ |  | O código é o id do livro (`Long` por sequence); o ISBN é atributo ([DEC-14](../decisoes/DEC-14-ids-nomes-e-seed.md)). |
+| RNF-LIV-002 | 🟡 | `apps/server/src/main/java/br/fatec/les/livraria/compartilhado/infraestrutura/seed/ExecutorDeSeeds.java` | Executor de seeds pronto; os scripts com as tabelas de domínio vêm no INF-05. Domínios, livros e estoque nos scripts `0NN` do seed, com IDs explícitos de 1 a 9999 ([DEC-14](../decisoes/DEC-14-ids-nomes-e-seed.md)). |
 | RN-LIV-001 | ❌ |  |  |
 | RN-LIV-002 | ❌ |  |  |
 | RN-LIV-003 | ❌ |  |  |

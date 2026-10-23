@@ -34,11 +34,11 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 |---|---|---|---|
 | RF-EST-001 | ❌ |  |  |
 | RF-EST-002 | ❌ |  |  |
-| RF-EST-003 | ❌ |  |  |
-| RF-EST-004 | ❌ |  |  |
+| RF-EST-003 | ❌ |  | Baixa na transação de aprovação, consumindo as reservas do checkout ([DEC-13](../decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)). |
+| RF-EST-004 | ❌ |  | Reentrada por item da troca marcado como "volta ao estoque" ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
 | RN-EST-001 | ❌ |  |  |
 | RN-EST-002 | ❌ |  |  |
 | RN-EST-003 | ❌ |  |  |
 | RN-EST-004 | ❌ |  |  |
 | RN-EST-005 | ❌ |  |  |
-| RN-EST-006 | ❌ |  |  |
+| RN-EST-006 | ❌ |  | Desvio: na reprovação, as reservas continuam no checkout para nova tentativa e só são liberadas quando ele expira ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |

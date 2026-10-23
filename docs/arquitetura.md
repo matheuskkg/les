@@ -26,6 +26,7 @@ Monólito modular. Cada grupo do DRS é um módulo (pacote de topo), e cada mód
 | `analise` | `ANA` |
 | `recomendacao` | `REC` |
 | `acesso` | `GER`: usuários, login e sessão ([DEC-08](decisoes/DEC-08-autenticacao-e-sessao.md)) |
+| `notificacoes` | notificações genéricas por usuário e envio por SSE ([DEC-13](decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)) |
 | `compartilhado` | `GER` e infraestrutura transversal |
 
 ### Camadas e dependências
@@ -47,7 +48,8 @@ domínio, com mappers MapStruct. Um teste ArchUnit faz o build falhar se `domini
 `infraestrutura`, ou se `aplicacao` importar `infraestrutura`.
 
 Módulos se comunicam pelos casos de uso ou portas públicas do outro módulo, nunca acessando a persistência dele.
-Exemplo: `vendas` chama `estoque` para reservar e baixar itens.
+Exemplo: `vendas` chama `estoque` para reservar e baixar itens. A chamada é direta, na transação de quem chama, sem
+eventos de domínio ([DEC-13](decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)).
 
 ### Estrutura de pacotes
 
@@ -65,7 +67,7 @@ apps/server/
     │   │   │   └── infraestrutura/     seed/, tempo/, auditoria/, seguranca/, web/, e2e/
     │   │   └── vendas/                 (mesma forma em todos os módulos)
     │   │       ├── dominio/
-    │   │       │   ├── modelo/         Pedido, ItemPedido, StatusPedido, Carrinho, Reserva, Cupom ...
+    │   │       │   ├── modelo/         Pedido, ItemPedido, StatusPedido, Carrinho, Checkout, Troca, Cupom ...
     │   │       │   └── regra/          ValorMinimoPorCartao, UmCupomPromocionalPorCompra ...
     │   │       ├── aplicacao/
     │   │       │   ├── casodeuso/      FinalizarCompra, DespacharPedido, AutorizarTroca ...
@@ -163,36 +165,62 @@ banco Postgres de desenvolvimento (não há dados reais).
   registrado ao terminar. Um arquivo já registrado é pulado, e um checksum diferente gera um aviso no log.
 - Vale para os dois bancos com o mesmo código. No H2 a tabela some com o banco a cada execução.
 - O seed contém as tabelas de domínio (RNF-LIV-002), os livros, as entradas de estoque com o custo, os cupons
-  promocionais e os clientes de teste.
+  promocionais, os clientes de teste e os pedidos históricos. Cada script entra no card que cria as entidades dele,
+  e a faixa do nome (`0NN` a `4NN`) define a ordem ([DEC-14](decisoes/DEC-14-ids-nomes-e-seed.md)).
+- O seed usa IDs explícitos de 1 a 9999. As sequences começam em 10000, então nunca colidem com ele.
+
+### IDs, nomes e índices
+
+Definidos no [DEC-14](decisoes/DEC-14-ids-nomes-e-seed.md):
+
+- ID `Long` por `SEQUENCE` própria de cada tabela (`<tabela>_seq`, valor inicial 10000). O ID é o código exibido de
+  cliente, livro e pedido.
+- Tabelas e colunas em snake_case, em português e no singular, com `@Table(name = ...)` em cada `*Jpa`. Tabelas do
+  Envers com sufixo `_aud`.
+- Índices em `@Table(indexes = ...)` nas colunas filtradas ou ordenadas e nas chaves estrangeiras consultadas
+  (RNF-GER-001).
 
 ## Decisões por requisito
 
 - **Reserva × baixa de estoque.**
   - O bloqueio ao adicionar ao carrinho (RN-VEN-014) é uma `Reserva` com validade, e não altera o estoque.
   - Disponível = quantidade em estoque − reservas ativas.
-  - A baixa (RF-EST-003) só ocorre quando o pedido é aprovado. Pedido reprovado libera as reservas (RN-EST-006).
+  - Em "Ir para pagamento", as reservas passam do carrinho para o `Checkout`, que tem prazo próprio
+    ([DEC-12](decisoes/DEC-12-pedido-checkout-e-trocas.md)).
+  - A baixa (RF-EST-003) só ocorre quando o pedido é aprovado. Num pedido reprovado, as reservas continuam no checkout
+    para outra tentativa e só são liberadas quando ele expira (RN-EST-006).
   - Para evitar venda além do estoque com acessos simultâneos, a linha de estoque usa lock pessimista ao reservar e
     ao baixar.
-- **Expiração do carrinho.**
-  - O job `ExpirarReservas` (`@Scheduled`) remove as reservas vencidas e retira do carrinho todos os itens do mesmo
-    produto (RN-VEN-015).
+- **Expiração do carrinho e do checkout.**
+  - A tarefa `ExpirarReservas` (`TarefaPorTempo`, a cada 30 s) avisa antes do vencimento e, vencido o prazo, remove
+    as reservas e retira todos os itens do mesmo produto (RN-VEN-015).
   - Os itens removidos ficam registrados para exibição no carrinho (RNF-VEN-001).
-  - O prazo é um parâmetro de configuração.
-  - `GET /carrinho` devolve `expiraEm`, e o web faz polling para o aviso de 5 minutos.
+  - Os prazos são parâmetros de configuração.
+  - Aviso e expiração chegam ao `web` como notificação. O `expiraEm` devolvido serve só para exibição
+    ([DEC-13](decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)).
 - **Preço de venda.** É calculado como maior custo entre as entradas do livro × (1 + margem do grupo de precificação)
   (RF-EST-002, RN-EST-002). Não é gravado fixo no seed.
 - **Pagamento.** As regras RN-VEN-003 a RN-VEN-006 são domínio puro e são validadas antes de chamar a
   `OperadoraCartao`. O adapter fake tem regras determinísticas (RN-VEN-007), e o resultado define `APROVADA` ou
   `REPROVADA` (RN-VEN-008).
+- **Finalização.** `FinalizarCompra` grava o pedido `EM PROCESSAMENTO` numa transação, chama a operadora fora dela e
+  grava a aprovação ou reprovação numa segunda transação
+  ([DEC-13](decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)).
 - **Frete.** A porta `CalculadoraFrete` tem um adapter fake determinístico, baseado em CEP e peso/dimensões
   (RF-VEN-004).
 - **Log de transação (RNF-GER-002).** Hibernate Envers nas entidades `*Jpa` com `@Audited`, com uma entidade de
   revisão própria que guarda o usuário (porta `UsuarioAtual`) e a data/hora. Os dados alterados ficam nas tabelas
   `_aud`.
-- **Notificações (RN-VEN-016, RN-VEN-014).** Ficam persistidas por cliente e são consultadas pelo web.
+- **Notificações (RN-VEN-016, RN-VEN-014).**
+  - Ficam persistidas por usuário no módulo genérico `notificacoes`, que os outros módulos chamam pelos casos de uso
+    `Notificar` e `NotificarAdministradores`.
+  - Chegam ao `web` por SSE (`SseEmitter`), enviadas depois do commit.
+  - O `web` também pode listá-las e marcá-las como lidas
+    ([DEC-13](decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)).
 - **Dinheiro.** Value object `Dinheiro` sobre `BigDecimal`, com escala 2 e `HALF_EVEN`. Nunca `double`.
 - **Senhas.** BCrypt, por meio da porta `CodificadorDeSenha` (RNF-CLI-003).
-- **Análise (ANA).** Consulta nativa agregada por mês e categoria, considerando só os status válidos (RN-ANA-004).
+- **Análise (ANA).** Consulta nativa agregada por mês e categoria copiada no pedido, considerando só os status
+  válidos e descontando as trocas concluídas (RN-ANA-004, [DEC-12](decisoes/DEC-12-pedido-checkout-e-trocas.md)).
   O preenchimento de meses sem venda com R$ 0,00 (RN-ANA-003) e a validação do período (RN-ANA-002) ficam em
   regras e no caso de uso. A exportação é em CSV ou XLSX.
 - **Recomendação (REC).** Porta `AssistenteDeLivros` com adapter fake por padrão. O provedor de IA real será definido

@@ -16,7 +16,9 @@ RFM simplificado: ranking inteiro de **0 a 100**.
 
 **Pedidos considerados:** do próprio cliente, com status `APROVADA`, `EM TRANSPORTE`, `ENTREGUE`, `EM TROCA` ou
 `TROCA AUTORIZADA`, feitos nos **últimos 12 meses** (365 dias até a data do cálculo). Ficam de fora
-`EM PROCESSAMENTO`, `REPROVADA` e `TROCADO` (o valor trocado volta ao cliente como cupom).
+`EM PROCESSAMENTO`, `REPROVADA` e `TROCADO` (o valor trocado volta ao cliente como cupom). (alterado pelo
+[DEC-12](DEC-12-pedido-checkout-e-trocas.md): o pedido não tem mais status de troca; contam `APROVADA`,
+`EM TRANSPORTE` e `ENTREGUE`.)
 
 **Fatores** (cada um vira uma nota de 0 a 100 por faixa):
 
@@ -30,7 +32,8 @@ RFM simplificado: ranking inteiro de **0 a 100**.
 | 100 | acima de R$ 1.000,00 | 8 ou mais | 0 a 30 |
 
 Os limites das faixas de valor são inclusivos ("até R$ 100,00" inclui R$ 100,00). O valor do pedido é o total da
-compra (itens + frete), em `BigDecimal`.
+compra (itens + frete), em `BigDecimal` (alterado pelo [DEC-12](DEC-12-pedido-checkout-e-trocas.md): menos os cupons
+gerados pelas trocas concluídas do pedido).
 
 **Fórmula:** `ranking = 0,5·V + 0,3·F + 0,2·R`, arredondado para inteiro com `HALF_UP`. Cliente sem pedidos
 considerados tem ranking **0**.

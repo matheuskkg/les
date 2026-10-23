@@ -18,6 +18,8 @@ Escopos:
 | [DEC-07](DEC-07-convencoes-da-api-rest.md) | Convenções da API REST | Aceita |
 | [DEC-08](DEC-08-autenticacao-e-sessao.md) | Autenticação, sessão e modelo de usuário | Aceita |
 | [DEC-09](DEC-09-topologia-de-execucao.md) | Topologia de execução de web e server | Aceita |
+| [DEC-13](DEC-13-processamento-do-pedido-e-notificacoes.md) | Processamento do pedido e notificações | Aceita |
+| [DEC-14](DEC-14-ids-nomes-e-seed.md) | IDs, nomes e seed | Aceita |
 
 ### Negócio
 
@@ -30,6 +32,7 @@ Escopos:
 | [DEC-06](DEC-06-validade-do-cartao.md) | Data de validade no cartão de crédito | Aceita |
 | [DEC-10](DEC-10-cliente-enderecos-e-cartoes.md) | Modelo de cliente, endereços e cartões | Aceita |
 | [DEC-11](DEC-11-cupons-e-distribuicao-do-pagamento.md) | Cupons e distribuição do pagamento | Aceita |
+| [DEC-12](DEC-12-pedido-checkout-e-trocas.md) | Pedido, checkout e trocas | Aceita |
 
 ## Modelo
 

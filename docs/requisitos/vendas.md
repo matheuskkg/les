@@ -57,33 +57,33 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 |---|---|---|---|
 | RF-VEN-001 | ❌ |  |  |
 | RF-VEN-002 | ❌ |  |  |
-| RF-VEN-003 | ❌ |  |  |
+| RF-VEN-003 | ❌ |  | "Ir para pagamento" move os itens e as reservas do carrinho para um checkout com prazo `livraria.checkout.prazo` (padrão 60 min); um checkout aberto por cliente ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
 | RF-VEN-004 | ❌ |  | Frete fake definido em [DEC-05.3](../decisoes/DEC-05.3-frete.md): base pela região do CEP + R$ 2,00 por 0,5 kg adicional (maior entre peso real e cúbico). |
 | RF-VEN-005 | ❌ |  | O checkout também pede o endereço de cobrança (padrão: igual à entrega); o pedido guarda cópia dos dois ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
 | RF-VEN-006 | ❌ |  | O CVV de cada cartão é pedido a cada compra, inclusive dos salvos, e nunca é gravado ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). Cupom promocional pelo código; de troca entre os do cliente ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). |
 | RF-VEN-007 | ❌ |  | Ordem: promocional, cupons de troca, cartões ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). |
-| RF-VEN-008 | ❌ |  |  |
-| RF-VEN-009 | ❌ |  |  |
-| RF-VEN-010 | ❌ |  |  |
-| RF-VEN-011 | ❌ |  |  |
-| RF-VEN-012 | ❌ |  |  |
-| RF-VEN-013 | ❌ |  |  |
-| RF-VEN-014 | ❌ |  |  |
-| RF-VEN-015 | ❌ |  | Valor = preço unitário do item no pedido × quantidade, sem frete; validade por `livraria.cupom.troca.validade` (padrão: sem validade) ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). |
-| RNF-VEN-001 | ❌ |  |  |
+| RF-VEN-008 | ❌ |  | Cada finalização cria um pedido; reprovado, o checkout continua aberto para nova tentativa até expirar ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). Pedido gravado `EM PROCESSAMENTO` numa transação, aprovação/reprovação em outra; duplo clique responde 409 ([DEC-13](../decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)). |
+| RF-VEN-009 | ❌ |  | Transições fora do diagrama respondem 409; `ENTREGUE` é final ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
+| RF-VEN-010 | ❌ |  | Grava `entregueEm`, início do prazo de troca ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
+| RF-VEN-011 | ❌ |  | Troca de itens com quantidade parcial, até o fim do dia `entregueEm` + `livraria.troca.prazo` (padrão 7 dias); várias trocas por pedido enquanto houver quantidade disponível ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
+| RF-VEN-012 | ❌ |  | Desvio: o admin autoriza a troca, e o pedido continua `ENTREGUE`. Extensão: o admin também pode recusar com motivo (`TROCA RECUSADA`); item recusado não pode ser trocado de novo ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
+| RF-VEN-013 | ❌ |  | Desvio: o admin visualiza as trocas `EM TROCA`, não compras; o pedido expõe o indicador `troca` (`situacao` da troca mais recente e `abrangencia` `PARCIAL`/`TOTAL`) ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
+| RF-VEN-014 | ❌ |  | Retorno ao estoque informado por item da troca ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
+| RF-VEN-015 | ❌ |  | Valor = preço unitário do item no pedido × quantidade, sem frete; validade por `livraria.cupom.troca.validade` (padrão: sem validade) ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). Um cupom por troca, gerado também para itens que não voltam ao estoque ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
+| RNF-VEN-001 | ❌ |  | Vale também para itens de checkout expirado ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
 | RN-VEN-001 | ❌ |  |  |
-| RN-VEN-002 | ❌ |  |  |
+| RN-VEN-002 | ❌ |  | Itens do checkout ficam reservados; a finalização revalida o estoque, e itens perdidos por expiração são notificados ([DEC-13](../decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)). |
 | RN-VEN-003 | ❌ |  | Vale para os quatro tipos de promocional, inclusive os de frete (`FRETE_GRATIS`, `FRETE_VALOR_FIXO`) ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). Extensão: o DRS não prevê cupom de frete. |
 | RN-VEN-004 | ❌ |  | O cliente informa o valor de cada cartão; a soma fecha o restante após os cupons ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). |
 | RN-VEN-005 | ❌ |  | Exceção: havendo cupom e restante menor que R$ 10,00, um único cartão paga o restante ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). |
 | RN-VEN-006 | ❌ |  | Só cupom de troca gera troco; o excedente do promocional se perde. Cupom desnecessário (sem ele os demais cobrem o total) recusa a compra com 422 ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). |
 | RN-VEN-007 | ❌ |  | Operadora fake definida em [DEC-05.2](../decisoes/DEC-05.2-operadora-de-cartao.md): reprova cartão vencido ([DEC-06](../decisoes/DEC-06-validade-do-cartao.md)), terminado em `0000` ou com CVV `000`. Cupons validados quanto a validade e disponibilidade; operadora chamada na própria requisição de finalização ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). |
-| RN-VEN-008 | ❌ |  |  |
+| RN-VEN-008 | ❌ |  | O pedido `REPROVADA` fica no histórico ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
 | RN-VEN-009 | ❌ |  |  |
 | RN-VEN-010 | ❌ |  |  |
-| RN-VEN-011 | ❌ |  |  |
-| RN-VEN-012 | ❌ |  |  |
-| RN-VEN-013 | ❌ |  |  |
-| RN-VEN-014 | ❌ |  | Prazo parametrizado em [DEC-05.1](../decisoes/DEC-05.1-bloqueio-do-carrinho.md): `livraria.carrinho.prazo-bloqueio` (padrão 30 min), aviso 5 min antes. |
+| RN-VEN-011 | ❌ |  | Desvio: o status `EM TROCA` é da troca; o pedido continua `ENTREGUE`, mesmo em troca total, com o indicador `troca`. Extensão: status `TROCA RECUSADA` na troca ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
+| RN-VEN-012 | ❌ |  | Desvio: só a troca passa a `TROCADO`; o pedido continua `ENTREGUE` ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
+| RN-VEN-013 | ❌ |  | Prazo de troca `livraria.troca.prazo` (padrão 7 dias após a entrega) ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
+| RN-VEN-014 | ❌ |  | Prazo parametrizado em [DEC-05.1](../decisoes/DEC-05.1-bloqueio-do-carrinho.md): `livraria.carrinho.prazo-bloqueio` (padrão 30 min), aviso 5 min antes. Aviso e expiração gerados pelo server (tarefa a cada 30 s) e entregues como notificação por SSE ([DEC-13](../decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)). |
 | RN-VEN-015 | ❌ |  |  |
-| RN-VEN-016 | ❌ |  |  |
+| RN-VEN-016 | ❌ |  | Notificação persistida e enviada por SSE; outras mudanças de status também notificam ([DEC-13](../decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)). |

@@ -35,7 +35,7 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 
 | ID | Status | Onde no código | Observação |
 |---|---|---|---|
-| RF-ANA-001 | ❌ |  |  |
+| RF-ANA-001 | ❌ |  | Por categoria copiada no pedido; item com várias categorias entra com valor cheio em cada uma ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
 | RF-ANA-002 | ❌ |  |  |
 | RF-ANA-003 | ❌ |  |  |
 | RF-ANA-004 | ❌ |  |  |
@@ -43,7 +43,7 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 | RNF-ANA-002 | ❌ |  |  |
 | RNF-ANA-003 | ❌ |  |  |
 | RNF-ANA-004 | ❌ |  |  |
-| RN-ANA-001 | ❌ |  |  |
+| RN-ANA-001 | ❌ |  | Mês da finalização; preço unitário × quantidade não trocada, sem frete e sem rateio do desconto ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
 | RN-ANA-002 | ❌ |  |  |
 | RN-ANA-003 | ❌ |  |  |
-| RN-ANA-004 | ❌ |  |  |
+| RN-ANA-004 | ❌ |  | Considera pedidos `APROVADA`, `EM TRANSPORTE` e `ENTREGUE` (mesmo conjunto do ranking). Desvio: desconta as quantidades de trocas concluídas; "canceladas" não corresponde a nenhum status do DRS ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
