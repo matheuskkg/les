@@ -46,12 +46,14 @@ test('admin compara só as categorias escolhidas e exporta o CSV com os mesmos f
   await expect(page).toHaveURL(/categoria=2$/);
   await expect(page.getByRole('list', { name: 'Legenda' }).getByRole('listitem')).toHaveText(['Ficção Científica']);
 
-  const exportar = page.getByRole('link', { name: 'Exportar CSV' });
-  await expect(exportar).toHaveAttribute('href', '/api/admin/analise/exportacao?inicio=2025-03&fim=2025-04&categoria=2');
-  const resposta = await page.request.get((await exportar.getAttribute('href')) ?? '');
-  expect(resposta.headers()['content-type']).toBe('text/csv;charset=UTF-8');
-  const csv = (await resposta.body()).toString('utf-8');
-  expect(csv.startsWith('﻿mes;categoria;valor\r\n2025-03;Ficção Científica;96,00\r\n')).toBe(true);
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Exportar CSV' }).click(),
+  ]);
+  expect(download.suggestedFilename()).toBe('analise-de-vendas-2025-03-a-2025-04.csv');
+  const caminho = await download.path();
+  const csv = (await import('node:fs')).readFileSync(caminho, 'utf-8');
+  expect(csv.startsWith('\uFEFFmes;categoria;valor\r\n2025-03;Ficção Científica;96,00\r\n')).toBe(true);
 
   await categorias.getByLabel('Ficção Científica').uncheck();
   await page.getByRole('button', { name: 'Atualizar' }).click();

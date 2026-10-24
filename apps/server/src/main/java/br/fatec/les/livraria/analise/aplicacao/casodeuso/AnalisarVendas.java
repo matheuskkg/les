@@ -2,10 +2,10 @@ package br.fatec.les.livraria.analise.aplicacao.casodeuso;
 
 import java.time.YearMonth;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -19,10 +19,8 @@ import br.fatec.les.livraria.analise.dominio.modelo.VendaNoMes;
 import br.fatec.les.livraria.analise.dominio.regra.CategoriaSelecionada;
 import br.fatec.les.livraria.analise.dominio.regra.FimNaoAnteriorAoInicio;
 import br.fatec.les.livraria.analise.dominio.regra.PeriodoDeAte24Meses;
-import br.fatec.les.livraria.catalogo.aplicacao.casodeuso.ListarCategorias;
+import br.fatec.les.livraria.catalogo.aplicacao.casodeuso.ConsultarCategorias;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.CategoriaDoLivro;
-import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
-import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarItensVendidos;
@@ -41,7 +39,7 @@ public class AnalisarVendas {
     private final FimNaoAnteriorAoInicio fimNaoAnteriorAoInicio;
     private final PeriodoDeAte24Meses periodoDeAte24Meses;
     private final CategoriaSelecionada categoriaSelecionada;
-    private final ListarCategorias listarCategorias;
+    private final ConsultarCategorias consultarCategorias;
     private final ConsultarItensVendidos consultarItensVendidos;
 
     /**
@@ -57,24 +55,21 @@ public class AnalisarVendas {
         Violacoes.verificar(solicitacao, fimNaoAnteriorAoInicio, periodoDeAte24Meses, categoriaSelecionada);
         List<CategoriaAnalisada> categorias = categoriasSelecionadas(solicitacao.categorias());
         PeriodoDeAnalise periodo = new PeriodoDeAnalise(solicitacao.inicio(), solicitacao.fim());
+        Set<Long> selecionadas = Set.copyOf(solicitacao.categorias());
         List<VendaNoMes> vendas = consultarItensVendidos
                 .executar(periodo.primeiroInstante(), periodo.fimExclusivo()).stream()
                 .map(AnalisarVendas::vendaNoMes)
+                .filter(venda -> venda.categorias().stream().anyMatch(selecionadas::contains))
                 .toList();
         return AnaliseDeVendas.calcular(periodo, categorias, vendas);
     }
 
     private List<CategoriaAnalisada> categoriasSelecionadas(List<Long> ids) {
-        Map<Long, String> catalogo = new LinkedHashMap<>();
-        Pagina<CategoriaDoLivro> pagina;
-        int numero = 0;
-        do {
-            pagina = listarCategorias.executar(new Paginacao(numero++, Paginacao.TAMANHO_MAXIMO, List.of()));
-            pagina.itens().forEach(categoria -> catalogo.put(categoria.id(), categoria.nome()));
-        } while (numero < pagina.totalPaginas());
+        Map<Long, String> nomes = consultarCategorias.executar(ids).stream()
+                .collect(Collectors.toMap(CategoriaDoLivro::id, CategoriaDoLivro::nome));
         List<CategoriaAnalisada> categorias = new ArrayList<>();
         for (Long id : ids) {
-            String nome = catalogo.get(id);
+            String nome = nomes.get(id);
             if (nome == null) {
                 throw new ParametroInvalido("categoria", "A categoria %d não existe.".formatted(id));
             }

@@ -158,6 +158,11 @@ class ListarLivrosTest {
         }
 
         @Override
+        public List<CategoriaDoLivro> buscarCategorias(Collection<Long> ids) {
+            return List.of();
+        }
+
+        @Override
         public List<br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroParaVenda> buscarParaVenda(
                 java.util.Collection<Long> livroIds) {
             throw new UnsupportedOperationException("Fora do escopo do teste.");

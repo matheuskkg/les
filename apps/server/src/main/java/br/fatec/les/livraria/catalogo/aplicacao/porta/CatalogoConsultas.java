@@ -39,6 +39,12 @@ public interface CatalogoConsultas {
     Pagina<CategoriaDoLivro> listarCategorias(Paginacao paginacao);
 
     /**
+     * @param ids ids das categorias desejadas
+     * @return as categorias existentes entre as informadas, em qualquer ordem
+     */
+    List<CategoriaDoLivro> buscarCategorias(Collection<Long> ids);
+
+    /**
      * Livros pelos ids, ativos ou não, com título e autores, para a leitura do carrinho (RF-VEN-001). A
      * situação é mantida para que o {@code vendas} recuse um livro inativo na adição.
      *

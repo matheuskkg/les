@@ -35,4 +35,14 @@ class PlanilhaDaAnaliseTest {
                 2025-02;"Contos; ""curtos\""";0,00\r
                 """);
     }
+
+    @Test
+    void rfAna004_nomeQueComecaComoFormulaGanhaApostrofo() {
+        YearMonth janeiro = YearMonth.of(2025, 1);
+        AnaliseDeVendas analise = AnaliseDeVendas.calcular(new PeriodoDeAnalise(janeiro, janeiro),
+                List.of(new CategoriaAnalisada(1L, "=1+1"), new CategoriaAnalisada(2L, "-Ofertas")), List.of());
+
+        assertThat(new String(PlanilhaDaAnalise.csv(analise), StandardCharsets.UTF_8))
+                .contains("2025-01;'=1+1;0,00\r\n", "2025-01;'-Ofertas;0,00\r\n");
+    }
 }

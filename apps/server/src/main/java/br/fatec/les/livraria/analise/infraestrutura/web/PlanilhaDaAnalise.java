@@ -39,8 +39,12 @@ final class PlanilhaDaAnalise {
         return dinheiro.valor().toPlainString().replace('.', ',');
     }
 
-    /** Aspas só quando o texto tem separador, aspas ou quebra de linha, dobrando as aspas internas (RFC 4180). */
-    private static String texto(String valor) {
+    /**
+     * Aspas só quando o texto tem separador, aspas ou quebra de linha, dobrando as aspas internas (RFC 4180). Um texto
+     * que começa como fórmula ({@code = + - @}) ganha um apóstrofo, para o Excel não executá-lo.
+     */
+    private static String texto(String original) {
+        String valor = original.isEmpty() || "=+-@\t\r".indexOf(original.charAt(0)) < 0 ? original : "'" + original;
         if (valor.contains(";") || valor.contains("\"") || valor.contains("\n") || valor.contains("\r")) {
             return '"' + valor.replace("\"", "\"\"") + '"';
         }

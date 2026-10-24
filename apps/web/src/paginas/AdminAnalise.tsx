@@ -32,6 +32,30 @@ interface Resultado {
  * linhas com uma linha por categoria, tabela com os mesmos valores e exportação em CSV. As regras do período e da
  * seleção são do server, que responde 422 com o requisito violado.
  */
+class ProblemaDoCatalogo extends Error {
+  constructor(readonly problema: ProblemaDetalhe) {
+    super(problema.detail);
+  }
+}
+
+/** Todas as categorias do catálogo, página a página (o tamanho máximo da página é 100, DEC-07). */
+async function carregarCatalogo(signal: AbortSignal): Promise<Categoria[]> {
+  const categorias: Categoria[] = [];
+  for (let pagina = 0; ; pagina++) {
+    const { data, error, response } = await cliente.GET('/api/livros/categorias', {
+      params: { query: { pagina, tamanho: 100, ordem: ['nome,asc'] } },
+      signal,
+    });
+    if (!response.ok || !data) {
+      throw new ProblemaDoCatalogo(interpretarProblema(error, response.status));
+    }
+    categorias.push(...data.itens);
+    if (pagina + 1 >= data.totalPaginas) {
+      return categorias;
+    }
+  }
+}
+
 export default function AdminAnalise() {
   const { url, route } = useLocation();
   const busca = url.includes('?') ? url.slice(url.indexOf('?')) : '';
@@ -41,24 +65,25 @@ export default function AdminAnalise() {
   const [filtros, definirFiltros] = useState<EstadoDaAnalise>(estado);
   const [semCategoria, definirSemCategoria] = useState(false);
   const [resultado, definirResultado] = useState<Resultado | null>(null);
+  const [exportando, definirExportando] = useState(false);
+  const [problemaDaExportacao, definirProblemaDaExportacao] = useState<ProblemaDetalhe | null>(null);
 
 
   useEffect(() => {
     const controle = new AbortController();
-    cliente
-      .GET('/api/livros/categorias', { params: { query: { tamanho: 100 } }, signal: controle.signal })
-      .then(({ data, error, response }) => {
+    carregarCatalogo(controle.signal)
+      .then((categorias) => {
         if (!controle.signal.aborted) {
-          if (response.ok) {
-            definirCatalogo(data?.itens ?? []);
-          } else {
-            definirProblemaDoCatalogo(interpretarProblema(error, response.status));
-          }
+          definirCatalogo(categorias);
         }
       })
-      .catch(() => {
+      .catch((erro: unknown) => {
         if (!controle.signal.aborted) {
-          definirProblemaDoCatalogo({ status: 0, detail: 'Não foi possível carregar as categorias. Tente novamente.' });
+          definirProblemaDoCatalogo(
+            erro instanceof ProblemaDoCatalogo
+              ? erro.problema
+              : { status: 0, detail: 'Não foi possível carregar as categorias. Tente novamente.' },
+          );
         }
       });
     return () => controle.abort();
@@ -70,7 +95,16 @@ export default function AdminAnalise() {
   useEffect(() => {
     definirFiltros({ ...estado, categorias: estado.categorias.length > 0 ? estado.categorias : idsDoCatalogo });
     definirSemCategoria(false);
-  }, [estado, idsDoCatalogo]);
+    definirProblemaDaExportacao(null);
+    // idsDoCatalogo fica de fora: a chegada do catálogo só marca as categorias, sem desfazer os meses digitados.
+  }, [estado]);
+
+  useEffect(() => {
+    if (estado.categorias.length === 0) {
+      definirFiltros((atual) => ({ ...atual, categorias: idsDoCatalogo }));
+    }
+  }, [idsDoCatalogo]);
+
   const consulta = useMemo(
     () => (catalogo === null ? null : consultaDaAnalise(estado, idsDoCatalogo)),
     [catalogo, estado, idsDoCatalogo],
@@ -111,6 +145,7 @@ export default function AdminAnalise() {
   const series = useMemo<SerieDoGrafico[]>(
     () =>
       (analise?.series ?? []).map((serie) => ({
+        id: serie.categoriaId,
         nome: serie.categoria,
         cor: corDaCategoria(serie.categoriaId, idsDoCatalogo),
         valores: serie.valores,
@@ -118,6 +153,38 @@ export default function AdminAnalise() {
     [analise, idsDoCatalogo],
   );
   const opcoes = (catalogo ?? []).map((categoria) => ({ valor: String(categoria.id), rotulo: categoria.nome }));
+
+  /**
+   * Baixa o CSV pelo cliente da API, e não por um link direto, para que um erro (sessão expirada, regra violada)
+   * apareça na tela em vez de ser salvo como planilha (RF-ANA-004).
+   */
+  async function exportar() {
+    if (consulta === null) {
+      return;
+    }
+    definirExportando(true);
+    definirProblemaDaExportacao(null);
+    try {
+      const { data, error, response } = await cliente.GET('/api/admin/analise/exportacao', {
+        params: { query: consulta },
+        parseAs: 'blob',
+      });
+      if (!response.ok || !data) {
+        definirProblemaDaExportacao(interpretarProblema(error, response.status));
+        return;
+      }
+      const endereco = URL.createObjectURL(data);
+      const link = document.createElement('a');
+      link.href = endereco;
+      link.download = `analise-de-vendas-${consulta.inicio}-a-${consulta.fim}.csv`;
+      link.click();
+      URL.revokeObjectURL(endereco);
+    } catch {
+      definirProblemaDaExportacao({ status: 0, detail: 'Não foi possível exportar a análise. Tente novamente.' });
+    } finally {
+      definirExportando(false);
+    }
+  }
 
   function filtrar(evento: Event) {
     evento.preventDefault();
@@ -166,11 +233,12 @@ export default function AdminAnalise() {
             Atualizar
           </button>
           {visivel?.analise && (
-            <a class="botao botao--secundario" href={chave} download>
-              Exportar CSV
-            </a>
+            <button class="botao botao--secundario" type="button" disabled={exportando} onClick={exportar}>
+              {exportando ? 'Exportando…' : 'Exportar CSV'}
+            </button>
           )}
         </div>
+        <Erro problema={problemaDaExportacao} />
       </form>
 
       {visivel === null ? (

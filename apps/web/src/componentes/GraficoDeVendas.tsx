@@ -4,6 +4,7 @@ import 'uplot/dist/uPlot.min.css';
 import { formatarDinheiro } from '../formatacao';
 
 export interface SerieDoGrafico {
+  id: number;
   nome: string;
   cor: string;
   /** Valores em decimal da API ("1234.56"), um por mês. */
@@ -139,7 +140,7 @@ export function GraficoDeVendas({ meses, series }: Props) {
       <figcaption>
         <ul class="grafico__legenda" aria-label="Legenda">
           {series.map((serie) => (
-            <li key={serie.nome}>
+            <li key={serie.id}>
               <span class="grafico__traco" style={{ background: serie.cor }} aria-hidden="true" />
               {serie.nome}
             </li>

@@ -61,6 +61,14 @@ public class CatalogoConsultasJpa implements CatalogoConsultas {
     }
 
     @Override
+    public List<CategoriaDoLivro> buscarCategorias(Collection<Long> ids) {
+        return ids.isEmpty() ? List.of()
+                : categorias.findAllById(ids).stream()
+                        .map(categoria -> new CategoriaDoLivro(categoria.getId(), categoria.getNome()))
+                        .toList();
+    }
+
+    @Override
     public List<LivroParaVenda> buscarParaVenda(Collection<Long> livroIds) {
         if (livroIds.isEmpty()) {
             return List.of();

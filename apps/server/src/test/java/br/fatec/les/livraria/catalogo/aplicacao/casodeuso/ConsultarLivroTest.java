@@ -122,6 +122,11 @@ class ConsultarLivroTest {
         }
 
         @Override
+        public List<CategoriaDoLivro> buscarCategorias(Collection<Long> ids) {
+            return List.of();
+        }
+
+        @Override
         public Optional<LivroDetalhe> buscar(Long id) {
             return detalhe;
         }
