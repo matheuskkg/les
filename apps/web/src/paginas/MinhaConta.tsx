@@ -1,23 +1,50 @@
 import { useLocation } from 'preact-iso';
+import { useSessao } from '../contextoDeSessao';
+import { Dados } from './conta/Dados';
+import { Senha } from './conta/Senha';
 
 const secoes = [
   { caminho: '/minha-conta', rotulo: 'Resumo' },
-  { caminho: '/minha-conta/dados', rotulo: 'Dados' },
-  { caminho: '/minha-conta/enderecos', rotulo: 'Endereços' },
-  { caminho: '/minha-conta/cartoes', rotulo: 'Cartões' },
-  { caminho: '/minha-conta/pedidos', rotulo: 'Pedidos' },
+  { caminho: '/minha-conta/dados', rotulo: 'Meus dados' },
+  { caminho: '/minha-conta/senha', rotulo: 'Senha' },
+  { caminho: '/minha-conta/notificacoes', rotulo: 'Notificações' },
 ];
 
+function Resumo() {
+  const { usuario } = useSessao();
+  return (
+    <div class="cartao">
+      <h2>Olá!</h2>
+      <p>Você entrou como {usuario?.email}.</p>
+      <ul class="lista">
+        {secoes.slice(1).map((secao) => (
+          <li key={secao.caminho}>
+            <a href={secao.caminho}>{secao.rotulo}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function Secao({ caminho }: { caminho: string }) {
+  switch (caminho) {
+    case '/minha-conta/dados':
+      return <Dados />;
+    case '/minha-conta/senha':
+      return <Senha />;
+    default:
+      return <Resumo />;
+  }
+}
+
+/** Área do cliente: resumo, dados cadastrais e senha (RF-CLI-002, RF-CLI-003, RF-CLI-008). */
 export default function MinhaConta() {
   const { path } = useLocation();
 
   return (
     <section class="pagina">
       <h1>Minha conta</h1>
-      <p class="pagina__introducao">
-        Esta é a área do cliente. As telas de dados, endereços, cartões e pedidos entram nas
-        próximas etapas.
-      </p>
 
       <nav class="abas" aria-label="Seções da conta">
         {secoes.map((secao) => (
@@ -32,13 +59,7 @@ export default function MinhaConta() {
         ))}
       </nav>
 
-      <div class="cartao">
-        <h2>Em construção</h2>
-        <p>
-          Em breve você poderá consultar e alterar seus dados, gerenciar endereços e cartões e
-          acompanhar seus pedidos por aqui.
-        </p>
-      </div>
+      <Secao caminho={path} />
     </section>
   );
 }

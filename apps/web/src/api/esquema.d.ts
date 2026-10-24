@@ -186,6 +186,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Consulta os dados do próprio cliente logado */
+        get: operations["obter"];
+        /** Altera os dados do próprio cliente logado */
+        put: operations["alterar"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me/eventos": {
         parameters: {
             query?: never;
@@ -197,6 +215,23 @@ export interface paths {
         get: operations["meusEventos"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/inativar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Inativa a conta do próprio cliente e encerra a sessão */
+        post: operations["inativar"];
         delete?: never;
         options?: never;
         head?: never;
@@ -271,6 +306,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/senha": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Altera a senha do próprio usuário logado */
+        post: operations["alterarSenha"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sessao": {
         parameters: {
             query?: never;
@@ -279,7 +331,7 @@ export interface paths {
             cookie?: never;
         };
         /** Consulta o usuário logado e emite o cookie CSRF */
-        get: operations["obter"];
+        get: operations["obter_1"];
         put?: never;
         /** Entra no sistema e grava o cookie de sessão */
         post: operations["entrar"];
@@ -294,6 +346,21 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AlteracaoDeDadosCliente: {
+            cpf?: string;
+            /** Format: date */
+            dataNascimento: string;
+            email: string;
+            /** @enum {string} */
+            genero: "FEMININO" | "MASCULINO" | "OUTRO" | "NAO_INFORMADO";
+            nome: string;
+            telefone: components["schemas"]["TelefoneDoCadastro"];
+        };
+        AlteracaoDeSenha: {
+            confirmacaoSenha: string;
+            novaSenha: string;
+            senhaAtual: string;
+        };
         BandeiraDoCartaoDto: {
             /** Format: int64 */
             id: number;
@@ -454,6 +521,18 @@ export interface components {
              */
             precoVenda?: string;
             titulo: string;
+        };
+        MeusDados: {
+            cpf: string;
+            /** Format: date */
+            dataNascimento: string;
+            email: string;
+            /** @enum {string} */
+            genero: "FEMININO" | "MASCULINO" | "OUTRO" | "NAO_INFORMADO";
+            /** Format: int64 */
+            id: number;
+            nome: string;
+            telefone: components["schemas"]["TelefoneDoCadastro"];
         };
         NotificacaoDto: {
             /** Format: date-time */
@@ -855,6 +934,104 @@ export interface operations {
             };
         };
     };
+    obter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Dados do cliente */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeusDados"];
+                };
+            };
+            /** @description Sem sessão válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Cliente não encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    alterar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlteracaoDeDadosCliente"];
+            };
+        };
+        responses: {
+            /** @description Dados atualizados */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeusDados"];
+                };
+            };
+            /** @description JSON malformado ou valor de enum inválido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Sem sessão válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Cliente não encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Dados violam regras de negócio */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
     meusEventos: {
         parameters: {
             query?: never;
@@ -873,6 +1050,42 @@ export interface operations {
                 };
                 content: {
                     "text/event-stream": components["schemas"]["SseEmitter"];
+                };
+            };
+        };
+    };
+    inativar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Conta inativada e sessão encerrada */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sem sessão válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description A conta já está inativa */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
         };
@@ -969,7 +1182,47 @@ export interface operations {
             };
         };
     };
-    obter: {
+    alterarSenha: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlteracaoDeSenha"];
+            };
+        };
+        responses: {
+            /** @description Senha alterada; a sessão atual continua válida */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sem sessão válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Senha atual incorreta ou nova senha inválida */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    obter_1: {
         parameters: {
             query?: never;
             header?: never;

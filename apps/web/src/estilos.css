@@ -892,3 +892,23 @@ textarea.campo__entrada {
 .tabela tbody tr:last-child td {
   border-bottom: 0;
 }
+
+/* Inativação da conta (RF-CLI-003) */
+.zona-de-perigo {
+  margin-top: 1.5rem;
+  border-color: var(--cor-erro);
+}
+
+.zona-de-perigo h2 {
+  color: var(--cor-erro);
+}
+
+.botao--perigo {
+  border-color: var(--cor-erro);
+  background: var(--cor-erro);
+  color: #fff;
+}
+
+.botao--perigo:hover {
+  filter: brightness(0.92);
+}
