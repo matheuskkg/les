@@ -4,7 +4,7 @@ import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/clien
 import type { components } from '../api/esquema';
 import { montarEndereco, type EnderecoDoFormulario } from '../cadastroDeCliente';
 import { Erro } from '../componentes/Erro';
-import { PagamentoDaCompra } from '../componentes/PagamentoDaCompra';
+import { PagamentoDaCompra, SEM_CHECKOUT } from '../componentes/PagamentoDaCompra';
 import { SelecaoDeEndereco } from '../componentes/SelecaoDeEndereco';
 import { Violacoes } from '../componentes/Violacoes';
 import { useRecargaPorNotificacao } from '../contextoDeNotificacoes';
@@ -115,13 +115,14 @@ export default function Checkout() {
       if (!ativo) {
         return;
       }
-      if (response.status === 404) {
-        // O checkout acabou (expirou ou foi encerrado): a tela passa a mostrar que não há compra em andamento.
-        void carregar().catch(() => undefined);
-        return;
-      }
       if (!data) {
-        definirProblemaDoEndereco(interpretarProblema(error, response.status));
+        const problema = interpretarProblema(error, response.status);
+        if (problema.status === 404 && problema.detail === SEM_CHECKOUT) {
+          // O checkout acabou (expirou ou foi encerrado): a tela passa a mostrar que não há compra em andamento.
+          void carregar().catch(() => undefined);
+          return;
+        }
+        definirProblemaDoEndereco(problema);
         return;
       }
       definirProblemaDoEndereco(null);

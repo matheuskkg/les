@@ -14,14 +14,22 @@ export interface CartaoNaCompra {
   cvv: string;
 }
 
-/** "1.234,56", "1234,56" ou "1234.56" como número; `null` se não for um valor em reais. */
-export function valorParaApi(valor: string): number | null {
+/**
+ * Valor digitado em reais como o texto decimal da API ("1234.56"), sem passar por ponto flutuante; `null` se não for
+ * um valor em reais. A vírgula é o separador decimal, e o ponto separa milhares ("1.234" é mil duzentos e trinta e
+ * quatro); sem vírgula, um ponto seguido de 1 ou 2 dígitos também é aceito como decimal ("59.88").
+ */
+export function valorParaApi(valor: string): string | null {
   const texto = valor.trim().replace(/^R\$\s*/, '');
-  const normalizado = texto.includes(',') ? texto.replace(/\./g, '').replace(',', '.') : texto;
-  if (!/^\d+(\.\d+)?$/.test(normalizado)) {
-    return null;
+  let normalizado: string;
+  if (texto.includes(',')) {
+    normalizado = texto.replace(/\./g, '').replace(',', '.');
+  } else if (/^\d{1,3}(\.\d{3})+$/.test(texto)) {
+    normalizado = texto.replace(/\./g, '');
+  } else {
+    normalizado = texto;
   }
-  return Number(normalizado);
+  return /^\d+(\.\d+)?$/.test(normalizado) ? normalizado : null;
 }
 
 /** Valor da API ("49.88") como o campo mostra ("49,88"). */
@@ -63,7 +71,7 @@ export function montarPagamento(
       ...('cartaoId' in cartao.escolha
         ? { cartaoId: cartao.escolha.cartaoId }
         : { novo: montarCartao(cartao.escolha.novo) }),
-      valor: valorParaApi(cartao.valor) ?? 0,
+      valor: valorParaApi(cartao.valor) ?? '',
     })),
   };
 }

@@ -2086,7 +2086,8 @@
             "$ref" : "#/components/schemas/CartaoInformadoDto"
           },
           "valor" : {
-            "type" : "number"
+            "type" : "string",
+            "example" : "49.88"
           }
         },
         "required" : [ "valor" ]

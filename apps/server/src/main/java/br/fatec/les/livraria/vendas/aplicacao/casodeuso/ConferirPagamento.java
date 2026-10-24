@@ -59,9 +59,8 @@ public class ConferirPagamento {
         DistribuicaoDoPagamento distribuicao = conferirCupons.conferir(clienteId, subtotal, frete,
                 pagamento.cuponsPromocionais(), pagamento.cuponsDeTroca());
 
-        boolean comCupom = !pagamento.cuponsPromocionais().isEmpty() || !pagamento.cuponsDeTroca().isEmpty();
         List<CartaoNoPagamento> cartoes = pagamento.cartoes().isEmpty() ? List.of()
-                : conferirCartoes.conferir(distribuicao, comCupom, pagamento.cartoes());
+                : conferirCartoes.conferir(distribuicao, pagamento.cartoes());
         return new PagamentoConferido(distribuicao, cartoes);
     }
 }

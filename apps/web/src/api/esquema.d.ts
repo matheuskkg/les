@@ -691,7 +691,8 @@ export interface components {
             /** Format: int64 */
             cartaoId?: number;
             novo?: components["schemas"]["CartaoInformadoDto"];
-            valor: number;
+            /** @example 49.88 */
+            valor: string;
         };
         CartaoInformadoDto: {
             /** Format: int64 */

@@ -19,6 +19,8 @@ public record PagamentoPropostoDto(
     public PagamentoInformado paraPagamento() {
         return new PagamentoInformado(entrega == null ? null : entrega.paraEscolha(), cuponsPromocionais,
                 cuponsDeTroca,
-                cartoes == null ? null : cartoes.stream().map(CartaoDoPagamentoDto::paraCartaoInformado).toList());
+                cartoes == null ? null : cartoes.stream()
+                        .map(cartao -> cartao == null ? null : cartao.paraCartaoInformado())
+                        .toList());
     }
 }

@@ -217,6 +217,25 @@ class PagamentoIntegracaoTest {
     }
 
     @Test
+    void rfVen007_cupomOuCartaoVazioNaListaEhRecusado() throws Exception {
+        iniciarCheckout(ANA);
+
+        conferir(ANA, "{" + ENTREGA + ",\"cuponsDeTroca\":[null]}").andExpect(status().isUnprocessableContent());
+        conferir(ANA, "{" + ENTREGA + ",\"cuponsPromocionais\":[null]}").andExpect(status().isUnprocessableContent());
+        conferir(ANA, "{" + ENTREGA + ",\"cartoes\":[null]}").andExpect(status().isUnprocessableContent());
+    }
+
+    @Test
+    void rnVen004_valorDoCartaoEmTextoNaoEhArredondado() throws Exception {
+        iniciarCheckout(ANA);
+
+        conferir(ANA, "{" + ENTREGA + ",\"cartoes\":[{\"cartaoId\":1,\"valor\":\"59.88\"}]}")
+                .andExpect(status().isOk());
+        conferir(ANA, "{" + ENTREGA + ",\"cartoes\":[{\"cartaoId\":1,\"valor\":\"59.875\"}]}")
+                .andExpect(status().isUnprocessableContent());
+    }
+
+    @Test
     void rfVen007_semCheckoutAbertoNaoHaPagamento() throws Exception {
         conferir(ANA, "{" + ENTREGA + "}").andExpect(status().isNotFound());
     }

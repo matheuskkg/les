@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'preact/hooks';
+import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/cliente';
 import type { components } from '../api/esquema';
 import { cartaoVazio, montarCartao, type CartaoDoFormulario } from '../cadastroDeCliente';
@@ -35,6 +35,9 @@ interface Digitado {
 
 const NOVO = 'novo';
 
+/** Mensagem do 404 de checkout inexistente; os demais 404 (endereço, cupom, cartão) são mostrados ao cliente. */
+export const SEM_CHECKOUT = 'Nenhuma compra em andamento.';
+
 function Problema({ problema }: { problema: ProblemaDetalhe | null }) {
   return problema?.violacoes && problema.violacoes.length > 0 ? (
     <Violacoes violacoes={problema.violacoes} />
@@ -63,6 +66,9 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
   const [conferido, definirConferido] = useState<PagamentoConferido | null>(null);
   const [problemaDosCartoes, definirProblemaDosCartoes] = useState<ProblemaDetalhe | null>(null);
   const [enviando, definirEnviando] = useState(false);
+  const [salvando, definirSalvando] = useState(false);
+  /** Muda a cada mudança de cupons ou endereço, para descartar uma conferência que chegou atrasada. */
+  const selecao = useRef(0);
 
   const carregarCartoes = useCallback(async () => {
     const { data } = await cliente.GET('/api/me/cartoes');
@@ -82,6 +88,7 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
 
   // RN-VEN-006: a distribuição sem cartões mostra o restante e já recusa cupons desnecessários.
   useEffect(() => {
+    selecao.current += 1;
     definirResumo(null);
     definirConferido(null);
     if (entrega === null) {
@@ -96,11 +103,12 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
       if (!ativo) {
         return;
       }
-      if (response.status === 404) {
+      const problema = data ? null : interpretarProblema(error, response.status);
+      if (problema?.status === 404 && problema.detail === SEM_CHECKOUT) {
         aoPerderCheckout();
         return;
       }
-      definirProblemaDosCupons(data ? null : interpretarProblema(error, response.status));
+      definirProblemaDosCupons(problema);
       definirResumo(data ?? null);
     })().catch(() => {
       if (ativo) {
@@ -111,6 +119,18 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
       ativo = false;
     };
   }, [checkoutId, entrega, promocional, selecionados, aoPerderCheckout]);
+
+  // Com um cartão só, ele paga todo o restante: acompanha a mudança dos cupons (RN-VEN-004).
+  const unico = emUso.length === 1 ? emUso[0] : undefined;
+  const restante = resumo?.restante;
+  useEffect(() => {
+    if (unico !== undefined && restante !== undefined) {
+      definirDigitados((atuais) => ({
+        ...atuais,
+        [unico]: { cvv: atuais[unico]?.cvv ?? '', valor: valorParaCampo(restante) },
+      }));
+    }
+  }, [unico, restante]);
 
   function digitado(chave: string): Digitado {
     return digitados[chave] ?? { valor: '', cvv: '' };
@@ -146,6 +166,10 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
   }
 
   async function salvarNovo() {
+    if (salvando) {
+      return;
+    }
+    definirSalvando(true);
     definirProblemaDosCartoes(null);
     try {
       const { data, error, response } = await cliente.POST('/api/me/cartoes', { body: montarCartao(novo) });
@@ -162,14 +186,18 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
       void carregarCartoes().catch(() => undefined);
     } catch {
       definirProblemaDosCartoes({ status: 0, detail: 'Não foi possível salvar o cartão. Tente novamente.' });
+    } finally {
+      definirSalvando(false);
     }
   }
 
   async function conferir() {
-    if (entrega === null || enviando) {
+    if (entrega === null || resumo === null || enviando) {
       return;
     }
-    const naCompra = cartoesNaCompra();
+    // Com os cupons cobrindo tudo, os cartões escolhidos antes ficam fora (DEC-11: restante zero não aceita cartão).
+    const naCompra = resumo.restante === '0.00' ? [] : cartoesNaCompra();
+    const versao = selecao.current;
     const problemas = problemasDosCartoes(naCompra);
     if (problemas.length > 0) {
       definirProblemaDosCartoes({
@@ -185,6 +213,9 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
       const { data, error, response } = await cliente.POST('/api/me/checkout/pagamento', {
         body: montarPagamento(entrega, promocional, selecionados, naCompra),
       });
+      if (versao !== selecao.current) {
+        return;
+      }
       if (!data) {
         definirProblemaDosCartoes(interpretarProblema(error, response.status));
         return;
@@ -260,17 +291,11 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
               <dt>Desconto do cupom promocional:</dt> <dd>− {formatarDinheiro(resumo.descontoPromocional)}</dd>
             </div>
           )}
-          {resumo.cuponsDeTroca.length > 0 && (
-            <div>
-              <dt>Cupons de troca:</dt>{' '}
-              <dd>
-                −{' '}
-                {formatarDinheiro(
-                  resumo.cuponsDeTroca.reduce((soma, cupom) => soma + Number(cupom.abatido), 0).toFixed(2),
-                )}
-              </dd>
+          {resumo.cuponsDeTroca.map((cupom) => (
+            <div key={cupom.id}>
+              <dt>Cupom {cupom.codigo}:</dt> <dd>− {formatarDinheiro(cupom.abatido)}</dd>
             </div>
-          )}
+          ))}
           {resumo.troco !== '0.00' && (
             <div>
               <dt>Troco, gerado como cupom de troca:</dt> <dd>{formatarDinheiro(resumo.troco)}</dd>
@@ -316,7 +341,8 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
                 }} />
               {camposDoPagamento(NOVO)}
               <div class="acoes">
-                <button class="botao botao--secundario" type="button" onClick={() => void salvarNovo()}>
+                <button class="botao botao--secundario" type="button" disabled={salvando}
+                  onClick={() => void salvarNovo()}>
                   Salvar no meu cadastro
                 </button>
               </div>

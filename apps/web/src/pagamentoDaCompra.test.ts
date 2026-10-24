@@ -9,11 +9,12 @@ import {
 } from './pagamentoDaCompra.ts';
 
 test('RN-VEN-004: valor do cartão em reais, com vírgula ou ponto', () => {
-  assert.equal(valorParaApi('49,88'), 49.88);
-  assert.equal(valorParaApi('1.234,56'), 1234.56);
-  assert.equal(valorParaApi('R$ 10,00'), 10);
-  assert.equal(valorParaApi('59.88'), 59.88);
-  assert.equal(valorParaApi('9,995'), 9.995);
+  assert.equal(valorParaApi('49,88'), '49.88');
+  assert.equal(valorParaApi('1.234,56'), '1234.56');
+  assert.equal(valorParaApi('1.234'), '1234');
+  assert.equal(valorParaApi('R$ 10,00'), '10.00');
+  assert.equal(valorParaApi('59.88'), '59.88');
+  assert.equal(valorParaApi('9,995'), '9.995');
   assert.equal(valorParaApi(''), null);
   assert.equal(valorParaApi('dez'), null);
   assert.equal(valorParaApi('-5'), null);
@@ -49,8 +50,8 @@ test('RF-VEN-007: o pagamento vai sem o código de segurança', () => {
     cuponsPromocionais: ['BEMVINDO10'],
     cuponsDeTroca: [2, 1],
     cartoes: [
-      { cartaoId: 1, valor: 10 },
-      { novo: { numero: '5555555555554444', nomeImpresso: 'ANA', bandeiraId: 2, validade: '2030-12' }, valor: 39.88 },
+      { cartaoId: 1, valor: '10.00' },
+      { novo: { numero: '5555555555554444', nomeImpresso: 'ANA', bandeiraId: 2, validade: '2030-12' }, valor: '39.88' },
     ],
   });
   assert.equal(JSON.stringify(corpo).includes('456'), false);

@@ -43,8 +43,7 @@ public class ConferirCartoes {
      *         cliente
      */
     @Transactional(readOnly = true)
-    public List<CartaoNoPagamento> conferir(DistribuicaoDoPagamento distribuicao, boolean comCupom,
-            List<CartaoInformado> informados) {
+    public List<CartaoNoPagamento> conferir(DistribuicaoDoPagamento distribuicao, List<CartaoInformado> informados) {
         List<Cartao> cartoes = informados.stream().map(informado -> resolverCartao.executar(informado.escolha()))
                 .toList();
         List<PagamentoEmCartao> pagamentos = new ArrayList<>();
@@ -52,7 +51,7 @@ public class ConferirCartoes {
             pagamentos.add(new PagamentoEmCartao(cartoes.get(i).numero(), informados.get(i).valor()));
         }
 
-        CartoesDaCompra alvo = new CartoesDaCompra(distribuicao.restante(), comCupom, pagamentos);
+        CartoesDaCompra alvo = new CartoesDaCompra(distribuicao.restante(), distribuicao.comCupom(), pagamentos);
         Violacoes violacoes = new Violacoes();
         valorInformado.validar(alvo, violacoes);
         violacoes.lancarSeHouver();
