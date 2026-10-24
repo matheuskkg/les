@@ -1,12 +1,15 @@
 package br.fatec.les.livraria.catalogo.aplicacao.casodeuso;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +19,7 @@ import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.estoque.aplicacao.casodeuso.ConsultarMaiorCusto;
 import br.fatec.les.livraria.estoque.aplicacao.porta.MaiorCustoPorLivro;
 
-/** Preço de venda em lote com portas em memória (RF-EST-002, RN-EST-002, RN-LIV-003). */
+/** Preço de venda em lote com portas em memória (RF-EST-002, RN-LIV-003). */
 class ConsultarPrecosDeVendaTest {
 
     private final MargemPorLivroFake margens = new MargemPorLivroFake(Map.of(
@@ -32,7 +35,7 @@ class ConsultarPrecosDeVendaTest {
             margens, new ConsultarMaiorCusto(custos), new CalcularPrecoVenda());
 
     @Test
-    void rfEst002_calculaOMaiorCustoComAMargemDoGrupoDeCadaLivro() {
+    void rfEst002_calculaOPrecoComAMargemDoGrupoDeCadaLivro() {
         Map<Long, Dinheiro> precos = consultarPrecos.executar(List.of(1L, 2L));
 
         assertThat(precos)
@@ -41,31 +44,39 @@ class ConsultarPrecosDeVendaTest {
     }
 
     @Test
-    void rnEst002_livroSemEntradaNaoTemPreco() {
+    void livroSemEntradaNaoTemPreco() {
         Map<Long, Dinheiro> precos = consultarPrecos.executar(List.of(20L));
 
         assertThat(precos).doesNotContainKey(20L);
-        assertThat(consultarPrecos.executar(20L)).isEmpty();
     }
 
     @Test
-    void rfEst002_consultaDeUmLivroDevolveOPreco() {
-        Optional<Dinheiro> preco = consultarPrecos.executar(2L);
-
-        assertThat(preco).contains(Dinheiro.de("64.13"));
-    }
-
-    @Test
-    void rfEst002_consultaVaziaNaoAcionaAsPortas() {
+    void consultaVaziaNaoAcionaAsPortas() {
         assertThat(consultarPrecos.executar(List.of())).isEmpty();
 
         assertThat(margens.chamadas).isZero();
         assertThat(custos.chamadas).isZero();
     }
 
+    @Test
+    void consultaComElementoNuloEhRejeitada() {
+        assertThatThrownBy(() -> consultarPrecos.executar(Arrays.asList(1L, null)))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("null");
+    }
+
+    @Test
+    void portasRecebemOsIdsSolicitados() {
+        consultarPrecos.executar(List.of(1L, 2L, 20L));
+
+        assertThat(margens.idsRecebidos).containsExactly(1L, 2L, 20L);
+        assertThat(custos.idsRecebidos).containsExactly(1L, 2L, 20L);
+    }
+
     private static final class MargemPorLivroFake implements MargemPorLivro {
 
         private final Map<Long, BigDecimal> valores;
+        private final List<Long> idsRecebidos = new ArrayList<>();
         private int chamadas;
 
         private MargemPorLivroFake(Map<Long, BigDecimal> valores) {
@@ -75,13 +86,17 @@ class ConsultarPrecosDeVendaTest {
         @Override
         public Map<Long, BigDecimal> buscar(Collection<Long> livroIds) {
             chamadas++;
-            return valores;
+            idsRecebidos.addAll(livroIds);
+            return valores.entrySet().stream()
+                    .filter(entrada -> livroIds.contains(entrada.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
     }
 
     private static final class MaiorCustoPorLivroFake implements MaiorCustoPorLivro {
 
         private final Map<Long, BigDecimal> valores;
+        private final List<Long> idsRecebidos = new ArrayList<>();
         private int chamadas;
 
         private MaiorCustoPorLivroFake(Map<Long, BigDecimal> valores) {
@@ -91,7 +106,10 @@ class ConsultarPrecosDeVendaTest {
         @Override
         public Map<Long, BigDecimal> buscar(Collection<Long> livroIds) {
             chamadas++;
-            return valores;
+            idsRecebidos.addAll(livroIds);
+            return valores.entrySet().stream()
+                    .filter(entrada -> livroIds.contains(entrada.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
     }
 }

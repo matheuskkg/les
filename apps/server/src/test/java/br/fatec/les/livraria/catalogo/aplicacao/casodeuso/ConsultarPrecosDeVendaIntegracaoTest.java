@@ -33,15 +33,14 @@ class ConsultarPrecosDeVendaIntegracaoTest {
     @Test
     void rfEst002_calculaPrecoPeloMaiorCustoEntreAsEntradasDoLivro() {
         // Livro 2 (Popular, 35%): entradas de 42.00, 47.50 e 45.00 → 47.50 × 1.35 = 64.125 → 64.13.
-        assertThat(consultarPrecosDeVenda.executar(2L)).contains(Dinheiro.de("64.13"));
+        assertThat(consultarPrecosDeVenda.executar(List.of(2L))).containsEntry(2L, Dinheiro.de("64.13"));
     }
 
     @Test
-    void rnEst002_livroSemEntradasNaoTemPreco() {
+    void livroSemEntradasNaoTemPreco() {
         Map<Long, Dinheiro> precos = consultarPrecosDeVenda.executar(List.of(20L));
 
         assertThat(precos).doesNotContainKey(20L);
-        assertThat(consultarPrecosDeVenda.executar(20L)).isEmpty();
     }
 
     @Test

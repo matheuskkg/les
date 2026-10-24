@@ -19,9 +19,6 @@ public class MaiorCustoPorLivroJpa implements MaiorCustoPorLivro {
 
     @Override
     public Map<Long, BigDecimal> buscar(Collection<Long> livroIds) {
-        if (livroIds.isEmpty()) {
-            return Map.of();
-        }
         return entradas.buscarMaiorCustoPorLivro(livroIds).stream()
                 .collect(Collectors.toMap(
                         MaiorCustoDoLivroProjecao::getLivroId,

@@ -1,6 +1,7 @@
 package br.fatec.les.livraria.catalogo.dominio.calculo;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
 
@@ -14,7 +15,7 @@ class CalcularPrecoVendaTest {
     private final CalcularPrecoVenda calcularPrecoVenda = new CalcularPrecoVenda();
 
     @Test
-    void rfEst002_custoDe3333ComMargemDe15PorCentoDa3800() {
+    void rfEst002_custoDe3333ComMargemDe15PorCentoDa3833() {
         // Exemplo do DEC-15.1: 33.33 × 1.15 = 38.3295 → 38.33.
         Dinheiro preco = calcularPrecoVenda.calcular(new BigDecimal("33.33"), new BigDecimal("0.15"));
 
@@ -58,5 +59,37 @@ class CalcularPrecoVendaTest {
 
         assertThat(preco.valor().scale()).isEqualTo(2);
         assertThat(preco).isEqualTo(Dinheiro.de("40.37"));
+    }
+
+    @Test
+    void rejeitaMaiorCustoNulo() {
+        assertThatThrownBy(() -> calcularPrecoVenda.calcular(null, new BigDecimal("0.20")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("maiorCusto");
+    }
+
+    @Test
+    void rejeitaMargemNula() {
+        assertThatThrownBy(() -> calcularPrecoVenda.calcular(new BigDecimal("39.90"), null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("margem");
+    }
+
+    @Test
+    void rejeitaMaiorCustoZeroOuNegativo() {
+        assertThatThrownBy(() -> calcularPrecoVenda.calcular(BigDecimal.ZERO, new BigDecimal("0.20")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("maiorCusto");
+
+        assertThatThrownBy(() -> calcularPrecoVenda.calcular(new BigDecimal("-1.00"), new BigDecimal("0.20")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("maiorCusto");
+    }
+
+    @Test
+    void rejeitaMargemNegativa() {
+        assertThatThrownBy(() -> calcularPrecoVenda.calcular(new BigDecimal("39.90"), new BigDecimal("-0.01")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("margem");
     }
 }

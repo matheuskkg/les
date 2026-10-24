@@ -19,9 +19,6 @@ public class MargemPorLivroJpa implements MargemPorLivro {
 
     @Override
     public Map<Long, BigDecimal> buscar(Collection<Long> livroIds) {
-        if (livroIds.isEmpty()) {
-            return Map.of();
-        }
         return livros.buscarMargensPorLivro(livroIds).stream()
                 .collect(Collectors.toMap(
                         MargemDoLivroProjecao::getLivroId,
