@@ -1,6 +1,5 @@
 package br.fatec.les.livraria.acesso.infraestrutura.seguranca;
 
-import java.time.Duration;
 import java.time.Instant;
 
 import org.springframework.http.ResponseCookie;
@@ -12,8 +11,9 @@ import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.stereotype.Component;
 
 import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.compartilhado.infraestrutura.seguranca.PropriedadesJwt;
-import br.fatec.les.livraria.compartilhado.infraestrutura.seguranca.PropriedadesSessao;
+import br.fatec.les.livraria.compartilhado.infraestrutura.tempo.RelogioComoClock;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -32,10 +32,11 @@ public class EmissorDeToken {
 
     private final JwtEncoder jwtEncoder;
     private final PropriedadesJwt propriedadesJwt;
-    private final PropriedadesSessao propriedadesSessao;
+    private final FabricaDeCookieDeSessao cookies;
+    private final Relogio relogio;
 
     public TokenDeSessao emitir(Usuario usuario) {
-        Instant agora = Instant.now();
+        Instant agora = RelogioComoClock.instante(relogio);
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(EMISSOR)
                 .subject(usuario.getId().toString())
@@ -45,25 +46,11 @@ public class EmissorDeToken {
                 .build();
         JwsHeader cabecalho = JwsHeader.with(MacAlgorithm.HS256).build();
         String valor = jwtEncoder.encode(JwtEncoderParameters.from(cabecalho, claims)).getTokenValue();
-        return new TokenDeSessao(valor, cookie(valor).build());
+        return new TokenDeSessao(valor, cookies.criar(valor));
     }
 
     /** Cookie que apaga a sessão no navegador (DEC-08). */
     public ResponseCookie cookieExpirado() {
-        return cookie("").maxAge(0).build();
-    }
-
-    private ResponseCookie.ResponseCookieBuilder cookie(String valor) {
-        return ResponseCookie.from(COOKIE, valor)
-                .httpOnly(true)
-                .secure(propriedadesSessao.cookieSeguro())
-                .sameSite("Strict")
-                .path("/api")
-                .maxAge(propriedadesJwt.validade());
-    }
-
-    /** Validade configurada, usada pelo controller da sessão em respostas informativas. */
-    public Duration validade() {
-        return propriedadesJwt.validade();
+        return cookies.expirado();
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +30,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -45,6 +48,7 @@ public class SessaoController {
 
     private final Autenticar autenticar;
     private final EmissorDeToken emissor;
+    private final CsrfTokenRepository csrf;
 
     @PostMapping
     @Operation(summary = "Entra no sistema e grava o cookie de sessão")
@@ -59,12 +63,13 @@ public class SessaoController {
                     content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
-    public ResponseEntity<Sessao> entrar(@Valid @RequestBody EntradaDeLogin entrada) {
+    public ResponseEntity<Sessao> entrar(@Valid @RequestBody EntradaDeLogin entrada,
+            HttpServletRequest requisicao, HttpServletResponse resposta) {
         Usuario usuario = autenticar.executar(new Autenticar.Credenciais(entrada.login(), entrada.senha()));
         TokenDeSessao token = emissor.emitir(usuario);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, token.cookie().toString())
-                .body(Sessao.de(usuario));
+        rotacionarCsrf(requisicao, resposta);
+        resposta.addHeader(HttpHeaders.SET_COOKIE, token.cookie().toString());
+        return ResponseEntity.ok().body(Sessao.de(usuario));
     }
 
     @GetMapping
@@ -87,10 +92,20 @@ public class SessaoController {
     @DeleteMapping
     @Operation(summary = "Encerra a sessão e apaga o cookie")
     @ApiResponses(@ApiResponse(responseCode = "204", description = "Sessão encerrada"))
-    public ResponseEntity<Void> sair() {
-        return ResponseEntity.noContent()
-                .header(HttpHeaders.SET_COOKIE, emissor.cookieExpirado().toString())
-                .build();
+    public ResponseEntity<Void> sair(HttpServletRequest requisicao, HttpServletResponse resposta) {
+        rotacionarCsrf(requisicao, resposta);
+        resposta.addHeader(HttpHeaders.SET_COOKIE, emissor.cookieExpirado().toString());
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Invalida o token CSRF da sessão anterior e grava um novo no cookie {@code XSRF-TOKEN} (DEC-08), para que ele não
+     * sobreviva ao login/logout. O {@code saveToken(null)} manda o navegador apagar o valor antigo; o novo valor é
+     * gravado em seguida.
+     */
+    private void rotacionarCsrf(HttpServletRequest requisicao, HttpServletResponse resposta) {
+        csrf.saveToken(null, requisicao, resposta);
+        csrf.saveToken(csrf.generateToken(requisicao), requisicao, resposta);
     }
 
     /** O papel vem das autoridades carregadas do banco pelo conversor do JWT (DEC-08), não da claim do token. */

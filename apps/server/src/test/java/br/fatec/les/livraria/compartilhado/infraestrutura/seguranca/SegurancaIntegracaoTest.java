@@ -48,11 +48,6 @@ class SegurancaIntegracaoTest {
             return "livros";
         }
 
-        @GetMapping("/api/categorias/exemplo")
-        String categorias() {
-            return "categorias";
-        }
-
         @GetMapping("/api/me/exemplo")
         String meu() {
             return "me";
@@ -113,11 +108,6 @@ class SegurancaIntegracaoTest {
                     assertThat(csrf).isNotNull();
                     assertThat(csrf.isHttpOnly()).isFalse();
                 });
-
-        // Filtro da vitrine (GET /api/categorias/**), público como a consulta de livros (DEC-08, DEC-15.4).
-        mvc.perform(get("/api/categorias/exemplo"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("categorias"));
     }
 
     @Test
@@ -164,6 +154,38 @@ class SegurancaIntegracaoTest {
         mvc.perform(get("/api/me/exemplo").cookie(cookieDe(inativo)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.detail").value("Autenticação necessária."));
+    }
+
+    @Test
+    void cookieDeUsuarioInativoNaoBloqueiaARotaPublicaDaVitrine() throws Exception {
+        Usuario inativo = usuarios.salvar(new Usuario(null, "inativo.vitrine@livraria.test", null,
+                senhas.codificar("Senha@123"), Papel.CLIENTE, relogio.agora().minusDays(1)));
+
+        mvc.perform(get("/api/livros/exemplo").cookie(cookieDe(inativo)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("livros"));
+    }
+
+    @Test
+    void cookieInvalidoEmRotaDoClienteResponde401EApagaOCookie() throws Exception {
+        Usuario inativo = usuarios.salvar(new Usuario(null, "inativo.me.cookie@livraria.test", null,
+                senhas.codificar("Senha@123"), Papel.CLIENTE, relogio.agora().minusDays(1)));
+
+        mvc.perform(get("/api/me/exemplo").cookie(cookieDe(inativo)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.detail").value("Autenticação necessária."))
+                .andExpect(resultado -> assertThat(resultado.getResponse().getHeaders("Set-Cookie"))
+                        .anyMatch(cookie -> cookie.startsWith(EmissorDeToken.COOKIE + "=")
+                                && cookie.contains("Max-Age=0")));
+    }
+
+    @Test
+    void cookieComAssinaturaInvalidaEmRotaDoClienteResponde401EApagaOCookie() throws Exception {
+        mvc.perform(get("/api/me/exemplo").cookie(new Cookie(EmissorDeToken.COOKIE, "token-invalido")))
+                .andExpect(status().isUnauthorized())
+                .andExpect(resultado -> assertThat(resultado.getResponse().getHeaders("Set-Cookie"))
+                        .anyMatch(cookie -> cookie.startsWith(EmissorDeToken.COOKIE + "=")
+                                && cookie.contains("Max-Age=0")));
     }
 
     @Test

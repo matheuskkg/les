@@ -34,6 +34,7 @@ import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
 import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
 import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
 import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.TokenDeSessao;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import jakarta.servlet.http.Cookie;
 
@@ -76,6 +77,9 @@ class SessaoIntegracaoTest {
 
     @Autowired
     private Relogio relogio;
+
+    @Autowired
+    private EmissorDeToken emissor;
 
     private MockMvc mvc;
 
@@ -199,6 +203,81 @@ class SessaoIntegracaoTest {
     }
 
     @Test
+    void loginRotacionaOTokenCsrf() throws Exception {
+        Cookie csrfAntes = tokenCsrf();
+
+        MockHttpServletResponse resposta = entrar(ADMIN, SENHA_DO_ADMIN, csrfAntes)
+                .andExpect(status().isOk())
+                .andReturn().getResponse();
+
+        String csrfDepois = valorDoCookie(resposta, COOKIE_CSRF);
+        assertThat(csrfDepois).isNotBlank().isNotEqualTo(csrfAntes.getValue());
+    }
+
+    @Test
+    void logoutRotacionaOTokenCsrf() throws Exception {
+        MockHttpServletResponse login = entrar(ADMIN, SENHA_DO_ADMIN, tokenCsrf())
+                .andExpect(status().isOk())
+                .andReturn().getResponse();
+        Cookie sessao = cookieDaSessao(login);
+        String csrfAntes = valorDoCookie(login, COOKIE_CSRF);
+
+        MockHttpServletResponse resposta = mvc.perform(delete("/api/sessao")
+                .cookie(sessao, new Cookie(COOKIE_CSRF, csrfAntes))
+                .header(CABECALHO_CSRF, csrfAntes))
+                .andExpect(status().isNoContent())
+                .andReturn().getResponse();
+
+        assertThat(valorDoCookie(resposta, COOKIE_CSRF)).isNotBlank().isNotEqualTo(csrfAntes);
+    }
+
+    @Test
+    void loginComCookieDeSessaoInvalidoUsaAsCredenciaisEReativaAConta() throws Exception {
+        Usuario inativa = criarUsuario("reativa.cookie@livraria.test", relogio.agora().minusDays(1));
+        Cookie cookieAntigo = cookieDe(inativa);
+        Cookie csrf = tokenCsrf();
+
+        mvc.perform(post("/api/sessao")
+                .cookie(cookieAntigo, csrf)
+                .header(CABECALHO_CSRF, csrf.getValue())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(corpoDeLogin("reativa.cookie@livraria.test", SENHA_DE_TESTE)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.papel").value("CLIENTE"));
+
+        assertThat(usuarios.buscarPorId(inativa.getId()))
+                .get()
+                .extracting(Usuario::getInativadoEm)
+                .isNull();
+    }
+
+    @Test
+    void logoutComCookieDeSessaoInvalidoResponde204EApagaOCookie() throws Exception {
+        Usuario inativa = criarUsuario("inativa.cookie@livraria.test", relogio.agora().minusDays(1));
+        Cookie csrf = tokenCsrf();
+
+        MockHttpServletResponse resposta = mvc.perform(delete("/api/sessao")
+                .cookie(cookieDe(inativa), csrf)
+                .header(CABECALHO_CSRF, csrf.getValue()))
+                .andExpect(status().isNoContent())
+                .andReturn().getResponse();
+
+        assertThat(setCookieDaSessao(resposta)).contains("Max-Age=0");
+    }
+
+    @Test
+    void getDaSessaoComCookieInvalidoResponde401EApagaOCookie() throws Exception {
+        Usuario inativa = criarUsuario("inativa.consulta@livraria.test", relogio.agora().minusDays(1));
+
+        MockHttpServletResponse resposta = mvc.perform(get("/api/sessao").cookie(cookieDe(inativa)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.detail").value("Autenticação necessária."))
+                .andReturn().getResponse();
+
+        assertThat(setCookieDaSessao(resposta)).contains("Max-Age=0");
+    }
+
+    @Test
     void getDaSessaoSemCookieResponde401EmProblemDetail() throws Exception {
         mvc.perform(get("/api/sessao"))
                 .andExpect(status().isUnauthorized())
@@ -231,6 +310,21 @@ class SessaoIntegracaoTest {
         Cookie csrf = mvc.perform(get("/api/sessao")).andReturn().getResponse().getCookie(COOKIE_CSRF);
         assertThat(csrf).isNotNull();
         return csrf;
+    }
+
+    private Cookie cookieDe(Usuario usuario) {
+        TokenDeSessao token = emissor.emitir(usuario);
+        return new Cookie(EmissorDeToken.COOKIE, token.valor());
+    }
+
+    /** Último valor não vazio do cookie no response, ignorando o Set-Cookie de expiração da rotação. */
+    private static String valorDoCookie(MockHttpServletResponse resposta, String nome) {
+        return resposta.getHeaders(HttpHeaders.SET_COOKIE).stream()
+                .filter(valor -> valor.startsWith(nome + "="))
+                .map(valor -> valor.substring((nome + "=").length()).split(";", 2)[0])
+                .filter(valor -> !valor.isBlank())
+                .reduce((anterior, atual) -> atual)
+                .orElse(null);
     }
 
     private Usuario criarUsuario(String email, LocalDateTime inativadoEm) {

@@ -36,4 +36,13 @@ class ArquiteturaTest {
             .that().resideInAPackage("..aplicacao..")
             .should().dependOnClassesThat().resideInAPackage("..infraestrutura..")
             .allowEmptyShould(true);
+
+    /** O compartilhado é a base comum; não pode conhecer nenhum módulo de negócio (docs/arquitetura.md). */
+    @ArchTest
+    static final ArchRule compartilhadoNaoDependeDeModulos = noClasses()
+            .that().resideInAPackage("br.fatec.les.livraria.compartilhado..")
+            .should().dependOnClassesThat().resideInAnyPackage(
+                    "..acesso..", "..catalogo..", "..estoque..", "..clientes..", "..vendas..",
+                    "..analise..", "..recomendacao..", "..notificacoes..")
+            .allowEmptyShould(true);
 }
