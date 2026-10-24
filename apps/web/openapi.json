@@ -435,6 +435,60 @@
         "tags" : [ "pedido-admin-controller" ]
       }
     },
+    "/api/admin/pedidos/{id}/confirmar-entrega" : {
+      "post" : {
+        "operationId" : "confirmarEntrega",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PedidoDetalheDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "pedido-admin-controller" ]
+      }
+    },
+    "/api/admin/pedidos/{id}/despachar" : {
+      "post" : {
+        "operationId" : "despachar",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PedidoDetalheDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "pedido-admin-controller" ]
+      }
+    },
     "/api/clientes" : {
       "post" : {
         "operationId" : "cadastrar",

@@ -1,9 +1,12 @@
 package br.fatec.les.livraria.vendas.infraestrutura.web;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -13,6 +16,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -21,29 +28,50 @@ import org.springframework.web.context.WebApplicationContext;
 
 import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
 import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
 import br.fatec.les.livraria.vendas.dominio.pedido.ClienteNoPedido;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.Cookie;
 
 /**
  * Consulta de pedidos do administrador (RF-VEN-009, RF-VEN-010, DEC-07, DEC-12). Cada teste grava três pedidos em
  * março de 2001 e desfaz tudo no fim; toda consulta filtra esse ano, para não depender dos pedidos que outros testes
- * deixam no banco. Cada pedido tem dois Dom Casmurro, frete de R$ 12,00 e R$ 10,00 de desconto: R$ 97,76.
+ * deixam no banco. Cada pedido tem dois Dom Casmurro, frete de R$ 12,00 e R$ 10,00 de desconto: R$ 97,76. O
+ * despacho e a entrega seguem o diagrama do DEC-12 (RN-VEN-009, RN-VEN-010, DEC-13), com o relógio fixo em
+ * 2026-10-24T12:00 no fuso da loja.
  */
 @SpringBootTest
 @Transactional
 class PedidoAdminControllerTest {
 
     private static final String ROTA = "/api/admin/pedidos";
+    private static final LocalDateTime AGORA = LocalDateTime.of(2026, 10, 24, 12, 0);
     private static final ClienteNoPedido ANA = new ClienteNoPedido(1L, "Ana Souza", "52998224725",
             "ana.souza@livraria.test", "(11) 98888-7001");
     private static final ClienteNoPedido BRUNO = new ClienteNoPedido(2L, "Bruno Lima", "11144477735",
             "bruno.lima@livraria.test", "(21) 98888-7002");
 
+    @TestConfiguration
+    static class RelogioFixo {
+
+        @Bean
+        @Primary
+        Relogio relogioFixo() {
+            return () -> AGORA;
+        }
+    }
+
     @Autowired
     private WebApplicationContext contexto;
+
+    @Autowired
+    private JdbcClient jdbc;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Autowired
     private UsuarioRepositorio usuarios;
@@ -169,6 +197,48 @@ class PedidoAdminControllerTest {
         mvc.perform(get(ROTA)).andExpect(status().isUnauthorized());
         mvc.perform(get(ROTA).cookie(cookieDoUsuario(2L))).andExpect(status().isForbidden());
         mvc.perform(get(ROTA + "/" + aprovadoDaAna).cookie(cookieDoUsuario(2L))).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void rnVen009_rnVen010_despachaEConfirmaAEntregaComNotificacoesAoCliente() throws Exception {
+        mvc.perform(comoAdmin(post(ROTA + "/" + aprovadoDaAna + "/despachar").with(csrf())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("EM_TRANSPORTE"))
+                .andExpect(jsonPath("$.entregueEm").doesNotExist());
+
+        mvc.perform(comoAdmin(post(ROTA + "/" + aprovadoDaAna + "/confirmar-entrega").with(csrf())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ENTREGUE"))
+                .andExpect(jsonPath("$.entregueEm").value("2026-10-24T15:00:00Z"));
+
+        mvc.perform(comoAdmin(get(ROTA + "/" + aprovadoDaAna)))
+                .andExpect(jsonPath("$.status").value("ENTREGUE"))
+                .andExpect(jsonPath("$.entregueEm").value("2026-10-24T15:00:00Z"));
+        entityManager.flush();
+        assertThat(jdbc.sql("select tipo from notificacao where usuario_id = 2 and recurso_id = ?")
+                .param(aprovadoDaAna).query(String.class).list())
+                .containsExactlyInAnyOrder("PEDIDO_DESPACHADO", "PEDIDO_ENTREGUE");
+    }
+
+    @Test
+    void dec12_transicoesForaDoDiagramaRespondem409() throws Exception {
+        mvc.perform(comoAdmin(post(ROTA + "/" + reprovadoDaAna + "/despachar").with(csrf()))).andExpect(status().isConflict());
+        mvc.perform(comoAdmin(post(ROTA + "/" + aprovadoDaAna + "/confirmar-entrega").with(csrf())))
+                .andExpect(status().isConflict());
+
+        mvc.perform(comoAdmin(post(ROTA + "/" + aprovadoDaAna + "/despachar").with(csrf()))).andExpect(status().isOk());
+        mvc.perform(comoAdmin(post(ROTA + "/" + aprovadoDaAna + "/despachar").with(csrf()))).andExpect(status().isConflict());
+        mvc.perform(comoAdmin(post(ROTA + "/" + aprovadoDaAna + "/confirmar-entrega").with(csrf()))).andExpect(status().isOk());
+        mvc.perform(comoAdmin(post(ROTA + "/" + aprovadoDaAna + "/confirmar-entrega").with(csrf())))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void rfVen009_acaoEmPedidoInexistenteResponde404EExigeAdmin() throws Exception {
+        mvc.perform(comoAdmin(post(ROTA + "/999999/despachar").with(csrf()))).andExpect(status().isNotFound());
+        mvc.perform(comoAdmin(post(ROTA + "/999999/confirmar-entrega").with(csrf()))).andExpect(status().isNotFound());
+        mvc.perform(post(ROTA + "/" + aprovadoDaAna + "/despachar").cookie(cookieDoUsuario(2L)))
+                .andExpect(status().isForbidden());
     }
 
     private long gravar(ClienteNoPedido cliente, LocalDateTime realizadoEm, boolean aprovar) {

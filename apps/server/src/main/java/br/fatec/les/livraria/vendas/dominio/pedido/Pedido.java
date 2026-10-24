@@ -94,6 +94,34 @@ public class Pedido {
         status = StatusPedido.REPROVADA;
     }
 
+    /**
+     * O administrador despacha o pedido aprovado para entrega (RF-VEN-009, RN-VEN-009, DEC-12).
+     *
+     * @throws ExcecaoDeConflito se o pedido não estiver aprovado
+     */
+    public void despachar() {
+        if (status != StatusPedido.APROVADA) {
+            throw new ExcecaoDeConflito("Só um pedido aprovado pode ser despachado.");
+        }
+        status = StatusPedido.EM_TRANSPORTE;
+    }
+
+    /**
+     * O administrador confirma a entrega do pedido em transporte (RF-VEN-010, RN-VEN-010, DEC-12). A data da entrega
+     * começa o prazo de troca, e depois dela o status não muda mais.
+     *
+     * @param agora data e hora da confirmação, gravada como {@code entregueEm}
+     * @throws ExcecaoDeConflito se o pedido não estiver em transporte
+     */
+    public void confirmarEntrega(LocalDateTime agora) {
+        Objects.requireNonNull(agora, "agora");
+        if (status != StatusPedido.EM_TRANSPORTE) {
+            throw new ExcecaoDeConflito("Só um pedido em transporte pode ter a entrega confirmada.");
+        }
+        status = StatusPedido.ENTREGUE;
+        entregueEm = agora;
+    }
+
     public boolean emProcessamento() {
         return status == StatusPedido.EM_PROCESSAMENTO;
     }
