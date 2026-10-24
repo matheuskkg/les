@@ -14,10 +14,10 @@ import lombok.Getter;
 public class Usuario {
 
     private final Long id;
-    private final String email;
+    private String email;
     /** Opcional: o administrador não tem telefone (DEC-10). */
-    private final Telefone telefone;
-    private final String senhaHash;
+    private Telefone telefone;
+    private String senhaHash;
     private final Papel papel;
     private LocalDateTime inativadoEm;
 
@@ -31,8 +31,7 @@ public class Usuario {
     }
 
     /** Inativa a conta a partir de {@code agora} (RF-CLI-003); uma conta já inativa não pode ser inativada de novo. */
-    public void inativar(LocalDateTime agora) {
-        if (inativadoEm != null) {
+    public void inativar(LocalDateTime agora) {        if (inativadoEm != null) {
             throw new IllegalStateException("A conta já está inativa.");
         }
         inativadoEm = Objects.requireNonNull(agora, "agora");
@@ -44,5 +43,19 @@ public class Usuario {
             throw new IllegalStateException("A conta já está ativa.");
         }
         inativadoEm = null;
+    }
+
+    /**
+     * Altera e-mail e telefone de login (RF-CLI-002, DEC-08, DEC-10). O e-mail é normalizado pelo value object, e o
+     * telefone já chega validado e só com dígitos.
+     */
+    public void alterarContato(String email, Telefone telefone) {
+        this.email = new Email(email).endereco();
+        this.telefone = Objects.requireNonNull(telefone, "telefone");
+    }
+
+    /** Troca o hash da senha (RF-CLI-008); o texto puro nunca é guardado (RNF-CLI-003). */
+    public void alterarSenhaHash(String senhaHash) {
+        this.senhaHash = Objects.requireNonNull(senhaHash, "senhaHash");
     }
 }

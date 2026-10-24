@@ -50,8 +50,17 @@ public interface UsuarioRepositorio {
     /** {@code true} se um e-mail pertence a uma conta em uso. */
     boolean existeEmailEmUso(String email);
 
+    /**
+     * {@code true} se um e-mail pertence a outra conta em uso, ignorando o usuário informado. Usada na alteração dos
+     * dados do cliente, em que o próprio e-mail não pode bloquear a operação (RF-CLI-002, DEC-10).
+     */
+    boolean existeEmailEmUsoExceto(String email, Long usuarioId);
+
     /** {@code true} se um telefone (só dígitos) pertence a uma conta em uso. */
     boolean existeTelefoneEmUso(String telefone);
+
+    /** {@code true} se um telefone (só dígitos) pertence a outra conta em uso, ignorando o usuário informado. */
+    boolean existeTelefoneEmUsoExceto(String telefone, Long usuarioId);
 
     /**
      * {@code true} se algum dos usuários informados pertence a uma conta em uso. Usada pela unicidade de CPF do

@@ -45,12 +45,31 @@ public interface UsuarioJpaRepository extends JpaRepository<UsuarioJpa, Long> {
 
     @Query("""
             select count(u) from UsuarioJpa u
+            where u.email = :email
+              and u.id <> :usuarioId
+              and (u.inativadoEm is null or u.inativadoEm >= :limite)
+            """)
+    long contarPorEmailEmUsoExceto(@Param("email") String email, @Param("usuarioId") Long usuarioId,
+            @Param("limite") LocalDateTime limite);
+
+    @Query("""
+            select count(u) from UsuarioJpa u
             where u.telefone.ddd = :ddd
               and u.telefone.numero = :numero
               and (u.inativadoEm is null or u.inativadoEm >= :limite)
             """)
     long contarPorTelefoneEmUso(@Param("ddd") String ddd, @Param("numero") String numero,
             @Param("limite") LocalDateTime limite);
+
+    @Query("""
+            select count(u) from UsuarioJpa u
+            where u.telefone.ddd = :ddd
+              and u.telefone.numero = :numero
+              and u.id <> :usuarioId
+              and (u.inativadoEm is null or u.inativadoEm >= :limite)
+            """)
+    long contarPorTelefoneEmUsoExceto(@Param("ddd") String ddd, @Param("numero") String numero,
+            @Param("usuarioId") Long usuarioId, @Param("limite") LocalDateTime limite);
 
     @Query("select u.id from UsuarioJpa u where u.papel = :papel order by u.id")
     List<Long> listarIdsPorPapel(@Param("papel") Papel papel);

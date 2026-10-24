@@ -141,7 +141,7 @@ public class ConfiguracaoDeSeguranca {
                 rotas.requestMatchers(caminho(null, TESTES_E2E)).permitAll();
             }
             // Áreas autenticadas; a ordem importa (/api/me e /api/admin antes do catch-all).
-            rotas.requestMatchers(caminho(null, "/api/me/**")).hasRole("CLIENTE");
+            rotas.requestMatchers(caminho(null, "/api/me"), caminho(null, "/api/me/**")).hasRole("CLIENTE");
             rotas.requestMatchers(caminho(null, "/api/admin/**")).hasRole("ADMIN");
             rotas.requestMatchers(caminho(null, "/api/**")).authenticated();
             /*

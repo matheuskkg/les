@@ -580,6 +580,112 @@
         "tags" : [ "livro-controller" ]
       }
     },
+    "/api/me" : {
+      "get" : {
+        "operationId" : "obter",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeusDados"
+                }
+              }
+            },
+            "description" : "Dados do cliente"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Sem sessão válida"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Cliente não encontrado"
+          }
+        },
+        "summary" : "Consulta os dados do próprio cliente logado",
+        "tags" : [ "me-controller" ]
+      },
+      "put" : {
+        "operationId" : "alterar",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AlteracaoDeDadosCliente"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeusDados"
+                }
+              }
+            },
+            "description" : "Dados atualizados"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "JSON malformado ou valor de enum inválido"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Sem sessão válida"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Cliente não encontrado"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Dados violam regras de negócio"
+          }
+        },
+        "summary" : "Altera os dados do próprio cliente logado",
+        "tags" : [ "me-controller" ]
+      }
+    },
     "/api/me/eventos" : {
       "get" : {
         "operationId" : "meusEventos",
@@ -606,6 +712,38 @@
         },
         "summary" : "Abre o stream SSE das notificações do cliente",
         "tags" : [ "eventos-controller" ]
+      }
+    },
+    "/api/me/inativar" : {
+      "post" : {
+        "operationId" : "inativar",
+        "responses" : {
+          "204" : {
+            "description" : "Conta inativada e sessão encerrada"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Sem sessão válida"
+          },
+          "409" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "A conta já está inativa"
+          }
+        },
+        "summary" : "Inativa a conta do próprio cliente e encerra a sessão",
+        "tags" : [ "conta-controller" ]
       }
     },
     "/api/me/notificacoes" : {
@@ -716,6 +854,48 @@
         "tags" : [ "notificacoes-do-cliente-controller" ]
       }
     },
+    "/api/me/senha" : {
+      "post" : {
+        "operationId" : "alterarSenha",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AlteracaoDeSenha"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Senha alterada; a sessão atual continua válida"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Sem sessão válida"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Senha atual incorreta ou nova senha inválida"
+          }
+        },
+        "summary" : "Altera a senha do próprio usuário logado",
+        "tags" : [ "conta-controller" ]
+      }
+    },
     "/api/sessao" : {
       "delete" : {
         "operationId" : "sair",
@@ -728,7 +908,7 @@
         "tags" : [ "sessao-controller" ]
       },
       "get" : {
-        "operationId" : "obter",
+        "operationId" : "obter_1",
         "responses" : {
           "200" : {
             "content" : {
@@ -805,6 +985,47 @@
   },
   "components" : {
     "schemas" : {
+      "AlteracaoDeDadosCliente" : {
+        "type" : "object",
+        "properties" : {
+          "cpf" : {
+            "type" : "string"
+          },
+          "dataNascimento" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "genero" : {
+            "type" : "string",
+            "enum" : [ "FEMININO", "MASCULINO", "OUTRO", "NAO_INFORMADO" ]
+          },
+          "nome" : {
+            "type" : "string"
+          },
+          "telefone" : {
+            "$ref" : "#/components/schemas/TelefoneDoCadastro"
+          }
+        },
+        "required" : [ "dataNascimento", "email", "genero", "nome", "telefone" ]
+      },
+      "AlteracaoDeSenha" : {
+        "type" : "object",
+        "properties" : {
+          "confirmacaoSenha" : {
+            "type" : "string"
+          },
+          "novaSenha" : {
+            "type" : "string"
+          },
+          "senhaAtual" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "confirmacaoSenha", "novaSenha", "senhaAtual" ]
+      },
       "BandeiraDoCartaoDto" : {
         "type" : "object",
         "properties" : {
@@ -1231,6 +1452,36 @@
           }
         },
         "required" : [ "ano", "autores", "categorias", "disponivel", "editora", "id", "titulo" ]
+      },
+      "MeusDados" : {
+        "type" : "object",
+        "properties" : {
+          "cpf" : {
+            "type" : "string"
+          },
+          "dataNascimento" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "genero" : {
+            "type" : "string",
+            "enum" : [ "FEMININO", "MASCULINO", "OUTRO", "NAO_INFORMADO" ]
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "nome" : {
+            "type" : "string"
+          },
+          "telefone" : {
+            "$ref" : "#/components/schemas/TelefoneDoCadastro"
+          }
+        },
+        "required" : [ "cpf", "dataNascimento", "email", "genero", "id", "nome", "telefone" ]
       },
       "NotificacaoDto" : {
         "type" : "object",

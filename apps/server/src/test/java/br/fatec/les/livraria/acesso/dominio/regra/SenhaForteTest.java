@@ -1,4 +1,4 @@
-package br.fatec.les.livraria.clientes.dominio.regra;
+package br.fatec.les.livraria.acesso.dominio.regra;
 
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.comSenha;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.violacoes;

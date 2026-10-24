@@ -246,9 +246,25 @@ class AutenticarTest {
         }
 
         @Override
+        public boolean existeEmailEmUsoExceto(String email, Long usuarioId) {
+            return email != null && porId.values().stream()
+                    .filter(usuario -> !usuario.getId().equals(usuarioId))
+                    .anyMatch(usuario -> usuario.getEmail().equalsIgnoreCase(email.strip()));
+        }
+
+        @Override
         public boolean existeTelefoneEmUso(String telefone) {
             String digitos = somenteDigitos(telefone);
             return porId.values().stream()
+                    .anyMatch(usuario -> usuario.getTelefone() != null
+                            && usuario.getTelefone().digitos().equals(digitos));
+        }
+
+        @Override
+        public boolean existeTelefoneEmUsoExceto(String telefone, Long usuarioId) {
+            String digitos = somenteDigitos(telefone);
+            return porId.values().stream()
+                    .filter(usuario -> !usuario.getId().equals(usuarioId))
                     .anyMatch(usuario -> usuario.getTelefone() != null
                             && usuario.getTelefone().digitos().equals(digitos));
         }

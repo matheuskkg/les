@@ -1,19 +1,14 @@
 package br.fatec.les.livraria.acesso.aplicacao.porta;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
-import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta;
-import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
+import br.fatec.les.livraria.clientes.ClientesDeTeste;
 
 /**
  * Repositório de usuários em memória para os testes de caso de uso que só precisam da lista de administradores
- * (DEC-13). As demais operações não são usadas e falham se chamadas.
+ * (DEC-13). As demais operações vêm do fake completo de {@link ClientesDeTeste}.
  */
-public class UsuarioRepositorioFake implements UsuarioRepositorio {
+public class UsuarioRepositorioFake extends ClientesDeTeste.FakeUsuarioRepositorio {
 
     private final List<Long> administradores;
 
@@ -24,50 +19,5 @@ public class UsuarioRepositorioFake implements UsuarioRepositorio {
     @Override
     public List<Long> listarAdministradores() {
         return administradores;
-    }
-
-    @Override
-    public Usuario salvar(Usuario usuario) {
-        throw new UnsupportedOperationException("Fora do escopo do teste.");
-    }
-
-    @Override
-    public Optional<Usuario> buscarPorId(Long id) {
-        throw new UnsupportedOperationException("Fora do escopo do teste.");
-    }
-
-    @Override
-    public Optional<Usuario> buscarPorLogin(String login) {
-        throw new UnsupportedOperationException("Fora do escopo do teste.");
-    }
-
-    @Override
-    public boolean existeEmailEmUso(String email) {
-        throw new UnsupportedOperationException("Fora do escopo do teste.");
-    }
-
-    @Override
-    public boolean existeTelefoneEmUso(String telefone) {
-        throw new UnsupportedOperationException("Fora do escopo do teste.");
-    }
-
-    @Override
-    public boolean existeAlgumaEmUso(Collection<Long> ids) {
-        throw new UnsupportedOperationException("Fora do escopo do teste.");
-    }
-
-    @Override
-    public List<Usuario> buscarPorIds(Collection<Long> ids) {
-        throw new UnsupportedOperationException("Fora do escopo do teste.");
-    }
-
-    @Override
-    public Set<Long> buscarIdsPorContato(String email, String telefone) {
-        throw new UnsupportedOperationException("Fora do escopo do teste.");
-    }
-
-    @Override
-    public Set<Long> listarIdsPorSituacao(Collection<SituacaoConta> situacoes, LocalDateTime agora) {
-        throw new UnsupportedOperationException("Fora do escopo do teste.");
     }
 }

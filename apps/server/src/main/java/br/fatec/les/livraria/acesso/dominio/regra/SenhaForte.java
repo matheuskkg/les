@@ -1,10 +1,10 @@
-package br.fatec.les.livraria.clientes.dominio.regra;
+package br.fatec.les.livraria.acesso.dominio.regra;
 
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.stereotype.Component;
 
-import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
+import br.fatec.les.livraria.acesso.dominio.modelo.SenhaInformada;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Senha;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
@@ -12,17 +12,17 @@ import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 /**
  * Senha forte (RNF-CLI-001): pelo menos 8 caracteres, com letra maiúscula, letra minúscula e caractere especial.
  * Espaço em branco e caractere de controle não contam como especial e são rejeitados. Também limita a senha ao
- * tamanho máximo aceito pelo BCrypt, em bytes UTF-8 (RNF-CLI-003). Uma senha em branco é reportada uma única vez por
- * {@link DadosObrigatoriosCliente}; esta regra só avalia o conteúdo das senhas preenchidas.
+ * tamanho máximo aceito pelo BCrypt, em bytes UTF-8 (RNF-CLI-003). Uma senha em branco é reportada pela regra de
+ * dados obrigatórios da operação; esta regra só avalia o conteúdo das senhas preenchidas.
  */
 @Component
-public class SenhaForte implements Regra<NovoCliente> {
+public class SenhaForte implements Regra<SenhaInformada> {
 
     private static final String CODIGO = "RNF-CLI-001";
     private static final int TAMANHO_MINIMO = 8;
 
     @Override
-    public void validar(NovoCliente alvo, Violacoes violacoes) {
+    public void validar(SenhaInformada alvo, Violacoes violacoes) {
         String senha = alvo.senha();
         if (senha == null || senha.isBlank()) {
             return;

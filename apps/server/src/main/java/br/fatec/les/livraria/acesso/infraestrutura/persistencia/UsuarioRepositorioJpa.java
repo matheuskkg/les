@@ -106,12 +106,36 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
     }
 
     @Override
+    public boolean existeEmailEmUsoExceto(String email, Long usuarioId) {
+        if (email == null || email.isBlank()) {
+            return false;
+        }
+        String normalizado = email.strip().toLowerCase(Locale.ROOT);
+        if (usuarioId == null) {
+            return existeEmailEmUso(normalizado);
+        }
+        return repositorio.contarPorEmailEmUsoExceto(normalizado, usuarioId, limiteEmUso()) > 0;
+    }
+
+    @Override
     public boolean existeTelefoneEmUso(String telefone) {
         String digitos = Telefone.digitosNacionais(telefone);
         if (!Telefone.digitosValidos(digitos)) {
             return false;
         }
         return repositorio.contarPorTelefoneEmUso(ddd(digitos), numero(digitos), limiteEmUso()) > 0;
+    }
+
+    @Override
+    public boolean existeTelefoneEmUsoExceto(String telefone, Long usuarioId) {
+        String digitos = Telefone.digitosNacionais(telefone);
+        if (!Telefone.digitosValidos(digitos)) {
+            return false;
+        }
+        if (usuarioId == null) {
+            return existeTelefoneEmUso(digitos);
+        }
+        return repositorio.contarPorTelefoneEmUsoExceto(ddd(digitos), numero(digitos), usuarioId, limiteEmUso()) > 0;
     }
 
     @Override

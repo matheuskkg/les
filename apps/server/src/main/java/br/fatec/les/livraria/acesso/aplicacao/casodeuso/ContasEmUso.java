@@ -25,10 +25,22 @@ public class ContasEmUso {
         return usuarios.existeEmailEmUso(email);
     }
 
+    /** {@code true} se o e-mail pertence a outra conta em uso, ignorando o usuário que está sendo alterado. */
+    @Transactional(readOnly = true)
+    public boolean emailEmUsoExceto(String email, Long usuarioId) {
+        return usuarios.existeEmailEmUsoExceto(email, usuarioId);
+    }
+
     /** {@code true} se o telefone (DDD + número) pertence a uma conta em uso, sem considerar o tipo. */
     @Transactional(readOnly = true)
     public boolean telefoneEmUso(String ddd, String numero) {
         return usuarios.existeTelefoneEmUso(ddd + numero);
+    }
+
+    /** {@code true} se o telefone pertence a outra conta em uso, ignorando o usuário que está sendo alterado. */
+    @Transactional(readOnly = true)
+    public boolean telefoneEmUsoExceto(String ddd, String numero, Long usuarioId) {
+        return usuarios.existeTelefoneEmUsoExceto(ddd + numero, usuarioId);
     }
 
     /** {@code true} se algum dos usuários informados ainda está em uso (conta encerrada libera CPF, DEC-10). */

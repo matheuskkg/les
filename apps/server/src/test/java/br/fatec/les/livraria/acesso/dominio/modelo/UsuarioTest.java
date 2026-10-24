@@ -56,6 +56,34 @@ class UsuarioTest {
         assertThat(usuario.getEmail()).isEqualTo("ana.teste@livraria.test");
     }
 
+    @Test
+    void alterarContatoGravaEmailNormalizadoETelefone_RF_CLI_002() {
+        Usuario usuario = usuario();
+        Telefone telefone = new Telefone(TipoTelefone.FIXO, "21", "988887002");
+
+        usuario.alterarContato("  Ana.Nova@Livraria.Test  ", telefone);
+
+        assertThat(usuario.getEmail()).isEqualTo("ana.nova@livraria.test");
+        assertThat(usuario.getTelefone()).isEqualTo(telefone);
+    }
+
+    @Test
+    void alterarSenhaHashTrocaOHashGravado_RF_CLI_008() {
+        Usuario usuario = usuario();
+
+        usuario.alterarSenhaHash("novo-hash");
+
+        assertThat(usuario.getSenhaHash()).isEqualTo("novo-hash");
+    }
+
+    @Test
+    void alterarSenhaHashNuloFalha_RF_CLI_008() {
+        Usuario usuario = usuario();
+
+        assertThatThrownBy(() -> usuario.alterarSenhaHash(null))
+                .isInstanceOf(NullPointerException.class);
+    }
+
     private static Usuario usuario() {
         return new Usuario(1L, "ana@teste.test", null, "hash", Papel.CLIENTE, null);
     }

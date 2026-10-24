@@ -1,28 +1,34 @@
 package br.fatec.les.livraria.clientes;
 
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.ContasEmUso;
+import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
 import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
 import br.fatec.les.livraria.acesso.dominio.modelo.TipoTelefone;
 import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
-import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
-import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
-import br.fatec.les.livraria.clientes.dominio.modelo.NovoEndereco;
 import br.fatec.les.livraria.clientes.aplicacao.porta.BandeiraRepositorio;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
 import br.fatec.les.livraria.clientes.dominio.modelo.Bandeira;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
+import br.fatec.les.livraria.clientes.dominio.modelo.Endereco;
 import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
+import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
+import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
+import br.fatec.les.livraria.clientes.dominio.modelo.NovoEndereco;
 import br.fatec.les.livraria.clientes.dominio.modelo.TipoEndereco;
 import br.fatec.les.livraria.clientes.dominio.modelo.TipoLogradouro;
 import br.fatec.les.livraria.clientes.dominio.modelo.Uf;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.compartilhado.dominio.Cpf;
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
@@ -90,6 +96,24 @@ public final class ClientesDeTeste {
         return new NovoCartao("4111111111111111", "ANA SOUZA", 1L, VALIDADE_FUTURA);
     }
 
+    /** Comando da alteração dos dados do cliente (RF-CLI-002, DEC-10), com o usuário 2 (Ana do seed). */
+    public static br.fatec.les.livraria.clientes.aplicacao.casodeuso.DadosAlteradosDoCliente alteracao() {
+        return new br.fatec.les.livraria.clientes.aplicacao.casodeuso.DadosAlteradosDoCliente(
+                2L, "Ana Souza", Genero.FEMININO, LocalDate.of(1990, 3, 14), CPF, EMAIL,
+                TipoTelefone.CELULAR, DDD, NUMERO);
+    }
+
+    /** Cliente de domínio já existente, usado nos testes de consulta e alteração. */
+    public static Cliente cliente(Long id, Long usuarioId) {
+        return new Cliente(id, usuarioId, "Ana Souza", Genero.FEMININO, LocalDate.of(1990, 3, 14),
+                new Cpf(CPF), List.of(enderecoDominio()), List.of());
+    }
+
+    private static Endereco enderecoDominio() {
+        return new Endereco(1L, "Casa", TipoEndereco.CASA, TipoLogradouro.RUA, "Rua das Flores", "123",
+                "Jardim Paulista", "01415000", "São Paulo", Uf.SP, Endereco.PAIS, null);
+    }
+
     /** Relógio fixo dos testes (2026-10-24T12:00). */
     public static Relogio relogio() {
         return new Relogio() {
@@ -108,6 +132,8 @@ public final class ClientesDeTeste {
         public final java.util.Set<Long> idsEmUso = new java.util.HashSet<>();
         public final java.util.Map<br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta, java.util.Set<Long>>
                 idsPorSituacao = new java.util.HashMap<>();
+        public final java.util.Map<String, Long> donosDosEmails = new HashMap<>();
+        public final java.util.Map<String, Long> donosDosTelefones = new HashMap<>();
         public final java.util.List<Usuario> salvos = new java.util.ArrayList<>();
         private long proximoId = 2;
 
@@ -121,8 +147,17 @@ public final class ClientesDeTeste {
         }
 
         @Override
-        public java.util.Optional<Usuario> buscarPorId(Long id) {
-            return salvos.stream().filter(usuario -> usuario.getId().equals(id)).findFirst();
+        public Optional<Usuario> buscarPorId(Long id) {
+            return buscarSalvo(id);
+        }
+
+        private Optional<Usuario> buscarSalvo(Long id) {
+            for (int i = salvos.size() - 1; i >= 0; i--) {
+                if (salvos.get(i).getId().equals(id)) {
+                    return Optional.of(salvos.get(i));
+                }
+            }
+            return Optional.empty();
         }
 
         @Override
@@ -168,7 +203,25 @@ public final class ClientesDeTeste {
         }
 
         @Override
+        public boolean existeEmailEmUsoExceto(String email, Long usuarioId) {
+            Long dono = donosDosEmails.get(email);
+            if (dono != null) {
+                return !dono.equals(usuarioId);
+            }
+            return emailsEmUso.contains(email);
+        }
+
+        @Override
         public boolean existeTelefoneEmUso(String telefone) {
+            return telefonesEmUso.contains(telefone);
+        }
+
+        @Override
+        public boolean existeTelefoneEmUsoExceto(String telefone, Long usuarioId) {
+            Long dono = donosDosTelefones.get(telefone);
+            if (dono != null) {
+                return !dono.equals(usuarioId);
+            }
             return telefonesEmUso.contains(telefone);
         }
 
@@ -200,6 +253,28 @@ public final class ClientesDeTeste {
         }
 
         @Override
+        public Optional<Cliente> buscarPorUsuarioId(Long usuarioId) {
+            for (int i = salvos.size() - 1; i >= 0; i--) {
+                if (salvos.get(i).getUsuarioId().equals(usuarioId)) {
+                    return Optional.of(salvos.get(i));
+                }
+            }
+            return Optional.empty();
+        }
+
+        @Override
+        public Cliente alterarDados(Long clienteId, String nome, Genero genero, LocalDate dataNascimento, Cpf cpf) {
+            Cliente atual = salvos.stream()
+                    .filter(cliente -> cliente.getId().equals(clienteId))
+                    .reduce((anterior, atualizado) -> atualizado)
+                    .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));
+            Cliente alterado = new Cliente(atual.getId(), atual.getUsuarioId(), nome, genero, dataNascimento, cpf,
+                    atual.getEnderecos(), atual.getCartoes());
+            salvos.add(alterado);
+            return alterado;
+        }
+
+        @Override
         public java.util.List<Long> buscarUsuarioIdsPorCpf(String cpf) {
             return usuariosPorCpf.getOrDefault(cpf, java.util.List.of());
         }
@@ -215,10 +290,10 @@ public final class ClientesDeTeste {
         }
 
         @Override
-        public java.util.Optional<Bandeira> buscarPorId(Long id) {
+        public Optional<Bandeira> buscarPorId(Long id) {
             return registradas.contains(id)
-                    ? java.util.Optional.of(new Bandeira(id, "Bandeira " + id))
-                    : java.util.Optional.empty();
+                    ? Optional.of(new Bandeira(id, "Bandeira " + id))
+                    : Optional.empty();
         }
     }
 
