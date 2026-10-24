@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.acesso.aplicacao.porta;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -66,7 +67,7 @@ public class UsuarioRepositorioFake implements UsuarioRepositorio {
     }
 
     @Override
-    public Set<Long> listarIdsPorSituacao(Collection<SituacaoConta> situacoes) {
+    public Set<Long> listarIdsPorSituacao(Collection<SituacaoConta> situacoes, LocalDateTime agora) {
         throw new UnsupportedOperationException("Fora do escopo do teste.");
     }
 }

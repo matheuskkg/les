@@ -2,6 +2,7 @@ package br.fatec.les.livraria.clientes;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
@@ -147,7 +148,8 @@ public final class ClientesDeTeste {
 
         @Override
         public java.util.Set<Long> listarIdsPorSituacao(
-                java.util.Collection<br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta> situacoes) {
+                java.util.Collection<br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta> situacoes,
+                java.time.LocalDateTime agora) {
             java.util.Set<Long> ids = new java.util.HashSet<>();
             for (var situacao : situacoes) {
                 ids.addAll(idsPorSituacao.getOrDefault(situacao, java.util.Set.of()));

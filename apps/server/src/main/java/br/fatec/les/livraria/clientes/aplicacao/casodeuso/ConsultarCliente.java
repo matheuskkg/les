@@ -13,6 +13,7 @@ import br.fatec.les.livraria.clientes.aplicacao.consulta.ClienteDetalhado;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClientesConsultas;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -25,6 +26,7 @@ public class ConsultarCliente {
 
     private final ClientesConsultas clientes;
     private final ConsultarUsuarios consultarUsuarios;
+    private final Relogio relogio;
 
     /**
      * @param id código do cliente
@@ -36,7 +38,8 @@ public class ConsultarCliente {
         Objects.requireNonNull(id, "id");
         Cliente cliente = clientes.buscar(id)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));
-        Map<Long, ContatoDoUsuario> contatos = consultarUsuarios.executar(List.of(cliente.getUsuarioId()));
+        Map<Long, ContatoDoUsuario> contatos = consultarUsuarios.executar(List.of(cliente.getUsuarioId()),
+                relogio.agora());
         ContatoDoUsuario contato = Objects.requireNonNull(contatos.get(cliente.getUsuarioId()),
                 "Contato do usuário " + cliente.getUsuarioId() + " não encontrado.");
         return new ClienteDetalhado(cliente, contato);

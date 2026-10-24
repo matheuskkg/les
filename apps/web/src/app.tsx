@@ -3,6 +3,8 @@ import { Cabecalho } from './componentes/Cabecalho';
 import { Protegida } from './componentes/Protegida';
 import {
   Admin,
+  AdminCliente,
+  AdminClientes,
   Cadastro,
   Livro,
   Login,
@@ -44,6 +46,22 @@ function NotificacoesDoAdmin() {
   );
 }
 
+function ClientesDoAdmin() {
+  return (
+    <Protegida papel="ADMIN">
+      <AdminClientes />
+    </Protegida>
+  );
+}
+
+function ClienteDoAdmin() {
+  return (
+    <Protegida papel="ADMIN">
+      <AdminCliente />
+    </Protegida>
+  );
+}
+
 export function App() {
   return (
     <div class="aplicacao">
@@ -63,6 +81,8 @@ export function App() {
           <Route path="/admin/notificacoes" component={NotificacoesDoAdmin} />
           <Route path="/minha-conta" component={AreaDoCliente} />
           <Route path="/minha-conta/*" component={AreaDoCliente} />
+          <Route path="/admin/clientes" component={ClientesDoAdmin} />
+          <Route path="/admin/clientes/:id" component={ClienteDoAdmin} />
           <Route path="/admin" component={AreaDoAdmin} />
           <Route path="/admin/*" component={AreaDoAdmin} />
           <Route default component={NaoEncontrada} />

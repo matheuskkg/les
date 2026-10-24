@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -21,6 +22,7 @@ import br.fatec.les.livraria.clientes.aplicacao.porta.ClientesConsultas;
 import br.fatec.les.livraria.compartilhado.aplicacao.Intervalo;
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -37,6 +39,7 @@ public class ListarClientes {
     private final BuscarUsuariosPorContato buscarUsuariosPorContato;
     private final BuscarUsuariosPorSituacao buscarUsuariosPorSituacao;
     private final ConsultarUsuarios consultarUsuarios;
+    private final Relogio relogio;
 
     /**
      * @param consulta filtros informados pelo admin; não pode ser nula
@@ -50,32 +53,29 @@ public class ListarClientes {
         Objects.requireNonNull(consulta, "consulta");
         Objects.requireNonNull(paginacao, "paginacao");
         Intervalo.validar("dataNascimento", consulta.dataNascimentoDe(), consulta.dataNascimentoAte());
+        // Um só instante para filtrar e para exibir a situação, para que os dois concordem (DEC-10).
+        LocalDateTime agora = relogio.agora();
 
         FiltroCliente filtro = new FiltroCliente(consulta.nome(), consulta.cpf(), consulta.genero(),
                 consulta.dataNascimentoDe(), consulta.dataNascimentoAte(), consulta.cidade(), consulta.uf(),
-                idsDoContato(consulta), idsDaSituacao(consulta));
+                buscarUsuariosPorContato.executar(consulta.email(), consulta.telefone()),
+                idsDaSituacao(consulta, agora));
 
         Pagina<ClienteResumo> pagina = clientes.listar(filtro, paginacao);
         Map<Long, ContatoDoUsuario> contatos = consultarUsuarios.executar(pagina.itens().stream()
                 .map(ClienteResumo::usuarioId)
-                .toList());
+                .toList(), agora);
 
         return pagina.map(resumo -> new ClienteListado(resumo,
                 Objects.requireNonNull(contatos.get(resumo.usuarioId()),
                         "Contato do usuário " + resumo.usuarioId() + " não encontrado.")));
     }
 
-    private Optional<Set<Long>> idsDoContato(ConsultaDeClientes consulta) {
-        if (!BuscarUsuariosPorContato.informado(consulta.email(), consulta.telefone())) {
-            return Optional.empty();
-        }
-        return Optional.of(buscarUsuariosPorContato.executar(consulta.email(), consulta.telefone()));
-    }
 
-    private Optional<Set<Long>> idsDaSituacao(ConsultaDeClientes consulta) {
+    private Optional<Set<Long>> idsDaSituacao(ConsultaDeClientes consulta, LocalDateTime agora) {
         if (consulta.situacao().isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(buscarUsuariosPorSituacao.executar(consulta.situacao()));
+        return Optional.of(buscarUsuariosPorSituacao.executar(consulta.situacao(), agora));
     }
 }

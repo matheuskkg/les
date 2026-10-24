@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.acesso.aplicacao.casodeuso;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -7,6 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
+import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -22,20 +25,26 @@ public class BuscarUsuariosPorContato {
 
     /**
      * @param email trecho do e-mail, sem diferenciar maiúsculas; nulo ou em branco não filtra
-     * @param telefone telefone com ou sem máscara; nulo ou em branco não filtra
-     * @return os ids encontrados; vazio quando nenhum usuário atende aos dois campos
+     * @param telefone telefone com ou sem máscara (e com ou sem +55); nulo ou em branco não filtra
+     * @return vazio quando nenhum dos dois foi informado (sem filtro); senão os ids encontrados, possivelmente
+     *         nenhum
+     * @throws ParametroInvalido se o telefone não tiver DDD e número (HTTP 400, DEC-07)
      */
     @Transactional(readOnly = true)
-    public Set<Long> executar(String email, String telefone) {
-        if ((email == null || email.isBlank()) && (telefone == null || telefone.isBlank())) {
-            return Set.of();
+    public Optional<Set<Long>> executar(String email, String telefone) {
+        String termo = email == null || email.isBlank() ? null : email.strip().toLowerCase(Locale.ROOT);
+        String digitos = telefone == null || telefone.isBlank() ? null : digitosDoTelefone(telefone);
+        if (termo == null && digitos == null) {
+            return Optional.empty();
         }
-        return usuarios.buscarIdsPorContato(email, telefone);
+        return Optional.of(usuarios.buscarIdsPorContato(termo, digitos));
     }
 
-    /** {@code true} quando ao menos um dos dois contatos foi informado. */
-    public static boolean informado(String email, String telefone) {
-        return Optional.ofNullable(email).filter(valor -> !valor.isBlank()).isPresent()
-                || Optional.ofNullable(telefone).filter(valor -> !valor.isBlank()).isPresent();
+    private static String digitosDoTelefone(String telefone) {
+        String digitos = Telefone.digitosNacionais(telefone);
+        if (!Telefone.digitosValidos(digitos)) {
+            throw new ParametroInvalido("telefone", "O telefone deve ter DDD e número, com 10 ou 11 dígitos.");
+        }
+        return digitos;
     }
 }

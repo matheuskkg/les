@@ -18,7 +18,6 @@ import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
 import br.fatec.les.livraria.acesso.dominio.modelo.TipoTelefone;
 import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
 import br.fatec.les.livraria.clientes.ClientesDeTeste;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 
 /**
  * Consulta em lote dos contatos usados pela listagem de clientes do admin (RF-CLI-004, DEC-07, DEC-10).
@@ -28,13 +27,12 @@ class ConsultarUsuariosTest {
     private static final LocalDateTime AGORA = LocalDateTime.of(2026, 10, 24, 12, 0);
 
     private final ClientesDeTeste.FakeUsuarioRepositorio usuarios = new ClientesDeTeste.FakeUsuarioRepositorio();
-    private final Relogio relogio = () -> AGORA;
 
     private ConsultarUsuarios consultar;
 
     @BeforeEach
     void criar() {
-        consultar = new ConsultarUsuarios(usuarios, new SituacaoDaConta(), relogio);
+        consultar = new ConsultarUsuarios(usuarios, new SituacaoDaConta());
     }
 
     @Test
@@ -46,7 +44,7 @@ class ConsultarUsuariosTest {
                 AGORA.minusDays(8)));
 
         Map<Long, ContatoDoUsuario> contatos = consultar.executar(
-                List.of(ativa.getId(), inativa.getId(), encerrada.getId()));
+                List.of(ativa.getId(), inativa.getId(), encerrada.getId()), AGORA);
 
         assertThat(contatos).hasSize(3);
         assertThat(contatos.get(ativa.getId()).situacao()).isEqualTo(SituacaoConta.ATIVA);
@@ -58,7 +56,7 @@ class ConsultarUsuariosTest {
 
     @Test
     void rfCli004_semIdsNaoConsultaOsUsuarios() {
-        assertThat(consultar.executar(Set.of())).isEmpty();
+        assertThat(consultar.executar(Set.of(), AGORA)).isEmpty();
     }
 
     @Test
@@ -66,7 +64,7 @@ class ConsultarUsuariosTest {
         Usuario admin = usuarios.salvar(new Usuario(null, "admin@livraria.test", null, "hash",
                 Papel.ADMIN, null));
 
-        ContatoDoUsuario contato = consultar.executar(List.of(admin.getId())).get(admin.getId());
+        ContatoDoUsuario contato = consultar.executar(List.of(admin.getId()), AGORA).get(admin.getId());
 
         assertThat(contato.telefone()).isNull();
         assertThat(contato.situacao()).isEqualTo(SituacaoConta.ATIVA);

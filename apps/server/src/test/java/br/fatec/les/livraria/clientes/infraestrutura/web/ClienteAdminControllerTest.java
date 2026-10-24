@@ -100,6 +100,14 @@ class ClienteAdminControllerTest {
     }
 
     @Test
+    void rfCli004_cidadeEUfValemParaOMesmoEndereco() throws Exception {
+        mvc.perform(comoAdmin(get(ROTA).param("cidade", "porto alegre").param("uf", "SP")))
+                .andExpect(jsonPath("$.totalItens").value(0));
+        mvc.perform(comoAdmin(get(ROTA).param("cidade", "porto alegre").param("uf", "RS")))
+                .andExpect(jsonPath("$.itens[*].nome", contains("Elisa Prado")));
+    }
+
+    @Test
     void rfCli004_cpfETelefoneComMascara() throws Exception {
         mvc.perform(comoAdmin(get(ROTA).param("cpf", "529.982.247-25")))
                 .andExpect(jsonPath("$.itens[*].nome", contains("Ana Souza")));

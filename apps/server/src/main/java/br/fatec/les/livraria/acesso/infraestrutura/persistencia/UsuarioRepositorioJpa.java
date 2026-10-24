@@ -16,7 +16,6 @@ import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta;
 import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoDaConta;
 import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
 import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
-import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import lombok.RequiredArgsConstructor;
 
@@ -52,9 +51,7 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
     }
 
     @Override
-    public Set<Long> buscarIdsPorContato(String email, String telefone) {
-        String termo = email == null || email.isBlank() ? null : email.strip().toLowerCase(Locale.ROOT);
-        String digitos = telefone == null || telefone.isBlank() ? null : digitosDoTelefone(telefone);
+    public Set<Long> buscarIdsPorContato(String termo, String digitos) {
         if (termo == null && digitos == null) {
             return Set.of();
         }
@@ -70,11 +67,11 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
     }
 
     @Override
-    public Set<Long> listarIdsPorSituacao(Collection<SituacaoConta> situacoes) {
+    public Set<Long> listarIdsPorSituacao(Collection<SituacaoConta> situacoes, LocalDateTime agora) {
         if (situacoes == null || situacoes.isEmpty()) {
             return Set.of();
         }
-        LocalDateTime limite = limiteEmUso();
+        LocalDateTime limite = agora.minus(SituacaoDaConta.PRAZO_DE_REATIVACAO);
         Set<Long> ids = new LinkedHashSet<>();
         if (situacoes.contains(SituacaoConta.ATIVA)) {
             ids.addAll(repositorio.listarIdsAtivos());
@@ -110,8 +107,8 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
 
     @Override
     public boolean existeTelefoneEmUso(String telefone) {
-        String digitos = somenteDigitos(telefone);
-        if (!telefoneValido(digitos)) {
+        String digitos = Telefone.digitosNacionais(telefone);
+        if (!Telefone.digitosValidos(digitos)) {
             return false;
         }
         return repositorio.contarPorTelefoneEmUso(ddd(digitos), numero(digitos), limiteEmUso()) > 0;
@@ -131,8 +128,8 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
     }
 
     private List<UsuarioJpa> buscarPorTelefone(String telefone) {
-        String digitos = somenteDigitos(telefone);
-        if (!telefoneValido(digitos)) {
+        String digitos = Telefone.digitosNacionais(telefone);
+        if (!Telefone.digitosValidos(digitos)) {
             return List.of();
         }
         return repositorio.buscarPorTelefoneEmUso(ddd(digitos), numero(digitos), limiteEmUso());
@@ -143,22 +140,7 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
         return relogio.agora().minus(SituacaoDaConta.PRAZO_DE_REATIVACAO);
     }
 
-    private static boolean telefoneValido(String digitos) {
-        return digitos.length() == 10 || digitos.length() == 11;
-    }
 
-    /**
-     * Dígitos do telefone informado como filtro, com o código do país descartado. Diferente do login, um valor sem
-     * formato de telefone é um parâmetro inválido (HTTP 400), e não uma busca sem resultado (DEC-07, RF-CLI-004).
-     */
-    private static String digitosDoTelefone(String telefone) {
-        String digitos = somenteDigitos(telefone);
-        if (!telefoneValido(digitos)) {
-            throw new ParametroInvalido("telefone",
-                    "O telefone deve ter DDD e número, com 10 ou 11 dígitos.");
-        }
-        return digitos;
-    }
 
     private static String ddd(String digitos) {
         return digitos.substring(0, 2);
@@ -168,9 +150,4 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
         return digitos.substring(2);
     }
 
-    /** Só os dígitos, sem o código do país quando digitado: {@code +55 (11) 98888-7777} vira {@code 11988887777}. */
-    private static String somenteDigitos(String telefone) {
-        String digitos = telefone == null ? "" : telefone.replaceAll("\\D", "");
-        return digitos.length() == 13 && digitos.startsWith("55") ? digitos.substring(2) : digitos;
-    }
 }

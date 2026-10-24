@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+    "/api/admin/clientes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listar_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/clientes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["buscar_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/eventos": {
         parameters: {
             query?: never;
@@ -262,6 +294,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        BandeiraDoCartaoDto: {
+            /** Format: int64 */
+            id: number;
+            nome: string;
+        };
         CadastroDeCliente: {
             cartoes: components["schemas"]["CartaoDoCadastro"][];
             confirmacaoSenha: string;
@@ -284,6 +321,16 @@ export interface components {
             /** @example 2027-08 */
             validade: string;
         };
+        CartaoDoClienteDto: {
+            bandeira: components["schemas"]["BandeiraDoCartaoDto"];
+            /** Format: int64 */
+            id: number;
+            nomeImpresso: string;
+            numero: string;
+            preferencial: boolean;
+            /** @example 2027-08 */
+            validade: string;
+        };
         CategoriaDto: {
             /** Format: int64 */
             id: number;
@@ -292,6 +339,36 @@ export interface components {
         ClienteCriado: {
             /** Format: int64 */
             id: number;
+        };
+        ClienteDetalheDto: {
+            cartoes: components["schemas"]["CartaoDoClienteDto"][];
+            cpf: string;
+            /** Format: date */
+            dataNascimento: string;
+            email: string;
+            enderecos: components["schemas"]["EnderecoDoClienteDto"][];
+            /** @enum {string} */
+            genero: "FEMININO" | "MASCULINO" | "OUTRO" | "NAO_INFORMADO";
+            /** Format: int64 */
+            id: number;
+            nome: string;
+            /** @enum {string} */
+            situacao: "ATIVA" | "INATIVA" | "ENCERRADA";
+            telefone?: string;
+        };
+        ClienteListadoDto: {
+            cpf: string;
+            /** Format: date */
+            dataNascimento: string;
+            email: string;
+            /** @enum {string} */
+            genero: "FEMININO" | "MASCULINO" | "OUTRO" | "NAO_INFORMADO";
+            /** Format: int64 */
+            id: number;
+            nome: string;
+            /** @enum {string} */
+            situacao: "ATIVA" | "INATIVA" | "ENCERRADA";
+            telefone?: string;
         };
         ContagemDeNaoLidasDto: {
             /** Format: int64 */
@@ -305,6 +382,24 @@ export interface components {
             nomeCurto: string;
             numero: string;
             observacoes: string;
+            /** @enum {string} */
+            tipoEndereco: "CASA" | "TRABALHO";
+            /** @enum {string} */
+            tipoLogradouro: "RUA" | "AVENIDA" | "ALAMEDA" | "TRAVESSA" | "PRACA" | "ESTRADA" | "RODOVIA" | "OUTRO";
+            /** @enum {string} */
+            uf: "AC" | "AL" | "AP" | "AM" | "BA" | "CE" | "DF" | "ES" | "GO" | "MA" | "MT" | "MS" | "MG" | "PA" | "PB" | "PR" | "PE" | "PI" | "RJ" | "RN" | "RS" | "RO" | "RR" | "SC" | "SP" | "SE" | "TO";
+        };
+        EnderecoDoClienteDto: {
+            bairro: string;
+            cep: string;
+            cidade: string;
+            /** Format: int64 */
+            id: number;
+            logradouro: string;
+            nomeCurto: string;
+            numero: string;
+            observacoes?: string;
+            pais: string;
             /** @enum {string} */
             tipoEndereco: "CASA" | "TRABALHO";
             /** @enum {string} */
@@ -385,6 +480,17 @@ export interface components {
             /** Format: int32 */
             totalPaginas: number;
         };
+        PaginaClienteListadoDto: {
+            itens: components["schemas"]["ClienteListadoDto"][];
+            /** Format: int32 */
+            pagina: number;
+            /** Format: int32 */
+            tamanho: number;
+            /** Format: int64 */
+            totalItens: number;
+            /** Format: int32 */
+            totalPaginas: number;
+        };
         PaginaLivroListadoDto: {
             itens: components["schemas"]["LivroListadoDto"][];
             /** Format: int32 */
@@ -446,6 +552,65 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    listar_1: {
+        parameters: {
+            query?: {
+                nome?: string;
+                cpf?: string;
+                genero?: ("FEMININO" | "MASCULINO" | "OUTRO" | "NAO_INFORMADO")[];
+                dataNascimentoDe?: string;
+                dataNascimentoAte?: string;
+                email?: string;
+                telefone?: string;
+                situacao?: ("ATIVA" | "INATIVA" | "ENCERRADA")[];
+                cidade?: string;
+                uf?: ("AC" | "AL" | "AP" | "AM" | "BA" | "CE" | "DF" | "ES" | "GO" | "MA" | "MT" | "MS" | "MG" | "PA" | "PB" | "PR" | "PE" | "PI" | "RJ" | "RN" | "RS" | "RO" | "RR" | "SC" | "SP" | "SE" | "TO")[];
+                /** @description Página, a partir de 0. */
+                pagina?: number;
+                /** @description Itens por página (padrão 20, máximo 100). */
+                tamanho?: number;
+                /** @description Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: nome, dataNascimento. Padrão: nome,asc. */
+                ordem?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginaClienteListadoDto"];
+                };
+            };
+        };
+    };
+    buscar_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClienteDetalheDto"];
+                };
+            };
+        };
+    };
     eventosDoAdmin: {
         parameters: {
             query?: never;

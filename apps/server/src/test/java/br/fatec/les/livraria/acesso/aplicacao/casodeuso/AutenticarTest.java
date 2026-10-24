@@ -225,7 +225,8 @@ class AutenticarTest {
 
         @Override
         public java.util.Set<Long> listarIdsPorSituacao(
-                java.util.Collection<br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta> situacoes) {
+                java.util.Collection<br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta> situacoes,
+                java.time.LocalDateTime agora) {
             return java.util.Set.of();
         }
 

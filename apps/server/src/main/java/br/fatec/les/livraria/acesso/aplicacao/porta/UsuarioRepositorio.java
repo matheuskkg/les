@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.acesso.aplicacao.porta;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -34,11 +35,17 @@ public interface UsuarioRepositorio {
      * Ids dos usuários cujo e-mail contém o termo, sem diferenciar maiúsculas, e/ou cujo telefone (DDD + número) é
      * igual aos dígitos informados. E-mail e telefone se combinam com E; um valor nulo não filtra (RF-CLI-004,
      * DEC-07).
+     *
+     * @param termoDoEmail trecho do e-mail já em minúsculas, ou nulo
+     * @param digitosDoTelefone DDD + número já validados, ou nulo
      */
-    Set<Long> buscarIdsPorContato(String email, String telefone);
+    Set<Long> buscarIdsPorContato(String termoDoEmail, String digitosDoTelefone);
 
-    /** Ids dos usuários nas situações informadas, calculadas sobre {@code inativado_em} (RF-CLI-004, DEC-10). */
-    Set<Long> listarIdsPorSituacao(Collection<SituacaoConta> situacoes);
+    /**
+     * Ids dos usuários nas situações informadas no instante {@code agora}, calculadas sobre {@code inativado_em}
+     * (RF-CLI-004, DEC-10).
+     */
+    Set<Long> listarIdsPorSituacao(Collection<SituacaoConta> situacoes, LocalDateTime agora);
 
     /** {@code true} se um e-mail pertence a uma conta em uso. */
     boolean existeEmailEmUso(String email);

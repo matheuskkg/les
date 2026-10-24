@@ -1,5 +1,7 @@
 package br.fatec.les.livraria.clientes.infraestrutura.persistencia;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -7,7 +9,12 @@ import java.util.Set;
 import org.springframework.data.jpa.domain.Specification;
 
 import br.fatec.les.livraria.clientes.aplicacao.consulta.FiltroCliente;
+import br.fatec.les.livraria.clientes.dominio.modelo.Uf;
 import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.Especificacoes;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 
 /**
  * Traduz o {@link FiltroCliente} para as {@link Specification} da consulta de clientes do admin (RF-CLI-004, DEC-07).
@@ -27,10 +34,35 @@ final class EspecificacoesDeCliente {
                 .and(Especificacoes.em("genero", filtro.genero()))
                 .and(Especificacoes.entre("dataNascimento",
                         filtro.dataNascimentoDe(), filtro.dataNascimentoAte()))
-                .and(Especificacoes.existeContem("enderecos", "cidade", filtro.cidade()))
-                .and(Especificacoes.existe("enderecos", "uf", filtro.uf()))
+                .and(enderecoCom(filtro.cidade(), filtro.uf()))
                 .and(porUsuario("usuarioId", filtro.usuarioIdsDoContato()))
                 .and(porUsuario("usuarioId", filtro.usuarioIdsDaSituacao()));
+    }
+
+    /**
+     * Cidade e UF valem para o mesmo endereço: um só {@code exists}, para que "Campinas" e "RJ" não casem com
+     * endereços diferentes do cliente (RF-CLI-004, DEC-07).
+     */
+    private static Specification<ClienteJpa> enderecoCom(String cidade, List<Uf> ufs) {
+        boolean semCidade = cidade == null || cidade.isBlank();
+        if (semCidade && ufs.isEmpty()) {
+            return Specification.unrestricted();
+        }
+        return (raiz, consulta, cb) -> {
+            Subquery<Integer> subconsulta = consulta.subquery(Integer.class);
+            Root<ClienteJpa> externa = subconsulta.correlate(raiz);
+            Join<ClienteJpa, EnderecoJpa> endereco = externa.join("enderecos");
+            List<Predicate> condicoes = new ArrayList<>();
+            Predicate naCidade = Especificacoes.contemEm(cb, endereco.get("cidade"), cidade);
+            if (naCidade != null) {
+                condicoes.add(naCidade);
+            }
+            if (!ufs.isEmpty()) {
+                condicoes.add(endereco.get("uf").in(ufs));
+            }
+            subconsulta.select(cb.literal(1)).where(condicoes.toArray(Predicate[]::new));
+            return cb.exists(subconsulta);
+        };
     }
 
     /** Um filtro resolvido no {@code acesso}: ausente não filtra; vazio não encontra ninguém (DEC-10). */

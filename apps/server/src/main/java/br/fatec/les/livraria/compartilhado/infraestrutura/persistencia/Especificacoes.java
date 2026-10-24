@@ -160,6 +160,15 @@ public final class Especificacoes {
         };
     }
 
+    /**
+     * Predicado "contém" sobre uma expressão já resolvida (por exemplo a coluna de um {@code join} dentro de uma
+     * subconsulta que combina várias condições), ou {@code null} quando o termo está em branco e não filtra.
+     */
+    public static Predicate contemEm(CriteriaBuilder cb, Expression<String> coluna, String termo) {
+        String escapado = padraoContem(termo);
+        return escapado == null ? null : predicadoContem(cb, coluna, escapado);
+    }
+
     /** Prepara o termo de um "contém": {@code trim}, ou {@code null} quando o valor é ignorado, já escapado. */
     private static String padraoContem(String termo) {
         String limpo = textoLimpo(termo);

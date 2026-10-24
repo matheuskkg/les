@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.acesso.aplicacao.casodeuso;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 
@@ -23,13 +24,14 @@ public class BuscarUsuariosPorSituacao {
 
     /**
      * @param situacoes situações desejadas, combinadas com OU; vazio não filtra
+     * @param agora instante da consulta, o mesmo usado para exibir a situação dos itens da página
      * @return os ids encontrados; vazio quando nenhuma conta está nas situações pedidas
      */
     @Transactional(readOnly = true)
-    public Set<Long> executar(Collection<SituacaoConta> situacoes) {
+    public Set<Long> executar(Collection<SituacaoConta> situacoes, LocalDateTime agora) {
         if (situacoes == null || situacoes.isEmpty()) {
             return Set.of();
         }
-        return usuarios.listarIdsPorSituacao(situacoes);
+        return usuarios.listarIdsPorSituacao(situacoes, agora);
     }
 }
