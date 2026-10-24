@@ -11,7 +11,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar_3"];
+        get: operations["listar_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -145,7 +145,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar_2"];
+        get: operations["listar_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -361,6 +361,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/checkout/pagamento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confere cupons e cartões e mostra a distribuição do pagamento, sem gravar nada */
+        post: operations["conferirPagamento"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me/checkout/voltar": {
         parameters: {
             query?: never;
@@ -372,6 +389,23 @@ export interface paths {
         put?: never;
         /** Encerra o checkout e devolve os itens ao carrinho */
         post: operations["voltar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/cupons-de-troca": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista os cupons de troca disponíveis do cliente */
+        get: operations["listar_2"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -614,6 +648,17 @@ export interface components {
              */
             subtotal: string;
         };
+        CartaoConferidoDto: {
+            bandeira: string;
+            /** Format: int64 */
+            cartaoId?: number;
+            numero: string;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            valor: string;
+        };
         CartaoDaResposta: {
             bandeira: components["schemas"]["BandeiraDaResposta"];
             /** Format: int64 */
@@ -639,6 +684,20 @@ export interface components {
             nomeImpresso: string;
             numero: string;
             preferencial: boolean;
+            /** @example 2027-08 */
+            validade: string;
+        };
+        CartaoDoPagamentoDto: {
+            /** Format: int64 */
+            cartaoId?: number;
+            novo?: components["schemas"]["CartaoInformadoDto"];
+            valor: number;
+        };
+        CartaoInformadoDto: {
+            /** Format: int64 */
+            bandeiraId: number;
+            nomeImpresso: string;
+            numero: string;
             /** @example 2027-08 */
             validade: string;
         };
@@ -700,6 +759,33 @@ export interface components {
         ContagemDeNaoLidasDto: {
             /** Format: int64 */
             quantidade: number;
+        };
+        CupomAbatidoDto: {
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            abatido: string;
+            codigo: string;
+            /** Format: int64 */
+            id: number;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            valor: string;
+        };
+        CupomDeTrocaDto: {
+            codigo: string;
+            /** Format: int64 */
+            id: number;
+            /** Format: date */
+            validade?: string;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            valor: string;
         };
         EnderecoDaResposta: {
             bairro: string;
@@ -895,6 +981,46 @@ export interface components {
             /** Format: int32 */
             quantidade: number;
         };
+        PagamentoConferidoDto: {
+            cartoes: components["schemas"]["CartaoConferidoDto"][];
+            cuponsDeTroca: components["schemas"]["CupomAbatidoDto"][];
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            descontoPromocional: string;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            frete: string;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            restante: string;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            subtotal: string;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            total: string;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            troco: string;
+        };
+        PagamentoPropostoDto: {
+            cartoes?: components["schemas"]["CartaoDoPagamentoDto"][];
+            cuponsDeTroca?: number[];
+            cuponsPromocionais?: string[];
+            entrega: components["schemas"]["EscolhaDeEnderecoDto"];
+        };
         PaginaCategoriaDto: {
             itens: components["schemas"]["CategoriaDto"][];
             /** Format: int32 */
@@ -981,7 +1107,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    listar_3: {
+    listar_4: {
         parameters: {
             query?: {
                 nome?: string;
@@ -1196,7 +1322,7 @@ export interface operations {
             };
         };
     };
-    listar_2: {
+    listar_3: {
         parameters: {
             query?: {
                 titulo?: string;
@@ -1850,6 +1976,48 @@ export interface operations {
             };
         };
     };
+    conferirPagamento: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PagamentoPropostoDto"];
+            };
+        };
+        responses: {
+            /** @description Pagamento conferido; sem cartões, mostra o restante */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PagamentoConferidoDto"];
+                };
+            };
+            /** @description Nenhum checkout aberto, ou endereço, cupom de troca ou cartão que não é do cliente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Cupom desconhecido, vencido, já usado, indisponível ou desnecessário, ou cartões que não fecham o restante */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
     voltar: {
         parameters: {
             query?: never;
@@ -1884,6 +2052,26 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    listar_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CupomDeTrocaDto"][];
                 };
             };
         };

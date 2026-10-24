@@ -13,12 +13,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.CalcularFrete;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConferirPagamento;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.IniciarCheckout;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.VerCheckout;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.VoltarAoCarrinho;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.CarrinhoDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.CheckoutDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.FreteDto;
+import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PagamentoConferidoDto;
+import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PagamentoPropostoDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PedidoDeFrete;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,7 +32,8 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Sessão de compra do cliente logado (RF-VEN-003, DEC-07, DEC-12): "Ir para pagamento", consulta do checkout aberto,
- * frete para o endereço de entrega (RF-VEN-004, RF-VEN-005) e "Voltar ao carrinho". O cliente vem da sessão.
+ * frete para o endereço de entrega (RF-VEN-004, RF-VEN-005), conferência do pagamento (RF-VEN-006, RF-VEN-007) e
+ * "Voltar ao carrinho". O cliente vem da sessão.
  */
 @RestController
 @RequestMapping("/api/me/checkout")
@@ -40,6 +44,7 @@ public class CheckoutController {
     private final VerCheckout verCheckout;
     private final VoltarAoCarrinho voltarAoCarrinho;
     private final CalcularFrete calcularFrete;
+    private final ConferirPagamento conferirPagamento;
 
     @GetMapping
     @Operation(summary = "Mostra o checkout aberto do cliente")
@@ -98,5 +103,22 @@ public class CheckoutController {
     })
     public FreteDto calcularFrete(@RequestBody PedidoDeFrete pedido) {
         return FreteDto.de(calcularFrete.executar(pedido.paraEscolha()));
+    }
+
+    @PostMapping("/pagamento")
+    @Operation(summary = "Confere cupons e cartões e mostra a distribuição do pagamento, sem gravar nada")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pagamento conferido; sem cartões, mostra o restante"),
+            @ApiResponse(responseCode = "404", description = "Nenhum checkout aberto, ou endereço, cupom de troca ou "
+                    + "cartão que não é do cliente", content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Cupom desconhecido, vencido, já usado, indisponível ou "
+                    + "desnecessário, ou cartões que não fecham o restante",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public PagamentoConferidoDto conferirPagamento(@RequestBody PagamentoPropostoDto pagamento) {
+        return PagamentoConferidoDto.de(conferirPagamento.executar(pagamento.paraPagamento()));
     }
 }

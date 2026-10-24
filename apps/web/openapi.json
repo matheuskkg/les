@@ -10,7 +10,7 @@
   "paths" : {
     "/api/admin/clientes" : {
       "get" : {
-        "operationId" : "listar_3",
+        "operationId" : "listar_4",
         "parameters" : [ {
           "in" : "query",
           "name" : "nome",
@@ -358,7 +358,7 @@
     },
     "/api/livros" : {
       "get" : {
-        "operationId" : "listar_2",
+        "operationId" : "listar_3",
         "parameters" : [ {
           "in" : "query",
           "name" : "titulo",
@@ -1218,6 +1218,55 @@
         "tags" : [ "checkout-controller" ]
       }
     },
+    "/api/me/checkout/pagamento" : {
+      "post" : {
+        "operationId" : "conferirPagamento",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PagamentoPropostoDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagamentoConferidoDto"
+                }
+              }
+            },
+            "description" : "Pagamento conferido; sem cartões, mostra o restante"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Nenhum checkout aberto, ou endereço, cupom de troca ou cartão que não é do cliente"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Cupom desconhecido, vencido, já usado, indisponível ou desnecessário, ou cartões que não fecham o restante"
+          }
+        },
+        "summary" : "Confere cupons e cartões e mostra a distribuição do pagamento, sem gravar nada",
+        "tags" : [ "checkout-controller" ]
+      }
+    },
     "/api/me/checkout/voltar" : {
       "post" : {
         "operationId" : "voltar",
@@ -1255,6 +1304,28 @@
         },
         "summary" : "Encerra o checkout e devolve os itens ao carrinho",
         "tags" : [ "checkout-controller" ]
+      }
+    },
+    "/api/me/cupons-de-troca" : {
+      "get" : {
+        "operationId" : "listar_2",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/CupomDeTrocaDto"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Lista os cupons de troca disponíveis do cliente",
+        "tags" : [ "cupom-controller" ]
       }
     },
     "/api/me/enderecos" : {
@@ -1908,6 +1979,27 @@
         },
         "required" : [ "itens", "quantidadeDeItens", "removidos", "subtotal" ]
       },
+      "CartaoConferidoDto" : {
+        "type" : "object",
+        "properties" : {
+          "bandeira" : {
+            "type" : "string"
+          },
+          "cartaoId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "numero" : {
+            "type" : "string"
+          },
+          "valor" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          }
+        },
+        "required" : [ "bandeira", "numero", "valor" ]
+      },
       "CartaoDaResposta" : {
         "type" : "object",
         "properties" : {
@@ -1982,6 +2074,43 @@
           }
         },
         "required" : [ "bandeira", "id", "nomeImpresso", "numero", "preferencial", "validade" ]
+      },
+      "CartaoDoPagamentoDto" : {
+        "type" : "object",
+        "properties" : {
+          "cartaoId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "novo" : {
+            "$ref" : "#/components/schemas/CartaoInformadoDto"
+          },
+          "valor" : {
+            "type" : "number"
+          }
+        },
+        "required" : [ "valor" ]
+      },
+      "CartaoInformadoDto" : {
+        "type" : "object",
+        "properties" : {
+          "bandeiraId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "nomeImpresso" : {
+            "type" : "string"
+          },
+          "numero" : {
+            "type" : "string"
+          },
+          "validade" : {
+            "type" : "string",
+            "example" : "2027-08",
+            "pattern" : "^\\d{4}-\\d{2}$"
+          }
+        },
+        "required" : [ "bandeiraId", "nomeImpresso", "numero", "validade" ]
       },
       "CategoriaDto" : {
         "type" : "object",
@@ -2128,6 +2257,51 @@
           }
         },
         "required" : [ "quantidade" ]
+      },
+      "CupomAbatidoDto" : {
+        "type" : "object",
+        "properties" : {
+          "abatido" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          },
+          "codigo" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "valor" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          }
+        },
+        "required" : [ "abatido", "codigo", "id", "valor" ]
+      },
+      "CupomDeTrocaDto" : {
+        "type" : "object",
+        "properties" : {
+          "codigo" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "validade" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "valor" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          }
+        },
+        "required" : [ "codigo", "id", "valor" ]
       },
       "EnderecoDaResposta" : {
         "type" : "object",
@@ -2587,6 +2761,82 @@
           }
         },
         "required" : [ "quantidade" ]
+      },
+      "PagamentoConferidoDto" : {
+        "type" : "object",
+        "properties" : {
+          "cartoes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CartaoConferidoDto"
+            }
+          },
+          "cuponsDeTroca" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CupomAbatidoDto"
+            }
+          },
+          "descontoPromocional" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          },
+          "frete" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          },
+          "restante" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          },
+          "subtotal" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          },
+          "total" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          },
+          "troco" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          }
+        },
+        "required" : [ "cartoes", "cuponsDeTroca", "descontoPromocional", "frete", "restante", "subtotal", "total", "troco" ]
+      },
+      "PagamentoPropostoDto" : {
+        "type" : "object",
+        "properties" : {
+          "cartoes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CartaoDoPagamentoDto"
+            }
+          },
+          "cuponsDeTroca" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          },
+          "cuponsPromocionais" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "entrega" : {
+            "$ref" : "#/components/schemas/EscolhaDeEnderecoDto"
+          }
+        },
+        "required" : [ "entrega" ]
       },
       "PaginaCategoriaDto" : {
         "type" : "object",
