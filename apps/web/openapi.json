@@ -686,6 +686,158 @@
         "tags" : [ "me-controller" ]
       }
     },
+    "/api/me/carrinho" : {
+      "get" : {
+        "operationId" : "ver",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CarrinhoDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Mostra o carrinho do cliente com o preço atual de cada livro",
+        "tags" : [ "carrinho-controller" ]
+      }
+    },
+    "/api/me/carrinho/itens" : {
+      "post" : {
+        "operationId" : "adicionar_2",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AdicaoAoCarrinho"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CarrinhoDto"
+                }
+              }
+            },
+            "description" : "Carrinho atualizado"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Quantidade inválida, livro indisponível ou estoque insuficiente"
+          }
+        },
+        "summary" : "Adiciona um livro ao carrinho, somando à linha existente",
+        "tags" : [ "carrinho-controller" ]
+      }
+    },
+    "/api/me/carrinho/itens/{livroId}" : {
+      "delete" : {
+        "operationId" : "remover_2",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "livroId",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CarrinhoDto"
+                }
+              }
+            },
+            "description" : "Carrinho atualizado"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Livro fora do carrinho"
+          }
+        },
+        "summary" : "Remove um livro do carrinho e libera a reserva",
+        "tags" : [ "carrinho-controller" ]
+      },
+      "put" : {
+        "operationId" : "alterar_3",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "livroId",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NovaQuantidade"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CarrinhoDto"
+                }
+              }
+            },
+            "description" : "Carrinho atualizado"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Livro fora do carrinho"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Quantidade inválida ou estoque insuficiente"
+          }
+        },
+        "summary" : "Altera a quantidade de um livro do carrinho",
+        "tags" : [ "carrinho-controller" ]
+      }
+    },
     "/api/me/cartoes" : {
       "get" : {
         "operationId" : "listar_1",
@@ -1408,6 +1560,20 @@
   },
   "components" : {
     "schemas" : {
+      "AdicaoAoCarrinho" : {
+        "type" : "object",
+        "properties" : {
+          "livroId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "quantidade" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "livroId", "quantidade" ]
+      },
       "AlteracaoDeDadosCliente" : {
         "type" : "object",
         "properties" : {
@@ -1518,6 +1684,31 @@
           }
         },
         "required" : [ "cartoes", "confirmacaoSenha", "cpf", "dataNascimento", "email", "enderecos", "genero", "nome", "senha", "telefone" ]
+      },
+      "CarrinhoDto" : {
+        "type" : "object",
+        "properties" : {
+          "expiraEm" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "itens" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ItemDoCarrinhoDto"
+            }
+          },
+          "quantidadeDeItens" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "subtotal" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          }
+        },
+        "required" : [ "itens", "quantidadeDeItens", "subtotal" ]
       },
       "CartaoDaResposta" : {
         "type" : "object",
@@ -1852,6 +2043,39 @@
         },
         "required" : [ "login", "senha" ]
       },
+      "ItemDoCarrinhoDto" : {
+        "type" : "object",
+        "properties" : {
+          "autores" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "livroId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "precoUnitario" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          },
+          "quantidade" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "subtotal" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          },
+          "titulo" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "autores", "livroId", "precoUnitario", "quantidade", "subtotal", "titulo" ]
+      },
       "LivroDetalheDto" : {
         "type" : "object",
         "properties" : {
@@ -2023,6 +2247,16 @@
           }
         },
         "required" : [ "criadaEm", "id", "mensagem", "tipo" ]
+      },
+      "NovaQuantidade" : {
+        "type" : "object",
+        "properties" : {
+          "quantidade" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "quantidade" ]
       },
       "PaginaCategoriaDto" : {
         "type" : "object",

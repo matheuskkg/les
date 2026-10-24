@@ -156,6 +156,12 @@ class ListarLivrosTest {
         public Pagina<CategoriaDoLivro> listarCategorias(Paginacao paginacao) {
             return new Pagina<>(List.of(), 0, 20, 0, 0);
         }
+
+        @Override
+        public List<br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroParaVenda> buscarParaVenda(
+                java.util.Collection<Long> livroIds) {
+            throw new UnsupportedOperationException("Fora do escopo do teste.");
+        }
     }
 
     private static final class SaldoDeEstoqueFake implements SaldoDeEstoque {
