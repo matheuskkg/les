@@ -1,6 +1,8 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -25,7 +27,7 @@ class ConfiguracaoDoWebTest {
 
     @BeforeEach
     void configurar() {
-        mvc = MockMvcBuilders.webAppContextSetup(contexto).build();
+        mvc = MockMvcBuilders.webAppContextSetup(contexto).apply(springSecurity()).build();
     }
 
     @Test
@@ -47,7 +49,7 @@ class ConfiguracaoDoWebTest {
 
     @Test
     void rotaInexistenteDaApiDa404EmProblemDetail() throws Exception {
-        mvc.perform(get("/api/inexistente"))
+        mvc.perform(get("/api/inexistente").with(jwt()))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
     }

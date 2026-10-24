@@ -1,5 +1,7 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -59,12 +61,12 @@ class ApiNoContextoTest {
 
     @BeforeEach
     void configurar() {
-        mvc = MockMvcBuilders.webAppContextSetup(contexto).build();
+        mvc = MockMvcBuilders.webAppContextSetup(contexto).apply(springSecurity()).build();
     }
 
     @Test
     void jsonUsaDinheiroComoStringEOmiteNulos() throws Exception {
-        mvc.perform(get("/api/exemplo/oferta"))
+        mvc.perform(get("/api/exemplo/oferta").with(jwt()))
                 .andExpect(jsonPath("$.preco").value("10.00"))
                 .andExpect(jsonPath("$.validade").value("2027-08"))
                 .andExpect(jsonPath("$.observacao").doesNotExist());
@@ -72,7 +74,7 @@ class ApiNoContextoTest {
 
     @Test
     void violacoesFicamNoTopoDoProblemDetail() throws Exception {
-        mvc.perform(get("/api/exemplo/regras"))
+        mvc.perform(get("/api/exemplo/regras").with(jwt()))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes[0].codigo").value("RN-VEN-004"))
                 .andExpect(jsonPath("$.properties").doesNotExist());

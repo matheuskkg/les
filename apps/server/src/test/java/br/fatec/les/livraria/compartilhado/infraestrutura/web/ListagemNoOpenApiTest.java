@@ -3,6 +3,8 @@ package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -72,12 +74,12 @@ class ListagemNoOpenApiTest {
 
     @BeforeEach
     void configurar() {
-        mvc = MockMvcBuilders.webAppContextSetup(contexto).build();
+        mvc = MockMvcBuilders.webAppContextSetup(contexto).apply(springSecurity()).build();
     }
 
     @Test
     void aceitaPaginaTamanhoEOrdemRepetida() throws Exception {
-        mvc.perform(get("/api/exemplo/listagem")
+        mvc.perform(get("/api/exemplo/listagem").with(jwt())
                 .param("pagina", "1")
                 .param("tamanho", "2")
                 .param("ordem", "nome,desc")
@@ -125,7 +127,7 @@ class ListagemNoOpenApiTest {
 
     @Test
     void recusaCampoDeOrdenacaoNaoDeclarado() throws Exception {
-        mvc.perform(get("/api/exemplo/listagem").param("ordem", "senha,asc"))
+        mvc.perform(get("/api/exemplo/listagem").with(jwt()).param("ordem", "senha,asc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.parametro").value("ordem"))
@@ -134,24 +136,24 @@ class ListagemNoOpenApiTest {
 
     @Test
     void recusaPaginaETamanhoInvalidos() throws Exception {
-        mvc.perform(get("/api/exemplo/listagem").param("pagina", "-1"))
+        mvc.perform(get("/api/exemplo/listagem").with(jwt()).param("pagina", "-1"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.parametro").value("pagina"))
                 .andExpect(jsonPath("$.detail").value("A página não pode ser negativa."));
 
-        mvc.perform(get("/api/exemplo/listagem").param("tamanho", "101"))
+        mvc.perform(get("/api/exemplo/listagem").with(jwt()).param("tamanho", "101"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.parametro").value("tamanho"))
                 .andExpect(jsonPath("$.detail").value("O tamanho da página deve estar entre 1 e 100."));
 
-        mvc.perform(get("/api/exemplo/listagem").param("pagina", String.valueOf(Integer.MAX_VALUE)))
+        mvc.perform(get("/api/exemplo/listagem").with(jwt()).param("pagina", String.valueOf(Integer.MAX_VALUE)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.parametro").value("pagina"));
     }
 
     @Test
     void recusaOrdemMalformada() throws Exception {
-        mvc.perform(get("/api/exemplo/listagem").param("ordem", "nome"))
+        mvc.perform(get("/api/exemplo/listagem").with(jwt()).param("ordem", "nome"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.parametro").value("ordem"))
                 .andExpect(jsonPath("$.detail").value("Ordenação inválida: use o formato campo,asc|desc."));
@@ -159,7 +161,7 @@ class ListagemNoOpenApiTest {
 
     @Test
     void recusaPaginaNaoNumerica() throws Exception {
-        mvc.perform(get("/api/exemplo/listagem").param("pagina", "abc"))
+        mvc.perform(get("/api/exemplo/listagem").with(jwt()).param("pagina", "abc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.parametro").value("pagina"))
                 .andExpect(jsonPath("$.detail").value("O parâmetro pagina deve ser um número inteiro."));

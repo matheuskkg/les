@@ -1,5 +1,7 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -81,12 +83,12 @@ class ConflitoDeEscritaTest {
 
     @BeforeEach
     void configurar() {
-        mvc = MockMvcBuilders.webAppContextSetup(contexto).build();
+        mvc = MockMvcBuilders.webAppContextSetup(contexto).apply(springSecurity()).build();
     }
 
     @Test
     void restricaoDeUnicidadeVira409SemVazarDetalhesDoBanco() throws Exception {
-        mvc.perform(get("/api/exemplo/conflito/unicidade"))
+        mvc.perform(get("/api/exemplo/conflito/unicidade").with(jwt()))
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.status").value(409))
@@ -95,7 +97,7 @@ class ConflitoDeEscritaTest {
 
     @Test
     void conflitoDeDominioVira409() throws Exception {
-        mvc.perform(get("/api/exemplo/conflito/dominio"))
+        mvc.perform(get("/api/exemplo/conflito/dominio").with(jwt()))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.detail").value("O cupom promocional já foi usado por este cliente."));
@@ -103,7 +105,7 @@ class ConflitoDeEscritaTest {
 
     @Test
     void bloqueioOtimistaVira409ComMensagemPropria() throws Exception {
-        mvc.perform(get("/api/exemplo/conflito/otimista"))
+        mvc.perform(get("/api/exemplo/conflito/otimista").with(jwt()))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.detail").value("O registro foi alterado por outra operação. Tente novamente."));

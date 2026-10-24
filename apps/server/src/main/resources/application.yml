@@ -16,6 +16,11 @@ springdoc:
   writer-with-order-by-keys: true
 
 livraria:
+  jwt:
+    segredo: ${JWT_SEGREDO:livraria-dev-jwt-segredo-2026-com-mais-de-32-bytes}
+    validade: 8h
+  sessao:
+    cookie-seguro: false
   seed:
     habilitado: true
     local: classpath:seed/*.sql

@@ -1,6 +1,7 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.nio.charset.StandardCharsets;
@@ -28,7 +29,7 @@ class ContratoOpenApiTest {
 
     @Test
     void especificacaoVersionadaEstaAtualizada() throws Exception {
-        MockMvc mvc = MockMvcBuilders.webAppContextSetup(contexto).build();
+        MockMvc mvc = MockMvcBuilders.webAppContextSetup(contexto).apply(springSecurity()).build();
         String atual = mvc.perform(get("/v3/api-docs")).andReturn().getResponse()
                 .getContentAsString(StandardCharsets.UTF_8) + "\n";
 
