@@ -2,7 +2,9 @@ package br.fatec.les.livraria.notificacoes.infraestrutura.persistencia;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.Formula;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import br.fatec.les.livraria.notificacoes.dominio.modelo.TipoNotificacao;
 import jakarta.persistence.Column;
@@ -64,4 +66,12 @@ public class NotificacaoJpa {
     /** Nulo enquanto a notificação não foi lida. */
     @Column(name = "lida_em")
     private LocalDateTime lidaEm;
+
+    /**
+     * 0 para não lida e 1 para lida, calculado pelo banco. Ordena as não lidas primeiro sem depender de onde cada banco
+     * põe os nulos de {@code lida_em} (DEC-13).
+     */
+    @NotAudited
+    @Formula("case when lida_em is null then 0 else 1 end")
+    private int lida;
 }

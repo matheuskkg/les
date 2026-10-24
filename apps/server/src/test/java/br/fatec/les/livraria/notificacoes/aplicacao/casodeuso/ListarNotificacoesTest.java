@@ -29,7 +29,7 @@ class ListarNotificacoesTest {
 
         assertThat(notificacoes.ultimaPaginacao().ordem()).containsExactlyElementsOf(ListarNotificacoes.ORDEM_PADRAO);
         assertThat(ListarNotificacoes.ORDEM_PADRAO).containsExactly(
-                new Ordem("lidaEm", Ordem.Direcao.DESC),
+                new Ordem("lida", Ordem.Direcao.ASC),
                 new Ordem("criadaEm", Ordem.Direcao.DESC),
                 new Ordem("id", Ordem.Direcao.DESC));
     }

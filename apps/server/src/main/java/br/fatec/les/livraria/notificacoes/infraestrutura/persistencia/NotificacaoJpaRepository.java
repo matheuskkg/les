@@ -18,6 +18,9 @@ public interface NotificacaoJpaRepository extends JpaRepository<NotificacaoJpa, 
     /** Não lidas do usuário, carregadas para que a leitura passe pela auditoria do Envers (RNF-GER-002). */
     List<NotificacaoJpa> findByUsuarioIdAndLidaEmIsNull(Long usuarioId);
 
-    /** Notificações posteriores ao {@code Last-Event-ID}, em ordem crescente de id (DEC-13). */
-    List<NotificacaoJpa> findByUsuarioIdAndIdGreaterThanOrderByIdAsc(Long usuarioId, Long ultimoId);
+    /**
+     * Até 100 notificações posteriores ao {@code Last-Event-ID}, em ordem crescente de id (DEC-13). O limite evita
+     * carregar o histórico inteiro numa reconexão antiga; o que passar dele continua na listagem.
+     */
+    List<NotificacaoJpa> findTop100ByUsuarioIdAndIdGreaterThanOrderByIdAsc(Long usuarioId, Long ultimoId);
 }

@@ -1,6 +1,7 @@
 package br.fatec.les.livraria.notificacoes.aplicacao.casodeuso;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,5 +58,12 @@ class NotificarAdministradoresTest {
         Notificar notificar = new Notificar(notificacoes, new EntregaDepoisDoCommit(eventos), () -> AGORA);
         return new NotificarAdministradores(
                 new ListarAdministradores(new UsuarioRepositorioFake(administradores)), notificar);
+    }
+
+    @Test
+    void dec13_tipoDestinadoAoClienteNaoVaiParaOsAdministradores() {
+        assertThatThrownBy(() -> NotificarAdministradores.Comando.semReferencia(
+                TipoNotificacao.PEDIDO_APROVADO, "Pedido aprovado."))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

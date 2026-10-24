@@ -53,7 +53,8 @@ public class ResolvedorDeTokenDaSessao implements BearerTokenResolver {
         return tokenDoCookie(requisicao);
     }
 
-    private static String tokenDoCookie(HttpServletRequest requisicao) {
+    /** Valor do cookie {@code sessao}, ou nulo se ausente ou vazio; também usado no logout. */
+    static String tokenDoCookie(HttpServletRequest requisicao) {
         Cookie cookie = WebUtils.getCookie(requisicao, EmissorDeToken.COOKIE);
         if (cookie == null || !StringUtils.hasText(cookie.getValue())) {
             return null;

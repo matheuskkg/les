@@ -40,8 +40,8 @@ public class NotificacoesDoAdminController {
     @GetMapping
     @Operation(summary = "Lista as notificações do administrador, não lidas primeiro e mais recentes antes")
     public Pagina<NotificacaoDto> listarNotificacoesDoAdmin(
-            @Listagem(campos = { "id", "tipo", "criadaEm", "lidaEm" },
-                    padrao = { "lidaEm,desc", "criadaEm,desc", "id,desc" }) Paginacao paginacao,
+            @Listagem(campos = { "id", "tipo", "criadaEm", "lidaEm", "lida" },
+                    padrao = { "lida,asc", "criadaEm,desc", "id,desc" }) Paginacao paginacao,
             Authentication autenticacao) {
         return listarNotificacoes.executar(UsuarioDaRequisicao.id(autenticacao), paginacao)
                 .map(mapeador::paraDto);

@@ -19,7 +19,12 @@ public class RegistroDeEmissores {
 
     /** Registra um emissor recém-aberto do usuário. */
     public void adicionar(Long usuarioId, SseEmitter emissor) {
-        emissores.computeIfAbsent(usuarioId, id -> ConcurrentHashMap.newKeySet()).add(emissor);
+        // A inclusão fica dentro do compute para não cair num conjunto que um remover() concorrente já tirou do mapa.
+        emissores.compute(usuarioId, (id, canais) -> {
+            Set<SseEmitter> atuais = canais == null ? ConcurrentHashMap.newKeySet() : canais;
+            atuais.add(emissor);
+            return atuais;
+        });
     }
 
     /** Remove o emissor; o usuário sai do mapa quando não tem mais canal aberto. */

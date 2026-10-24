@@ -58,7 +58,7 @@ public class NotificacaoRepositorioJpa implements NotificacaoRepositorio {
 
     @Override
     public List<Notificacao> listarComIdMaiorQue(Long usuarioId, Long ultimoId) {
-        return repositorio.findByUsuarioIdAndIdGreaterThanOrderByIdAsc(usuarioId, ultimoId).stream()
+        return repositorio.findTop100ByUsuarioIdAndIdGreaterThanOrderByIdAsc(usuarioId, ultimoId).stream()
                 .map(mapper::paraDominio)
                 .toList();
     }

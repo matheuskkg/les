@@ -100,6 +100,22 @@ class NotificacaoControllerTest {
     }
 
     @Test
+    void dec13_lidasSaemDaMaisRecenteParaAMaisAntigaPelaCriacaoENaoPelaLeitura() throws Exception {
+        Usuario cliente = criarCliente("notificacoes.lidas@livraria.test");
+        Notificacao antiga = criar(cliente.getId(), TipoNotificacao.PEDIDO_APROVADO, CRIADA_EM);
+        Notificacao recente = criar(cliente.getId(), TipoNotificacao.PEDIDO_ENTREGUE, CRIADA_EM.plusHours(2));
+        recente.marcarComoLida(CRIADA_EM.plusHours(3));
+        notificacoes.salvar(recente);
+        antiga.marcarComoLida(CRIADA_EM.plusHours(5));
+        notificacoes.salvar(antiga);
+
+        mvc.perform(get("/api/me/notificacoes").cookie(cookieDe(cliente)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.itens[0].id").value(recente.getId()))
+                .andExpect(jsonPath("$.itens[1].id").value(antiga.getId()));
+    }
+
+    @Test
     void dec13_contaAsNaoLidasDoCliente() throws Exception {
         Usuario cliente = criarCliente("notificacoes.contador@livraria.test");
         criar(cliente.getId(), TipoNotificacao.CARRINHO_EXPIRANDO);

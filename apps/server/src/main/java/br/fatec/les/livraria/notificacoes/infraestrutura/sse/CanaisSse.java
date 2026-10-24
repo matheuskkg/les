@@ -2,7 +2,9 @@ package br.fatec.les.livraria.notificacoes.infraestrutura.sse;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -16,9 +18,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Canais SSE das notificações (DEC-13). Cada evento leva o id da notificação em {@code id}, o tipo como nome do
- * evento e o mesmo DTO da listagem em {@code data}; os emissores ficam por usuário, com timeout de 30 minutos e
- * batimento a cada 25 segundos, e são removidos ao completar, dar erro ou expirar.
+ * Canais SSE das notificações (DEC-13). Cada evento se chama {@code notificacao}, leva o id da notificação em
+ * {@code id} e o mesmo DTO da listagem em {@code data}; os emissores ficam por usuário, com timeout de 30 minutos e
+ * batimento a cada 25 segundos, e são removidos ao completar, dar erro ou expirar. Cada emissor guarda os ids já
+ * enviados, para que a reconexão com {@code Last-Event-ID} não repita o que chegou ao vivo.
  */
 @Slf4j
 @Component
@@ -28,15 +31,20 @@ public class CanaisSse implements EventosDeNotificacao, CanaisDeEventos {
     /** Tempo de vida de um canal; o {@code EventSource} reconecta sozinho (DEC-13). */
     public static final Duration TEMPO_LIMITE = Duration.ofMinutes(30);
 
+    /** Nome único dos eventos do stream; o {@code web} escuta só ele (DEC-13). */
+    public static final String EVENTO = "notificacao";
+
     private final RegistroDeEmissores registro;
     private final MapeadorDeNotificacoes mapeador;
+    private final Map<SseEmitter, Set<Long>> enviados = new ConcurrentHashMap<>();
 
     /** Abre um canal do usuário, com os callbacks que o removem do registro (DEC-13). */
     public SseEmitter abrir(Long usuarioId) {
         SseEmitter emissor = new SseEmitter(TEMPO_LIMITE.toMillis());
-        emissor.onCompletion(() -> registro.remover(usuarioId, emissor));
-        emissor.onTimeout(() -> registro.remover(usuarioId, emissor));
-        emissor.onError(erro -> registro.remover(usuarioId, emissor));
+        enviados.put(emissor, ConcurrentHashMap.newKeySet());
+        emissor.onCompletion(() -> esquecer(usuarioId, emissor));
+        emissor.onTimeout(() -> fechar(usuarioId, emissor));
+        emissor.onError(erro -> esquecer(usuarioId, emissor));
         registro.adicionar(usuarioId, emissor);
         return emissor;
     }
@@ -50,13 +58,18 @@ public class CanaisSse implements EventosDeNotificacao, CanaisDeEventos {
 
     /**
      * Envia uma notificação persistida a um emissor, no formato {@code id}/{@code event}/{@code data} do DEC-13.
-     * Falha de escrita remove o canal, sem interromper a entrega aos outros.
+     * Falha de escrita remove o canal, sem interromper a entrega aos outros; uma notificação já enviada a este
+     * emissor não é repetida.
      */
     public void enviar(Long usuarioId, SseEmitter emissor, Notificacao notificacao) {
+        Set<Long> jaEnviados = enviados.get(emissor);
+        if (jaEnviados == null || !jaEnviados.add(notificacao.getId())) {
+            return;
+        }
         try {
             emissor.send(SseEmitter.event()
                     .id(String.valueOf(notificacao.getId()))
-                    .name(notificacao.getTipo().name())
+                    .name(EVENTO)
                     .data(mapeador.paraDto(notificacao), MediaType.APPLICATION_JSON));
         } catch (IOException | IllegalStateException excecao) {
             log.debug("Canal SSE do usuário {} encerrado durante o envio", usuarioId, excecao);
@@ -79,19 +92,28 @@ public class CanaisSse implements EventosDeNotificacao, CanaisDeEventos {
 
     @Override
     public void encerrar(Long usuarioId) {
-        Set<SseEmitter> emissores = registro.de(usuarioId);
-        for (SseEmitter emissor : emissores) {
-            registro.remover(usuarioId, emissor);
-            try {
-                emissor.complete();
-            } catch (IllegalStateException excecao) {
-                log.debug("Canal SSE do usuário {} já estava encerrado", usuarioId, excecao);
-            }
+        for (SseEmitter emissor : registro.de(usuarioId)) {
+            fechar(usuarioId, emissor);
         }
     }
 
-    private void descartar(Long usuarioId, SseEmitter emissor, Exception causa) {
+    /** Fecha só este emissor, sem afetar os outros canais do usuário. */
+    public void fechar(Long usuarioId, SseEmitter emissor) {
+        esquecer(usuarioId, emissor);
+        try {
+            emissor.complete();
+        } catch (IllegalStateException excecao) {
+            log.debug("Canal SSE do usuário {} já estava encerrado", usuarioId, excecao);
+        }
+    }
+
+    private void esquecer(Long usuarioId, SseEmitter emissor) {
         registro.remover(usuarioId, emissor);
+        enviados.remove(emissor);
+    }
+
+    private void descartar(Long usuarioId, SseEmitter emissor, Exception causa) {
+        esquecer(usuarioId, emissor);
         try {
             emissor.completeWithError(causa);
         } catch (IllegalStateException excecao) {

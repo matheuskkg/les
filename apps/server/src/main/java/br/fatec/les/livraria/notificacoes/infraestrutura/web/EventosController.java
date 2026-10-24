@@ -13,8 +13,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Stream SSE das notificações do cliente e do administrador (DEC-13). O evento leva o id da notificação em
- * {@code id}, o tipo em {@code event} e o DTO da listagem em {@code data}. Na reconexão, o {@code Last-Event-ID}
+ * Stream SSE das notificações do cliente e do administrador (DEC-13). O evento {@code notificacao} leva o id da
+ * notificação em {@code id} e o DTO da listagem em {@code data}. Na reconexão, o {@code Last-Event-ID}
  * faz o servidor reenviar as notificações persistidas do usuário com id maior.
  */
 @RestController
@@ -40,7 +40,8 @@ public class EventosController {
 
     /**
      * Registra o canal antes de reenviar o intervalo do {@code Last-Event-ID}, para que uma notificação publicada
-     * durante a conexão não se perca. A partir daí, só chegam os eventos entregues depois do commit.
+     * durante a conexão não se perca; o canal descarta o que já tiver chegado ao vivo. A partir daí, só chegam os eventos
+     * entregues depois do commit.
      */
     private SseEmitter abrir(Long usuarioId, Long ultimoEvento) {
         SseEmitter emissor = canais.abrir(usuarioId);
@@ -52,7 +53,7 @@ public class EventosController {
                     .forEach(notificacao -> canais.enviar(usuarioId, emissor, notificacao));
             return emissor;
         } catch (RuntimeException excecao) {
-            canais.encerrar(usuarioId);
+            canais.fechar(usuarioId, emissor);
             throw excecao;
         }
     }

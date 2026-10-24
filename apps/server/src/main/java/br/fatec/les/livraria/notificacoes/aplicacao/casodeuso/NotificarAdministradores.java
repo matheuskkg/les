@@ -43,6 +43,13 @@ public class NotificarAdministradores {
      */
     public record Comando(TipoNotificacao tipo, String mensagem, String recurso, Long recursoId) {
 
+        public Comando {
+            Objects.requireNonNull(tipo, "tipo");
+            if (tipo.destinatario() != TipoNotificacao.Destinatario.ADMIN) {
+                throw new IllegalArgumentException("O tipo " + tipo + " não é destinado aos administradores.");
+            }
+        }
+
         /** Notificação sem referência a recurso. */
         public static Comando semReferencia(TipoNotificacao tipo, String mensagem) {
             return new Comando(tipo, mensagem, null, null);

@@ -23,11 +23,11 @@ import lombok.RequiredArgsConstructor;
 public class ListarNotificacoes {
 
     /**
-     * Ordem padrão: {@code lidaEm desc} com nulos (não lidas) primeiro no H2 e no PostgreSQL, depois a mais recente
-     * e o id como desempate.
+     * Ordem padrão: não lidas primeiro ({@code lida} vale 0 para não lida), depois a mais recente e o id como
+     * desempate.
      */
     public static final List<Ordem> ORDEM_PADRAO = List.of(
-            new Ordem("lidaEm", Ordem.Direcao.DESC),
+            new Ordem("lida", Ordem.Direcao.ASC),
             new Ordem("criadaEm", Ordem.Direcao.DESC),
             new Ordem("id", Ordem.Direcao.DESC));
 

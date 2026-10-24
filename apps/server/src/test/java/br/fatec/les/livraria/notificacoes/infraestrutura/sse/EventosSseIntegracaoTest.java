@@ -96,7 +96,8 @@ class EventosSseIntegracaoTest {
         String corpo = corpo(resultado);
         assertThat(corpo)
                 .contains("id:" + notificacao.getId())
-                .contains("event:PEDIDO_APROVADO")
+                .contains("event:notificacao")
+                .contains("\"tipo\":\"PEDIDO_APROVADO\"")
                 .contains("data:{")
                 .contains("\"id\":" + notificacao.getId())
                 .contains("\"mensagem\":\"Seu pedido foi aprovado.\"")
@@ -147,7 +148,8 @@ class EventosSseIntegracaoTest {
         String corpo = corpo(resultado);
         assertThat(corpo)
                 .contains("id:" + notificacao.getId())
-                .contains("event:TROCA_SOLICITADA");
+                .contains("event:notificacao")
+                .contains("\"tipo\":\"TROCA_SOLICITADA\"");
 
         encerrarCanais.executar(admin.getId());
     }

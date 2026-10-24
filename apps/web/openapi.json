@@ -61,7 +61,7 @@
             "minimum" : 1
           }
         }, {
-          "description" : "Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: id, tipo, criadaEm, lidaEm. Padrão: lidaEm,desc, criadaEm,desc, id,desc.",
+          "description" : "Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: id, tipo, criadaEm, lidaEm, lida. Padrão: lida,asc, criadaEm,desc, id,desc.",
           "explode" : true,
           "in" : "query",
           "name" : "ordem",
@@ -470,7 +470,7 @@
             "minimum" : 1
           }
         }, {
-          "description" : "Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: id, tipo, criadaEm, lidaEm. Padrão: lidaEm,desc, criadaEm,desc, id,desc.",
+          "description" : "Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: id, tipo, criadaEm, lidaEm, lida. Padrão: lida,asc, criadaEm,desc, id,desc.",
           "explode" : true,
           "in" : "query",
           "name" : "ordem",

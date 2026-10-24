@@ -34,7 +34,7 @@ public interface NotificacaoRepositorio {
     int marcarTodasComoLidas(Long usuarioId, LocalDateTime agora);
 
     /**
-     * Notificações do usuário com id maior que {@code ultimoId}, em ordem crescente de id, para a reconexão do
+     * Notificações do usuário com id maior que {@code ultimoId} (no máximo 100), em ordem crescente de id, para a reconexão do
      * {@code EventSource} com {@code Last-Event-ID} (DEC-13).
      */
     List<Notificacao> listarComIdMaiorQue(Long usuarioId, Long ultimoId);

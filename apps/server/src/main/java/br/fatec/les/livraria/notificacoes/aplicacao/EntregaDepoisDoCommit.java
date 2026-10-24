@@ -9,6 +9,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import br.fatec.les.livraria.notificacoes.aplicacao.porta.EventosDeNotificacao;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Agenda a entrega de uma notificação para depois do commit da transação de quem notificou (DEC-13). O gancho fica
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
  * <p>Se a transação for desfeita, o {@link TransactionSynchronization#afterCommit()} não roda e nada é enviado. Fora
  * de uma transação, a escrita não tem commit a esperar e a entrega é imediata.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class EntregaDepoisDoCommit {
@@ -28,14 +30,26 @@ public class EntregaDepoisDoCommit {
     public void agendar(Notificacao notificacao) {
         Objects.requireNonNull(notificacao, "notificacao");
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-            eventos.publicar(notificacao);
+            publicarSemPropagar(notificacao);
             return;
         }
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                eventos.publicar(notificacao);
+                publicarSemPropagar(notificacao);
             }
         });
+    }
+
+    /**
+     * A escrita já fez commit: uma falha na entrega pelo stream não pode virar erro de quem notificou. A notificação
+     * continua persistida e aparece na listagem e na próxima reconexão.
+     */
+    private void publicarSemPropagar(Notificacao notificacao) {
+        try {
+            eventos.publicar(notificacao);
+        } catch (RuntimeException excecao) {
+            log.warn("Falha ao entregar a notificação {} pelo stream", notificacao.getId(), excecao);
+        }
     }
 }
