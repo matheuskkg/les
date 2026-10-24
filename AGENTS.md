@@ -47,6 +47,8 @@ npm run build                               # checagem de tipos + build em apps/
 npm run gerar-api                           # regenera src/api/esquema.d.ts a partir de openapi.json
 npm run typecheck                           # só a checagem de tipos
 npm test                                    # testes unitários com o runner do Node (node --test)
+npm run e2e                                 # Playwright com o Chrome instalado; sobe o server (h2,e2e) e o web sozinho
+npm run e2e:relatorio                       # abre o relatório HTML da última execução
 ```
 
 O jar único da demonstração é montado rodando `npm run build` em `apps/web` e depois `mvn package` em
