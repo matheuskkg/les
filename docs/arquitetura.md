@@ -232,10 +232,12 @@ Definido no [DEC-16](decisoes/DEC-16-modelo-de-dados.md):
 - **Dinheiro.** Value object `Dinheiro` sobre `BigDecimal`, com escala 2 e `HALF_UP`, arredondado só no fim de
   cada cálculo ([DEC-15.1](decisoes/DEC-15.1-arredondamento.md)). Nunca `double`.
 - **Senhas.** BCrypt, por meio da porta `CodificadorDeSenha` (RNF-CLI-003).
-- **Análise (ANA).** Consulta nativa agregada por mês e categoria copiada no pedido, considerando só os status
-  válidos e descontando as trocas concluídas (RN-ANA-004, [DEC-12](decisoes/DEC-12-pedido-checkout-e-trocas.md)).
-  O preenchimento de meses sem venda com R$ 0,00 (RN-ANA-003) e a validação do período (RN-ANA-002) ficam em
-  regras e no caso de uso. A exportação é em CSV ([DEC-15.4](decisoes/DEC-15.4-acesso-consultas-e-exportacao.md)).
+- **Análise (ANA).** O módulo `vendas` expõe o caso de uso `ConsultarItensVendidos`, com os itens dos pedidos de
+  status válidos e a quantidade em trocas concluídas, em duas consultas JPQL sem SQL de JSON
+  (RN-ANA-004, [DEC-12](decisoes/DEC-12-pedido-checkout-e-trocas.md), [DEC-16](decisoes/DEC-16-modelo-de-dados.md)).
+  O módulo `analise` soma em Java por mês e categoria copiada no pedido e preenche com R$ 0,00 os meses sem venda
+  (RN-ANA-001, RN-ANA-003); a validação do período e da seleção (RF-ANA-002, RF-ANA-003, RN-ANA-002) fica em regras.
+  A exportação é em CSV ([DEC-15.4](decisoes/DEC-15.4-acesso-consultas-e-exportacao.md)).
 - **Recomendação (REC).** Porta `AssistenteDeLivros` com adapter fake por padrão. O provedor de IA real será definido
   quando o módulo for implementado.
 

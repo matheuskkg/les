@@ -4,6 +4,40 @@
  */
 
 export interface paths {
+    "/api/admin/analise": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Vendas por categoria e mês, para o gráfico de evolução */
+        get: operations["analisar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/analise/exportacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Exporta os dados do gráfico em CSV (mes;categoria;valor) */
+        get: operations["exportar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/clientes": {
         parameters: {
             query?: never;
@@ -808,6 +842,14 @@ export interface components {
             novaSenha: string;
             senhaAtual: string;
         };
+        AnaliseDeVendasDto: {
+            /** @example 2027-08 */
+            fim: string;
+            /** @example 2027-08 */
+            inicio: string;
+            meses: string[];
+            series: components["schemas"]["SerieDeVendasDto"][];
+        };
         BandeiraDaResposta: {
             /** Format: int64 */
             id: number;
@@ -1512,6 +1554,12 @@ export interface components {
         RecusaDeTrocaDto: {
             motivo?: string;
         };
+        SerieDeVendasDto: {
+            categoria: string;
+            /** Format: int64 */
+            categoriaId: number;
+            valores: string[];
+        };
         Sessao: {
             email: string;
             /** @enum {string} */
@@ -1574,6 +1622,90 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    analisar: {
+        parameters: {
+            query: {
+                inicio: string;
+                fim: string;
+                categoria?: number[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Uma série por categoria, com um valor por mês */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnaliseDeVendasDto"];
+                };
+            };
+            /** @description Mês malformado, ausente ou categoria inexistente */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Período invertido ou maior que 24 meses, ou nenhuma categoria selecionada */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    exportar: {
+        parameters: {
+            query: {
+                inicio: string;
+                fim: string;
+                categoria?: number[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Planilha CSV em UTF-8 com BOM */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+            /** @description Mês malformado, ausente ou categoria inexistente */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Período invertido ou maior que 24 meses, ou nenhuma categoria selecionada */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
     listar_7: {
         parameters: {
             query?: {

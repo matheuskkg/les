@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,8 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
+import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
 import jakarta.persistence.LockModeType;
 
 public interface TrocaJpaRepository extends JpaRepository<TrocaJpa, Long>, JpaSpecificationExecutor<TrocaJpa> {
@@ -42,4 +45,22 @@ public interface TrocaJpaRepository extends JpaRepository<TrocaJpa, Long>, JpaSp
 
     @EntityGraph(attributePaths = "itens")
     List<TrocaJpa> findByPedidoId(Long pedidoId);
+
+    /**
+     * Quantidade trocada de cada item dos pedidos finalizados no período com um dos status, só nas trocas com o
+     * status informado (RN-ANA-004, DEC-12).
+     */
+    @Query("select i.itemPedido.id as itemId, sum(i.quantidade) as quantidade from ItemTrocaJpa i "
+            + "join i.troca t join t.pedido p where t.status = :statusDaTroca and p.status in :status "
+            + "and p.realizadoEm >= :inicio and p.realizadoEm < :fim group by i.itemPedido.id")
+    List<QuantidadeTrocada> somarTrocadasDoPeriodo(@Param("statusDaTroca") StatusTroca statusDaTroca,
+            @Param("status") Collection<StatusPedido> status, @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fimExclusivo);
+
+    interface QuantidadeTrocada {
+
+        Long getItemId();
+
+        Long getQuantidade();
+    }
 }

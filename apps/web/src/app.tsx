@@ -3,6 +3,7 @@ import { Cabecalho } from './componentes/Cabecalho';
 import { Protegida } from './componentes/Protegida';
 import {
   Admin,
+  AdminAnalise,
   AdminCliente,
   AdminClientes,
   AdminPedido,
@@ -91,6 +92,14 @@ function TrocasDoAdmin() {
   );
 }
 
+function AnaliseDoAdmin() {
+  return (
+    <Protegida papel="ADMIN">
+      <AdminAnalise />
+    </Protegida>
+  );
+}
+
 function CarrinhoDoCliente() {
   return (
     <Protegida papel="CLIENTE">
@@ -133,6 +142,7 @@ export function App() {
           <Route path="/admin/pedidos" component={PedidosDoAdmin} />
           <Route path="/admin/pedidos/:id" component={PedidoDoAdmin} />
           <Route path="/admin/trocas" component={TrocasDoAdmin} />
+          <Route path="/admin/analise" component={AnaliseDoAdmin} />
           <Route path="/admin" component={AreaDoAdmin} />
           <Route path="/admin/*" component={AreaDoAdmin} />
           <Route default component={NaoEncontrada} />

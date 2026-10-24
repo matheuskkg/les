@@ -35,8 +35,7 @@ export default function Admin() {
       <div class="cartao">
         <h2>Em construção</h2>
         <p>
-          Clientes, pedidos e trocas já podem ser consultados pelas abas acima. Em breve você poderá ver a
-          análise de vendas com gráficos e exportação.
+          Clientes, pedidos, trocas e a análise de vendas, com gráfico e exportação, estão nas abas acima.
         </p>
       </div>
     </section>

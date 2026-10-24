@@ -8,6 +8,145 @@
     "url" : "/"
   } ],
   "paths" : {
+    "/api/admin/analise" : {
+      "get" : {
+        "operationId" : "analisar",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "inicio",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "example" : "2027-08",
+            "pattern" : "^\\d{4}-\\d{2}$"
+          }
+        }, {
+          "in" : "query",
+          "name" : "fim",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "example" : "2027-08",
+            "pattern" : "^\\d{4}-\\d{2}$"
+          }
+        }, {
+          "in" : "query",
+          "name" : "categoria",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AnaliseDeVendasDto"
+                }
+              }
+            },
+            "description" : "Uma série por categoria, com um valor por mês"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Mês malformado, ausente ou categoria inexistente"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Período invertido ou maior que 24 meses, ou nenhuma categoria selecionada"
+          }
+        },
+        "summary" : "Vendas por categoria e mês, para o gráfico de evolução",
+        "tags" : [ "analise-admin-controller" ]
+      }
+    },
+    "/api/admin/analise/exportacao" : {
+      "get" : {
+        "operationId" : "exportar",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "inicio",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "example" : "2027-08",
+            "pattern" : "^\\d{4}-\\d{2}$"
+          }
+        }, {
+          "in" : "query",
+          "name" : "fim",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "example" : "2027-08",
+            "pattern" : "^\\d{4}-\\d{2}$"
+          }
+        }, {
+          "in" : "query",
+          "name" : "categoria",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "text/csv" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              }
+            },
+            "description" : "Planilha CSV em UTF-8 com BOM"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Mês malformado, ausente ou categoria inexistente"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Período invertido ou maior que 24 meses, ou nenhuma categoria selecionada"
+          }
+        },
+        "summary" : "Exporta os dados do gráfico em CSV (mes;categoria;valor)",
+        "tags" : [ "analise-admin-controller" ]
+      }
+    },
     "/api/admin/clientes" : {
       "get" : {
         "operationId" : "listar_7",
@@ -2532,6 +2671,36 @@
         },
         "required" : [ "confirmacaoSenha", "novaSenha", "senhaAtual" ]
       },
+      "AnaliseDeVendasDto" : {
+        "type" : "object",
+        "properties" : {
+          "fim" : {
+            "type" : "string",
+            "example" : "2027-08",
+            "pattern" : "^\\d{4}-\\d{2}$"
+          },
+          "inicio" : {
+            "type" : "string",
+            "example" : "2027-08",
+            "pattern" : "^\\d{4}-\\d{2}$"
+          },
+          "meses" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "example" : "2027-08",
+              "pattern" : "^\\d{4}-\\d{2}$"
+            }
+          },
+          "series" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SerieDeVendasDto"
+            }
+          }
+        },
+        "required" : [ "fim", "inicio", "meses", "series" ]
+      },
       "BandeiraDaResposta" : {
         "type" : "object",
         "properties" : {
@@ -4193,6 +4362,27 @@
             "type" : "string"
           }
         }
+      },
+      "SerieDeVendasDto" : {
+        "type" : "object",
+        "properties" : {
+          "categoria" : {
+            "type" : "string"
+          },
+          "categoriaId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "valores" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "decimal",
+              "example" : "1234.56"
+            }
+          }
+        },
+        "required" : [ "categoria", "categoriaId", "valores" ]
       },
       "Sessao" : {
         "type" : "object",

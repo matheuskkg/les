@@ -10,5 +10,13 @@ public enum StatusPedido {
     APROVADA,
     REPROVADA,
     EM_TRANSPORTE,
-    ENTREGUE
+    ENTREGUE;
+
+    /**
+     * Se o pedido conta como venda na análise e no ranking: {@code APROVADA}, {@code EM TRANSPORTE} e
+     * {@code ENTREGUE} (RN-ANA-004, DEC-04, DEC-12).
+     */
+    public boolean contaComoVenda() {
+        return this == APROVADA || this == EM_TRANSPORTE || this == ENTREGUE;
+    }
 }
