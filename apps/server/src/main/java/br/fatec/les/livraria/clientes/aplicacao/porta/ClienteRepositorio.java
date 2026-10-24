@@ -8,7 +8,10 @@ import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
 import br.fatec.les.livraria.compartilhado.dominio.Cpf;
 
-/** Persistência do cliente e dos seus endereços e cartões (RF-CLI-001, RF-CLI-002, DEC-10, DEC-16). */
+/**
+ * Persistência do cliente e dos seus endereços e cartões (RF-CLI-001, RF-CLI-002, RF-CLI-006, RF-CLI-007, DEC-10,
+ * DEC-16).
+ */
 public interface ClienteRepositorio {
 
     Cliente salvar(Cliente cliente);

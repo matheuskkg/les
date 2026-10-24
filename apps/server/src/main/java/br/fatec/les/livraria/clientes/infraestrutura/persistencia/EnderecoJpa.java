@@ -17,7 +17,7 @@ import jakarta.persistence.Table;
 import br.fatec.les.livraria.clientes.dominio.modelo.TipoEndereco;
 import br.fatec.les.livraria.clientes.dominio.modelo.TipoLogradouro;
 import br.fatec.les.livraria.clientes.dominio.modelo.Uf;
-import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCliente;
+import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosEndereco;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -43,7 +43,7 @@ public class EnderecoJpa {
     @JoinColumn(name = "cliente_id", nullable = false)
     private ClienteJpa cliente;
 
-    @Column(name = "nome_curto", nullable = false, length = TamanhosMaximosCliente.NOME_CURTO)
+    @Column(name = "nome_curto", nullable = false, length = TamanhosMaximosEndereco.NOME_CURTO)
     private String nomeCurto;
 
     @Enumerated(EnumType.STRING)
@@ -54,19 +54,19 @@ public class EnderecoJpa {
     @Column(name = "tipo_logradouro", nullable = false, length = 20)
     private TipoLogradouro tipoLogradouro;
 
-    @Column(name = "logradouro", nullable = false, length = TamanhosMaximosCliente.LOGRADOURO)
+    @Column(name = "logradouro", nullable = false, length = TamanhosMaximosEndereco.LOGRADOURO)
     private String logradouro;
 
-    @Column(name = "numero", nullable = false, length = TamanhosMaximosCliente.NUMERO_DO_ENDERECO)
+    @Column(name = "numero", nullable = false, length = TamanhosMaximosEndereco.NUMERO_DO_ENDERECO)
     private String numero;
 
-    @Column(name = "bairro", nullable = false, length = TamanhosMaximosCliente.BAIRRO)
+    @Column(name = "bairro", nullable = false, length = TamanhosMaximosEndereco.BAIRRO)
     private String bairro;
 
-    @Column(name = "cep", nullable = false, length = TamanhosMaximosCliente.CEP)
+    @Column(name = "cep", nullable = false, length = TamanhosMaximosEndereco.CEP)
     private String cep;
 
-    @Column(name = "cidade", nullable = false, length = TamanhosMaximosCliente.CIDADE)
+    @Column(name = "cidade", nullable = false, length = TamanhosMaximosEndereco.CIDADE)
     private String cidade;
 
     @Enumerated(EnumType.STRING)
@@ -76,6 +76,6 @@ public class EnderecoJpa {
     @Column(name = "pais", nullable = false, length = 40)
     private String pais;
 
-    @Column(name = "observacoes", length = TamanhosMaximosCliente.OBSERVACOES)
+    @Column(name = "observacoes", length = TamanhosMaximosEndereco.OBSERVACOES)
     private String observacoes;
 }

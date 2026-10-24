@@ -318,9 +318,9 @@ public final class ClientesDeTeste {
     }
 
     @SafeVarargs
-    public static java.util.List<Violacao> violacoes(NovoCliente alvo, Regra<? super NovoCliente>... regras) {
+    public static <T> java.util.List<Violacao> violacoes(T alvo, Regra<? super T>... regras) {
         Violacoes violacoes = new Violacoes();
-        for (Regra<? super NovoCliente> regra : regras) {
+        for (Regra<? super T> regra : regras) {
             regra.validar(alvo, violacoes);
         }
         return violacoes.lista();

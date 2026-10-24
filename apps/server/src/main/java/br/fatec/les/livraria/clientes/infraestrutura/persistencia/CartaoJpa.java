@@ -17,7 +17,7 @@ import lombok.Setter;
 
 import org.hibernate.envers.Audited;
 
-import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCliente;
+import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCartao;
 
 /**
  * Tabela {@code cartao} do MER (RN-CLI-004, RN-CLI-005, DEC-06, DEC-10, DEC-14, DEC-16). Guarda a validade como
@@ -48,14 +48,14 @@ public class CartaoJpa {
     @JoinColumn(name = "bandeira_id", nullable = false)
     private BandeiraJpa bandeira;
 
-    @Column(name = "numero", nullable = false, length = TamanhosMaximosCliente.NUMERO_DO_CARTAO)
+    @Column(name = "numero", nullable = false, length = TamanhosMaximosCartao.NUMERO_DO_CARTAO)
     private String numero;
 
-    @Column(name = "nome_impresso", nullable = false, length = TamanhosMaximosCliente.NOME_IMPRESSO)
+    @Column(name = "nome_impresso", nullable = false, length = TamanhosMaximosCartao.NOME_IMPRESSO)
     private String nomeImpresso;
 
     /** Validade no formato {@code AAAA-MM} (DEC-07, DEC-06). */
-    @Column(name = "validade", nullable = false, length = TamanhosMaximosCliente.VALIDADE_DO_CARTAO)
+    @Column(name = "validade", nullable = false, length = TamanhosMaximosCartao.VALIDADE_DO_CARTAO)
     private String validade;
 
     @Column(name = "preferencial", nullable = false)

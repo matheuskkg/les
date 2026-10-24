@@ -1,0 +1,44 @@
+package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import br.fatec.les.livraria.clientes.aplicacao.ClienteDoUsuario;
+import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
+import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
+import br.fatec.les.livraria.clientes.dominio.modelo.Endereco;
+import br.fatec.les.livraria.clientes.dominio.modelo.NovoEndereco;
+import br.fatec.les.livraria.clientes.dominio.regra.EnderecoCompleto;
+import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosEndereco;
+import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+import lombok.RequiredArgsConstructor;
+
+/**
+ * Adiciona um endereço ao cadastro do cliente autenticado (RF-CLI-006, RNF-CLI-004). Não altera os demais dados do
+ * cadastro; o endereço é incluído no agregado {@link Cliente}, que mantém ao menos um endereço (RN-CLI-001,
+ * RN-CLI-002, DEC-10). As regras de composição e tamanho são as do próprio endereço (RN-CLI-003).
+ */
+@Component
+@RequiredArgsConstructor
+public class AdicionarEndereco {
+
+    private final EnderecoCompleto enderecoCompleto; // RN-CLI-003
+    private final TamanhosMaximosEndereco tamanhosMaximos; // RN-CLI-003
+    private final ClienteDoUsuario clienteDoUsuario;
+    private final ClienteRepositorio clientes;
+
+    /**
+     * @return o endereço gravado, já com o id gerado
+     * @throws br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio com as violações encontradas
+     */
+    @Transactional
+    public Endereco executar(Long usuarioId, NovoEndereco comando) {
+        Violacoes.verificar(comando, enderecoCompleto, tamanhosMaximos);
+        Cliente cliente = clienteDoUsuario.buscar(usuarioId);
+        Cliente salvo = clientes.salvar(cliente.comEndereco(Endereco.de(comando, null)));
+        List<Endereco> enderecos = salvo.getEnderecos();
+        return enderecos.get(enderecos.size() - 1);
+    }
+}

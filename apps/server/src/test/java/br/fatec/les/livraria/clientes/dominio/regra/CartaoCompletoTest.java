@@ -15,7 +15,7 @@ import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 /** RN-CLI-004: composição do cartão (sem código de segurança, DEC-10). */
 class CartaoCompletoTest {
 
-    private final CartaoCompleto regra = new CartaoCompleto();
+    private final CartoesCompletos regra = new CartoesCompletos(new CartaoCompleto());
 
     @Test
     void rnCli004_cartaoCompletoNaoTemViolacao() {

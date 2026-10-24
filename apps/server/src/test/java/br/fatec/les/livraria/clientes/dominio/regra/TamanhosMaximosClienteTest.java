@@ -26,7 +26,8 @@ import jakarta.persistence.Column;
 /** RN-CLI-006, RN-CLI-003, RN-CLI-004: limites das colunas do cliente, do endereço e do cartão. */
 class TamanhosMaximosClienteTest {
 
-    private final TamanhosMaximosCliente regra = new TamanhosMaximosCliente();
+    private final TamanhosMaximosCliente regra =
+            new TamanhosMaximosCliente(new TamanhosMaximosEndereco(), new TamanhosMaximosCartao());
 
     @Test
     void rnCli006_nomeNoLimiteEhAceito() {
@@ -67,8 +68,9 @@ class TamanhosMaximosClienteTest {
     /** As constantes da regra precisam continuar iguais às colunas JPA que elas protegem. */
     @ParameterizedTest
     @MethodSource("colunas")
-    void limiteEspelhaAColunaJpa(String constante, Class<?> entidade, String campo) throws Exception {
-        int limite = TamanhosMaximosCliente.class.getField(constante).getInt(null);
+    void limiteEspelhaAColunaJpa(Class<?> regraDoLimite, String constante, Class<?> entidade, String campo)
+            throws Exception {
+        int limite = regraDoLimite.getField(constante).getInt(null);
         Column coluna = entidade.getDeclaredField(campo).getAnnotation(Column.class);
 
         assertThat(coluna).as("coluna %s.%s", entidade.getSimpleName(), campo).isNotNull();
@@ -77,27 +79,27 @@ class TamanhosMaximosClienteTest {
 
     static Stream<Arguments> colunas() {
         return Stream.of(
-                Arguments.of("NOME", ClienteJpa.class, "nome"),
-                Arguments.of("CPF", ClienteJpa.class, "cpf"),
-                Arguments.of("NOME_CURTO", EnderecoJpa.class, "nomeCurto"),
-                Arguments.of("LOGRADOURO", EnderecoJpa.class, "logradouro"),
-                Arguments.of("NUMERO_DO_ENDERECO", EnderecoJpa.class, "numero"),
-                Arguments.of("BAIRRO", EnderecoJpa.class, "bairro"),
-                Arguments.of("CEP", EnderecoJpa.class, "cep"),
-                Arguments.of("CIDADE", EnderecoJpa.class, "cidade"),
-                Arguments.of("OBSERVACOES", EnderecoJpa.class, "observacoes"),
-                Arguments.of("NUMERO_DO_CARTAO", CartaoJpa.class, "numero"),
-                Arguments.of("NOME_IMPRESSO", CartaoJpa.class, "nomeImpresso"),
-                Arguments.of("VALIDADE_DO_CARTAO", CartaoJpa.class, "validade"));
+                Arguments.of(TamanhosMaximosCliente.class, "NOME", ClienteJpa.class, "nome"),
+                Arguments.of(TamanhosMaximosCliente.class, "CPF", ClienteJpa.class, "cpf"),
+                Arguments.of(TamanhosMaximosEndereco.class, "NOME_CURTO", EnderecoJpa.class, "nomeCurto"),
+                Arguments.of(TamanhosMaximosEndereco.class, "LOGRADOURO", EnderecoJpa.class, "logradouro"),
+                Arguments.of(TamanhosMaximosEndereco.class, "NUMERO_DO_ENDERECO", EnderecoJpa.class, "numero"),
+                Arguments.of(TamanhosMaximosEndereco.class, "BAIRRO", EnderecoJpa.class, "bairro"),
+                Arguments.of(TamanhosMaximosEndereco.class, "CEP", EnderecoJpa.class, "cep"),
+                Arguments.of(TamanhosMaximosEndereco.class, "CIDADE", EnderecoJpa.class, "cidade"),
+                Arguments.of(TamanhosMaximosEndereco.class, "OBSERVACOES", EnderecoJpa.class, "observacoes"),
+                Arguments.of(TamanhosMaximosCartao.class, "NUMERO_DO_CARTAO", CartaoJpa.class, "numero"),
+                Arguments.of(TamanhosMaximosCartao.class, "NOME_IMPRESSO", CartaoJpa.class, "nomeImpresso"),
+                Arguments.of(TamanhosMaximosCartao.class, "VALIDADE_DO_CARTAO", CartaoJpa.class, "validade"));
     }
 
-    private static final int NOME_CURTO = TamanhosMaximosCliente.NOME_CURTO;
-    private static final int LOGRADOURO = TamanhosMaximosCliente.LOGRADOURO;
-    private static final int NUMERO_DO_ENDERECO = TamanhosMaximosCliente.NUMERO_DO_ENDERECO;
-    private static final int BAIRRO = TamanhosMaximosCliente.BAIRRO;
-    private static final int CIDADE = TamanhosMaximosCliente.CIDADE;
-    private static final int OBSERVACOES = TamanhosMaximosCliente.OBSERVACOES;
-    private static final int NOME_IMPRESSO = TamanhosMaximosCliente.NOME_IMPRESSO;
+    private static final int NOME_CURTO = TamanhosMaximosEndereco.NOME_CURTO;
+    private static final int LOGRADOURO = TamanhosMaximosEndereco.LOGRADOURO;
+    private static final int NUMERO_DO_ENDERECO = TamanhosMaximosEndereco.NUMERO_DO_ENDERECO;
+    private static final int BAIRRO = TamanhosMaximosEndereco.BAIRRO;
+    private static final int CIDADE = TamanhosMaximosEndereco.CIDADE;
+    private static final int OBSERVACOES = TamanhosMaximosEndereco.OBSERVACOES;
+    private static final int NOME_IMPRESSO = TamanhosMaximosCartao.NOME_IMPRESSO;
 
     private void rejeita(String codigo, String campo, NovoCliente alvo) {
         assertThat(violacoes(alvo, regra))

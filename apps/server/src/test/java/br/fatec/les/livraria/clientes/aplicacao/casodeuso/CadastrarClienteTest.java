@@ -31,6 +31,11 @@ import br.fatec.les.livraria.clientes.aplicacao.regra.ValidadeDoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.clientes.dominio.regra.CartaoCompleto;
+import br.fatec.les.livraria.clientes.aplicacao.regra.ValidadesDosCartoes;
+import br.fatec.les.livraria.clientes.dominio.regra.CartoesCompletos;
+import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCartao;
+import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosEndereco;
+import br.fatec.les.livraria.clientes.dominio.regra.EnderecosCompletos;
 import br.fatec.les.livraria.acesso.dominio.regra.ConfirmacaoDeSenha;
 import br.fatec.les.livraria.clientes.dominio.regra.CpfValido;
 import br.fatec.les.livraria.clientes.dominio.regra.DadosObrigatoriosCliente;
@@ -59,14 +64,14 @@ class CadastrarClienteTest {
                 new DadosObrigatoriosCliente(),
                 new DataNascimentoValida(relogio()),
                 new EnderecoDoCliente(),
-                new EnderecoCompleto(),
-                new TamanhosMaximosCliente(),
+                new EnderecosCompletos(new EnderecoCompleto()),
+                new TamanhosMaximosCliente(new TamanhosMaximosEndereco(), new TamanhosMaximosCartao()),
                 new SenhaForte(),
                 new ConfirmacaoDeSenha(),
                 new CpfValido(),
                 new EmailValido(),
-                new CartaoCompleto(),
-                new ValidadeDoCartao(relogio()),
+                new CartoesCompletos(new CartaoCompleto()),
+                new ValidadesDosCartoes(new ValidadeDoCartao(relogio())),
                 new CpfUnico(clientes, contas),
                 new EmailUnico(contas),
                 new TelefoneUnico(contas),

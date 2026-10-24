@@ -14,7 +14,11 @@ import br.fatec.les.livraria.compartilhado.dominio.Cpf;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
 import lombok.RequiredArgsConstructor;
 
-/** Adapter JPA do cadastro do cliente com endereços e cartões (RF-CLI-001, RF-CLI-002, DEC-10, DEC-16). */
+/**
+ * Adapter JPA do cadastro do cliente com endereços e cartões (RF-CLI-001, RF-CLI-002, RF-CLI-006, RF-CLI-007, DEC-10,
+ * DEC-16). A leitura acontece dentro da transação do caso de uso, com as coleções carregadas antes de virarem o
+ * agregado de domínio ({@code spring.jpa.open-in-view=false}).
+ */
 @Component
 @RequiredArgsConstructor
 public class ClienteRepositorioJpa implements ClienteRepositorio {

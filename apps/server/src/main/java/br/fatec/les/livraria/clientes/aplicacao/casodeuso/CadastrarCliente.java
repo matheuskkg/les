@@ -22,7 +22,7 @@ import br.fatec.les.livraria.clientes.aplicacao.regra.CpfUnico;
 import br.fatec.les.livraria.clientes.aplicacao.regra.DataNascimentoValida;
 import br.fatec.les.livraria.clientes.aplicacao.regra.EmailUnico;
 import br.fatec.les.livraria.clientes.aplicacao.regra.TelefoneUnico;
-import br.fatec.les.livraria.clientes.aplicacao.regra.ValidadeDoCartao;
+import br.fatec.les.livraria.clientes.aplicacao.regra.ValidadesDosCartoes;
 import br.fatec.les.livraria.clientes.dominio.modelo.Bandeira;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
@@ -30,12 +30,12 @@ import br.fatec.les.livraria.clientes.dominio.modelo.Endereco;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoEndereco;
-import br.fatec.les.livraria.clientes.dominio.regra.CartaoCompleto;
+import br.fatec.les.livraria.clientes.dominio.regra.CartoesCompletos;
 import br.fatec.les.livraria.clientes.dominio.regra.CpfValido;
 import br.fatec.les.livraria.clientes.dominio.regra.DadosObrigatoriosCliente;
 import br.fatec.les.livraria.clientes.dominio.regra.EmailValido;
-import br.fatec.les.livraria.clientes.dominio.regra.EnderecoCompleto;
 import br.fatec.les.livraria.clientes.dominio.regra.EnderecoDoCliente;
+import br.fatec.les.livraria.clientes.dominio.regra.EnderecosCompletos;
 import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Cpf;
 import br.fatec.les.livraria.compartilhado.dominio.Email;
@@ -55,14 +55,14 @@ public class CadastrarCliente {
     private final DadosObrigatoriosCliente dadosObrigatorios; // RN-CLI-006
     private final DataNascimentoValida dataNascimentoValida; // RN-CLI-006
     private final EnderecoDoCliente enderecoDoCliente; // RN-CLI-001, RN-CLI-002
-    private final EnderecoCompleto enderecoCompleto; // RN-CLI-003
+    private final EnderecosCompletos enderecosCompletos; // RN-CLI-003
     private final TamanhosMaximosCliente tamanhosMaximos; // RN-CLI-003, RN-CLI-004, RN-CLI-006
     private final SenhaForte senhaForte; // RNF-CLI-001
     private final ConfirmacaoDeSenha confirmacaoDeSenha; // RNF-CLI-002
     private final CpfValido cpfValido;
     private final EmailValido emailValido;
-    private final CartaoCompleto cartaoCompleto; // RN-CLI-004
-    private final ValidadeDoCartao validadeDoCartao; // DEC-06
+    private final CartoesCompletos cartoesCompletos; // RN-CLI-004
+    private final ValidadesDosCartoes validadesDosCartoes; // DEC-06
     private final CpfUnico cpfUnico; // RF-CLI-001
     private final EmailUnico emailUnico; // RF-CLI-001
     private final TelefoneUnico telefoneUnico; // RF-CLI-001
@@ -83,8 +83,8 @@ public class CadastrarCliente {
                 bandeiraRegistrada.validar(alvo, violacoes, bandeirasPorId);
 
         Violacoes.verificar(comando, dadosObrigatorios, dataNascimentoValida, enderecoDoCliente,
-                enderecoCompleto, tamanhosMaximos, senhaForte, confirmacaoDeSenha, cpfValido, emailValido,
-                cartaoCompleto, validadeDoCartao, cpfUnico, emailUnico, telefoneUnico,
+                enderecosCompletos, tamanhosMaximos, senhaForte, confirmacaoDeSenha, cpfValido, emailValido,
+                cartoesCompletos, validadesDosCartoes, cpfUnico, emailUnico, telefoneUnico,
                 bandeiraRegistradaComAsBandeiras);
 
         Long usuarioId = criarUsuario.executar(new NovoUsuario(
@@ -117,10 +117,7 @@ public class CadastrarCliente {
     private List<Endereco> enderecos(NovoCliente comando) {
         List<Endereco> enderecos = new ArrayList<>();
         for (NovoEndereco novo : comando.enderecos()) {
-            enderecos.add(new Endereco(null, novo.nomeCurto().strip(), novo.tipoEndereco(),
-                    novo.tipoLogradouro(), novo.logradouro().strip(), novo.numero().strip(),
-                    novo.bairro().strip(), Telefone.somenteDigitos(novo.cep()), novo.cidade().strip(), novo.uf(),
-                    Endereco.PAIS, textoOuNulo(novo.observacoes())));
+            enderecos.add(Endereco.de(novo, null));
         }
         return enderecos;
     }
@@ -137,13 +134,8 @@ public class CadastrarCliente {
             if (bandeira == null) {
                 throw new IllegalStateException("Bandeira validada não encontrada.");
             }
-            cartoes.add(new Cartao(null, Telefone.somenteDigitos(novo.numero()), novo.nomeImpresso().strip(),
-                    bandeira, novo.validade(), i == 0));
+            cartoes.add(Cartao.de(novo, bandeira, null, i == 0));
         }
         return cartoes;
-    }
-
-    private static String textoOuNulo(String valor) {
-        return valor == null || valor.isBlank() ? null : valor.strip();
     }
 }

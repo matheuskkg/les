@@ -15,7 +15,7 @@ import br.fatec.les.livraria.clientes.dominio.modelo.NovoEndereco;
 /** RN-CLI-003: composição do endereço e as adaptações do DEC-10 (país fixo e CEP de 8 dígitos). */
 class EnderecoCompletoTest {
 
-    private final EnderecoCompleto regra = new EnderecoCompleto();
+    private final EnderecosCompletos regra = new EnderecosCompletos(new EnderecoCompleto());
 
     @Test
     void rnCli003_enderecoCompletoNaoTemViolacao() {

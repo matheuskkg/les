@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 /** DEC-06: o cartão não pode ser cadastrado com validade vencida no mês corrente. */
 class ValidadeDoCartaoTest {
 
-    private final ValidadeDoCartao regra = new ValidadeDoCartao(relogio());
+    private final ValidadesDosCartoes regra = new ValidadesDosCartoes(new ValidadeDoCartao(relogio()));
 
     @Test
     void dec06_validadeFuturaNaoTemViolacao() {
