@@ -63,4 +63,9 @@ public class ClienteRepositorioJpa implements ClienteRepositorio {
     public List<Long> buscarUsuarioIdsPorCpf(String cpf) {
         return repositorio.buscarUsuarioIdsPorCpf(cpf);
     }
+
+    @Override
+    public Optional<Long> buscarIdPorUsuarioId(Long usuarioId) {
+        return repositorio.buscarIdPorUsuarioId(usuarioId);
+    }
 }

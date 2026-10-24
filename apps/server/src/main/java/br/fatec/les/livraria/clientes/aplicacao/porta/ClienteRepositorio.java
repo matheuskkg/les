@@ -32,6 +32,12 @@ public interface ClienteRepositorio {
     Cliente alterarDados(Long clienteId, String nome, Genero genero, LocalDate dataNascimento, Cpf cpf);
 
     /**
+     * Id do cliente do usuário de login, para as rotas {@code /api/me} (RF-VEN-001, DEC-07, DEC-15.4). O
+     * cliente nunca informa o próprio id: ele vem do usuário autenticado.
+     */
+    Optional<Long> buscarIdPorUsuarioId(Long usuarioId);
+
+    /**
      * Ids dos usuários dos clientes com o CPF informado, em qualquer situação. A regra {@code CpfUnico} pergunta ao
      * {@code acesso} se algum deles ainda está em uso (DEC-10).
      */

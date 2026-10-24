@@ -283,6 +283,14 @@ public final class ClientesDeTeste {
         public java.util.List<Long> buscarUsuarioIdsPorCpf(String cpf) {
             return usuariosPorCpf.getOrDefault(cpf, java.util.List.of());
         }
+
+        @Override
+        public java.util.Optional<Long> buscarIdPorUsuarioId(Long usuarioId) {
+            return salvos.stream()
+                    .filter(cliente -> cliente.getUsuarioId().equals(usuarioId))
+                    .map(Cliente::getId)
+                    .findFirst();
+        }
     }
 
     public static class FakeBandeiraRepositorio implements BandeiraRepositorio {

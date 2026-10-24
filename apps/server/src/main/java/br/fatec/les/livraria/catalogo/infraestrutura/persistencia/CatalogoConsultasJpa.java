@@ -1,6 +1,7 @@
 package br.fatec.les.livraria.catalogo.infraestrutura.persistencia;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.CategoriaDoLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.FiltroLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroDetalhe;
+import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroParaVenda;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroResumo;
 import br.fatec.les.livraria.catalogo.aplicacao.porta.CatalogoConsultas;
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
@@ -55,6 +57,23 @@ public class CatalogoConsultasJpa implements CatalogoConsultas {
         Page<CategoriaJpa> pagina = categorias.findAll(ConversorDePaginacao.paraPageable(paginacao));
         return ConversorDePaginacao.paraPagina(pagina,
                 categoria -> new CategoriaDoLivro(categoria.getId(), categoria.getNome()));
+    }
+
+    @Override
+    public List<LivroParaVenda> buscarParaVenda(Collection<Long> livroIds) {
+        if (livroIds.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, List<String>> autores = new LinkedHashMap<>();
+        for (AutorDoLivroProjecao autor : livros.buscarAutoresPorLivro(livroIds)) {
+            autores.computeIfAbsent(autor.getLivroId(), id -> new ArrayList<>()).add(autor.getNome());
+        }
+
+        return livros.findByIdIn(livroIds).stream()
+                .map(livro -> new LivroParaVenda(livro.getId(), livro.getTitulo(),
+                        autores.getOrDefault(livro.getId(), List.of()), livro.isAtivo()))
+                .toList();
     }
 
     /** Carrega autores e categorias dos livros informados em lote. */

@@ -1,11 +1,13 @@
 package br.fatec.les.livraria.catalogo.aplicacao.porta;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.CategoriaDoLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.FiltroLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroDetalhe;
+import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroParaVenda;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroResumo;
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
@@ -34,4 +36,13 @@ public interface CatalogoConsultas {
      * @return a página de categorias
      */
     Pagina<CategoriaDoLivro> listarCategorias(Paginacao paginacao);
+
+    /**
+     * Livros pelos ids, ativos ou não, com título e autores, para a leitura do carrinho (RF-VEN-001). A
+     * situação é mantida para que o {@code vendas} recuse um livro inativo na adição.
+     *
+     * @param livroIds livros a consultar
+     * @return os livros encontrados, em ordem indeterminada; id inexistente não aparece
+     */
+    List<LivroParaVenda> buscarParaVenda(Collection<Long> livroIds);
 }

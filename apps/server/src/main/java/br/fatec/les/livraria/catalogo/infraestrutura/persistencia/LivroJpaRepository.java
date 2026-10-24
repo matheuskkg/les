@@ -47,6 +47,9 @@ public interface LivroJpaRepository extends JpaRepository<LivroJpa, Long>, JpaSp
             """)
     List<AutorDoLivroProjecao> buscarAutoresPorLivro(@Param("livroIds") Collection<Long> livroIds);
 
+    /** Livros pelos ids, inclusive inativos, para a leitura do carrinho (RF-VEN-001). */
+    List<LivroJpa> findByIdIn(Collection<Long> livroIds);
+
     /** Categorias dos livros da página em uma única consulta, sem N+1 (RF-LIV-005, RN-LIV-002). */
     @Query("""
             select l.id as livroId, c.id as categoriaId, c.nome as nome
