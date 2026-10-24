@@ -1,5 +1,5 @@
 import { type Page } from '@playwright/test';
-import { entrarComo, expect, test } from './fixtures';
+import { entrarComo, expect, sair, test } from './fixtures';
 
 const NOVA = {
   nome: 'Fernanda Lima',
@@ -52,14 +52,14 @@ async function tentarEntrar(page: Page, login: string, senha: string): Promise<v
 }
 
 test.describe('Jornada do cliente (E2E-02)', () => {
-  test('do cadastro ao encerramento da conta e ao novo cadastro com o mesmo CPF', async ({ page, ajustarRelogio }) => {
+  test('do cadastro ao encerramento da conta e ao novo cadastro com o mesmo CPF (RF-CLI-001 a RF-CLI-007, DEC-10)', async ({ page, ajustarRelogio }) => {
     test.setTimeout(90_000);
 
     // RF-CLI-001: cadastro com endereço; a conta já entra logada.
     await cadastrar(page);
 
     // DEC-10: login por e-mail.
-    await page.getByRole('banner').getByRole('button', { name: 'Sair' }).click();
+    await sair(page);
     await entrarComo(page, NOVA.email, NOVA.senha);
 
     // RF-CLI-002: alteração dos dados cadastrais.
@@ -88,7 +88,7 @@ test.describe('Jornada do cliente (E2E-02)', () => {
     await page.getByRole('button', { name: 'Adicionar cartão' }).click();
     await page.locator('#cartao-numero').fill('4111 1111 1111 1111');
     await page.locator('#cartao-nome').fill('FERNANDA LIMA');
-    await page.locator('#cartao-bandeira').selectOption('1');
+    await page.locator('#cartao-bandeira').selectOption({ label: 'Visa' });
     await page.locator('#cartao-validade').fill('2025-01');
     await page.getByRole('button', { name: 'Salvar cartão' }).click();
     await expect(page.getByText('A validade não pode estar vencida.')).toBeVisible();
@@ -107,11 +107,11 @@ test.describe('Jornada do cliente (E2E-02)', () => {
     await expect(page.getByText('Senha alterada.')).toBeVisible();
 
     // DEC-10: login por telefone com a nova senha.
-    await page.getByRole('banner').getByRole('button', { name: 'Sair' }).click();
+    await sair(page);
     await entrarComo(page, NOVA.telefone, NOVA.novaSenha);
 
     // RF-CLI-004: o administrador encontra a cliente pelo CPF.
-    await page.getByRole('banner').getByRole('button', { name: 'Sair' }).click();
+    await sair(page);
     await entrarComo(page, 'admin@livraria.test', 'Admin@123');
     await page.goto('/admin/clientes');
     await page.getByLabel('CPF', { exact: true }).fill(NOVA.cpf);
@@ -120,7 +120,7 @@ test.describe('Jornada do cliente (E2E-02)', () => {
     await page.getByRole('link', { name: 'Fernanda Lima Rocha' }).click();
     await expect(page.getByRole('heading', { name: 'Fernanda Lima Rocha' })).toBeVisible();
     await expect(page.getByText('147.258.369-82')).toBeVisible();
-    await page.getByRole('banner').getByRole('button', { name: 'Sair' }).click();
+    await sair(page);
 
     // RF-CLI-003 / DEC-10: inativar e entrar de novo reativa a conta.
     await entrarComo(page, NOVA.email, NOVA.novaSenha);
@@ -133,7 +133,7 @@ test.describe('Jornada do cliente (E2E-02)', () => {
     await tentarEntrar(page, NOVA.email, NOVA.novaSenha);
     await expect(page.getByRole('alert')).toHaveText('Login ou senha inválidos.');
 
-    // Com a conta encerrada, o mesmo CPF pode ser cadastrado de novo.
+    // Com a conta encerrada, o mesmo CPF (e o mesmo e-mail, que deixou de estar em uso) pode ser cadastrado de novo.
     await cadastrar(page);
   });
 });

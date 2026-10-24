@@ -45,21 +45,38 @@ export async function entrarComo(page: Page, login: string, senha: string): Prom
   await expect(page.getByRole('banner').getByRole('button', { name: 'Sair' })).toBeVisible();
 }
 
+/** Sai pelo botão do cabeçalho. */
+export async function sair(page: Page): Promise<void> {
+  await page.getByRole('banner').getByRole('button', { name: 'Sair' }).click();
+}
+
+/** Põe um Dom Casmurro (livro 1, R$ 47,88) no carrinho pela página do livro. */
+export async function adicionarDomCasmurro(page: Page): Promise<void> {
+  await page.goto('/livros/1');
+  await page.getByRole('button', { name: 'Adicionar ao carrinho' }).click();
+  await expect(page.getByText('Adicionado ao carrinho.')).toBeVisible();
+}
+
 /**
  * A cliente já logada compra um Dom Casmurro (R$ 47,88) para o primeiro endereço, em SP (frete R$ 12,00), pagando com
  * o cartão salvo de final {@link finalDoCartao}, e devolve o número do pedido aprovado (RF-VEN-008).
  */
 export async function comprarDomCasmurro(page: Page, finalDoCartao: string, idDoCartao: number): Promise<string> {
-  await page.goto('/livros/1');
-  await page.getByRole('button', { name: 'Adicionar ao carrinho' }).click();
-  await expect(page.getByText('Adicionado ao carrinho.')).toBeVisible();
+  await adicionarDomCasmurro(page);
   await page.goto('/carrinho');
   await page.getByRole('button', { name: 'Ir para pagamento' }).click();
   await expect(page.getByTestId('restante')).toHaveText('R$ 59,88');
   await page.getByRole('group', { name: 'Cartões' }).getByLabel(new RegExp(finalDoCartao)).check();
   await page.locator(`#cartao-${idDoCartao}-cvv`).fill('123');
   await page.getByRole('button', { name: 'Finalizar compra' }).click();
+  return numeroDoPedidoAprovado(page);
+}
+
+/** Lê o número do pedido na confirmação de compra aprovada (RF-VEN-008). */
+export async function numeroDoPedidoAprovado(page: Page): Promise<string> {
   const aprovado = page.getByTestId('pedido-aprovado');
   await expect(aprovado).toContainText(/Pedido nº \d+ realizado/);
-  return /Pedido nº (\d+)/.exec((await aprovado.textContent()) ?? '')?.[1] ?? '';
+  const numero = /Pedido nº (\d+)/.exec((await aprovado.textContent()) ?? '')?.[1];
+  expect(numero, 'número do pedido aprovado').toBeTruthy();
+  return numero ?? '';
 }

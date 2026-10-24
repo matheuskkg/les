@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { entrarComo, expect, test } from './fixtures';
+import { adicionarDomCasmurro, entrarComo, expect, test } from './fixtures';
 
 // Prazos do VEN-02 e VEN-03: carrinho de 30 min com aviso 5 min antes; checkout de 60 min (DEC-12).
 const ANA = { login: 'ana.souza@livraria.test', senha: 'Senha@123' };
@@ -8,19 +8,13 @@ function daquiA(minutos: number): string {
   return new Date(Date.now() + minutos * 60_000).toISOString();
 }
 
-async function adicionarDomCasmurro(page: Page): Promise<void> {
-  await page.goto('/livros/1');
-  await page.getByRole('button', { name: 'Adicionar ao carrinho' }).click();
-  await expect(page.getByText('Adicionado ao carrinho.')).toBeVisible();
-}
-
 function contador(page: Page, naoLidas: number) {
   const nome = naoLidas > 0 ? `Notificações: ${naoLidas} não lidas` : 'Notificações';
   return page.getByRole('banner').getByRole('link', { name: nome, exact: true });
 }
 
 test.describe('Expiração e notificações com relógio controlado (E2E-05)', () => {
-  test('carrinho avisa, expira por SSE sem recarregar e os avisos são marcados como lidos', async ({
+  test('carrinho avisa, expira por SSE sem recarregar e os avisos são marcados como lidos (RN-VEN-014, DEC-13)', async ({
     page,
     ajustarRelogio,
   }) => {
@@ -51,7 +45,7 @@ test.describe('Expiração e notificações com relógio controlado (E2E-05)', (
     await expect(contador(page, 0)).toBeVisible();
   });
 
-  test('checkout vencido leva os itens aos removidos e notifica CHECKOUT_EXPIRADO', async ({
+  test('checkout vencido leva os itens aos removidos e notifica CHECKOUT_EXPIRADO (RN-VEN-014, RNF-VEN-001)', async ({
     page,
     ajustarRelogio,
   }) => {

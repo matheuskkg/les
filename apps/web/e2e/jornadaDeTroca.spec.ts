@@ -1,20 +1,16 @@
 import type { Page } from '@playwright/test';
-import { comprarDomCasmurro, entrarComo, expect, test } from './fixtures';
+import { adicionarDomCasmurro, comprarDomCasmurro, entrarComo, expect, sair, test } from './fixtures';
 
 // A Ana compra um Dom Casmurro (R$ 47,88 + frete de SP R$ 12,00) com o Visa final 1111 (cartão 1).
 const ANA = { login: 'ana.souza@livraria.test', senha: 'Senha@123' };
 const ADMIN = { login: 'admin@livraria.test', senha: 'Admin@123' };
-
-async function sair(page: Page): Promise<void> {
-  await page.getByRole('banner').getByRole('button', { name: 'Sair' }).click();
-}
 
 async function estoqueDoDomCasmurro(page: Page, esperado: number): Promise<void> {
   await page.goto('/livros/1');
   await expect(page.getByText(`Em estoque: ${esperado}`)).toBeVisible();
 }
 
-test('jornada de troca: entregue, trocado com retorno ao estoque e cupom usado na compra seguinte (E2E-04)', async ({
+test('jornada de troca: entregue, trocado com retorno ao estoque e cupom usado na compra seguinte (E2E-04, RF-VEN-011 a RF-VEN-015)', async ({
   page,
 }) => {
   test.setTimeout(90_000);
@@ -58,11 +54,10 @@ test('jornada de troca: entregue, trocado com retorno ao estoque e cupom usado n
   const conclusao = page.getByText(/foi concluída\. O cupom de troca TROCA-\d+, de R\$ 47,88/);
   await expect(conclusao).toBeVisible();
   const cupom = /TROCA-\d+/.exec((await conclusao.textContent()) ?? '')?.[0] ?? '';
+  expect(cupom, 'código do cupom de troca').toBeTruthy();
 
   // Nova compra: o cupom de troca abate o livro e o cartão paga só o frete (RF-VEN-007, RN-VEN-005).
-  await page.goto('/livros/1');
-  await page.getByRole('button', { name: 'Adicionar ao carrinho' }).click();
-  await expect(page.getByText('Adicionado ao carrinho.')).toBeVisible();
+  await adicionarDomCasmurro(page);
   await page.goto('/carrinho');
   await page.getByRole('button', { name: 'Ir para pagamento' }).click();
   await expect(page.getByTestId('restante')).toHaveText('R$ 59,88');
@@ -75,9 +70,7 @@ test('jornada de troca: entregue, trocado com retorno ao estoque e cupom usado n
   await expect(page.getByTestId('pedido-aprovado')).toContainText(/Pedido nº \d+ realizado/);
 
   // O cupom foi usado e não aparece mais para a próxima compra.
-  await page.goto('/livros/1');
-  await page.getByRole('button', { name: 'Adicionar ao carrinho' }).click();
-  await expect(page.getByText('Adicionado ao carrinho.')).toBeVisible();
+  await adicionarDomCasmurro(page);
   await page.goto('/carrinho');
   await page.getByRole('button', { name: 'Ir para pagamento' }).click();
   await expect(page.getByTestId('restante')).toHaveText('R$ 59,88');

@@ -1,10 +1,10 @@
-import { entrarComo, expect, test } from './fixtures';
+import { entrarComo, expect, numeroDoPedidoAprovado, sair, test } from './fixtures';
 
 // A Ana compra dois Dom Casmurro (R$ 47,88 cada) para o endereço "Trabalho", com cobrança em "Casa". O Visa final
 // 1111 é o cartão salvo dela; o terminado em 0000 é sempre recusado pela operadora simulada (DEC-05.2).
 const ANA = { login: 'ana.souza@livraria.test', senha: 'Senha@123' };
 
-test('jornada de compra: reprovada, aprovada com dois cartões e cupom, despachada e entregue (E2E-03)', async ({
+test('jornada de compra: reprovada, aprovada com dois cartões e cupom, despachada e entregue (E2E-03, RF-VEN-001 a RF-VEN-010)', async ({
   page,
 }) => {
   test.setTimeout(90_000);
@@ -59,9 +59,7 @@ test('jornada de compra: reprovada, aprovada com dois cartões e cupom, despacha
   await page.locator('#cartao-novo-valor').fill('49,76');
   await page.getByRole('button', { name: 'Finalizar compra' }).click();
 
-  const aprovado = page.getByTestId('pedido-aprovado');
-  await expect(aprovado).toContainText(/Pedido nº \d+ realizado/);
-  const numero = /Pedido nº (\d+)/.exec((await aprovado.textContent()) ?? '')?.[1] ?? '';
+  const numero = await numeroDoPedidoAprovado(page);
 
   // APROVADA: estoque baixado (RF-EST-003) e cliente notificada (DEC-13).
   await page.goto('/livros/1');
@@ -70,10 +68,9 @@ test('jornada de compra: reprovada, aprovada com dois cartões e cupom, despacha
   await expect(page.getByText(new RegExp(`${numero}.*aprovado|aprovado.*${numero}`, 'i')).first()).toBeVisible();
 
   // O administrador despacha e confirma a entrega (RF-VEN-009, RF-VEN-010).
-  await page.getByRole('banner').getByRole('button', { name: 'Sair' }).click();
+  await sair(page);
   await entrarComo(page, 'admin@livraria.test', 'Admin@123');
-  await page.goto('/admin/pedidos');
-  await page.getByRole('row', { name: new RegExp(numero) }).getByRole('link', { name: numero }).click();
+  await page.goto(`/admin/pedidos/${numero}`);
   await expect(page.getByTestId('status-do-pedido')).toHaveText('APROVADA');
   await expect(page.getByTestId('total-do-pedido')).toHaveText('R$ 99,76');
   await page.getByRole('button', { name: 'Despachar' }).click();
@@ -82,10 +79,10 @@ test('jornada de compra: reprovada, aprovada com dois cartões e cupom, despacha
   await expect(page.getByTestId('status-do-pedido')).toHaveText('ENTREGUE');
 
   // A cliente vê o pedido entregue em "Meus pedidos" (RF-CLI-005).
-  await page.getByRole('banner').getByRole('button', { name: 'Sair' }).click();
+  await sair(page);
   await entrarComo(page, ANA.login, ANA.senha);
   await page.goto('/minha-conta/pedidos');
-  const linha = page.getByRole('row', { name: new RegExp(numero) });
+  const linha = page.getByRole('row').filter({ has: page.getByRole('link', { name: numero, exact: true }) });
   await expect(linha).toContainText('ENTREGUE');
   await expect(linha).toContainText('R$ 99,76');
 });

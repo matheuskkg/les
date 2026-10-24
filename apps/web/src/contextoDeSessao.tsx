@@ -21,9 +21,9 @@ export function SessaoProvider({ children }: { children: ComponentChildren }) {
   const [usuario, definirUsuario] = useState<Usuario | null>(null);
   const [carregando, definirCarregando] = useState(true);
   const { route } = useLocation();
-  // O tratador de 401 é registrado uma vez; lê o usuário atual por aqui.
-  const usuarioAtual = useRef<Usuario | null>(null);
-  usuarioAtual.current = usuario;
+  // Marcado de forma síncrona ao sair ou inativar, antes de qualquer await: um 401 que
+  // chegue nesse meio-tempo (ex.: o stream SSE fechado pelo server) não leva ao login.
+  const encerrando = useRef(false);
 
   // GET /api/sessao ao iniciar; qualquer falha é tratada como "sem sessão".
   useEffect(() => {
@@ -55,9 +55,7 @@ export function SessaoProvider({ children }: { children: ComponentChildren }) {
   // caminho atual para retornar depois de entrar.
   useEffect(() => {
     return definirTratadorDeNaoAutorizado(() => {
-      // Sem ninguém logado não há sessão a perder (ex.: o stream SSE fechado logo
-      // depois de sair ou inativar a conta), então não há o que redirecionar.
-      if (usuarioAtual.current === null) {
+      if (encerrando.current) {
         return;
       }
       if (location.pathname === '/login') {
@@ -69,7 +67,7 @@ export function SessaoProvider({ children }: { children: ComponentChildren }) {
       void Login.preload()
         .catch(() => undefined)
         .then(() => {
-          if (usuarioAtual.current === null) {
+          if (encerrando.current) {
             return;
           }
           definirUsuario(null);
@@ -78,7 +76,13 @@ export function SessaoProvider({ children }: { children: ComponentChildren }) {
     });
   }, [route]);
 
+  function definirUsuarioDaSessao(novo: Usuario | null): void {
+    encerrando.current = false;
+    definirUsuario(novo);
+  }
+
   async function encerrarSessao(): Promise<void> {
+    encerrando.current = true;
     try {
       await sair();
     } catch {
@@ -88,16 +92,17 @@ export function SessaoProvider({ children }: { children: ComponentChildren }) {
   }
 
   async function voltarAVitrineSemSessao(): Promise<void> {
+    encerrando.current = true;
     // Garante que a vitrine já está carregada antes de limpar o usuário: assim o
     // Router troca de rota no mesmo commit e a Protegida não redireciona ao login.
     await Vitrine.preload().catch(() => undefined);
 
     definirUsuario(null);
-    route('/');
+    route('/', true);
   }
 
   return (
-    <Contexto.Provider value={{ usuario, carregando, definirUsuario, encerrarSessao, voltarAVitrineSemSessao }}>
+    <Contexto.Provider value={{ usuario, carregando, definirUsuario: definirUsuarioDaSessao, encerrarSessao, voltarAVitrineSemSessao }}>
       {children}
     </Contexto.Provider>
   );
