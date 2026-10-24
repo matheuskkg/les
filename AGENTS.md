@@ -38,6 +38,19 @@ Variáveis do profile `postgres`: `DB_PORTA` (padrão `5432`, usada pelo Compose
 exemplo, `DB_PORTA=5433` se a 5432 estiver ocupada), `DB_USUARIO` e `DB_SENHA` (padrão `livraria`) e `DB_URL`
 (sobrescreve a URL inteira).
 
+Comandos do `web` (rodar em `apps/web`):
+
+```bash
+npm install                                 # instala as dependências (lista fechada em DEC-01 e DEC-07)
+npm run dev                                 # Vite em http://localhost:5173, com proxy de /api e /v3 para o server
+npm run build                               # checagem de tipos + build em apps/web/dist
+npm run gerar-api                           # regenera src/api/esquema.d.ts a partir de openapi.json
+npm run typecheck                           # só a checagem de tipos
+```
+
+O jar único da demonstração é montado rodando `npm run build` em `apps/web` e depois `mvn package` em
+`apps/server` (o server copia `apps/web/dist` para `static/`, DEC-09).
+
 ## Escopo do MVP
 
 O objetivo atual é um MVP. Prioridades:
