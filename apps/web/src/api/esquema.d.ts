@@ -678,15 +678,15 @@ export interface components {
              * Format: decimal
              * @example 1234.56
              */
-            precoUnitario: string;
+            precoUnitario?: string;
             /** Format: int32 */
             quantidade: number;
             /**
              * Format: decimal
              * @example 1234.56
              */
-            subtotal: string;
-            titulo: string;
+            subtotal?: string;
+            titulo?: string;
         };
         LivroDetalheDto: {
             altura: number;

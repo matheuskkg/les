@@ -32,6 +32,12 @@ public class CarrinhoRepositorioJpa implements CarrinhoRepositorio {
 
     @Override
     @Transactional
+    public Optional<Carrinho> buscarPorClienteParaAlterar(Long clienteId) {
+        return repositorio.buscarPorClienteComLock(clienteId).map(CarrinhoRepositorioJpa::paraDominio);
+    }
+
+    @Override
+    @Transactional
     public Carrinho salvar(Carrinho carrinho) {
         CarrinhoJpa entidade = carrinho.getId() == null
                 ? new CarrinhoJpa()

@@ -35,10 +35,11 @@ function LinhaDoCarrinho({
     <li class="item-da-conta">
       <div>
         <a href={`/livros/${item.livroId}`}>
-          <strong>{item.titulo}</strong>
+          <strong>{item.titulo ?? `Livro ${item.livroId}`}</strong>
         </a>
         <br />
-        {item.autores.join('; ')} · {formatarDinheiro(item.precoUnitario)} cada
+        {item.titulo === undefined ? 'Livro indisponível' : item.autores.join('; ')} ·{' '}
+        {item.precoUnitario ? `${formatarDinheiro(item.precoUnitario)} cada` : 'Fora de venda: remova do carrinho'}
       </div>
       <div class="item-da-conta__acoes">
         <label class="adicionar-ao-carrinho__quantidade">
@@ -58,7 +59,7 @@ function LinhaDoCarrinho({
             }}
           />
         </label>
-        <strong>{formatarDinheiro(item.subtotal)}</strong>
+        {item.subtotal && <strong>{formatarDinheiro(item.subtotal)}</strong>}
         <button class="botao botao--secundario" type="button" onClick={() => remover(item.livroId)}>
           Remover
         </button>

@@ -151,6 +151,29 @@ class CarrinhoIntegracaoTest {
     }
 
     @Test
+    void rnVen001_renovarOPrazoNaoRessuscitaReservaVencidaSemEstoque() throws Exception {
+        adicionar(ANA, 7, 6).andExpect(status().isOk());
+        AGORA.set(INICIO.plusHours(1));
+        adicionar(BRUNO, 7, 6).andExpect(status().isOk());
+
+        adicionar(ANA, 1, 1)
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.violacoes[*].codigo", hasItem("RN-VEN-001")));
+        mvc.perform(get("/api/livros/7")).andExpect(jsonPath("$.disponivel").value(0));
+    }
+
+    @Test
+    void rnVen014_alterarComPrazoVencidoReservaDeNovoTodoOCarrinho() throws Exception {
+        adicionar(ANA, 1, 1).andExpect(status().isOk());
+        adicionar(ANA, 7, 2).andExpect(status().isOk());
+        AGORA.set(INICIO.plusHours(1));
+
+        escrever(put("/api/me/carrinho/itens/1"), ANA, "{\"quantidade\":2}").andExpect(status().isOk());
+
+        mvc.perform(get("/api/livros/7")).andExpect(jsonPath("$.disponivel").value(4));
+    }
+
+    @Test
     void rfVen001_livroSemPrecoOuInexistenteResponde422() throws Exception {
         adicionar(ANA, 20, 1).andExpect(status().isUnprocessableContent());
         adicionar(ANA, 999_999, 1).andExpect(status().isUnprocessableContent());

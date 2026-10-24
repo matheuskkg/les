@@ -2074,7 +2074,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "autores", "livroId", "precoUnitario", "quantidade", "subtotal", "titulo" ]
+        "required" : [ "autores", "livroId", "quantidade" ]
       },
       "LivroDetalheDto" : {
         "type" : "object",

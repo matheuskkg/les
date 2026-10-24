@@ -2,6 +2,7 @@ package br.fatec.les.livraria.vendas.aplicacao;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,7 @@ public class MontarCarrinhoConsultado {
 
         Dinheiro subtotal = itens.stream()
                 .map(ItemDoCarrinho::subtotal)
+                .filter(Objects::nonNull)
                 .reduce(Dinheiro.ZERO, Dinheiro::somar);
         int quantidadeDeItens = itens.stream().mapToInt(ItemDoCarrinho::quantidade).sum();
 
@@ -50,8 +52,9 @@ public class MontarCarrinhoConsultado {
         LivroParaVenda livro = livros.get(item.getLivroId());
         String titulo = livro == null ? null : livro.titulo();
         List<String> autores = livro == null ? List.of() : livro.autores();
-        Dinheiro preco = precos.getOrDefault(item.getLivroId(), Dinheiro.ZERO);
+        // Sem preço (livro fora de venda), o item aparece sem valor e fica fora do subtotal.
+        Dinheiro preco = precos.get(item.getLivroId());
         return new ItemDoCarrinho(item.getLivroId(), titulo, autores, preco, item.getQuantidade(),
-                preco.multiplicar(item.getQuantidade()));
+                preco == null ? null : preco.multiplicar(item.getQuantidade()));
     }
 }

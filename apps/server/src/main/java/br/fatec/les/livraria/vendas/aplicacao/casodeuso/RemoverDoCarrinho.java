@@ -35,7 +35,7 @@ public class RemoverDoCarrinho {
     @Transactional
     public CarrinhoConsultado executar(Long livroId) {
         Long clienteId = identificarCliente.executar();
-        Carrinho carrinho = carrinhos.buscarPorCliente(clienteId)
+        Carrinho carrinho = carrinhos.buscarPorClienteParaAlterar(clienteId)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Carrinho não encontrado."));
         carrinho.item(livroId)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Item não encontrado no carrinho."));
