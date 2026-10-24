@@ -1,6 +1,7 @@
 import { render } from 'preact';
 import { LocationProvider } from 'preact-iso';
 import { App } from './app';
+import { NotificacoesProvider } from './contextoDeNotificacoes';
 import { SessaoProvider } from './contextoDeSessao';
 import './estilos.css';
 
@@ -12,7 +13,9 @@ if (!elemento) {
 render(
   <LocationProvider>
     <SessaoProvider>
-      <App />
+      <NotificacoesProvider>
+        <App />
+      </NotificacoesProvider>
     </SessaoProvider>
   </LocationProvider>,
   elemento,

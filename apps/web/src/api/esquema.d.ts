@@ -4,6 +4,91 @@
  */
 
 export interface paths {
+    "/api/admin/eventos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Abre o stream SSE das notificações do administrador */
+        get: operations["eventosDoAdmin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/notificacoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista as notificações do administrador, não lidas primeiro e mais recentes antes */
+        get: operations["listarNotificacoesDoAdmin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/notificacoes/ler-todas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marca todas as notificações do administrador como lidas */
+        post: operations["marcarTodasComoLidasDoAdmin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/notificacoes/nao-lidas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Conta as notificações não lidas do administrador */
+        get: operations["contarNaoLidasDoAdmin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/notificacoes/{id}/ler": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marca uma notificação do administrador como lida */
+        post: operations["marcarComoLidaDoAdmin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clientes": {
         parameters: {
             query?: never;
@@ -69,6 +154,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/eventos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Abre o stream SSE das notificações do cliente */
+        get: operations["meusEventos"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/notificacoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista as notificações do cliente, não lidas primeiro e mais recentes antes */
+        get: operations["listarNotificacoesDoCliente"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/notificacoes/ler-todas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marca todas as notificações do cliente como lidas */
+        post: operations["marcarTodasComoLidasDoCliente"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/notificacoes/nao-lidas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Conta as notificações não lidas do cliente */
+        get: operations["contarNaoLidasDoCliente"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/notificacoes/{id}/ler": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marca uma notificação do cliente como lida */
+        post: operations["marcarComoLidaDoCliente"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sessao": {
         parameters: {
             query?: never;
@@ -81,7 +251,7 @@ export interface paths {
         put?: never;
         /** Entra no sistema e grava o cookie de sessão */
         post: operations["entrar"];
-        /** Encerra a sessão e apaga o cookie */
+        /** Encerra a sessão, fecha os canais SSE e apaga o cookie */
         delete: operations["sair"];
         options?: never;
         head?: never;
@@ -122,6 +292,10 @@ export interface components {
         ClienteCriado: {
             /** Format: int64 */
             id: number;
+        };
+        ContagemDeNaoLidasDto: {
+            /** Format: int64 */
+            quantidade: number;
         };
         EnderecoDoCadastro: {
             bairro: string;
@@ -186,6 +360,20 @@ export interface components {
             precoVenda?: string;
             titulo: string;
         };
+        NotificacaoDto: {
+            /** Format: date-time */
+            criadaEm: string;
+            /** Format: int64 */
+            id: number;
+            /** Format: date-time */
+            lidaEm?: string;
+            mensagem: string;
+            recurso?: string;
+            /** Format: int64 */
+            recursoId?: number;
+            /** @enum {string} */
+            tipo: "CARRINHO_EXPIRANDO" | "CHECKOUT_EXPIRANDO" | "CARRINHO_EXPIRADO" | "CHECKOUT_EXPIRADO" | "PEDIDO_APROVADO" | "PEDIDO_REPROVADO" | "PEDIDO_DESPACHADO" | "PEDIDO_ENTREGUE" | "TROCA_AUTORIZADA" | "TROCA_RECUSADA" | "TROCA_CONCLUIDA" | "TROCA_SOLICITADA" | "PEDIDO_AGUARDANDO_DESPACHO";
+        };
         PaginaCategoriaDto: {
             itens: components["schemas"]["CategoriaDto"][];
             /** Format: int32 */
@@ -199,6 +387,17 @@ export interface components {
         };
         PaginaLivroListadoDto: {
             itens: components["schemas"]["LivroListadoDto"][];
+            /** Format: int32 */
+            pagina: number;
+            /** Format: int32 */
+            tamanho: number;
+            /** Format: int64 */
+            totalItens: number;
+            /** Format: int32 */
+            totalPaginas: number;
+        };
+        PaginaNotificacaoDto: {
+            itens: components["schemas"]["NotificacaoDto"][];
             /** Format: int32 */
             pagina: number;
             /** Format: int32 */
@@ -228,6 +427,10 @@ export interface components {
             /** Format: int64 */
             usuarioId: number;
         };
+        SseEmitter: {
+            /** Format: int64 */
+            timeout?: number;
+        };
         TelefoneDoCadastro: {
             ddd: string;
             numero: string;
@@ -243,6 +446,120 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    eventosDoAdmin: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Last-Event-ID"?: number;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": components["schemas"]["SseEmitter"];
+                };
+            };
+        };
+    };
+    listarNotificacoesDoAdmin: {
+        parameters: {
+            query?: {
+                /** @description Página, a partir de 0. */
+                pagina?: number;
+                /** @description Itens por página (padrão 20, máximo 100). */
+                tamanho?: number;
+                /** @description Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: id, tipo, criadaEm, lidaEm, lida. Padrão: lida,asc, criadaEm,desc, id,desc. */
+                ordem?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginaNotificacaoDto"];
+                };
+            };
+        };
+    };
+    marcarTodasComoLidasDoAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Notificações marcadas como lidas */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    contarNaoLidasDoAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ContagemDeNaoLidasDto"];
+                };
+            };
+        };
+    };
+    marcarComoLidaDoAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Notificação marcada como lida */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Notificação não encontrada para o administrador */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     cadastrar: {
         parameters: {
             query?: never;
@@ -370,6 +687,120 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["LivroDetalheDto"];
                 };
+            };
+        };
+    };
+    meusEventos: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Last-Event-ID"?: number;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": components["schemas"]["SseEmitter"];
+                };
+            };
+        };
+    };
+    listarNotificacoesDoCliente: {
+        parameters: {
+            query?: {
+                /** @description Página, a partir de 0. */
+                pagina?: number;
+                /** @description Itens por página (padrão 20, máximo 100). */
+                tamanho?: number;
+                /** @description Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: id, tipo, criadaEm, lidaEm, lida. Padrão: lida,asc, criadaEm,desc, id,desc. */
+                ordem?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginaNotificacaoDto"];
+                };
+            };
+        };
+    };
+    marcarTodasComoLidasDoCliente: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Notificações marcadas como lidas */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    contarNaoLidasDoCliente: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ContagemDeNaoLidasDto"];
+                };
+            };
+        };
+    };
+    marcarComoLidaDoCliente: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Notificação marcada como lida */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Notificação não encontrada para o cliente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

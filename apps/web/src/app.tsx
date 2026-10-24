@@ -1,7 +1,16 @@
 import { Router, Route } from 'preact-iso';
 import { Cabecalho } from './componentes/Cabecalho';
 import { Protegida } from './componentes/Protegida';
-import { Admin, Cadastro, Livro, Login, MinhaConta, NaoEncontrada, Vitrine } from './paginas/telas';
+import {
+  Admin,
+  Cadastro,
+  Livro,
+  Login,
+  MinhaConta,
+  NaoEncontrada,
+  Notificacoes,
+  Vitrine,
+} from './paginas/telas';
 
 function AreaDoCliente() {
   return (
@@ -15,6 +24,22 @@ function AreaDoAdmin() {
   return (
     <Protegida papel="ADMIN">
       <Admin />
+    </Protegida>
+  );
+}
+
+function NotificacoesDoCliente() {
+  return (
+    <Protegida papel="CLIENTE">
+      <Notificacoes />
+    </Protegida>
+  );
+}
+
+function NotificacoesDoAdmin() {
+  return (
+    <Protegida papel="ADMIN">
+      <Notificacoes />
     </Protegida>
   );
 }
@@ -34,6 +59,8 @@ export function App() {
           <Route path="/livros/:id" component={Livro} />
           <Route path="/login" component={Login} />
           <Route path="/cadastro" component={Cadastro} />
+          <Route path="/minha-conta/notificacoes" component={NotificacoesDoCliente} />
+          <Route path="/admin/notificacoes" component={NotificacoesDoAdmin} />
           <Route path="/minha-conta" component={AreaDoCliente} />
           <Route path="/minha-conta/*" component={AreaDoCliente} />
           <Route path="/admin" component={AreaDoAdmin} />

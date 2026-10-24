@@ -46,6 +46,14 @@ export function definirTratadorDeNaoAutorizado(
   };
 }
 
+/**
+ * Avisa que a sessão acabou por um caminho que não passa pelo cliente HTTP, como o
+ * stream SSE recusado com 401 (DEC-13). Tem o mesmo efeito de um 401 da API.
+ */
+export function avisarSessaoEncerrada(): void {
+  tratadorDeNaoAutorizado?.();
+}
+
 function lerCookie(nome: string): string | null {
   const prefixo = `${nome}=`;
   for (const parte of document.cookie.split(';')) {

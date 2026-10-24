@@ -10,4 +10,5 @@ export const Login = lazy(() => import('./Login'));
 export const Cadastro = lazy(() => import('./Cadastro'));
 export const MinhaConta = lazy(() => import('./MinhaConta'));
 export const Admin = lazy(() => import('./Admin'));
+export const Notificacoes = lazy(() => import('./Notificacoes'));
 export const NaoEncontrada = lazy(() => import('./NaoEncontrada'));
