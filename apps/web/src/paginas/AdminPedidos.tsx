@@ -7,6 +7,7 @@ import { Erro } from '../componentes/Erro';
 import { formatarCpf } from '../filtrosDeClientes';
 import {
   ORDENS,
+  SITUACOES_DA_TROCA,
   STATUS,
   consultaDoEstado,
   filtrosVazios,
@@ -29,7 +30,47 @@ interface Resultado {
 const NUMERO_INVALIDO = 'O número do pedido deve ter só dígitos.';
 const CODIGO_INVALIDO = 'O código do cliente deve ter só dígitos.';
 
-/** Consulta de pedidos do administrador, com filtros combinados guardados na URL (RF-VEN-009, RF-VEN-010). */
+interface PropsDasOpcoes<T extends string> {
+  legenda: string;
+  name: string;
+  opcoes: readonly { valor: T; rotulo: string }[];
+  marcadas: T[];
+  aoMudar: (marcadas: T[]) => void;
+}
+
+/** Grupo de caixas combinadas com OU; as marcadas ficam na ordem da lista. */
+function OpcoesMarcaveis<T extends string>({ legenda, name, opcoes, marcadas, aoMudar }: PropsDasOpcoes<T>) {
+  return (
+    <fieldset class="grupo-de-categorias">
+      <legend>{legenda}</legend>
+      <div class="categorias">
+        {opcoes.map((opcao) => (
+          <label class="categoria-opcao" key={opcao.valor}>
+            <input
+              type="checkbox"
+              name={name}
+              value={opcao.valor}
+              checked={marcadas.includes(opcao.valor)}
+              onChange={() =>
+                aoMudar(
+                  marcadas.includes(opcao.valor)
+                    ? marcadas.filter((item) => item !== opcao.valor)
+                    : opcoes.map((item) => item.valor)
+                      .filter((valor) => valor === opcao.valor || marcadas.includes(valor)),
+                )}
+            />
+            {opcao.rotulo}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+/**
+ * Consulta de pedidos do administrador, com filtros combinados guardados na URL (RF-VEN-009, RF-VEN-010). A situação
+ * da troca filtra pelo status da troca mais recente do pedido (DEC-12).
+ */
 export default function AdminPedidos() {
   const { url, route } = useLocation();
   const busca = url.includes('?') ? url.slice(url.indexOf('?')) : '';
@@ -113,30 +154,10 @@ export default function AdminPedidos() {
         <CampoDeFormulario id="filtro-realizado-ate" rotulo="Realizado até" tipo="date" name="realizadoEmAte"
           valor={filtros.realizadoEmAte} aoMudar={(valor) => mudarCampo('realizadoEmAte', valor)} />
 
-        <fieldset class="grupo-de-categorias">
-          <legend>Status</legend>
-          <div class="categorias">
-            {STATUS.map((opcao) => (
-              <label class="categoria-opcao" key={opcao.valor}>
-                <input
-                  type="checkbox"
-                  name="status"
-                  value={opcao.valor}
-                  checked={filtros.status.includes(opcao.valor)}
-                  onChange={() =>
-                    definirFiltros((atual) => ({
-                      ...atual,
-                      status: atual.status.includes(opcao.valor)
-                        ? atual.status.filter((item) => item !== opcao.valor)
-                        : STATUS.map((item) => item.valor)
-                          .filter((valor) => valor === opcao.valor || atual.status.includes(valor)),
-                    }))}
-                />
-                {opcao.rotulo}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <OpcoesMarcaveis legenda="Status" name="status" opcoes={STATUS} marcadas={filtros.status}
+          aoMudar={(status) => definirFiltros((atual) => ({ ...atual, status }))} />
+        <OpcoesMarcaveis legenda="Situação da troca" name="situacao" opcoes={SITUACOES_DA_TROCA}
+          marcadas={filtros.situacao} aoMudar={(situacao) => definirFiltros((atual) => ({ ...atual, situacao }))} />
 
         <div class="acoes">
           <button class="botao" type="submit" disabled={!numeroValido(filtros.numero) || !numeroValido(filtros.clienteId)}>

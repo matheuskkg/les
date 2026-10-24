@@ -4,6 +4,7 @@ import { cliente, interpretarProblema, type ProblemaDetalhe } from '../../api/cl
 import type { components } from '../../api/esquema';
 import { CopiasDoPedido } from '../../componentes/CopiasDoPedido';
 import { Erro } from '../../componentes/Erro';
+import { useRecargaPorNotificacao } from '../../contextoDeNotificacoes';
 import { SolicitarTroca } from '../../componentes/SolicitarTroca';
 import { TrocasDoPedido } from '../../componentes/TrocasDoPedido';
 import { formatarDataHora, formatarDinheiro, textoDoStatus } from '../../formatacao';
@@ -145,6 +146,9 @@ export function MeuPedido({ id }: { id: string }) {
   const [recarga, definirRecarga] = useState(0);
   // Aviso da troca recém-pedida, preso ao pedido: sobrevive ao recarregamento, que pode esconder o formulário.
   const [trocaSolicitadaEm, definirTrocaSolicitadaEm] = useState<string | null>(null);
+
+  // Autorização e recusa da troca pelo admin chegam por notificação e atualizam o detalhe (DEC-13).
+  useRecargaPorNotificacao('troca', () => definirRecarga((atual) => atual + 1));
 
   useEffect(() => {
     const numero = Number(id);

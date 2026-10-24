@@ -5,6 +5,7 @@ const secoes = [
   { caminho: '/admin/clientes', rotulo: 'Clientes' },
   { caminho: '/admin/livros', rotulo: 'Livros' },
   { caminho: '/admin/pedidos', rotulo: 'Pedidos' },
+  { caminho: '/admin/trocas', rotulo: 'Trocas' },
   { caminho: '/admin/analise', rotulo: 'Análise de vendas' },
 ];
 
@@ -34,7 +35,7 @@ export default function Admin() {
       <div class="cartao">
         <h2>Em construção</h2>
         <p>
-          Clientes e pedidos já podem ser consultados pelas abas acima. Em breve você poderá ver a
+          Clientes, pedidos e trocas já podem ser consultados pelas abas acima. Em breve você poderá ver a
           análise de vendas com gráficos e exportação.
         </p>
       </div>

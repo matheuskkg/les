@@ -3,6 +3,7 @@ import { useRoute } from 'preact-iso';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/cliente';
 import type { components } from '../api/esquema';
 import { CopiasDoPedido } from '../componentes/CopiasDoPedido';
+import { AcoesDaTroca } from '../componentes/AcoesDaTroca';
 import { Erro } from '../componentes/Erro';
 import { TrocasDoPedido } from '../componentes/TrocasDoPedido';
 import { formatarDataHora, textoDoStatus } from '../formatacao';
@@ -26,7 +27,7 @@ const ACOES: Partial<Record<PedidoDetalhe['status'], { acao: Acao; rotulo: strin
 /**
  * Detalhe do pedido para o administrador com as cópias gravadas na finalização: cliente, endereços, itens,
  * cartões, cupons e valores (RF-VEN-009, RF-VEN-010, DEC-12). Daqui o admin despacha o pedido aprovado e
- * confirma a entrega do pedido em transporte.
+ * confirma a entrega do pedido em transporte, e autoriza ou recusa as trocas `EM TROCA` (RF-VEN-012).
  */
 export default function AdminPedido() {
   const { params } = useRoute();
@@ -110,6 +111,18 @@ export default function AdminPedido() {
     }
   }
 
+  /** Resposta da ação numa troca; ignorada se o admin já foi para outro pedido. Sem pedido, recarrega a tela. */
+  function aoAlterarTroca(daTela: string, alterado: PedidoDetalhe | null) {
+    if (idDaTela.current !== daTela) {
+      return;
+    }
+    if (alterado) {
+      definirResultado({ id: daTela, pedido: alterado, problema: null });
+    } else {
+      definirRecarga((atual) => atual + 1);
+    }
+  }
+
   return (
     <section class="pagina">
       <p>
@@ -147,7 +160,13 @@ export default function AdminPedido() {
             {problemaDaAcao?.id === id && <Erro problema={problemaDaAcao.problema} />}
           </div>
 
-          <TrocasDoPedido pedido={pedido} />
+          <TrocasDoPedido
+            pedido={pedido}
+            acoes={(troca) =>
+              troca.status === 'EM_TROCA' ? (
+                <AcoesDaTroca key={`${pedido.id}-${troca.id}`} troca={troca} aoAlterar={(alterado) => aoAlterarTroca(id, alterado)} />
+              ) : null}
+          />
           <CopiasDoPedido pedido={pedido} linkDoCliente={`/admin/clientes/${pedido.cliente.id}`} />
         </>
       )}

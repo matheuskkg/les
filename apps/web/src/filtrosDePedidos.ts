@@ -4,10 +4,16 @@ import { textoDoStatus } from './formatacao.ts';
 /** Parâmetros de `GET /api/admin/pedidos`, como definidos no contrato (RF-VEN-009, DEC-07). */
 export type ConsultaDePedidos = NonNullable<paths['/api/admin/pedidos']['get']['parameters']['query']>;
 export type StatusDoPedido = NonNullable<ConsultaDePedidos['status']>[number];
+export type SituacaoDaTroca = NonNullable<ConsultaDePedidos['situacao']>[number];
 
 /** Status do pedido na ordem do ciclo da venda, com o texto do DRS (DEC-12). */
 export const STATUS: readonly { valor: StatusDoPedido; rotulo: string }[] = (
   ['EM_PROCESSAMENTO', 'APROVADA', 'REPROVADA', 'EM_TRANSPORTE', 'ENTREGUE'] as const
+).map((valor) => ({ valor, rotulo: textoDoStatus(valor) }));
+
+/** Situações do indicador de troca: o status da troca mais recente do pedido (DEC-12). */
+export const SITUACOES_DA_TROCA: readonly { valor: SituacaoDaTroca; rotulo: string }[] = (
+  ['EM_TROCA', 'TROCA_AUTORIZADA', 'TROCA_RECUSADA', 'TROCADO'] as const
 ).map((valor) => ({ valor, rotulo: textoDoStatus(valor) }));
 
 export const ORDENS: readonly { valor: string; rotulo: string }[] = [
@@ -27,6 +33,7 @@ export type CampoDeTexto = (typeof CAMPOS_DE_TEXTO)[number];
 /** Filtros da consulta, guardados como vêm do formulário e da URL. */
 export interface FiltrosDePedidos extends Record<CampoDeTexto, string> {
   status: StatusDoPedido[];
+  situacao: SituacaoDaTroca[];
 }
 
 /** Estado da tela: filtros, ordenação e página (a partir de 1 na URL). */
@@ -37,7 +44,13 @@ export interface EstadoDaConsulta {
 }
 
 export function filtrosVazios(): FiltrosDePedidos {
-  return { numero: '', clienteId: '', cliente: '', cpf: '', realizadoEmDe: '', realizadoEmAte: '', status: [] };
+  return { numero: '', clienteId: '', cliente: '', cpf: '', realizadoEmDe: '', realizadoEmAte: '', status: [], situacao: [] };
+}
+
+/** Opções conhecidas entre os valores lidos, sem repetição e na ordem da lista. */
+function lerOpcoes<T extends string>(valores: string[], opcoes: readonly { valor: T }[]): T[] {
+  const lidos = new Set(valores.map((valor) => valor.trim()));
+  return opcoes.map((opcao) => opcao.valor).filter((valor) => lidos.has(valor));
 }
 
 /** Lê o estado da query string; valores desconhecidos são ignorados. */
@@ -47,14 +60,8 @@ export function lerEstadoDaConsulta(busca: string): EstadoDaConsulta {
   for (const campo of CAMPOS_DE_TEXTO) {
     filtros[campo] = (parametros.get(campo) ?? '').trim();
   }
-  const status = new Set<StatusDoPedido>();
-  for (const valor of parametros.getAll('status')) {
-    const conhecido = STATUS.find((item) => item.valor === valor.trim());
-    if (conhecido !== undefined) {
-      status.add(conhecido.valor);
-    }
-  }
-  filtros.status = STATUS.map((item) => item.valor).filter((valor) => status.has(valor));
+  filtros.status = lerOpcoes(parametros.getAll('status'), STATUS);
+  filtros.situacao = lerOpcoes(parametros.getAll('situacao'), SITUACOES_DA_TROCA);
 
   const ordem = parametros.get('ordem');
   const pagina = Number.parseInt(parametros.get('pagina') ?? '', 10);
@@ -76,6 +83,9 @@ export function urlDaConsulta(estado: EstadoDaConsulta): string {
   }
   for (const valor of estado.filtros.status) {
     parametros.append('status', valor);
+  }
+  for (const valor of estado.filtros.situacao) {
+    parametros.append('situacao', valor);
   }
   if (estado.ordem !== ORDEM_PADRAO) {
     parametros.set('ordem', estado.ordem);
@@ -118,6 +128,9 @@ export function consultaDoEstado(estado: EstadoDaConsulta): ConsultaDePedidos {
   }
   if (estado.filtros.status.length > 0) {
     consulta.status = estado.filtros.status;
+  }
+  if (estado.filtros.situacao.length > 0) {
+    consulta.situacao = estado.filtros.situacao;
   }
   return consulta;
 }

@@ -1,13 +1,22 @@
+import type { ComponentChildren } from 'preact';
 import type { components } from '../api/esquema';
 import { formatarData, formatarDataHora, formatarDinheiro, textoDoStatus } from '../formatacao';
 
 type PedidoDetalhe = components['schemas']['PedidoDetalheDto'];
+type Troca = components['schemas']['TrocaDto'];
 
 /**
  * Indicador de troca do pedido e todas as trocas dele, da mais recente à mais antiga (DEC-12). O status do pedido
- * continua o da venda; a troca aparece ao lado, com a situação da mais recente e se ela é parcial ou total.
+ * continua o da venda; a troca aparece ao lado, com a situação da mais recente e se ela é parcial ou total. O admin
+ * passa `acoes` para autorizar ou recusar cada troca (RF-VEN-012).
  */
-export function TrocasDoPedido({ pedido }: { pedido: PedidoDetalhe }) {
+export function TrocasDoPedido({
+  pedido,
+  acoes,
+}: {
+  pedido: PedidoDetalhe;
+  acoes?: (troca: Troca) => ComponentChildren;
+}) {
   if (pedido.trocas.length === 0 && pedido.trocaAte === undefined) {
     return null;
   }
@@ -41,11 +50,12 @@ export function TrocasDoPedido({ pedido }: { pedido: PedidoDetalhe }) {
                 <th scope="col">Status</th>
                 <th scope="col">Itens</th>
                 <th scope="col">Cupom</th>
+                {acoes && <th scope="col">Ações</th>}
               </tr>
             </thead>
             <tbody>
               {pedido.trocas.map((troca) => (
-                <tr key={troca.id}>
+                <tr key={troca.id} data-testid={`troca-${troca.id}`}>
                   <td>{troca.id}</td>
                   <td>{formatarDataHora(troca.solicitadaEm)}</td>
                   <td>
@@ -63,6 +73,7 @@ export function TrocasDoPedido({ pedido }: { pedido: PedidoDetalhe }) {
                       .join('; ')}
                   </td>
                   <td>{troca.valorCupom ? formatarDinheiro(troca.valorCupom) : '—'}</td>
+                  {acoes && <td>{acoes(troca)}</td>}
                 </tr>
               ))}
             </tbody>

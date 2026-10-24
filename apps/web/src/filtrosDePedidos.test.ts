@@ -3,8 +3,12 @@ import test from 'node:test';
 import { consultaDoEstado, lerEstadoDaConsulta, numeroValido, urlDaConsulta } from './filtrosDePedidos.ts';
 
 test('lerEstadoDaConsulta usa os padrões e ignora valores desconhecidos', () => {
-  const estado = lerEstadoDaConsulta('?status=ENTREGUE&status=CANCELADO&status=APROVADA&ordem=cliente,asc&pagina=0');
+  const estado = lerEstadoDaConsulta(
+    '?status=ENTREGUE&status=CANCELADO&status=APROVADA&situacao=TROCADO&situacao=EM_TROCA&situacao=X'
+      + '&ordem=cliente,asc&pagina=0',
+  );
   assert.deepEqual(estado.filtros.status, ['APROVADA', 'ENTREGUE']);
+  assert.deepEqual(estado.filtros.situacao, ['EM_TROCA', 'TROCADO']);
   assert.equal(estado.ordem, 'realizadoEm,desc');
   assert.equal(estado.pagina, 1);
 });
@@ -12,7 +16,7 @@ test('lerEstadoDaConsulta usa os padrões e ignora valores desconhecidos', () =>
 test('urlDaConsulta e lerEstadoDaConsulta fazem ida e volta', () => {
   const estado = lerEstadoDaConsulta(
     '?numero=10001&clienteId=1&cliente=ana&cpf=529.982.247-25&realizadoEmDe=2026-10-01&realizadoEmAte=2026-10-24'
-      + '&status=APROVADA&status=EM_TRANSPORTE&ordem=total,asc&pagina=2',
+      + '&status=APROVADA&status=EM_TRANSPORTE&situacao=TROCA_RECUSADA&ordem=total,asc&pagina=2',
   );
   const url = urlDaConsulta(estado);
   assert.ok(url.startsWith('/admin/pedidos?'));
@@ -22,7 +26,9 @@ test('urlDaConsulta e lerEstadoDaConsulta fazem ida e volta', () => {
 
 test('consultaDoEstado omite vazios, converte o número e a página para a API', () => {
   const consulta = consultaDoEstado(
-    lerEstadoDaConsulta('?numero=%2010001%20&cliente=%20&status=APROVADA&realizadoEmAte=2026-10-24&pagina=3'),
+    lerEstadoDaConsulta(
+      '?numero=%2010001%20&cliente=%20&status=APROVADA&situacao=EM_TROCA&realizadoEmAte=2026-10-24&pagina=3',
+    ),
   );
   assert.deepEqual(consulta, {
     pagina: 2,
@@ -31,6 +37,7 @@ test('consultaDoEstado omite vazios, converte o número e a página para a API',
     numero: 10001,
     realizadoEmAte: '2026-10-24',
     status: ['APROVADA'],
+    situacao: ['EM_TROCA'],
   });
 });
 

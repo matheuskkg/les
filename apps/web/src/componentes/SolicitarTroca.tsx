@@ -52,10 +52,11 @@ export function SolicitarTroca({ pedido, aoSolicitar }: { pedido: PedidoDetalhe;
         .filter((item) => item.disponivelParaTroca > 0)
         .map((item) => (
           <div class="campo" key={item.id}>
-            <label for={`troca-${item.id}`}>
+            <label class="campo__rotulo" for={`troca-${item.id}`}>
               {item.livro.titulo} (até {item.disponivelParaTroca})
             </label>
             <input
+              class="campo__entrada"
               id={`troca-${item.id}`}
               type="number"
               inputMode="numeric"
