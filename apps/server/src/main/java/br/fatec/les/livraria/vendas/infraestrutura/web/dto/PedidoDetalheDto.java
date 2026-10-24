@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.compartilhado.infraestrutura.tempo.RelogioDoSistema;
 import br.fatec.les.livraria.vendas.dominio.pedido.ClienteNoPedido;
@@ -21,7 +23,7 @@ public record PedidoDetalheDto(
         Long id,
         StatusPedido status,
         Instant realizadoEm,
-        Instant entregueEm,
+        @Nullable Instant entregueEm,
         ClienteNoPedido cliente,
         EnderecoNoPedido enderecoEntrega,
         EnderecoNoPedido enderecoCobranca,

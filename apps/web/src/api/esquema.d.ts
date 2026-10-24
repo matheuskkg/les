@@ -836,7 +836,7 @@ export interface components {
             /** Format: int64 */
             id: number;
             nome: string;
-            telefone: string;
+            telefone?: string;
         };
         CompraFinalizadaDto: {
             /** Format: int64 */
@@ -889,7 +889,7 @@ export interface components {
             codigo: string;
             /** Format: int64 */
             id: number;
-            tipo: string;
+            tipo?: string;
         };
         CupomPedido: {
             cupom: components["schemas"]["CupomNoPedido"];
@@ -970,11 +970,11 @@ export interface components {
             cep: string;
             cidade: string;
             /** Format: int64 */
-            id: number;
+            id?: number;
             logradouro: string;
             nomeCurto: string;
             numero: string;
-            observacoes: string;
+            observacoes?: string;
             pais: string;
             tipoEndereco: string;
             tipoLogradouro: string;
@@ -1260,7 +1260,7 @@ export interface components {
             enderecoCobranca: components["schemas"]["EnderecoNoPedido"];
             enderecoEntrega: components["schemas"]["EnderecoNoPedido"];
             /** Format: date-time */
-            entregueEm: string;
+            entregueEm?: string;
             /**
              * Format: decimal
              * @example 1234.56

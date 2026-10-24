@@ -34,8 +34,8 @@ export default function Admin() {
       <div class="cartao">
         <h2>Em construção</h2>
         <p>
-          Em breve você poderá consultar clientes e pedidos, acompanhar o estoque e ver a análise
-          de vendas com gráficos e exportação.
+          Clientes e pedidos já podem ser consultados pelas abas acima. Em breve você poderá ver a
+          análise de vendas com gráficos e exportação.
         </p>
       </div>
     </section>
