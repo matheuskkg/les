@@ -7,6 +7,154 @@
   "servers" : [ {
     "url" : "/"
   } ],
-  "paths" : { },
-  "components" : { }
+  "paths" : {
+    "/api/sessao" : {
+      "delete" : {
+        "operationId" : "sair",
+        "responses" : {
+          "204" : {
+            "description" : "Sessão encerrada"
+          }
+        },
+        "summary" : "Encerra a sessão e apaga o cookie",
+        "tags" : [ "sessao-controller" ]
+      },
+      "get" : {
+        "operationId" : "obter",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Sessao"
+                }
+              }
+            },
+            "description" : "Usuário logado"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Sem sessão válida"
+          }
+        },
+        "summary" : "Consulta o usuário logado e emite o cookie CSRF",
+        "tags" : [ "sessao-controller" ]
+      },
+      "post" : {
+        "operationId" : "entrar",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/EntradaDeLogin"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Sessao"
+                }
+              }
+            },
+            "description" : "Sessão aberta"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Login ou senha em branco"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Login ou senha inválidos"
+          }
+        },
+        "summary" : "Entra no sistema e grava o cookie de sessão",
+        "tags" : [ "sessao-controller" ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "EntradaDeLogin" : {
+        "type" : "object",
+        "properties" : {
+          "login" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "senha" : {
+            "type" : "string",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "login", "senha" ]
+      },
+      "ProblemDetail" : {
+        "type" : "object",
+        "properties" : {
+          "detail" : {
+            "type" : "string"
+          },
+          "instance" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "properties" : {
+            "type" : "object",
+            "additionalProperties" : { }
+          },
+          "status" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "format" : "uri"
+          }
+        }
+      },
+      "Sessao" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string"
+          },
+          "papel" : {
+            "type" : "string",
+            "enum" : [ "CLIENTE", "ADMIN" ]
+          },
+          "usuarioId" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "email", "papel", "usuarioId" ]
+      }
+    }
+  }
 }

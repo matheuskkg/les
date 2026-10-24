@@ -112,6 +112,7 @@ public class ConfiguracaoDeSeguranca {
 
         http.authorizeHttpRequests(rotas -> {
             rotas.requestMatchers(HttpMethod.GET, "/api/livros/**").permitAll();
+            rotas.requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll();
             rotas.requestMatchers(HttpMethod.POST, "/api/clientes").permitAll();
             rotas.requestMatchers("/api/sessao", "/api/sessao/**").permitAll();
             rotas.requestMatchers(HttpMethod.GET, "/v3/api-docs/**").permitAll();

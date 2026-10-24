@@ -119,44 +119,6 @@ export const cliente = createClient<paths>({
 
 cliente.use(middlewareDeCsrf);
 
-export interface OpcoesDeRequisicao {
-  method?: string;
-  corpo?: unknown;
-}
-
-/**
- * Requisição simples para rotas que ainda não estão no contrato versionado
- * (as de sessão, por exemplo). Usa o mesmo tratamento de CSRF e de 401 do cliente.
- */
-export async function requisitar(
-  caminho: string,
-  opcoes: OpcoesDeRequisicao = {},
-): Promise<Response> {
-  const metodo = (opcoes.method ?? 'GET').toUpperCase();
-  const headers = new Headers();
-
-  let corpo: string | undefined;
-  if (opcoes.corpo !== undefined) {
-    headers.set('Content-Type', 'application/json');
-    corpo = JSON.stringify(opcoes.corpo);
-  }
-  if (metodoDeEscrita(metodo)) {
-    adicionarTokenCsrf(headers);
-  }
-
-  const resposta = await fetch(caminho, {
-    method: metodo,
-    credentials: 'same-origin',
-    headers,
-    body: corpo,
-  });
-
-  if (resposta.status === 401) {
-    avisarNaoAutorizado(caminho);
-  }
-  return resposta;
-}
-
 function mensagemPadrao(status: number): string {
   switch (status) {
     case 400:
@@ -196,20 +158,14 @@ function lerViolacoes(valor: unknown): Violacao[] {
 }
 
 /**
- * Lê o ProblemDetail de uma resposta de erro, com fallback em português quando o
- * corpo não vem no formato esperado (erro de proxy, 500 sem corpo etc.).
+ * Interpreta o corpo de erro já lido pelo cliente tipado (o `error` do
+ * openapi-fetch), com fallback em português quando ele não vem no formato
+ * ProblemDetail esperado (erro de proxy, 500 sem corpo etc.).
  */
-export async function lerProblema(resposta: Response): Promise<ProblemaDetalhe> {
-  let corpo: unknown;
-  try {
-    corpo = await resposta.json();
-  } catch {
-    corpo = null;
-  }
-
+export function interpretarProblema(corpo: unknown, statusDaResposta: number): ProblemaDetalhe {
   const registro =
     typeof corpo === 'object' && corpo !== null ? (corpo as Record<string, unknown>) : {};
-  const status = typeof registro.status === 'number' ? registro.status : resposta.status;
+  const status = typeof registro.status === 'number' ? registro.status : statusDaResposta;
   const detalhe = typeof registro.detail === 'string' ? registro.detail.trim() : '';
   const problema: ProblemaDetalhe = {
     status,

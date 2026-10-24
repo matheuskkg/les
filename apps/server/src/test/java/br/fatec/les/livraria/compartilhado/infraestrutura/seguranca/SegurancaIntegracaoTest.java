@@ -48,6 +48,11 @@ class SegurancaIntegracaoTest {
             return "livros";
         }
 
+        @GetMapping("/api/categorias/exemplo")
+        String categorias() {
+            return "categorias";
+        }
+
         @GetMapping("/api/me/exemplo")
         String meu() {
             return "me";
@@ -108,6 +113,11 @@ class SegurancaIntegracaoTest {
                     assertThat(csrf).isNotNull();
                     assertThat(csrf.isHttpOnly()).isFalse();
                 });
+
+        // Filtro da vitrine (GET /api/categorias/**), público como a consulta de livros (DEC-08, DEC-15.4).
+        mvc.perform(get("/api/categorias/exemplo"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("categorias"));
     }
 
     @Test
