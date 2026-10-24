@@ -88,7 +88,7 @@ public class PedidoRepositorioJpa implements PedidoRepositorio {
         return entidade;
     }
 
-    private static Pedido paraDominio(PedidoJpa entidade) {
+    static Pedido paraDominio(PedidoJpa entidade) {
         return new Pedido(entidade.getId(), entidade.getCheckout() == null ? null : entidade.getCheckout().getId(),
                 entidade.getClienteId(), entidade.getStatus(), entidade.getRealizadoEm(), entidade.getEntregueEm(),
                 entidade.getCliente(), entidade.getEnderecoEntrega(), entidade.getEnderecoCobranca(),

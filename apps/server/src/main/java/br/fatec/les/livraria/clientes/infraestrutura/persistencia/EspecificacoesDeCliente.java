@@ -28,15 +28,20 @@ final class EspecificacoesDeCliente {
 
     static Specification<ClienteJpa> de(FiltroCliente filtro) {
         Objects.requireNonNull(filtro, "filtro");
-        return Specification.<ClienteJpa>unrestricted()
-                .and(Especificacoes.contem("nome", filtro.nome()))
-                .and(Especificacoes.digitos("cpf", filtro.cpf()))
+        return porNomeECpf(filtro.nome(), filtro.cpf())
                 .and(Especificacoes.em("genero", filtro.genero()))
                 .and(Especificacoes.entre("dataNascimento",
                         filtro.dataNascimentoDe(), filtro.dataNascimentoAte()))
                 .and(enderecoCom(filtro.cidade(), filtro.uf()))
                 .and(porUsuario("usuarioId", filtro.usuarioIdsDoContato()))
                 .and(porUsuario("usuarioId", filtro.usuarioIdsDaSituacao()));
+    }
+
+    /** Nome ("contém", sem caixa nem acentos) e CPF (só os dígitos), combinados com E (DEC-07). */
+    static Specification<ClienteJpa> porNomeECpf(String nome, String cpf) {
+        return Specification.<ClienteJpa>unrestricted()
+                .and(Especificacoes.contem("nome", nome))
+                .and(Especificacoes.digitos("cpf", cpf));
     }
 
     /**

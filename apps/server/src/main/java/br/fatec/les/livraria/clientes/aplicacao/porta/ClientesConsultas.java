@@ -1,6 +1,7 @@
 package br.fatec.les.livraria.clientes.aplicacao.porta;
 
 import java.util.Optional;
+import java.util.Set;
 
 import br.fatec.les.livraria.clientes.aplicacao.consulta.ClienteResumo;
 import br.fatec.les.livraria.clientes.aplicacao.consulta.FiltroCliente;
@@ -21,6 +22,13 @@ public interface ClientesConsultas {
      * @return a página de clientes que atende ao filtro
      */
     Pagina<ClienteResumo> listar(FiltroCliente filtro, Paginacao paginacao);
+
+    /**
+     * @param nome trecho do nome, sem diferenciar maiúsculas nem acentos; nulo ou em branco não filtra
+     * @param cpf CPF comparado só pelos dígitos; nulo ou em branco não filtra
+     * @return os ids dos clientes que atendem aos dois, possivelmente nenhum
+     */
+    Set<Long> buscarIds(String nome, String cpf);
 
     /**
      * @param id código do cliente

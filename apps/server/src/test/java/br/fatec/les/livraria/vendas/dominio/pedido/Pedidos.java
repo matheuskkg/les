@@ -15,14 +15,18 @@ public final class Pedidos {
 
     /** Dois Dom Casmurro (R$ 47,88) com frete de R$ 12,00, BEMVINDO10, o cupom de troca 2 e um Visa. */
     public static Pedido emProcessamento(Long checkoutId, Long clienteId) {
+        return emProcessamento(checkoutId, new ClienteNoPedido(clienteId, "Ana Souza", "52998224725",
+                "ana@exemplo.com", "(11) 98888-7001"), REALIZADO_EM);
+    }
+
+    /** O mesmo pedido de {@link #emProcessamento(Long, Long)}, com outro cliente e outra data de finalização. */
+    public static Pedido emProcessamento(Long checkoutId, ClienteNoPedido cliente, LocalDateTime realizadoEm) {
         LivroNoPedido livro = new LivroNoPedido(1L, "Dom Casmurro", List.of("Machado de Assis"), "Editora Garnier",
                 "1ª", "9788535910663", List.of(new CategoriaNoPedido(1L, "Romance"),
                         new CategoriaNoPedido(2L, "Clássicos")));
         EnderecoNoPedido endereco = new EnderecoNoPedido(1L, "Casa", "RESIDENCIAL", "RUA", "Rua Oscar Freire", "100",
                 "Jardins", "01415000", "São Paulo", "SP", "Brasil", null);
-        return Pedido.registrar(checkoutId, clienteId, REALIZADO_EM,
-                new ClienteNoPedido(clienteId, "Ana Souza", "52998224725", "ana@exemplo.com", "(11) 98888-7001"),
-                endereco, endereco,
+        return Pedido.registrar(checkoutId, cliente.id(), realizadoEm, cliente, endereco, endereco,
                 List.of(new ItemPedido(null, livro, Dinheiro.de("47.88"), 2)),
                 List.of(new PagamentoCartao(new CartaoNoPedido(1L, "Visa", "1111"), Dinheiro.de("57.76"))),
                 List.of(new CupomPedido(new CupomNoPedido(1L, "BEMVINDO10", CategoriaCupom.PROMOCIONAL, "VALOR_FIXO"),

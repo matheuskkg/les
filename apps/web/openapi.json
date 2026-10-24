@@ -10,7 +10,7 @@
   "paths" : {
     "/api/admin/clientes" : {
       "get" : {
-        "operationId" : "listar_4",
+        "operationId" : "listar_5",
         "parameters" : [ {
           "in" : "query",
           "name" : "nome",
@@ -146,7 +146,7 @@
     },
     "/api/admin/clientes/{id}" : {
       "get" : {
-        "operationId" : "buscar_1",
+        "operationId" : "buscar_2",
         "parameters" : [ {
           "in" : "path",
           "name" : "id",
@@ -305,6 +305,134 @@
         },
         "summary" : "Marca uma notificação do administrador como lida",
         "tags" : [ "notificacoes-do-admin-controller" ]
+      }
+    },
+    "/api/admin/pedidos" : {
+      "get" : {
+        "operationId" : "listar_4",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "numero",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "EM_PROCESSAMENTO", "APROVADA", "REPROVADA", "EM_TRANSPORTE", "ENTREGUE" ]
+            }
+          }
+        }, {
+          "in" : "query",
+          "name" : "cliente",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "cpf",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "realizadoEmDe",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "realizadoEmAte",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "description" : "Página, a partir de 0.",
+          "in" : "query",
+          "name" : "pagina",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "description" : "Itens por página (padrão 20, máximo 100).",
+          "in" : "query",
+          "name" : "tamanho",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 20,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        }, {
+          "description" : "Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: realizadoEm, total, id. Padrão: realizadoEm,desc.",
+          "explode" : true,
+          "in" : "query",
+          "name" : "ordem",
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaginaPedidoListadoDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "pedido-admin-controller" ]
+      }
+    },
+    "/api/admin/pedidos/{id}" : {
+      "get" : {
+        "operationId" : "buscar_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PedidoDetalheDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "pedido-admin-controller" ]
       }
     },
     "/api/clientes" : {
@@ -2193,6 +2321,22 @@
         },
         "required" : [ "bandeiraId", "nomeImpresso", "numero", "validade" ]
       },
+      "CartaoNoPedido" : {
+        "type" : "object",
+        "properties" : {
+          "bandeira" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "ultimosDigitos" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "bandeira", "id", "ultimosDigitos" ]
+      },
       "CartaoRecusadoDto" : {
         "type" : "object",
         "properties" : {
@@ -2206,6 +2350,19 @@
         "required" : [ "motivo", "ultimosDigitos" ]
       },
       "CategoriaDto" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "nome" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "id", "nome" ]
+      },
+      "CategoriaNoPedido" : {
         "type" : "object",
         "properties" : {
           "id" : {
@@ -2341,6 +2498,28 @@
         },
         "required" : [ "cpf", "dataNascimento", "email", "genero", "id", "nome", "situacao" ]
       },
+      "ClienteNoPedido" : {
+        "type" : "object",
+        "properties" : {
+          "cpf" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "nome" : {
+            "type" : "string"
+          },
+          "telefone" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "cpf", "email", "id", "nome", "telefone" ]
+      },
       "CompraFinalizadaDto" : {
         "type" : "object",
         "properties" : {
@@ -2424,6 +2603,40 @@
           }
         },
         "required" : [ "codigo", "id", "valor" ]
+      },
+      "CupomNoPedido" : {
+        "type" : "object",
+        "properties" : {
+          "categoria" : {
+            "type" : "string",
+            "enum" : [ "PROMOCIONAL", "TROCA" ]
+          },
+          "codigo" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "tipo" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "categoria", "codigo", "id", "tipo" ]
+      },
+      "CupomPedido" : {
+        "type" : "object",
+        "properties" : {
+          "cupom" : {
+            "$ref" : "#/components/schemas/CupomNoPedido"
+          },
+          "valorAbatido" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          }
+        },
+        "required" : [ "cupom", "valorAbatido" ]
       },
       "EnderecoDaResposta" : {
         "type" : "object",
@@ -2595,6 +2808,49 @@
         },
         "required" : [ "bairro", "cep", "cidade", "logradouro", "nomeCurto", "numero", "observacoes", "tipoEndereco", "tipoLogradouro", "uf" ]
       },
+      "EnderecoNoPedido" : {
+        "type" : "object",
+        "properties" : {
+          "bairro" : {
+            "type" : "string"
+          },
+          "cep" : {
+            "type" : "string"
+          },
+          "cidade" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "logradouro" : {
+            "type" : "string"
+          },
+          "nomeCurto" : {
+            "type" : "string"
+          },
+          "numero" : {
+            "type" : "string"
+          },
+          "observacoes" : {
+            "type" : "string"
+          },
+          "pais" : {
+            "type" : "string"
+          },
+          "tipoEndereco" : {
+            "type" : "string"
+          },
+          "tipoLogradouro" : {
+            "type" : "string"
+          },
+          "uf" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "bairro", "cep", "cidade", "id", "logradouro", "nomeCurto", "numero", "observacoes", "pais", "tipoEndereco", "tipoLogradouro", "uf" ]
+      },
       "EntradaDeLogin" : {
         "type" : "object",
         "properties" : {
@@ -2705,6 +2961,33 @@
           }
         },
         "required" : [ "autores", "livroId", "quantidade" ]
+      },
+      "ItemDoPedidoDto" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "livro" : {
+            "$ref" : "#/components/schemas/LivroNoPedido"
+          },
+          "precoUnitario" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          },
+          "quantidade" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "subtotal" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          }
+        },
+        "required" : [ "id", "livro", "precoUnitario", "quantidade", "subtotal" ]
       },
       "ItemRemovidoDoCarrinhoDto" : {
         "type" : "object",
@@ -2843,6 +3126,40 @@
         },
         "required" : [ "ano", "autores", "categorias", "disponivel", "editora", "id", "titulo" ]
       },
+      "LivroNoPedido" : {
+        "type" : "object",
+        "properties" : {
+          "autores" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "categorias" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CategoriaNoPedido"
+            }
+          },
+          "edicao" : {
+            "type" : "string"
+          },
+          "editora" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "isbn" : {
+            "type" : "string"
+          },
+          "titulo" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "autores", "categorias", "edicao", "editora", "id", "isbn", "titulo" ]
+      },
       "MeusDados" : {
         "type" : "object",
         "properties" : {
@@ -2914,6 +3231,20 @@
           }
         },
         "required" : [ "quantidade" ]
+      },
+      "PagamentoCartao" : {
+        "type" : "object",
+        "properties" : {
+          "cartao" : {
+            "$ref" : "#/components/schemas/CartaoNoPedido"
+          },
+          "valor" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          }
+        },
+        "required" : [ "cartao", "valor" ]
       },
       "PagamentoConferidoDto" : {
         "type" : "object",
@@ -3103,6 +3434,34 @@
         },
         "required" : [ "itens", "pagina", "tamanho", "totalItens", "totalPaginas" ]
       },
+      "PaginaPedidoListadoDto" : {
+        "type" : "object",
+        "properties" : {
+          "itens" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PedidoListadoDto"
+            }
+          },
+          "pagina" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "tamanho" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItens" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPaginas" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "itens", "pagina", "tamanho", "totalItens", "totalPaginas" ]
+      },
       "PedidoDeFrete" : {
         "type" : "object",
         "properties" : {
@@ -3111,6 +3470,108 @@
           }
         },
         "required" : [ "entrega" ]
+      },
+      "PedidoDetalheDto" : {
+        "type" : "object",
+        "properties" : {
+          "cartoes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PagamentoCartao"
+            }
+          },
+          "cliente" : {
+            "$ref" : "#/components/schemas/ClienteNoPedido"
+          },
+          "cupons" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CupomPedido"
+            }
+          },
+          "descontoPromocional" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          },
+          "enderecoCobranca" : {
+            "$ref" : "#/components/schemas/EnderecoNoPedido"
+          },
+          "enderecoEntrega" : {
+            "$ref" : "#/components/schemas/EnderecoNoPedido"
+          },
+          "entregueEm" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "frete" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "itens" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ItemDoPedidoDto"
+            }
+          },
+          "realizadoEm" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "EM_PROCESSAMENTO", "APROVADA", "REPROVADA", "EM_TRANSPORTE", "ENTREGUE" ]
+          },
+          "subtotal" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          },
+          "total" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          }
+        },
+        "required" : [ "cartoes", "cliente", "cupons", "descontoPromocional", "enderecoCobranca", "enderecoEntrega", "entregueEm", "frete", "id", "itens", "realizadoEm", "status", "subtotal", "total" ]
+      },
+      "PedidoListadoDto" : {
+        "type" : "object",
+        "properties" : {
+          "clienteCpf" : {
+            "type" : "string"
+          },
+          "clienteId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "clienteNome" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "realizadoEm" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "EM_PROCESSAMENTO", "APROVADA", "REPROVADA", "EM_TRANSPORTE", "ENTREGUE" ]
+          },
+          "total" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          }
+        },
+        "required" : [ "clienteCpf", "clienteId", "clienteNome", "id", "realizadoEm", "status", "total" ]
       },
       "ProblemDetail" : {
         "type" : "object",

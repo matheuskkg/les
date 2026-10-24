@@ -1,6 +1,8 @@
 package br.fatec.les.livraria.clientes.infraestrutura.persistencia;
 
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -33,6 +35,14 @@ public class ClientesConsultasJpa implements ClientesConsultas {
         Page<ClienteJpa> pagina = clientes.findAll(EspecificacoesDeCliente.de(filtro),
                 ConversorDePaginacao.paraPageable(paginacao));
         return ConversorDePaginacao.paraPagina(pagina, ClientesConsultasJpa::paraResumo);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set<Long> buscarIds(String nome, String cpf) {
+        return clientes.findAll(EspecificacoesDeCliente.porNomeECpf(nome, cpf)).stream()
+                .map(ClienteJpa::getId)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override

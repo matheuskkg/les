@@ -11,7 +11,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar_4"];
+        get: operations["listar_5"];
         put?: never;
         post?: never;
         delete?: never;
@@ -27,7 +27,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["buscar_1"];
+        get: operations["buscar_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -115,6 +115,38 @@ export interface paths {
         put?: never;
         /** Marca uma notificação do administrador como lida */
         post: operations["marcarComoLidaDoAdmin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/pedidos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listar_4"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/pedidos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["buscar_1"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -728,11 +760,22 @@ export interface components {
             /** @example 2027-08 */
             validade: string;
         };
+        CartaoNoPedido: {
+            bandeira: string;
+            /** Format: int64 */
+            id: number;
+            ultimosDigitos: string;
+        };
         CartaoRecusadoDto: {
             motivo: string;
             ultimosDigitos: string;
         };
         CategoriaDto: {
+            /** Format: int64 */
+            id: number;
+            nome: string;
+        };
+        CategoriaNoPedido: {
             /** Format: int64 */
             id: number;
             nome: string;
@@ -787,6 +830,14 @@ export interface components {
             situacao: "ATIVA" | "INATIVA" | "ENCERRADA";
             telefone?: string;
         };
+        ClienteNoPedido: {
+            cpf: string;
+            email: string;
+            /** Format: int64 */
+            id: number;
+            nome: string;
+            telefone: string;
+        };
         CompraFinalizadaDto: {
             /** Format: int64 */
             pedidoId: number;
@@ -831,6 +882,22 @@ export interface components {
              * @example 1234.56
              */
             valor: string;
+        };
+        CupomNoPedido: {
+            /** @enum {string} */
+            categoria: "PROMOCIONAL" | "TROCA";
+            codigo: string;
+            /** Format: int64 */
+            id: number;
+            tipo: string;
+        };
+        CupomPedido: {
+            cupom: components["schemas"]["CupomNoPedido"];
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            valorAbatido: string;
         };
         EnderecoDaResposta: {
             bairro: string;
@@ -898,6 +965,21 @@ export interface components {
             /** @enum {string} */
             uf: "AC" | "AL" | "AP" | "AM" | "BA" | "CE" | "DF" | "ES" | "GO" | "MA" | "MT" | "MS" | "MG" | "PA" | "PB" | "PR" | "PE" | "PI" | "RJ" | "RN" | "RS" | "RO" | "RR" | "SC" | "SP" | "SE" | "TO";
         };
+        EnderecoNoPedido: {
+            bairro: string;
+            cep: string;
+            cidade: string;
+            /** Format: int64 */
+            id: number;
+            logradouro: string;
+            nomeCurto: string;
+            numero: string;
+            observacoes: string;
+            pais: string;
+            tipoEndereco: string;
+            tipoLogradouro: string;
+            uf: string;
+        };
         EntradaDeLogin: {
             login: string;
             senha: string;
@@ -948,6 +1030,23 @@ export interface components {
              */
             subtotal?: string;
             titulo?: string;
+        };
+        ItemDoPedidoDto: {
+            /** Format: int64 */
+            id: number;
+            livro: components["schemas"]["LivroNoPedido"];
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            precoUnitario: string;
+            /** Format: int32 */
+            quantidade: number;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            subtotal: string;
         };
         ItemRemovidoDoCarrinhoDto: {
             autores: string[];
@@ -1003,6 +1102,16 @@ export interface components {
             precoVenda?: string;
             titulo: string;
         };
+        LivroNoPedido: {
+            autores: string[];
+            categorias: components["schemas"]["CategoriaNoPedido"][];
+            edicao: string;
+            editora: string;
+            /** Format: int64 */
+            id: number;
+            isbn: string;
+            titulo: string;
+        };
         MeusDados: {
             cpf: string;
             /** Format: date */
@@ -1032,6 +1141,14 @@ export interface components {
         NovaQuantidade: {
             /** Format: int32 */
             quantidade: number;
+        };
+        PagamentoCartao: {
+            cartao: components["schemas"]["CartaoNoPedido"];
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            valor: string;
         };
         PagamentoConferidoDto: {
             cartoes: components["schemas"]["CartaoConferidoDto"][];
@@ -1117,8 +1234,72 @@ export interface components {
             /** Format: int32 */
             totalPaginas: number;
         };
+        PaginaPedidoListadoDto: {
+            itens: components["schemas"]["PedidoListadoDto"][];
+            /** Format: int32 */
+            pagina: number;
+            /** Format: int32 */
+            tamanho: number;
+            /** Format: int64 */
+            totalItens: number;
+            /** Format: int32 */
+            totalPaginas: number;
+        };
         PedidoDeFrete: {
             entrega: components["schemas"]["EscolhaDeEnderecoDto"];
+        };
+        PedidoDetalheDto: {
+            cartoes: components["schemas"]["PagamentoCartao"][];
+            cliente: components["schemas"]["ClienteNoPedido"];
+            cupons: components["schemas"]["CupomPedido"][];
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            descontoPromocional: string;
+            enderecoCobranca: components["schemas"]["EnderecoNoPedido"];
+            enderecoEntrega: components["schemas"]["EnderecoNoPedido"];
+            /** Format: date-time */
+            entregueEm: string;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            frete: string;
+            /** Format: int64 */
+            id: number;
+            itens: components["schemas"]["ItemDoPedidoDto"][];
+            /** Format: date-time */
+            realizadoEm: string;
+            /** @enum {string} */
+            status: "EM_PROCESSAMENTO" | "APROVADA" | "REPROVADA" | "EM_TRANSPORTE" | "ENTREGUE";
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            subtotal: string;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            total: string;
+        };
+        PedidoListadoDto: {
+            clienteCpf: string;
+            /** Format: int64 */
+            clienteId: number;
+            clienteNome: string;
+            /** Format: int64 */
+            id: number;
+            /** Format: date-time */
+            realizadoEm: string;
+            /** @enum {string} */
+            status: "EM_PROCESSAMENTO" | "APROVADA" | "REPROVADA" | "EM_TRANSPORTE" | "ENTREGUE";
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            total: string;
         };
         ProblemDetail: {
             detail?: string;
@@ -1159,7 +1340,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    listar_4: {
+    listar_5: {
         parameters: {
             query?: {
                 nome?: string;
@@ -1196,7 +1377,7 @@ export interface operations {
             };
         };
     };
-    buscar_1: {
+    buscar_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1329,6 +1510,61 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    listar_4: {
+        parameters: {
+            query?: {
+                numero?: number;
+                status?: ("EM_PROCESSAMENTO" | "APROVADA" | "REPROVADA" | "EM_TRANSPORTE" | "ENTREGUE")[];
+                cliente?: string;
+                cpf?: string;
+                realizadoEmDe?: string;
+                realizadoEmAte?: string;
+                /** @description Página, a partir de 0. */
+                pagina?: number;
+                /** @description Itens por página (padrão 20, máximo 100). */
+                tamanho?: number;
+                /** @description Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: realizadoEm, total, id. Padrão: realizadoEm,desc. */
+                ordem?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginaPedidoListadoDto"];
+                };
+            };
+        };
+    };
+    buscar_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PedidoDetalheDto"];
+                };
             };
         };
     };
