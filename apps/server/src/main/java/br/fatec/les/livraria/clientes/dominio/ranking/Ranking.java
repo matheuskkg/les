@@ -11,12 +11,10 @@ import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
 /**
  * Ranking do cliente de 0 a 100 (RN-CLI-007, DEC-04): {@code 0,5·V + 0,3·F + 0,2·R} sobre as compras dos últimos
- * {@value #JANELA_EM_DIAS} dias, arredondado para inteiro com {@code HALF_UP} (DEC-15.1). Cliente sem compras na
+ * {@value JanelaDoRanking#DIAS} dias, arredondado para inteiro com {@code HALF_UP} (DEC-15.1). Cliente sem compras na
  * janela tem ranking 0. É calculado na consulta, nunca gravado.
  */
 public final class Ranking {
-
-    public static final int JANELA_EM_DIAS = 365;
 
     private static final BigDecimal PESO_DO_VALOR = new BigDecimal("0.5");
     private static final BigDecimal PESO_DA_FREQUENCIA = new BigDecimal("0.3");
@@ -25,18 +23,13 @@ public final class Ranking {
     private Ranking() {
     }
 
-    /** Primeiro dia da janela que termina em {@code hoje}: compras a partir dele contam. */
-    public static LocalDate inicioDaJanela(LocalDate hoje) {
-        return hoje.minusDays(JANELA_EM_DIAS);
-    }
-
     /**
      * @param compras compras do cliente; as de fora da janela são ignoradas
      * @param hoje data do cálculo, no fuso da loja
      * @return o ranking, de 0 a 100
      */
     public static int calcular(Collection<CompraDoCliente> compras, LocalDate hoje) {
-        LocalDate inicio = inicioDaJanela(hoje);
+        LocalDate inicio = JanelaDoRanking.inicio(hoje);
         List<CompraDoCliente> naJanela = compras.stream()
                 .filter(compra -> !compra.realizadoEm().toLocalDate().isBefore(inicio)
                         && !compra.realizadoEm().toLocalDate().isAfter(hoje))

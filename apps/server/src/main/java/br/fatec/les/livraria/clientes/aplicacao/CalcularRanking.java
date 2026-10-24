@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import br.fatec.les.livraria.clientes.aplicacao.porta.HistoricoDeCompras;
 import br.fatec.les.livraria.clientes.dominio.ranking.CompraDoCliente;
+import br.fatec.les.livraria.clientes.dominio.ranking.JanelaDoRanking;
 import br.fatec.les.livraria.clientes.dominio.ranking.Ranking;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import lombok.RequiredArgsConstructor;
@@ -33,12 +34,8 @@ public class CalcularRanking {
         }
         LocalDate hoje = relogio.agora().toLocalDate();
         Map<Long, List<CompraDoCliente>> compras = historico.comprasDesde(clienteIds,
-                Ranking.inicioDaJanela(hoje).atStartOfDay());
+                JanelaDoRanking.inicio(hoje).atStartOfDay());
         return clienteIds.stream().distinct().collect(Collectors.toMap(Function.identity(),
                 id -> Ranking.calcular(compras.getOrDefault(id, List.of()), hoje)));
-    }
-
-    public int executar(Long clienteId) {
-        return executar(List.of(clienteId)).get(clienteId);
     }
 }

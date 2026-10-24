@@ -44,6 +44,6 @@ public class ConsultarCliente {
                 relogio.agora());
         ContatoDoUsuario contato = Objects.requireNonNull(contatos.get(cliente.getUsuarioId()),
                 "Contato do usuário " + cliente.getUsuarioId() + " não encontrado.");
-        return new ClienteDetalhado(cliente, contato, calcularRanking.executar(cliente.getId()));
+        return new ClienteDetalhado(cliente, contato, calcularRanking.executar(List.of(cliente.getId())).get(cliente.getId()));
     }
 }

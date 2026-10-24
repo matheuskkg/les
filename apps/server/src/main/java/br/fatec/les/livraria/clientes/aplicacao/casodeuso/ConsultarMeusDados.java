@@ -1,5 +1,7 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,6 @@ public class ConsultarMeusDados {
         Cliente cliente = clientes.buscarPorUsuarioId(usuarioId)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));
         DadosDeContato contato = consultarContato.executar(usuarioId);
-        return DadosDoCliente.de(cliente, contato, calcularRanking.executar(cliente.getId()));
+        return DadosDoCliente.de(cliente, contato, calcularRanking.executar(List.of(cliente.getId())).get(cliente.getId()));
     }
 }

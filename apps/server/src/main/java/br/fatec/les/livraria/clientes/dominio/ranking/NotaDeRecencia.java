@@ -20,6 +20,6 @@ public final class NotaDeRecencia {
         if (dias <= 270) {
             return 40;
         }
-        return dias <= Ranking.JANELA_EM_DIAS ? 20 : 0;
+        return dias <= JanelaDoRanking.DIAS ? 20 : 0;
     }
 }

@@ -74,7 +74,7 @@ public class ListarClientes {
         return pagina.map(resumo -> new ClienteListado(resumo,
                 Objects.requireNonNull(contatos.get(resumo.usuarioId()),
                         "Contato do usuário " + resumo.usuarioId() + " não encontrado."),
-                rankings.getOrDefault(resumo.id(), 0)));
+                rankings.get(resumo.id())));
     }
 
 

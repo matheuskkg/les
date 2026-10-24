@@ -51,6 +51,15 @@ public class VendasConsultasJpa implements VendasConsultas {
                 .toList();
     }
 
+    /**
+     * Total menos os cupons das trocas concluídas, nunca abaixo de zero: o cupom é o preço cheio dos itens, que pode
+     * passar do total quando houve desconto promocional (DEC-11, DEC-12).
+     */
+    private static Dinheiro valorParaORanking(PedidoDoCliente pedido, Map<Long, BigDecimal> cupons) {
+        return Dinheiro.maior(Dinheiro.ZERO, Dinheiro.de(pedido.getTotal()
+                .subtract(cupons.getOrDefault(pedido.getId(), BigDecimal.ZERO))));
+    }
+
     @Override
     @Transactional(readOnly = true)
     public Map<Long, List<CompraDoCliente>> comprasDosClientes(Collection<Long> clienteIds, LocalDateTime desde) {
@@ -62,8 +71,7 @@ public class VendasConsultasJpa implements VendasConsultas {
                 .collect(Collectors.toMap(CuponsDoPedido::getPedidoId, CuponsDoPedido::getValor));
         return pedidos.buscarDosClientesDesde(clienteIds, CONTAM_COMO_VENDA, desde).stream()
                 .collect(Collectors.groupingBy(PedidoDoCliente::getClienteId, Collectors.mapping(
-                        pedido -> new CompraDoCliente(pedido.getRealizadoEm(), Dinheiro.de(pedido.getTotal()
-                                .subtract(cupons.getOrDefault(pedido.getId(), BigDecimal.ZERO)))),
+                        pedido -> new CompraDoCliente(pedido.getRealizadoEm(), valorParaORanking(pedido, cupons)),
                         Collectors.toList())));
     }
 }

@@ -18,6 +18,6 @@ test('admin vê o ranking na consulta e no detalhe do cliente (RN-CLI-007, DEC-1
   const linha = page.getByRole('row', { name: /Elisa Prado/ });
   await expect(linha.getByRole('cell').last()).toHaveText('68');
 
-  await page.goto('/admin/clientes/5');
+  await linha.getByRole('link', { name: 'Elisa Prado' }).click();
   await expect(page.getByText('68 de 100')).toBeVisible();
 });

@@ -54,9 +54,13 @@ test('admin compara só as categorias escolhidas e exporta o CSV com os mesmos f
   expect(download.suggestedFilename()).toBe('analise-de-vendas-2025-03-a-2025-04.csv');
   expect(resposta.url()).toContain('inicio=2025-03&fim=2025-04&categoria=2');
   expect(resposta.headers()['content-type']).toBe('text/csv;charset=UTF-8');
-  const csv = await resposta.body();
-  expect([...csv.subarray(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
-  expect(csv.toString('utf-8').startsWith('\uFEFFmes;categoria;valor\r\n2025-03;Ficção Científica;96,00\r\n')).toBe(true);
+  // O corpo já foi lido pela página; busca de novo, na própria página, para conferir os bytes do BOM.
+  const csv = await page.evaluate(async (endereco) => {
+    const bytes = new Uint8Array(await (await fetch(endereco)).arrayBuffer());
+    return { inicio: [...bytes.slice(0, 3)], texto: new TextDecoder('utf-8', { ignoreBOM: true }).decode(bytes) };
+  }, resposta.url());
+  expect(csv.inicio).toEqual([0xef, 0xbb, 0xbf]);
+  expect(csv.texto.startsWith('\uFEFFmes;categoria;valor\r\n2025-03;Ficção Científica;96,00\r\n')).toBe(true);
 
   await categorias.getByLabel('Ficção Científica').uncheck();
   await page.getByRole('button', { name: 'Atualizar' }).click();

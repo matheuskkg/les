@@ -63,7 +63,7 @@ class RankingTest {
         assertThat(Ranking.calcular(List.of(), HOJE)).isZero();
         assertThat(Ranking.calcular(List.of(compra(366, "5000.00")), HOJE)).isZero();
         assertThat(Ranking.calcular(List.of(compra(365, "50.00")), HOJE)).isEqualTo(20);
-        assertThat(Ranking.inicioDaJanela(HOJE)).isEqualTo(LocalDate.of(2025, 10, 24));
+        assertThat(JanelaDoRanking.inicio(HOJE)).isEqualTo(LocalDate.of(2025, 10, 24));
     }
 
     private static CompraDoCliente compra(int diasAtras, String valor) {
