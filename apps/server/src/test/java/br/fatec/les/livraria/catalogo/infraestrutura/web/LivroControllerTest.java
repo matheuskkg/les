@@ -304,16 +304,46 @@ class LivroControllerTest {
     }
 
     @Test
-    void rfLiv005_listaAsCategoriasOrdenadasPorNome() throws Exception {
-        mvc.perform(get("/api/categorias"))
+    void rfLiv005_listaAsCategoriasNoEnvelopePaginadoOrdenadasPorNome() throws Exception {
+        mvc.perform(get("/api/livros/categorias"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pagina").value(0))
-                .andExpect(jsonPath("$.tamanho").value(100))
+                .andExpect(jsonPath("$.tamanho").value(20))
                 .andExpect(jsonPath("$.totalItens").value(5))
                 .andExpect(jsonPath("$.totalPaginas").value(1))
+                .andExpect(jsonPath("$.itens.length()").value(5))
                 .andExpect(jsonPath("$.itens[0].id").value(3))
                 .andExpect(jsonPath("$.itens[0].nome").value("Fantasia"))
                 .andExpect(jsonPath("$.itens[4].nome").value("Tecnologia"));
+    }
+
+    @Test
+    void rfLiv005_paginaAsCategoriasComTamanhoInformado() throws Exception {
+        mvc.perform(get("/api/livros/categorias").param("tamanho", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pagina").value(0))
+                .andExpect(jsonPath("$.tamanho").value(2))
+                .andExpect(jsonPath("$.totalItens").value(5))
+                .andExpect(jsonPath("$.totalPaginas").value(3))
+                .andExpect(jsonPath("$.itens.length()").value(2))
+                .andExpect(jsonPath("$.itens[0].nome").value("Fantasia"))
+                .andExpect(jsonPath("$.itens[1].nome").value("Ficção Científica"));
+
+        mvc.perform(get("/api/livros/categorias").param("pagina", "2").param("tamanho", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pagina").value(2))
+                .andExpect(jsonPath("$.totalPaginas").value(3))
+                .andExpect(jsonPath("$.itens.length()").value(1))
+                .andExpect(jsonPath("$.itens[0].nome").value("Tecnologia"));
+    }
+
+    @Test
+    void rfLiv005_campoDeOrdenacaoDeCategoriaDesconhecidoResponde400() throws Exception {
+        mvc.perform(get("/api/livros/categorias").param("ordem", "id,asc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.parametro").value("ordem"))
+                .andExpect(jsonPath("$.detail").value(containsString("id")));
     }
 
     private static ReservaJpa novaReserva(Long livroId, int quantidade, LocalDateTime expiraEm) {

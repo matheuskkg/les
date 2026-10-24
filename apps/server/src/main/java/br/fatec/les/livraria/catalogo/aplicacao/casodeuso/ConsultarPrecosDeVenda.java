@@ -4,12 +4,12 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.catalogo.aplicacao.porta.MargemPorLivro;
+import br.fatec.les.livraria.compartilhado.aplicacao.Ids;
 import br.fatec.les.livraria.catalogo.dominio.calculo.CalcularPrecoVenda;
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.estoque.aplicacao.casodeuso.ConsultarMaiorCusto;
@@ -38,9 +38,7 @@ public class ConsultarPrecosDeVenda {
      */
     @Transactional(readOnly = true)
     public Map<Long, Dinheiro> executar(Collection<Long> livroIds) {
-        Objects.requireNonNull(livroIds, "livroIds");
-        livroIds.forEach(livroId -> Objects.requireNonNull(livroId, "livroIds não pode conter null"));
-        if (livroIds.isEmpty()) {
+        if (Ids.validar(livroIds)) {
             return Map.of();
         }
 

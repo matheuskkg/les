@@ -3,11 +3,11 @@ package br.fatec.les.livraria.estoque.aplicacao.casodeuso;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.fatec.les.livraria.compartilhado.aplicacao.Ids;
 import br.fatec.les.livraria.estoque.aplicacao.porta.MaiorCustoPorLivro;
 import lombok.RequiredArgsConstructor;
 
@@ -23,13 +23,12 @@ public class ConsultarMaiorCusto {
     private final MaiorCustoPorLivro maiorCustoPorLivro;
 
     /**
-     * @param livroIds livros a consultar
+     * @param livroIds livros a consultar; não pode ser nulo nem conter elementos nulos
      * @return maior custo por id de livro; livro sem entrada não aparece no mapa
      */
     @Transactional(readOnly = true)
     public Map<Long, BigDecimal> executar(Collection<Long> livroIds) {
-        Objects.requireNonNull(livroIds, "livroIds");
-        if (livroIds.isEmpty()) {
+        if (Ids.validar(livroIds)) {
             return Map.of();
         }
         return maiorCustoPorLivro.buscar(livroIds);

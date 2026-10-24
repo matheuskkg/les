@@ -30,7 +30,8 @@ public interface CatalogoConsultas {
     Optional<LivroDetalhe> buscar(Long id);
 
     /**
-     * @return todas as categorias, ordenadas por nome
+     * @param paginacao página, tamanho e ordenação já validados
+     * @return a página de categorias
      */
-    List<CategoriaDoLivro> listarCategorias();
+    Pagina<CategoriaDoLivro> listarCategorias(Paginacao paginacao);
 }

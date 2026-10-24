@@ -1,6 +1,6 @@
 package br.fatec.les.livraria.catalogo.aplicacao.casodeuso;
 
-import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,8 +12,8 @@ import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Lista as categorias usadas no filtro da vitrine (RF-LIV-005). É uma tabela de domínio pequena: a resposta
- * usa o envelope de paginação do DEC-07 com o tamanho máximo, porque cabe em uma página só.
+ * Lista as categorias usadas no filtro da vitrine (RF-LIV-005, RN-LIV-002), com paginação real: o envelope
+ * reflete a página pedida e o total de categorias, como em qualquer listagem do DEC-07.
  */
 @Component
 @RequiredArgsConstructor
@@ -21,10 +21,13 @@ public class ListarCategorias {
 
     private final CatalogoConsultas catalogoConsultas;
 
+    /**
+     * @param paginacao página, tamanho e ordenação já validados; não pode ser nula
+     * @return a página de categorias
+     */
     @Transactional(readOnly = true)
-    public Pagina<CategoriaDoLivro> executar() {
-        List<CategoriaDoLivro> itens = catalogoConsultas.listarCategorias();
-        int totalPaginas = itens.isEmpty() ? 0 : 1;
-        return new Pagina<>(itens, Paginacao.PAGINA_PADRAO, Paginacao.TAMANHO_MAXIMO, itens.size(), totalPaginas);
+    public Pagina<CategoriaDoLivro> executar(Paginacao paginacao) {
+        Objects.requireNonNull(paginacao, "paginacao");
+        return catalogoConsultas.listarCategorias(paginacao);
     }
 }

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import br.fatec.les.livraria.estoque.aplicacao.porta.SaldoDeEstoque;
+import br.fatec.les.livraria.estoque.aplicacao.porta.SaldoDoLivro;
 import lombok.RequiredArgsConstructor;
 
 /** Adapter JPA da porta {@link SaldoDeEstoque} (DEC-15.3). */
@@ -16,21 +17,12 @@ import lombok.RequiredArgsConstructor;
 public class SaldoDeEstoqueJpa implements SaldoDeEstoque {
 
     private final EstoqueJpaRepository estoques;
-    private final ReservaJpaRepository reservas;
 
     @Override
-    public Map<Long, Integer> quantidadesEmEstoque(Collection<Long> livroIds) {
-        return estoques.buscarQuantidades(livroIds).stream()
+    public Map<Long, SaldoDoLivro> saldos(Collection<Long> livroIds, LocalDateTime agora) {
+        return estoques.buscarSaldos(livroIds, agora).stream()
                 .collect(Collectors.toMap(
-                        QuantidadeDoLivroProjecao::getLivroId,
-                        QuantidadeDoLivroProjecao::getQuantidade));
-    }
-
-    @Override
-    public Map<Long, Integer> reservasAtivas(Collection<Long> livroIds, LocalDateTime agora) {
-        return reservas.somarReservasAtivas(livroIds, agora).stream()
-                .collect(Collectors.toMap(
-                        ReservaAtivaDoLivroProjecao::getLivroId,
-                        reserva -> Math.toIntExact(reserva.getQuantidade())));
+                        SaldoDoLivroProjecao::getLivroId,
+                        linha -> new SaldoDoLivro(linha.getQuantidade(), linha.getReservada())));
     }
 }

@@ -6,7 +6,9 @@ import org.springframework.stereotype.Component;
 
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.CategoriaDoLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroConsultado;
+import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroDetalhe;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroListado;
+import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroResumo;
 import br.fatec.les.livraria.catalogo.infraestrutura.web.dto.CategoriaDto;
 import br.fatec.les.livraria.catalogo.infraestrutura.web.dto.LivroDetalheDto;
 import br.fatec.les.livraria.catalogo.infraestrutura.web.dto.LivroListadoDto;
@@ -16,15 +18,20 @@ import br.fatec.les.livraria.catalogo.infraestrutura.web.dto.LivroListadoDto;
 public class MapeadorDeLivros {
 
     public LivroListadoDto paraDto(LivroListado livro) {
-        return new LivroListadoDto(livro.id(), livro.titulo(), livro.autores(), paraDto(livro.categorias()),
-                livro.editora(), livro.ano(), livro.precoVenda(), livro.disponivel());
+        LivroResumo resumo = livro.livro();
+        return new LivroListadoDto(resumo.id(), resumo.titulo(), resumo.autores(),
+                paraDto(resumo.categorias()), resumo.editora(), resumo.ano(), livro.precoVenda(),
+                livro.disponivel());
     }
 
-    public LivroDetalheDto paraDto(LivroConsultado livro) {
-        return new LivroDetalheDto(livro.id(), livro.titulo(), livro.autores(), paraDto(livro.categorias()),
-                livro.editora(), livro.ano(), livro.precoVenda(), livro.disponivel(), livro.edicao(),
-                livro.isbn(), livro.paginas(), livro.sinopse(), livro.altura(), livro.largura(),
-                livro.profundidade(), livro.peso(), livro.codigoBarras());
+    public LivroDetalheDto paraDto(LivroConsultado consultado) {
+        LivroDetalhe detalhe = consultado.livro();
+        LivroResumo resumo = detalhe.livro();
+        return new LivroDetalheDto(resumo.id(), resumo.titulo(), resumo.autores(),
+                paraDto(resumo.categorias()), resumo.editora(), resumo.ano(), consultado.precoVenda(),
+                consultado.disponivel(), detalhe.edicao(), detalhe.isbn(), detalhe.paginas(),
+                detalhe.sinopse(), detalhe.altura(), detalhe.largura(), detalhe.profundidade(),
+                detalhe.peso(), detalhe.codigoBarras());
     }
 
     public CategoriaDto paraDto(CategoriaDoLivro categoria) {

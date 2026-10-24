@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -23,9 +22,10 @@ import lombok.RequiredArgsConstructor;
 /**
  * Adapter JPA das consultas de leitura do catálogo (RF-LIV-005, RNF-LIV-001, DEC-07).
  *
- * <p>Autores, categorias e editora dos livros de uma página são carregados em três consultas em lote, para
- * não gerar uma consulta por item. A consulta paginada em si usa as {@link EspecificacoesDeLivro}, mantendo
- * a contagem correta mesmo com os filtros por relacionamento.
+ * <p>A editora vem na própria consulta paginada, por {@code @EntityGraph}. Autores e categorias dos livros de
+ * uma página são carregados em duas consultas em lote, para não gerar uma consulta por item. A consulta
+ * paginada em si usa as {@link EspecificacoesDeLivro}, mantendo a contagem correta mesmo com os filtros por
+ * relacionamento.
  */
 @Component
 @RequiredArgsConstructor
@@ -51,13 +51,13 @@ public class CatalogoConsultasJpa implements CatalogoConsultas {
     }
 
     @Override
-    public List<CategoriaDoLivro> listarCategorias() {
-        return categorias.findAllByOrderByNomeAsc().stream()
-                .map(categoria -> new CategoriaDoLivro(categoria.getId(), categoria.getNome()))
-                .toList();
+    public Pagina<CategoriaDoLivro> listarCategorias(Paginacao paginacao) {
+        Page<CategoriaJpa> pagina = categorias.findAll(ConversorDePaginacao.paraPageable(paginacao));
+        return ConversorDePaginacao.paraPagina(pagina,
+                categoria -> new CategoriaDoLivro(categoria.getId(), categoria.getNome()));
     }
 
-    /** Carrega os relacionamentos dos livros informados em lote. */
+    /** Carrega autores e categorias dos livros informados em lote. */
     private Relacionamentos carregar(List<Long> livroIds) {
         if (livroIds.isEmpty()) {
             return Relacionamentos.vazios();
@@ -74,12 +74,7 @@ public class CatalogoConsultasJpa implements CatalogoConsultas {
                     .add(new CategoriaDoLivro(categoria.getCategoriaId(), categoria.getNome()));
         }
 
-        Map<Long, String> editoras = livros.buscarEditorasPorLivro(livroIds).stream()
-                .collect(Collectors.toMap(
-                        EditoraDoLivroProjecao::getLivroId,
-                        EditoraDoLivroProjecao::getNome));
-
-        return new Relacionamentos(congelar(autores), congelar(categoriasPorLivro), Map.copyOf(editoras));
+        return new Relacionamentos(congelar(autores), congelar(categoriasPorLivro));
     }
 
     private static LivroResumo paraResumo(LivroJpa livro, Relacionamentos relacionamentos) {
@@ -87,16 +82,14 @@ public class CatalogoConsultasJpa implements CatalogoConsultas {
         return new LivroResumo(id, livro.getTitulo(),
                 relacionamentos.autores().getOrDefault(id, List.of()),
                 relacionamentos.categorias().getOrDefault(id, List.of()),
-                relacionamentos.editoras().get(id),
+                livro.getEditora().getNome(),
                 livro.getAno());
     }
 
     private static LivroDetalhe paraDetalhe(LivroJpa livro, Relacionamentos relacionamentos) {
-        LivroResumo resumo = paraResumo(livro, relacionamentos);
-        return new LivroDetalhe(resumo.id(), resumo.titulo(), resumo.autores(), resumo.categorias(),
-                resumo.editora(), resumo.ano(), livro.getEdicao(), livro.getIsbn(), livro.getPaginas(),
-                livro.getSinopse(), livro.getAltura(), livro.getLargura(), livro.getProfundidade(),
-                livro.getPeso(), livro.getCodigoBarras());
+        return new LivroDetalhe(paraResumo(livro, relacionamentos), livro.getEdicao(), livro.getIsbn(),
+                livro.getPaginas(), livro.getSinopse(), livro.getAltura(), livro.getLargura(),
+                livro.getProfundidade(), livro.getPeso(), livro.getCodigoBarras());
     }
 
     private static <T> Map<Long, List<T>> congelar(Map<Long, List<T>> mapa) {
@@ -108,11 +101,10 @@ public class CatalogoConsultasJpa implements CatalogoConsultas {
     /** Relacionamentos de uma página, indexados pelo id do livro. */
     private record Relacionamentos(
             Map<Long, List<String>> autores,
-            Map<Long, List<CategoriaDoLivro>> categorias,
-            Map<Long, String> editoras) {
+            Map<Long, List<CategoriaDoLivro>> categorias) {
 
         private static Relacionamentos vazios() {
-            return new Relacionamentos(Map.of(), Map.of(), Map.of());
+            return new Relacionamentos(Map.of(), Map.of());
         }
     }
 }

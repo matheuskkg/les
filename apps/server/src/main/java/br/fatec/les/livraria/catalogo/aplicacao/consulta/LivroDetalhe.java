@@ -1,19 +1,15 @@
 package br.fatec.les.livraria.catalogo.aplicacao.consulta;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Objects;
 
 /**
  * Livro completo como a consulta o devolve, sem preço nem disponibilidade, que são enriquecidos pelo caso
- * de uso (RF-LIV-005, RN-LIV-001). Só livros ativos chegam aqui.
+ * de uso (RF-LIV-005, RN-LIV-001). Só livros ativos chegam aqui. Os dados comuns à vitrine ficam em
+ * {@link LivroResumo}, reutilizado no lugar de repetir os campos.
  */
 public record LivroDetalhe(
-        Long id,
-        String titulo,
-        List<String> autores,
-        List<CategoriaDoLivro> categorias,
-        String editora,
-        Integer ano,
+        LivroResumo livro,
         String edicao,
         String isbn,
         Integer paginas,
@@ -25,7 +21,6 @@ public record LivroDetalhe(
         String codigoBarras) {
 
     public LivroDetalhe {
-        autores = List.copyOf(autores);
-        categorias = List.copyOf(categorias);
+        Objects.requireNonNull(livro, "livro");
     }
 }

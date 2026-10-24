@@ -1,7 +1,6 @@
 package br.fatec.les.livraria.catalogo.aplicacao.consulta;
 
-import java.math.BigDecimal;
-import java.util.List;
+import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
 
@@ -12,26 +11,11 @@ import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
  * preço aparece sem {@code precoVenda} e com disponível zero.
  */
 public record LivroConsultado(
-        Long id,
-        String titulo,
-        List<String> autores,
-        List<CategoriaDoLivro> categorias,
-        String editora,
-        Integer ano,
+        LivroDetalhe livro,
         @Nullable Dinheiro precoVenda,
-        int disponivel,
-        String edicao,
-        String isbn,
-        Integer paginas,
-        String sinopse,
-        BigDecimal altura,
-        BigDecimal largura,
-        BigDecimal profundidade,
-        BigDecimal peso,
-        String codigoBarras) {
+        int disponivel) {
 
     public LivroConsultado {
-        autores = List.copyOf(autores);
-        categorias = List.copyOf(categorias);
+        Objects.requireNonNull(livro, "livro");
     }
 }

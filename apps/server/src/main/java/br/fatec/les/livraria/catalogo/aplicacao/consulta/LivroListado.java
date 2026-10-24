@@ -1,6 +1,6 @@
 package br.fatec.les.livraria.catalogo.aplicacao.consulta;
 
-import java.util.List;
+import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
 
@@ -11,17 +11,11 @@ import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
  * DEC-15.3). Livro sem preço aparece sem {@code precoVenda} e com disponível zero.
  */
 public record LivroListado(
-        Long id,
-        String titulo,
-        List<String> autores,
-        List<CategoriaDoLivro> categorias,
-        String editora,
-        Integer ano,
+        LivroResumo livro,
         @Nullable Dinheiro precoVenda,
         int disponivel) {
 
     public LivroListado {
-        autores = List.copyOf(autores);
-        categorias = List.copyOf(categorias);
+        Objects.requireNonNull(livro, "livro");
     }
 }

@@ -4,13 +4,14 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.fatec.les.livraria.compartilhado.aplicacao.Ids;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.estoque.aplicacao.porta.SaldoDeEstoque;
+import br.fatec.les.livraria.estoque.aplicacao.porta.SaldoDoLivro;
 import br.fatec.les.livraria.estoque.dominio.calculo.CalcularDisponivel;
 import lombok.RequiredArgsConstructor;
 
@@ -20,8 +21,9 @@ import lombok.RequiredArgsConstructor;
  * persistência de estoque.
  *
  * <p>Disponível = quantidade em estoque − reservas ativas, nunca negativo. Uma reserva é ativa quando
- * {@code expiraEm} está no futuro em relação ao {@link Relogio}. Livro sem linha de saldo tem disponível
- * zero.
+ * {@code expiraEm} está no futuro em relação ao {@link Relogio}. Quantidade e reservas vêm de uma única
+ * consulta, na mesma transação, portanto do mesmo retrato do estoque. Livro sem linha de saldo tem
+ * disponível zero.
  */
 @Component
 @RequiredArgsConstructor
@@ -37,21 +39,18 @@ public class ConsultarDisponibilidade {
      */
     @Transactional(readOnly = true)
     public Map<Long, Integer> executar(Collection<Long> livroIds) {
-        Objects.requireNonNull(livroIds, "livroIds");
-        livroIds.forEach(livroId -> Objects.requireNonNull(livroId, "livroIds não pode conter null"));
-        if (livroIds.isEmpty()) {
+        if (Ids.validar(livroIds)) {
             return Map.of();
         }
 
         LocalDateTime agora = relogio.agora();
-        Map<Long, Integer> quantidades = saldoDeEstoque.quantidadesEmEstoque(livroIds);
-        Map<Long, Integer> reservas = saldoDeEstoque.reservasAtivas(livroIds, agora);
+        Map<Long, SaldoDoLivro> saldos = saldoDeEstoque.saldos(livroIds, agora);
 
         Map<Long, Integer> disponiveis = new LinkedHashMap<>();
         for (Long livroId : livroIds) {
+            SaldoDoLivro saldo = saldos.getOrDefault(livroId, SaldoDoLivro.ZERO);
             disponiveis.put(livroId, calcularDisponivel.calcular(
-                    quantidades.getOrDefault(livroId, 0),
-                    reservas.getOrDefault(livroId, 0)));
+                    saldo.quantidadeEmEstoque(), saldo.quantidadeReservada()));
         }
         return Map.copyOf(disponiveis);
     }

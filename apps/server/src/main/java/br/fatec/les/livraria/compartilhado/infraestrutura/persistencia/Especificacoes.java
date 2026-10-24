@@ -13,6 +13,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 
@@ -45,16 +46,11 @@ public final class Especificacoes {
     }
 
     private static <T> Specification<T> contem(Function<Root<T>, Path<String>> caminho, String termo) {
-        String limpo = textoLimpo(termo);
-        if (limpo == null) {
+        String escapado = padraoContem(termo);
+        if (escapado == null) {
             return semFiltro();
         }
-        String escapado = escaparLike(limpo);
-        return (raiz, consulta, cb) -> {
-            Expression<String> coluna = normalizada(cb, caminho.apply(raiz));
-            Expression<String> valor = normalizada(cb, cb.literal(escapado));
-            return cb.like(coluna, cb.concat(cb.concat(cb.literal("%"), valor), cb.literal("%")), ESCAPE);
-        };
+        return (raiz, consulta, cb) -> predicadoContem(cb, caminho.apply(raiz), escapado);
     }
 
     /** Igualdade; texto passa por {@code trim} e valor nulo ou em branco é ignorado. */
@@ -143,21 +139,31 @@ public final class Especificacoes {
      * maiúsculas nem acentos.
      */
     public static <T> Specification<T> existeContem(String relacao, String campo, String termo) {
-        String limpo = textoLimpo(termo);
-        if (limpo == null) {
+        String escapado = padraoContem(termo);
+        if (escapado == null) {
             return semFiltro();
         }
-        String escapado = escaparLike(limpo);
         return (raiz, consulta, cb) -> {
             Subquery<Integer> subconsulta = consulta.subquery(Integer.class);
             Root<T> externa = subconsulta.correlate(raiz);
             Join<T, ?> juncao = externa.join(relacao);
-            Expression<String> coluna = normalizada(cb, juncao.get(campo));
-            Expression<String> valor = normalizada(cb, cb.literal(escapado));
-            subconsulta.select(cb.literal(1)).where(cb.like(coluna,
-                    cb.concat(cb.concat(cb.literal("%"), valor), cb.literal("%")), ESCAPE));
+            subconsulta.select(cb.literal(1)).where(predicadoContem(cb, juncao.get(campo), escapado));
             return cb.exists(subconsulta);
         };
+    }
+
+    /** Prepara o termo de um "contém": {@code trim}, ou {@code null} quando o valor é ignorado, já escapado. */
+    private static String padraoContem(String termo) {
+        String limpo = textoLimpo(termo);
+        return limpo == null ? null : escaparLike(limpo);
+    }
+
+    /** O predicado "contém" comum a {@link #contem(String, String)} e {@link #existeContem}: LIKE sem caixa. */
+    private static Predicate predicadoContem(CriteriaBuilder cb, Expression<String> coluna, String escapado) {
+        Expression<String> colunaNormalizada = normalizada(cb, coluna);
+        Expression<String> valor = normalizada(cb, cb.literal(escapado));
+        return cb.like(colunaNormalizada,
+                cb.concat(cb.concat(cb.literal("%"), valor), cb.literal("%")), ESCAPE);
     }
 
     private static Expression<String> normalizada(CriteriaBuilder cb, Expression<String> expressao) {
