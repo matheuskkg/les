@@ -173,7 +173,7 @@ export default function Carrinho() {
     definirProblema(null);
     try {
       const { data, error, response } = await cliente.POST('/api/me/checkout');
-      if (data || response.status === 409) {
+      if (data || (response.status === 409 && (await cliente.GET('/api/me/checkout')).data)) {
         route('/checkout');
         return;
       }

@@ -3,6 +3,7 @@ package br.fatec.les.livraria.vendas.infraestrutura.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -200,6 +201,53 @@ class CheckoutIntegracaoTest {
 
         assertThat(reservas.listarPorOrigem(OrigemReserva.CHECKOUT, checkoutId)).isEmpty();
         mvc.perform(get("/api/livros/7")).andExpect(jsonPath("$.disponivel").value(6));
+    }
+
+    @Test
+    void rnVen014_checkoutVencidoAntesDaTarefaNaoBloqueiaUmNovo() throws Exception {
+        adicionar(ANA, 7, 2).andExpect(status().isOk());
+        escrever(post("/api/me/checkout"), ANA).andExpect(status().isCreated());
+        AGORA.set(INICIO.plusMinutes(61));
+
+        mvc.perform(get("/api/me/checkout").cookie(sessaoDe(ANA))).andExpect(status().isNotFound());
+        adicionar(ANA, 1, 1).andExpect(status().isOk());
+        escrever(post("/api/me/checkout"), ANA)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.itens[*].livroId", contains(1)));
+        mvc.perform(get("/api/me/carrinho").cookie(sessaoDe(ANA)))
+                .andExpect(jsonPath("$.removidos[*].livroId", contains(7)));
+    }
+
+    @Test
+    void rnfVen001_livroReadicionadoNoCarrinhoNaoViraRemovidoNaExpiracaoDoCheckout() throws Exception {
+        adicionar(ANA, 7, 2).andExpect(status().isOk());
+        escrever(post("/api/me/checkout"), ANA).andExpect(status().isCreated());
+        AGORA.set(INICIO.plusMinutes(45));
+        adicionar(ANA, 7, 1).andExpect(status().isOk());
+
+        AGORA.set(INICIO.plusMinutes(60));
+        expirarReservas.executar();
+
+        mvc.perform(get("/api/me/carrinho").cookie(sessaoDe(ANA)))
+                .andExpect(jsonPath("$.itens[*].livroId", contains(7)))
+                .andExpect(jsonPath("$.removidos", hasSize(0)));
+    }
+
+    @Test
+    void rnVen001_voltarSemEstoqueParaASomaExplicaComoSair() throws Exception {
+        adicionar(ANA, 7, 4).andExpect(status().isOk());
+        escrever(post("/api/me/checkout"), ANA).andExpect(status().isCreated());
+        adicionar(ANA, 7, 2).andExpect(status().isOk());
+        // A reserva do carrinho vence e Bruno leva as duas unidades.
+        AGORA.set(INICIO.plusMinutes(31));
+        adicionar(BRUNO, 7, 2).andExpect(status().isOk());
+
+        escrever(post("/api/me/checkout/voltar"), ANA)
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.violacoes[0].codigo").value("RN-VEN-001"))
+                .andExpect(jsonPath("$.violacoes[0].mensagem").value(containsString(
+                        "Diminua ou remova no carrinho")));
+        mvc.perform(get("/api/me/checkout").cookie(sessaoDe(ANA))).andExpect(status().isOk());
     }
 
     private long carrinhoId() {

@@ -134,17 +134,21 @@ public class Carrinho {
         List<ItemRemovidoCarrinho> retirados = itens.stream()
                 .map(item -> new ItemRemovidoCarrinho(item.getLivroId(), item.getQuantidade(), agora))
                 .toList();
-        registrarRemovidos(retirados);
         itens.clear();
+        registrarRemovidos(retirados);
         encerrarExpiracao();
     }
 
     /**
      * Guarda itens retirados por expiração, um por livro (DEC-16): o registro mais recente de um livro substitui o
-     * anterior.
+     * anterior. Um livro que já está de novo entre os itens do carrinho não vira aviso, como na expiração de um
+     * checkout depois de o cliente ter readicionado o livro.
      */
     public void registrarRemovidos(List<ItemRemovidoCarrinho> novos) {
         for (ItemRemovidoCarrinho novo : novos) {
+            if (item(novo.livroId()).isPresent()) {
+                continue;
+            }
             removidos.removeIf(removido -> removido.livroId().equals(novo.livroId()));
             removidos.add(novo);
         }

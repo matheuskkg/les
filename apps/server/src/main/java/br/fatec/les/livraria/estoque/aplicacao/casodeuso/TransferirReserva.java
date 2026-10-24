@@ -9,9 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio;
-import br.fatec.les.livraria.estoque.aplicacao.porta.EstoqueTravado;
 import br.fatec.les.livraria.estoque.aplicacao.porta.ReservasDeEstoque;
-import br.fatec.les.livraria.estoque.dominio.calculo.CalcularDisponivel;
+import br.fatec.les.livraria.estoque.aplicacao.regra.DisponivelParaReservar;
 import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
 import br.fatec.les.livraria.estoque.dominio.modelo.Reserva;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +27,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TransferirReserva {
 
-    private final EstoqueTravado estoqueTravado;
     private final ReservasDeEstoque reservas;
-    private final CalcularDisponivel calcularDisponivel;
+    private final DisponivelParaReservar disponivelParaReservar;
     private final Relogio relogio;
 
     /**
@@ -55,20 +53,11 @@ public class TransferirReserva {
         if (!Objects.requireNonNull(expiraEm, "expiraEm").isAfter(agora)) {
             throw new IllegalArgumentException("A reserva deve expirar no futuro.");
         }
-        // RN-VEN-001: a linha travada serializa as reservas concorrentes do mesmo livro (DEC-15.3).
-        int emMaos = estoqueTravado.quantidadeComLock(livroId).orElse(0);
         Optional<Reserva> existente = reservas.buscar(livroId, origem, origemId);
-        int reservadoPorOutros = reservas.quantidadeReservadaAtivaExceto(livroId, agora,
-                existente.map(Reserva::getId).orElse(-1L));
-        int disponivel = calcularDisponivel.calcular(emMaos, reservadoPorOutros);
-        if (quantidade > disponivel) {
-            throw new ExcecaoDeNegocio("RN-VEN-001",
-                    "Estoque insuficiente para o livro %d. Disponível: %d.".formatted(livroId, disponivel));
-        }
+        disponivelParaReservar.exigir(livroId, quantidade, existente, agora);
         Reserva reserva = existente
                 .map(atual -> {
-                    atual.alterar(quantidade, expiraEm);
-                    atual.transferir(destino, destinoId, expiraEm);
+                    atual.transferir(destino, destinoId, quantidade, expiraEm);
                     return atual;
                 })
                 .orElseGet(() -> Reserva.nova(livroId, destino, destinoId, quantidade, expiraEm));

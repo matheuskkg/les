@@ -64,7 +64,12 @@ public class VoltarAoCarrinho {
         }
         LocalDateTime expiraEm = relogio.agora().plus(propriedades.prazoBloqueio());
         carrinho.renovarExpiracao(expiraEm);
-        reservarItens.executar(carrinho, expiraEm);
+        try {
+            reservarItens.executar(carrinho, expiraEm);
+        } catch (ExcecaoDeNegocio excecao) {
+            throw new ExcecaoDeNegocio("RN-VEN-001", "Não há estoque para somar os itens da compra aos do carrinho. "
+                    + "Diminua ou remova no carrinho os livros repetidos e tente de novo.");
+        }
         checkout.encerrar();
         checkouts.salvar(checkout);
         return montarCarrinho.montar(carrinhos.salvar(carrinho));

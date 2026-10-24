@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio;
 import br.fatec.les.livraria.estoque.aplicacao.porta.EstoqueTravado;
 import br.fatec.les.livraria.estoque.aplicacao.porta.ReservasDeEstoque;
+import br.fatec.les.livraria.estoque.aplicacao.regra.DisponivelParaReservar;
 import br.fatec.les.livraria.estoque.dominio.calculo.CalcularDisponivel;
 import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
 import br.fatec.les.livraria.estoque.dominio.modelo.Reserva;
@@ -29,8 +30,8 @@ class ReservarTest {
 
     private final Map<Long, Integer> estoque = new HashMap<>(Map.of(LIVRO, 6));
     private final ReservasEmMemoria reservas = new ReservasEmMemoria();
-    private final Reservar reservar = new Reservar(livroId -> Optional.ofNullable(estoque.get(livroId)), reservas,
-            new CalcularDisponivel(), () -> AGORA);
+    private final Reservar reservar = new Reservar(reservas, new DisponivelParaReservar(
+            livroId -> Optional.ofNullable(estoque.get(livroId)), reservas, new CalcularDisponivel()), () -> AGORA);
 
     @Test
     void rnVen001_reservaDentroDoDisponivel() {

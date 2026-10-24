@@ -47,13 +47,13 @@ public class Reserva {
     }
 
     /**
-     * Passa a reserva a outro dono com novo prazo, como do carrinho ao checkout (DEC-12, DEC-16). A quantidade não
-     * muda.
+     * Passa a reserva a outro dono com a quantidade do item e um novo prazo, como do carrinho ao checkout (DEC-12,
+     * DEC-16).
      */
-    public void transferir(OrigemReserva origem, Long origemId, LocalDateTime expiraEm) {
+    public void transferir(OrigemReserva origem, Long origemId, int quantidade, LocalDateTime expiraEm) {
         this.origem = Objects.requireNonNull(origem, "origem");
         this.origemId = Objects.requireNonNull(origemId, "origemId");
-        this.expiraEm = Objects.requireNonNull(expiraEm, "expiraEm");
+        alterar(quantidade, expiraEm);
     }
 
     public boolean ativaEm(LocalDateTime agora) {
