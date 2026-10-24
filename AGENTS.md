@@ -46,6 +46,7 @@ npm run dev                                 # Vite em http://localhost:5173, com
 npm run build                               # checagem de tipos + build em apps/web/dist
 npm run gerar-api                           # regenera src/api/esquema.d.ts a partir de openapi.json
 npm run typecheck                           # só a checagem de tipos
+npm test                                    # testes unitários com o runner do Node (node --test)
 ```
 
 O jar único da demonstração é montado rodando `npm run build` em `apps/web` e depois `mvn package` em

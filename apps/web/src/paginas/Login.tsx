@@ -5,22 +5,8 @@ import { CampoDeFormulario } from '../componentes/CampoDeFormulario';
 import { Erro } from '../componentes/Erro';
 import { Violacoes } from '../componentes/Violacoes';
 import { useSessao } from '../contextoDeSessao';
-import { entrar, type Usuario } from '../sessao';
-
-function destinoSeguro(destino: string | undefined, usuario: Usuario): string {
-  const inicial = usuario.papel === 'ADMIN' ? '/admin' : '/minha-conta';
-
-  if (!destino || !destino.startsWith('/') || destino.startsWith('//')) {
-    return inicial;
-  }
-  if (destino.startsWith('/admin') && usuario.papel !== 'ADMIN') {
-    return inicial;
-  }
-  if (destino.startsWith('/minha-conta') && usuario.papel !== 'CLIENTE') {
-    return inicial;
-  }
-  return destino;
-}
+import { destinoSeguro } from '../destino';
+import { entrar } from '../sessao';
 
 export default function Login() {
   const { definirUsuario } = useSessao();
@@ -46,7 +32,7 @@ export default function Login() {
     try {
       const usuario = await entrar(identificacao, senha);
       definirUsuario(usuario);
-      route(destinoSeguro(query.destino, usuario), true);
+      route(destinoSeguro(query.destino, usuario, location.origin), true);
     } catch (erro) {
       if (erro instanceof ErroDaApi) {
         definirProblema(erro.problema);

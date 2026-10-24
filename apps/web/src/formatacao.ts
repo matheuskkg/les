@@ -1,6 +1,37 @@
 /** Formatação de valores vindos da API, sem conta de dinheiro com number (DEC-07). */
 
-const vazio = '';
+function avancarDigito(digito: string): string {
+  return String.fromCharCode(digito.charCodeAt(0) + 1);
+}
+
+/** Soma um centavo em "inteiro" + "centavos", com carry dígito a dígito. */
+function somarCentavo(
+  inteiro: string,
+  centavos: string,
+): { inteiro: string; centavos: string } {
+  const dezena = centavos.charAt(0);
+  const unidade = centavos.charAt(1);
+
+  if (unidade !== '9') {
+    return { inteiro, centavos: dezena + avancarDigito(unidade) };
+  }
+  if (dezena !== '9') {
+    return { inteiro, centavos: avancarDigito(dezena) + '0' };
+  }
+
+  const digitos = inteiro.split('');
+  let posicao = digitos.length - 1;
+  while (posicao >= 0 && digitos[posicao] === '9') {
+    digitos[posicao] = '0';
+    posicao -= 1;
+  }
+  if (posicao < 0) {
+    digitos.unshift('1');
+  } else {
+    digitos[posicao] = avancarDigito(digitos[posicao] ?? '0');
+  }
+  return { inteiro: digitos.join(''), centavos: '00' };
+}
 
 /**
  * Formata um decimal em string (padrão da API: "1234.56") como "R$ 1.234,56".
@@ -9,16 +40,23 @@ const vazio = '';
 export function formatarDinheiro(valor: string): string {
   const texto = valor.trim();
   if (texto === '' || !/^-?\d+(?:\.\d*)?$/.test(texto)) {
-    return vazio;
+    return valor;
   }
 
   const negativo = texto.startsWith('-');
   const semSinal = negativo ? texto.slice(1) : texto;
   const [inteiroBruto = '0', fracionarioBruto = ''] = semSinal.split('.');
-  const inteiro = inteiroBruto.replace(/^0+(?=\d)/, '') || '0';
-  const centavos = (fracionarioBruto + '00').slice(0, 2);
-  const comMilhares = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const inteiroNormalizado = inteiroBruto.replace(/^0+(?=\d)/, '') || '0';
 
+  let inteiro = inteiroNormalizado;
+  let centavos = (fracionarioBruto + '00').slice(0, 2);
+
+  // DEC-15.1: arredondamento HALF_UP na terceira casa, dígito a dígito (sem number).
+  if (fracionarioBruto.length > 2 && (fracionarioBruto.charAt(2) || '0') >= '5') {
+    ({ inteiro, centavos } = somarCentavo(inteiro, centavos));
+  }
+
+  const comMilhares = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   return `${negativo ? '-' : ''}R$ ${comMilhares},${centavos}`;
 }
 

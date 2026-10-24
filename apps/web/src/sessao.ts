@@ -32,10 +32,7 @@ function comoUsuario(dados: unknown): Usuario {
   };
 }
 
-/**
- * POST /api/sessao — login por e-mail ou telefone (DEC-08/DEC-10).
- * A rota ainda não existe no server; a chamada fica isolada aqui para o dia em que ela entrar.
- */
+/** POST /api/sessao — login por e-mail ou telefone (DEC-08/DEC-10). */
 export async function entrar(login: string, senha: string): Promise<Usuario> {
   const resposta = await requisitar('/api/sessao', {
     method: 'POST',

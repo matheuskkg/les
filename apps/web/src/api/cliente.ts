@@ -51,7 +51,12 @@ function lerCookie(nome: string): string | null {
   for (const parte of document.cookie.split(';')) {
     const item = parte.trim();
     if (item.startsWith(prefixo)) {
-      return decodeURIComponent(item.slice(prefixo.length));
+      const valor = item.slice(prefixo.length);
+      try {
+        return decodeURIComponent(valor);
+      } catch {
+        return valor;
+      }
     }
   }
   return null;

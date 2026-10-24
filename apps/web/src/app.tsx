@@ -1,13 +1,7 @@
-import { Router, Route, lazy } from 'preact-iso';
+import { Router, Route } from 'preact-iso';
 import { Cabecalho } from './componentes/Cabecalho';
 import { Protegida } from './componentes/Protegida';
-
-const Vitrine = lazy(() => import('./paginas/Vitrine'));
-const Login = lazy(() => import('./paginas/Login'));
-const Cadastro = lazy(() => import('./paginas/Cadastro'));
-const MinhaConta = lazy(() => import('./paginas/MinhaConta'));
-const Admin = lazy(() => import('./paginas/Admin'));
-const NaoEncontrada = lazy(() => import('./paginas/NaoEncontrada'));
+import { Admin, Cadastro, Login, MinhaConta, NaoEncontrada, Vitrine } from './paginas/telas';
 
 function AreaDoCliente() {
   return (
@@ -39,7 +33,9 @@ export function App() {
           <Route path="/" component={Vitrine} />
           <Route path="/login" component={Login} />
           <Route path="/cadastro" component={Cadastro} />
+          <Route path="/minha-conta" component={AreaDoCliente} />
           <Route path="/minha-conta/*" component={AreaDoCliente} />
+          <Route path="/admin" component={AreaDoAdmin} />
           <Route path="/admin/*" component={AreaDoAdmin} />
           <Route default component={NaoEncontrada} />
         </Router>

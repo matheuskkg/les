@@ -3,6 +3,7 @@ import type { ComponentChildren } from 'preact';
 import { useContext, useEffect, useState } from 'preact/hooks';
 import { useLocation } from 'preact-iso';
 import { definirTratadorDeNaoAutorizado } from './api/cliente';
+import { Login, Vitrine } from './paginas/telas';
 import { obterSessao, sair, type Usuario } from './sessao';
 
 interface ContextoDeSessao {
@@ -45,15 +46,24 @@ export function SessaoProvider({ children }: { children: ComponentChildren }) {
     };
   }, []);
 
-  // Qualquer 401 da API limpa a sessão e volta ao login (DEC-08).
-  useEffect(
-    () =>
-      definirTratadorDeNaoAutorizado(() => {
+  // Qualquer 401 da API limpa a sessão e volta ao login (DEC-08), guardando o
+  // caminho atual para retornar depois de entrar.
+  useEffect(() => {
+    return definirTratadorDeNaoAutorizado(() => {
+      if (location.pathname === '/login') {
         definirUsuario(null);
-        route('/login', true);
-      }),
-    [route],
-  );
+        return;
+      }
+
+      const destino = `${location.pathname}${location.search}`;
+      void Login.preload()
+        .catch(() => undefined)
+        .then(() => {
+          definirUsuario(null);
+          route(`/login?destino=${encodeURIComponent(destino)}`, true);
+        });
+    });
+  }, [route]);
 
   async function encerrarSessao(): Promise<void> {
     try {
@@ -61,6 +71,11 @@ export function SessaoProvider({ children }: { children: ComponentChildren }) {
     } catch {
       // Mesmo se o server falhar, a sessão local é encerrada.
     }
+
+    // Garante que a vitrine já está carregada antes de limpar o usuário: assim o
+    // Router troca de rota no mesmo commit e a Protegida não redireciona ao login.
+    await Vitrine.preload().catch(() => undefined);
+
     definirUsuario(null);
     route('/');
   }
