@@ -105,6 +105,8 @@ public final class ClientesDeTeste {
         public final java.util.Set<String> emailsEmUso = new java.util.HashSet<>();
         public final java.util.Set<String> telefonesEmUso = new java.util.HashSet<>();
         public final java.util.Set<Long> idsEmUso = new java.util.HashSet<>();
+        public final java.util.Map<br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta, java.util.Set<Long>>
+                idsPorSituacao = new java.util.HashMap<>();
         public final java.util.List<Usuario> salvos = new java.util.ArrayList<>();
         private long proximoId = 2;
 
@@ -120,6 +122,37 @@ public final class ClientesDeTeste {
         @Override
         public java.util.Optional<Usuario> buscarPorId(Long id) {
             return salvos.stream().filter(usuario -> usuario.getId().equals(id)).findFirst();
+        }
+
+        @Override
+        public java.util.List<Usuario> buscarPorIds(java.util.Collection<Long> ids) {
+            return salvos.stream().filter(usuario -> ids.contains(usuario.getId())).toList();
+        }
+
+        @Override
+        public java.util.Set<Long> buscarIdsPorContato(String email, String telefone) {
+            String termo = email == null || email.isBlank() ? null : email.strip().toLowerCase();
+            String digitos = telefone == null || telefone.isBlank()
+                    ? null
+                    : br.fatec.les.livraria.acesso.dominio.modelo.Telefone.somenteDigitos(telefone);
+            return salvos.stream()
+                    .filter(usuario -> termo == null
+                            || usuario.getEmail().toLowerCase().contains(termo))
+                    .filter(usuario -> digitos == null
+                            || (usuario.getTelefone() != null
+                                    && usuario.getTelefone().digitos().equals(digitos)))
+                    .map(Usuario::getId)
+                    .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        }
+
+        @Override
+        public java.util.Set<Long> listarIdsPorSituacao(
+                java.util.Collection<br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta> situacoes) {
+            java.util.Set<Long> ids = new java.util.HashSet<>();
+            for (var situacao : situacoes) {
+                ids.addAll(idsPorSituacao.getOrDefault(situacao, java.util.Set.of()));
+            }
+            return java.util.Set.copyOf(ids);
         }
 
         @Override

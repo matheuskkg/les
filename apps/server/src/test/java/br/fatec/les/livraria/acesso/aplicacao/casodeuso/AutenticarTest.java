@@ -214,6 +214,22 @@ class AutenticarTest {
         }
 
         @Override
+        public List<Usuario> buscarPorIds(java.util.Collection<Long> ids) {
+            return ids.stream().map(porId::get).filter(java.util.Objects::nonNull).toList();
+        }
+
+        @Override
+        public java.util.Set<Long> buscarIdsPorContato(String email, String telefone) {
+            return java.util.Set.of();
+        }
+
+        @Override
+        public java.util.Set<Long> listarIdsPorSituacao(
+                java.util.Collection<br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta> situacoes) {
+            return java.util.Set.of();
+        }
+
+        @Override
         public Optional<Usuario> buscarPorLogin(String login) {
             if (login == null || login.isBlank()) {
                 return Optional.empty();

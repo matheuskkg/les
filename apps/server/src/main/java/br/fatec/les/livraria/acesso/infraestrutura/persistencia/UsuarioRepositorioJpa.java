@@ -2,16 +2,21 @@ package br.fatec.les.livraria.acesso.infraestrutura.persistencia;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
 import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
 import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
+import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta;
 import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoDaConta;
+import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
 import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
+import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import lombok.RequiredArgsConstructor;
 
@@ -36,6 +41,51 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
     @Override
     public Optional<Usuario> buscarPorId(Long id) {
         return repositorio.findById(id).map(mapper::paraDominio);
+    }
+
+    @Override
+    public List<Usuario> buscarPorIds(Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+        return repositorio.findAllById(ids).stream().map(mapper::paraDominio).toList();
+    }
+
+    @Override
+    public Set<Long> buscarIdsPorContato(String email, String telefone) {
+        String termo = email == null || email.isBlank() ? null : email.strip().toLowerCase(Locale.ROOT);
+        String digitos = telefone == null || telefone.isBlank() ? null : digitosDoTelefone(telefone);
+        if (termo == null && digitos == null) {
+            return Set.of();
+        }
+        List<Long> encontrados;
+        if (termo != null && digitos != null) {
+            encontrados = repositorio.buscarIdsPorEmailETelefone(termo, digitos);
+        } else if (termo != null) {
+            encontrados = repositorio.buscarIdsPorEmail(termo);
+        } else {
+            encontrados = repositorio.buscarIdsPorTelefone(digitos);
+        }
+        return Set.copyOf(encontrados);
+    }
+
+    @Override
+    public Set<Long> listarIdsPorSituacao(Collection<SituacaoConta> situacoes) {
+        if (situacoes == null || situacoes.isEmpty()) {
+            return Set.of();
+        }
+        LocalDateTime limite = limiteEmUso();
+        Set<Long> ids = new LinkedHashSet<>();
+        if (situacoes.contains(SituacaoConta.ATIVA)) {
+            ids.addAll(repositorio.listarIdsAtivos());
+        }
+        if (situacoes.contains(SituacaoConta.INATIVA)) {
+            ids.addAll(repositorio.listarIdsInativos(limite));
+        }
+        if (situacoes.contains(SituacaoConta.ENCERRADA)) {
+            ids.addAll(repositorio.listarIdsEncerrados(limite));
+        }
+        return Set.copyOf(ids);
     }
 
     @Override
@@ -95,6 +145,19 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
 
     private static boolean telefoneValido(String digitos) {
         return digitos.length() == 10 || digitos.length() == 11;
+    }
+
+    /**
+     * Dígitos do telefone informado como filtro, com o código do país descartado. Diferente do login, um valor sem
+     * formato de telefone é um parâmetro inválido (HTTP 400), e não uma busca sem resultado (DEC-07, RF-CLI-004).
+     */
+    private static String digitosDoTelefone(String telefone) {
+        String digitos = somenteDigitos(telefone);
+        if (!telefoneValido(digitos)) {
+            throw new ParametroInvalido("telefone",
+                    "O telefone deve ter DDD e número, com 10 ou 11 dígitos.");
+        }
+        return digitos;
     }
 
     private static String ddd(String digitos) {

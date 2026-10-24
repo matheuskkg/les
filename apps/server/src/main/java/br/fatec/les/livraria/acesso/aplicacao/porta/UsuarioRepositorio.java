@@ -3,7 +3,9 @@ package br.fatec.les.livraria.acesso.aplicacao.porta;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta;
 import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
 
 /**
@@ -21,6 +23,22 @@ public interface UsuarioRepositorio {
      * pode vir com o código do país ({@code +55}); ele é descartado antes da validação de 10 ou 11 dígitos.
      */
     Optional<Usuario> buscarPorLogin(String login);
+
+    /**
+     * Carrega vários usuários de uma vez, para que as listagens de outros módulos não façam uma consulta por item
+     * (RF-CLI-004, DEC-07).
+     */
+    List<Usuario> buscarPorIds(Collection<Long> ids);
+
+    /**
+     * Ids dos usuários cujo e-mail contém o termo, sem diferenciar maiúsculas, e/ou cujo telefone (DDD + número) é
+     * igual aos dígitos informados. E-mail e telefone se combinam com E; um valor nulo não filtra (RF-CLI-004,
+     * DEC-07).
+     */
+    Set<Long> buscarIdsPorContato(String email, String telefone);
+
+    /** Ids dos usuários nas situações informadas, calculadas sobre {@code inativado_em} (RF-CLI-004, DEC-10). */
+    Set<Long> listarIdsPorSituacao(Collection<SituacaoConta> situacoes);
 
     /** {@code true} se um e-mail pertence a uma conta em uso. */
     boolean existeEmailEmUso(String email);

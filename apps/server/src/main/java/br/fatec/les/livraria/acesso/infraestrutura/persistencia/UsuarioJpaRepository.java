@@ -55,6 +55,47 @@ public interface UsuarioJpaRepository extends JpaRepository<UsuarioJpa, Long> {
     @Query("select u.id from UsuarioJpa u where u.papel = :papel order by u.id")
     List<Long> listarIdsPorPapel(@Param("papel") Papel papel);
 
+    @Query("select u.id from UsuarioJpa u where u.inativadoEm is null order by u.id")
+    List<Long> listarIdsAtivos();
+
+    @Query("""
+            select u.id from UsuarioJpa u
+            where u.inativadoEm is not null
+              and u.inativadoEm >= :limite
+            order by u.id
+            """)
+    List<Long> listarIdsInativos(@Param("limite") LocalDateTime limite);
+
+    @Query("""
+            select u.id from UsuarioJpa u
+            where u.inativadoEm is not null
+              and u.inativadoEm < :limite
+            order by u.id
+            """)
+    List<Long> listarIdsEncerrados(@Param("limite") LocalDateTime limite);
+
+    @Query("""
+            select u.id from UsuarioJpa u
+            where locate(:termo, lower(u.email)) > 0
+            order by u.id
+            """)
+    List<Long> buscarIdsPorEmail(@Param("termo") String termo);
+
+    @Query("""
+            select u.id from UsuarioJpa u
+            where concat(u.telefone.ddd, u.telefone.numero) = :digitos
+            order by u.id
+            """)
+    List<Long> buscarIdsPorTelefone(@Param("digitos") String digitos);
+
+    @Query("""
+            select u.id from UsuarioJpa u
+            where locate(:termo, lower(u.email)) > 0
+              and concat(u.telefone.ddd, u.telefone.numero) = :digitos
+            order by u.id
+            """)
+    List<Long> buscarIdsPorEmailETelefone(@Param("termo") String termo, @Param("digitos") String digitos);
+
     @Query("""
             select count(u) from UsuarioJpa u
             where u.id in :ids

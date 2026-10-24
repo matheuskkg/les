@@ -31,6 +31,14 @@ public final class Especificacoes {
     private Especificacoes() {
     }
 
+    /**
+     * Filtro que nunca casa. Usado quando um valor já resolvido em outro módulo não encontrou nenhum id: o
+     * resultado da consulta precisa ser vazio, e não "sem filtro" (RF-CLI-004, DEC-07).
+     */
+    public static <T> Specification<T> nenhum() {
+        return (raiz, consulta, cb) -> cb.disjunction();
+    }
+
     /** "Contém" em texto, sem diferenciar maiúsculas nem acentos. */
     public static <T> Specification<T> contem(String campo, String termo) {
         return contem(raiz -> raiz.get(campo), termo);
