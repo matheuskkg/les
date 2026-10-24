@@ -320,6 +320,14 @@
           }
         }, {
           "in" : "query",
+          "name" : "clienteId",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "in" : "query",
           "name" : "status",
           "required" : false,
           "schema" : {

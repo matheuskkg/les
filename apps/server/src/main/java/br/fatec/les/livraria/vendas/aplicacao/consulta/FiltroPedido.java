@@ -14,6 +14,7 @@ import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
  * significa que nenhum cliente atendeu ao filtro.
  *
  * @param numero número do pedido; nulo não filtra
+ * @param clienteId código do cliente; nulo não filtra
  * @param status status desejados, combinados com OU; vazio não filtra
  * @param realizadoDesde início do período da finalização, inclusive; nulo não filtra
  * @param realizadoAntesDe fim do período da finalização, exclusive; nulo não filtra
@@ -21,6 +22,7 @@ import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
  */
 public record FiltroPedido(
         Long numero,
+        Long clienteId,
         List<StatusPedido> status,
         LocalDateTime realizadoDesde,
         LocalDateTime realizadoAntesDe,

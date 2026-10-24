@@ -27,6 +27,7 @@ interface Resultado {
 }
 
 const NUMERO_INVALIDO = 'O número do pedido deve ter só dígitos.';
+const CODIGO_INVALIDO = 'O código do cliente deve ter só dígitos.';
 
 /** Consulta de pedidos do administrador, com filtros combinados guardados na URL (RF-VEN-009, RF-VEN-010). */
 export default function AdminPedidos() {
@@ -41,8 +42,9 @@ export default function AdminPedidos() {
   }, [estado]);
 
   useEffect(() => {
-    if (!numeroValido(estado.filtros.numero)) {
-      definirResultado({ busca, pagina: null, problema: { status: 400, detail: NUMERO_INVALIDO } });
+    if (!numeroValido(estado.filtros.numero) || !numeroValido(estado.filtros.clienteId)) {
+      const detail = numeroValido(estado.filtros.numero) ? CODIGO_INVALIDO : NUMERO_INVALIDO;
+      definirResultado({ busca, pagina: null, problema: { status: 400, detail } });
       return;
     }
     const controle = new AbortController();
@@ -98,6 +100,10 @@ export default function AdminPedidos() {
         <CampoDeFormulario id="filtro-numero" rotulo="Número do pedido" valor={filtros.numero} name="numero"
           inputMode="numeric" erro={numeroValido(filtros.numero) ? undefined : NUMERO_INVALIDO}
           aoMudar={(valor) => mudarCampo('numero', valor)} />
+        <CampoDeFormulario id="filtro-cliente-id" rotulo="Código do cliente" valor={filtros.clienteId}
+          name="clienteId" inputMode="numeric"
+          erro={numeroValido(filtros.clienteId) ? undefined : CODIGO_INVALIDO}
+          aoMudar={(valor) => mudarCampo('clienteId', valor)} />
         <CampoDeFormulario id="filtro-cliente" rotulo="Cliente" valor={filtros.cliente} name="cliente"
           aoMudar={(valor) => mudarCampo('cliente', valor)} />
         <CampoDeFormulario id="filtro-cpf" rotulo="CPF" valor={filtros.cpf} name="cpf" inputMode="numeric"
@@ -133,7 +139,7 @@ export default function AdminPedidos() {
         </fieldset>
 
         <div class="acoes">
-          <button class="botao" type="submit" disabled={!numeroValido(filtros.numero)}>
+          <button class="botao" type="submit" disabled={!numeroValido(filtros.numero) || !numeroValido(filtros.clienteId)}>
             Filtrar
           </button>
           <button

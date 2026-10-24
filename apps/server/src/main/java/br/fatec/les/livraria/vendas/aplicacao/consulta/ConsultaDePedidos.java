@@ -11,6 +11,7 @@ import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
  * combinam com E; status repetidos combinam com OU.
  *
  * @param numero número do pedido
+ * @param clienteId código do cliente
  * @param status status desejados; vazio não filtra
  * @param cliente trecho do nome do cliente
  * @param cpf CPF do cliente, com ou sem máscara
@@ -19,6 +20,7 @@ import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
  */
 public record ConsultaDePedidos(
         Long numero,
+        Long clienteId,
         List<StatusPedido> status,
         String cliente,
         String cpf,

@@ -20,7 +20,7 @@ export const ORDENS: readonly { valor: string; rotulo: string }[] = [
 export const ORDEM_PADRAO = 'realizadoEm,desc';
 export const TAMANHO_DA_PAGINA = 20;
 
-const CAMPOS_DE_TEXTO = ['numero', 'cliente', 'cpf', 'realizadoEmDe', 'realizadoEmAte'] as const;
+const CAMPOS_DE_TEXTO = ['numero', 'clienteId', 'cliente', 'cpf', 'realizadoEmDe', 'realizadoEmAte'] as const;
 
 export type CampoDeTexto = (typeof CAMPOS_DE_TEXTO)[number];
 
@@ -37,7 +37,7 @@ export interface EstadoDaConsulta {
 }
 
 export function filtrosVazios(): FiltrosDePedidos {
-  return { numero: '', cliente: '', cpf: '', realizadoEmDe: '', realizadoEmAte: '', status: [] };
+  return { numero: '', clienteId: '', cliente: '', cpf: '', realizadoEmDe: '', realizadoEmAte: '', status: [] };
 }
 
 /** Lê o estado da query string; valores desconhecidos são ignorados. */
@@ -87,7 +87,7 @@ export function urlDaConsulta(estado: EstadoDaConsulta): string {
   return texto === '' ? '/admin/pedidos' : `/admin/pedidos?${texto}`;
 }
 
-/** Número do pedido em branco ou só com dígitos; outro texto não vai para a API. */
+/** Número (do pedido ou do cliente) em branco ou só com dígitos; outro texto não vai para a API. */
 export function numeroValido(numero: string): boolean {
   const texto = numero.trim();
   return texto === '' || (/^\d+$/.test(texto) && Number.isSafeInteger(Number(texto)));
@@ -104,9 +104,11 @@ export function consultaDoEstado(estado: EstadoDaConsulta): ConsultaDePedidos {
     tamanho: TAMANHO_DA_PAGINA,
     ordem: [estado.ordem],
   };
-  const numero = estado.filtros.numero.trim();
-  if (numero !== '' && numeroValido(numero)) {
-    consulta.numero = Number(numero);
+  for (const campo of ['numero', 'clienteId'] as const) {
+    const valor = estado.filtros[campo].trim();
+    if (valor !== '' && numeroValido(valor)) {
+      consulta[campo] = Number(valor);
+    }
   }
   for (const campo of ['cliente', 'cpf', 'realizadoEmDe', 'realizadoEmAte'] as const) {
     const valor = estado.filtros[campo].trim();

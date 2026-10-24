@@ -40,8 +40,8 @@ public class ListarPedidos {
         Objects.requireNonNull(consulta, "consulta");
         Objects.requireNonNull(paginacao, "paginacao");
         PeriodoDoPedido periodo = PeriodoDoPedido.dosDias(consulta.realizadoEmDe(), consulta.realizadoEmAte());
-        FiltroPedido filtro = new FiltroPedido(consulta.numero(), consulta.status(), periodo.inicio(),
-                periodo.fimExclusivo(), buscarClientes.executar(consulta.cliente(), consulta.cpf()));
+        FiltroPedido filtro = new FiltroPedido(consulta.numero(), consulta.clienteId(), consulta.status(),
+                periodo.inicio(), periodo.fimExclusivo(), buscarClientes.executar(consulta.cliente(), consulta.cpf()));
         return pedidos.listar(filtro, paginacao);
     }
 }

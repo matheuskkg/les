@@ -23,6 +23,7 @@ final class EspecificacoesDePedido {
         Objects.requireNonNull(filtro, "filtro");
         return Specification.<PedidoJpa>unrestricted()
                 .and(Especificacoes.igual("id", filtro.numero()))
+                .and(Especificacoes.igual("clienteId", filtro.clienteId()))
                 .and(Especificacoes.em("status", filtro.status()))
                 .and(desde(filtro.realizadoDesde()))
                 .and(antesDe(filtro.realizadoAntesDe()))

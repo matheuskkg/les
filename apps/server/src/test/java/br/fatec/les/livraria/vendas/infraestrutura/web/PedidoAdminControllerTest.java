@@ -126,6 +126,14 @@ class PedidoAdminControllerTest {
     }
 
     @Test
+    void rfCli005_filtraPeloCodigoDoClienteParaOHistoricoDoCadastro() throws Exception {
+        mvc.perform(comoAdmin(em2001(get(ROTA)).param("clienteId", "2")))
+                .andExpect(jsonPath("$.itens[*].id", contains((int) aprovadoDoBruno)));
+        mvc.perform(comoAdmin(em2001(get(ROTA)).param("clienteId", "1")))
+                .andExpect(jsonPath("$.itens[*].id", contains((int) reprovadoDaAna, (int) aprovadoDaAna)));
+    }
+
+    @Test
     void rfVen009_clienteSemCorrespondenciaNaoListaNenhumPedido() throws Exception {
         mvc.perform(comoAdmin(em2001(get(ROTA)).param("cliente", "Ninguém com esse nome")))
                 .andExpect(status().isOk())

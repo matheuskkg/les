@@ -11,7 +11,7 @@ test('lerEstadoDaConsulta usa os padrões e ignora valores desconhecidos', () =>
 
 test('urlDaConsulta e lerEstadoDaConsulta fazem ida e volta', () => {
   const estado = lerEstadoDaConsulta(
-    '?numero=10001&cliente=ana&cpf=529.982.247-25&realizadoEmDe=2026-10-01&realizadoEmAte=2026-10-24'
+    '?numero=10001&clienteId=1&cliente=ana&cpf=529.982.247-25&realizadoEmDe=2026-10-01&realizadoEmAte=2026-10-24'
       + '&status=APROVADA&status=EM_TRANSPORTE&ordem=total,asc&pagina=2',
   );
   const url = urlDaConsulta(estado);

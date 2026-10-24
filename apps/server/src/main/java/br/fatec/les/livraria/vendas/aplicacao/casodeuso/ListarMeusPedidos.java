@@ -3,7 +3,6 @@ package br.fatec.les.livraria.vendas.aplicacao.casodeuso;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +36,7 @@ public class ListarMeusPedidos {
     public Pagina<PedidoResumo> executar(Paginacao paginacao) {
         Objects.requireNonNull(paginacao, "paginacao");
         Long clienteId = identificarCliente.executar();
-        return pedidos.listar(new FiltroPedido(null, List.of(), null, null, Optional.of(Set.of(clienteId))),
+        return pedidos.listar(new FiltroPedido(null, clienteId, List.of(), null, null, Optional.empty()),
                 paginacao);
     }
 }

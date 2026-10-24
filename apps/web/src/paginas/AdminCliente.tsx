@@ -120,7 +120,7 @@ export default function AdminCliente() {
             )}
           </div>
 
-          <PedidosDoCliente cpf={visivel.cliente.cpf} />
+          <PedidosDoCliente clienteId={visivel.cliente.id} />
         </>
       )}
     </section>

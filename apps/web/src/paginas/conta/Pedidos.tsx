@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import { useLocation } from 'preact-iso';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../../api/cliente';
 import type { components } from '../../api/esquema';
 import { CopiasDoPedido } from '../../componentes/CopiasDoPedido';
@@ -16,9 +17,18 @@ interface Lista {
   problema: ProblemaDetalhe | null;
 }
 
-/** Todas as transações do cliente logado, das mais recentes às mais antigas, inclusive as reprovadas (RF-CLI-005). */
+function urlDaPagina(pagina: number): string {
+  return pagina > 1 ? `/minha-conta/pedidos?pagina=${pagina}` : '/minha-conta/pedidos';
+}
+
+/**
+ * Todas as transações do cliente logado, das mais recentes às mais antigas, inclusive as reprovadas (RF-CLI-005). A
+ * página fica na URL, para o "Voltar" do detalhe e os links voltarem a ela.
+ */
 export function MeusPedidos() {
-  const [pagina, definirPagina] = useState(1);
+  const { query, route } = useLocation();
+  const lida = Number.parseInt(query.pagina ?? '', 10);
+  const pagina = Number.isSafeInteger(lida) && lida > 1 ? lida : 1;
   const [lista, definirLista] = useState<Lista | null>(null);
 
   useEffect(() => {
@@ -61,6 +71,10 @@ export function MeusPedidos() {
         </p>
       ) : visivel.problema ? (
         <Erro problema={visivel.problema} />
+      ) : dados !== null && dados.itens.length === 0 && dados.totalItens > 0 ? (
+        <p class="aviso">
+          Esta página não existe mais. <a href={urlDaPagina(1)}>Ir para a primeira página</a>
+        </p>
       ) : dados === null || dados.totalItens === 0 ? (
         <p>Você ainda não fez nenhum pedido.</p>
       ) : (
@@ -79,7 +93,9 @@ export function MeusPedidos() {
                 {dados.itens.map((item) => (
                   <tr key={item.id}>
                     <td>
-                      <a href={`/minha-conta/pedidos/${item.id}`}>{item.id}</a>
+                      <a href={pagina > 1 ? `/minha-conta/pedidos/${item.id}?de=${pagina}` : `/minha-conta/pedidos/${item.id}`}>
+                        {item.id}
+                      </a>
                     </td>
                     <td>{formatarDataHora(item.realizadoEm)}</td>
                     <td>{textoDoStatus(item.status)}</td>
@@ -92,14 +108,14 @@ export function MeusPedidos() {
           {dados.totalPaginas > 1 && (
             <nav class="paginacao" aria-label="Páginas de pedidos">
               <button class="botao botao--secundario" type="button" disabled={pagina <= 1}
-                onClick={() => definirPagina(pagina - 1)}>
+                onClick={() => route(urlDaPagina(pagina - 1))}>
                 Anterior
               </button>
               <span class="paginacao__posicao">
                 Página {pagina} de {dados.totalPaginas}
               </span>
               <button class="botao botao--secundario" type="button" disabled={pagina >= dados.totalPaginas}
-                onClick={() => definirPagina(pagina + 1)}>
+                onClick={() => route(urlDaPagina(pagina + 1))}>
                 Próxima
               </button>
             </nav>
@@ -118,6 +134,8 @@ interface Detalhe {
 
 /** Detalhe de um pedido do cliente logado, com as cópias gravadas na finalização (RF-CLI-005, DEC-12). */
 export function MeuPedido({ id }: { id: string }) {
+  const { query } = useLocation();
+  const voltar = query.de === undefined ? '/minha-conta/pedidos' : urlDaPagina(Number.parseInt(query.de, 10) || 1);
   const [detalhe, definirDetalhe] = useState<Detalhe | null>(null);
 
   useEffect(() => {
@@ -156,7 +174,7 @@ export function MeuPedido({ id }: { id: string }) {
   return (
     <>
       <p>
-        <a href="/minha-conta/pedidos">← Voltar para os meus pedidos</a>
+        <a href={voltar}>← Voltar para os meus pedidos</a>
       </p>
       {visivel === null ? (
         <p class="aviso" role="status">
@@ -164,7 +182,7 @@ export function MeuPedido({ id }: { id: string }) {
         </p>
       ) : pedido === null ? (
         <div class="cartao">
-          <h2>Pedido não encontrado</h2>
+          <h2>{visivel.problema?.status === 404 ? 'Pedido não encontrado' : 'Não foi possível abrir o pedido'}</h2>
           <Erro problema={visivel.problema} />
         </div>
       ) : (

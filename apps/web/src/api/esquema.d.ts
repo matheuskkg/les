@@ -1581,6 +1581,7 @@ export interface operations {
         parameters: {
             query?: {
                 numero?: number;
+                clienteId?: number;
                 status?: ("EM_PROCESSAMENTO" | "APROVADA" | "REPROVADA" | "EM_TRANSPORTE" | "ENTREGUE")[];
                 cliente?: string;
                 cpf?: string;

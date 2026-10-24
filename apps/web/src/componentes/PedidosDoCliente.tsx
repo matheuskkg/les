@@ -10,49 +10,50 @@ type PaginaDePedidos = components['schemas']['PaginaPedidoListadoDto'];
 const TAMANHO = 20;
 
 interface Resultado {
-  cpf: string;
+  clienteId: number;
   dados: PaginaDePedidos | null;
   problema: ProblemaDetalhe | null;
 }
 
 /**
  * Histórico de transações no cadastro do cliente, para o administrador (RF-CLI-005): os pedidos mais recentes,
- * buscados pelo CPF na consulta de pedidos (RF-VEN-009), com o link para a consulta completa.
+ * buscados pelo código do cliente na consulta de pedidos (RF-VEN-009), com o link para a consulta completa. Não
+ * usa o CPF, que uma conta encerrada libera para outro cadastro (DEC-10).
  */
-export function PedidosDoCliente({ cpf }: { cpf: string }) {
+export function PedidosDoCliente({ clienteId }: { clienteId: number }) {
   const [resultado, definirResultado] = useState<Resultado | null>(null);
 
   useEffect(() => {
     const controle = new AbortController();
     cliente
       .GET('/api/admin/pedidos', {
-        params: { query: { cpf, pagina: 0, tamanho: TAMANHO, ordem: ['realizadoEm,desc'] } },
+        params: { query: { clienteId, pagina: 0, tamanho: TAMANHO, ordem: ['realizadoEm,desc'] } },
         signal: controle.signal,
       })
       .then(({ data, error, response }) => {
         if (!controle.signal.aborted) {
           definirResultado(
             response.ok
-              ? { cpf, dados: data ?? null, problema: null }
-              : { cpf, dados: null, problema: interpretarProblema(error, response.status) },
+              ? { clienteId, dados: data ?? null, problema: null }
+              : { clienteId, dados: null, problema: interpretarProblema(error, response.status) },
           );
         }
       })
       .catch(() => {
         if (!controle.signal.aborted) {
           definirResultado({
-            cpf,
+            clienteId,
             dados: null,
             problema: { status: 0, detail: 'Não foi possível carregar os pedidos. Tente novamente.' },
           });
         }
       });
     return () => controle.abort();
-  }, [cpf]);
+  }, [clienteId]);
 
-  const visivel = resultado?.cpf === cpf ? resultado : null;
+  const visivel = resultado?.clienteId === clienteId ? resultado : null;
   const dados = visivel?.dados ?? null;
-  const consultaCompleta = urlDaConsulta({ filtros: { ...filtrosVazios(), cpf }, ordem: 'realizadoEm,desc', pagina: 1 });
+  const consultaCompleta = urlDaConsulta({ filtros: { ...filtrosVazios(), clienteId: String(clienteId) }, ordem: 'realizadoEm,desc', pagina: 1 });
 
   return (
     <div class="cartao">
