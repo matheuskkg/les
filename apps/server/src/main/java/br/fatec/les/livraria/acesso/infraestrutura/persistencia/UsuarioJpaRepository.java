@@ -1,6 +1,7 @@
 package br.fatec.les.livraria.acesso.infraestrutura.persistencia;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -53,4 +54,11 @@ public interface UsuarioJpaRepository extends JpaRepository<UsuarioJpa, Long> {
 
     @Query("select u.id from UsuarioJpa u where u.papel = :papel order by u.id")
     List<Long> listarIdsPorPapel(@Param("papel") Papel papel);
+
+    @Query("""
+            select count(u) from UsuarioJpa u
+            where u.id in :ids
+              and (u.inativadoEm is null or u.inativadoEm >= :limite)
+            """)
+    long contarEmUsoPorIds(@Param("ids") Collection<Long> ids, @Param("limite") LocalDateTime limite);
 }

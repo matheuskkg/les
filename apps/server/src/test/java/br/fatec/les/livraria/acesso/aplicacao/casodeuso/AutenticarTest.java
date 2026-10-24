@@ -237,6 +237,11 @@ class AutenticarTest {
         }
 
         @Override
+        public boolean existeAlgumaEmUso(java.util.Collection<Long> ids) {
+            return ids.stream().anyMatch(porId::containsKey);
+        }
+
+        @Override
         public List<Long> listarAdministradores() {
             return porId.values().stream()
                     .filter(usuario -> usuario.getPapel() == Papel.ADMIN)

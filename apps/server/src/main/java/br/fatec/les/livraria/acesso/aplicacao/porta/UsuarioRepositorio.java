@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.acesso.aplicacao.porta;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,12 @@ public interface UsuarioRepositorio {
 
     /** {@code true} se um telefone (só dígitos) pertence a uma conta em uso. */
     boolean existeTelefoneEmUso(String telefone);
+
+    /**
+     * {@code true} se algum dos usuários informados pertence a uma conta em uso. Usada pela unicidade de CPF do
+     * módulo {@code clientes}, que pergunta ao {@code acesso} antes de liberar um CPF de conta encerrada (DEC-10).
+     */
+    boolean existeAlgumaEmUso(Collection<Long> ids);
 
     List<Long> listarAdministradores();
 }

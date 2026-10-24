@@ -1,6 +1,7 @@
 package br.fatec.les.livraria.acesso.infraestrutura.persistencia;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -64,6 +65,14 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
             return false;
         }
         return repositorio.contarPorTelefoneEmUso(ddd(digitos), numero(digitos), limiteEmUso()) > 0;
+    }
+
+    @Override
+    public boolean existeAlgumaEmUso(Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return false;
+        }
+        return repositorio.contarEmUsoPorIds(ids, limiteEmUso()) > 0;
     }
 
     @Override
