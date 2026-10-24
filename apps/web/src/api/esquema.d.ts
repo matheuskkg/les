@@ -218,6 +218,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/trocas/{id}/confirmar-recebimento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirma o recebimento dos itens de uma troca autorizada e gera o cupom de troca */
+        post: operations["confirmarRecebimento"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/trocas/{id}/recusar": {
         parameters: {
             query?: never;
@@ -1196,6 +1213,11 @@ export interface components {
              */
             subtotal: string;
         };
+        ItemRecebidoDto: {
+            /** Format: int64 */
+            itemPedidoId?: number;
+            voltaEstoque?: boolean;
+        };
         ItemRemovidoDoCarrinhoDto: {
             autores: string[];
             /** Format: int64 */
@@ -1483,6 +1505,9 @@ export interface components {
             title?: string;
             /** Format: uri */
             type?: string;
+        };
+        RecebimentoDeTrocaDto: {
+            itens?: components["schemas"]["ItemRecebidoDto"][];
         };
         RecusaDeTrocaDto: {
             motivo?: string;
@@ -1882,6 +1907,59 @@ export interface operations {
             };
             /** @description A troca não está EM TROCA */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    confirmarRecebimento: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecebimentoDeTrocaDto"];
+            };
+        };
+        responses: {
+            /** @description Troca TROCADO; devolve o pedido dela */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PedidoDetalheDto"];
+                };
+            };
+            /** @description Troca inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description A troca não está autorizada */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Falta informar se algum item volta ao estoque */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -16,10 +16,12 @@ import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 import br.fatec.les.livraria.compartilhado.infraestrutura.web.Listagem;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.AutorizarTroca;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConfirmarRecebimentoDaTroca;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ListarTrocas;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.RecusarTroca;
 import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PedidoDetalheDto;
+import br.fatec.les.livraria.vendas.infraestrutura.web.dto.RecebimentoDeTrocaDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.RecusaDeTrocaDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.TrocaListadaDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,9 +32,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Trocas para o administrador (RF-VEN-012, RF-VEN-013, DEC-07, DEC-12). A consulta filtra pelo status de cada troca,
- * com OU. Autorizar e recusar são ações em sub-rotas {@code POST} que devolvem o pedido da troca, com as trocas
- * atualizadas; fora do diagrama do DEC-12 respondem 409.
+ * Trocas para o administrador (RF-VEN-012, RF-VEN-013, RF-VEN-014, DEC-07, DEC-12). A consulta filtra pelo status de
+ * cada troca, com OU. Autorizar, recusar e confirmar o recebimento são ações em sub-rotas {@code POST} que devolvem
+ * o pedido da troca, com as trocas atualizadas; fora do diagrama do DEC-12 respondem 409.
  */
 @RestController
 @RequestMapping("/api/admin/trocas")
@@ -42,6 +44,7 @@ public class TrocaAdminController {
     private final ListarTrocas listarTrocas;
     private final AutorizarTroca autorizarTroca;
     private final RecusarTroca recusarTroca;
+    private final ConfirmarRecebimentoDaTroca confirmarRecebimentoDaTroca;
 
     @GetMapping
     public Pagina<TrocaListadaDto> listar(@RequestParam(required = false) List<StatusTroca> status,
@@ -84,5 +87,26 @@ public class TrocaAdminController {
     })
     public PedidoDetalheDto recusar(@PathVariable Long id, @RequestBody RecusaDeTrocaDto recusa) {
         return PedidoDetalheDto.de(recusarTroca.executar(id, recusa.motivo()));
+    }
+
+    @PostMapping("/{id}/confirmar-recebimento")
+    @Operation(summary = "Confirma o recebimento dos itens de uma troca autorizada e gera o cupom de troca")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Troca TROCADO; devolve o pedido dela",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PedidoDetalheDto.class))),
+            @ApiResponse(responseCode = "404", description = "Troca inexistente",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "A troca não está autorizada",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Falta informar se algum item volta ao estoque",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public PedidoDetalheDto confirmarRecebimento(@PathVariable Long id,
+            @RequestBody RecebimentoDeTrocaDto recebimento) {
+        return PedidoDetalheDto.de(confirmarRecebimentoDaTroca.executar(id, recebimento.paraItens()));
     }
 }

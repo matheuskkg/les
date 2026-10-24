@@ -619,6 +619,74 @@
         "tags" : [ "troca-admin-controller" ]
       }
     },
+    "/api/admin/trocas/{id}/confirmar-recebimento" : {
+      "post" : {
+        "operationId" : "confirmarRecebimento",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RecebimentoDeTrocaDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PedidoDetalheDto"
+                }
+              }
+            },
+            "description" : "Troca TROCADO; devolve o pedido dela"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Troca inexistente"
+          },
+          "409" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "A troca não está autorizada"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Falta informar se algum item volta ao estoque"
+          }
+        },
+        "summary" : "Confirma o recebimento dos itens de uma troca autorizada e gera o cupom de troca",
+        "tags" : [ "troca-admin-controller" ]
+      }
+    },
     "/api/admin/trocas/{id}/recusar" : {
       "post" : {
         "operationId" : "recusar",
@@ -3427,6 +3495,18 @@
         },
         "required" : [ "disponivelParaTroca", "id", "livro", "precoUnitario", "quantidade", "subtotal" ]
       },
+      "ItemRecebidoDto" : {
+        "type" : "object",
+        "properties" : {
+          "itemPedidoId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "voltaEstoque" : {
+            "type" : "boolean"
+          }
+        }
+      },
       "ItemRemovidoDoCarrinhoDto" : {
         "type" : "object",
         "properties" : {
@@ -4092,6 +4172,17 @@
           "type" : {
             "type" : "string",
             "format" : "uri"
+          }
+        }
+      },
+      "RecebimentoDeTrocaDto" : {
+        "type" : "object",
+        "properties" : {
+          "itens" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ItemRecebidoDto"
+            }
           }
         }
       },

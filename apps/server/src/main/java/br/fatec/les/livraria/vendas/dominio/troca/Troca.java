@@ -2,6 +2,7 @@ package br.fatec.les.livraria.vendas.dominio.troca;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
@@ -18,7 +19,7 @@ public class Troca {
     private final @Nullable Long id;
     private final Long pedidoId;
     private final LocalDateTime solicitadaEm;
-    private final List<ItemTroca> itens;
+    private List<ItemTroca> itens;
     private StatusTroca status;
     private @Nullable String motivoRecusa;
     private @Nullable Dinheiro valorCupom;
@@ -79,6 +80,38 @@ public class Troca {
         exigirEmTroca("recusada");
         status = StatusTroca.TROCA_RECUSADA;
         motivoRecusa = motivo.strip();
+    }
+
+    /**
+     * O administrador confirma o recebimento dos itens: {@code TROCA AUTORIZADA} → {@code TROCADO} (RF-VEN-014,
+     * RF-VEN-015, RN-VEN-012, DEC-12). Guarda se cada item volta ao estoque, o valor e o cupom gerado. As regras do
+     * recebimento ficam em {@code vendas.dominio.regra}.
+     *
+     * @param voltaEstoque decisão por item do pedido; precisa cobrir todos os itens da troca
+     * @throws ExcecaoDeConflito se a troca não estiver {@code TROCA AUTORIZADA}
+     */
+    public void confirmarRecebimento(Map<Long, Boolean> voltaEstoque, Dinheiro valor, Long cupomGerado) {
+        Objects.requireNonNull(voltaEstoque, "voltaEstoque");
+        exigirAutorizada();
+        itens = itens.stream()
+                .map(item -> new ItemTroca(item.id(), item.itemPedidoId(), item.quantidade(),
+                        Objects.requireNonNull(voltaEstoque.get(item.itemPedidoId()),
+                                "voltaEstoque do item " + item.itemPedidoId())))
+                .toList();
+        status = StatusTroca.TROCADO;
+        valorCupom = Objects.requireNonNull(valor, "valor");
+        cupomId = Objects.requireNonNull(cupomGerado, "cupomGerado");
+    }
+
+    /**
+     * Confere, antes das regras do recebimento, que a troca está {@code TROCA AUTORIZADA} (DEC-12).
+     *
+     * @throws ExcecaoDeConflito se não estiver
+     */
+    public void exigirAutorizada() {
+        if (status != StatusTroca.TROCA_AUTORIZADA) {
+            throw new ExcecaoDeConflito("Só uma troca autorizada pode ter o recebimento confirmado.");
+        }
     }
 
     /**
