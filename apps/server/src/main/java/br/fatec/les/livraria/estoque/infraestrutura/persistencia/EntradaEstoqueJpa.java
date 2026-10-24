@@ -14,6 +14,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
+import org.hibernate.envers.Audited;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,6 +31,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@Audited
 @Entity
 @Table(name = "entrada_estoque", indexes = {
         @Index(name = "ix_entrada_estoque_livro_data", columnList = "livro_id, data_entrada"),

@@ -5,6 +5,13 @@ spring:
     default: h2
   jpa:
     open-in-view: false
+    properties:
+      # Log de transação (RNF-GER-002, DEC-08, DEC-14): tabelas _aud e revisão com nomes em português.
+      org.hibernate.envers.audit_table_suffix: _aud
+      org.hibernate.envers.revision_field_name: revisao
+      org.hibernate.envers.revision_type_field_name: tipo_revisao
+      # Exclusões mantêm a linha completa na tabela _aud (DEC-14).
+      org.hibernate.envers.store_data_at_delete: true
   sql:
     init:
       mode: never

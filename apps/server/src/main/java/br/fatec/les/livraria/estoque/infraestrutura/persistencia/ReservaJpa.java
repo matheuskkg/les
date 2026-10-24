@@ -13,6 +13,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
+import org.hibernate.envers.Audited;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,6 +27,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@Audited
 @Entity
 @Table(name = "reserva", indexes = {
         @Index(name = "ix_reserva_livro_expira_em", columnList = "livro_id, expira_em"),

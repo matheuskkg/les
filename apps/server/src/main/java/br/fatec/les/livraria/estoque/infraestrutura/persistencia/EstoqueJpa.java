@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import org.hibernate.annotations.Check;
+import org.hibernate.envers.Audited;
 
 /**
  * Saldo em mãos por livro (DEC-15.3). O {@code livro_id} é único e referência a outro módulo, sem
@@ -21,6 +22,7 @@ import org.hibernate.annotations.Check;
 @Getter
 @Setter
 @NoArgsConstructor
+@Audited
 @Entity
 @Check(constraints = "quantidade >= 0")
 @Table(name = "estoque", indexes = @Index(name = "uk_estoque_livro", columnList = "livro_id", unique = true))

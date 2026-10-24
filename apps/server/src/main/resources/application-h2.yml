@@ -4,6 +4,8 @@ spring:
     username: sa
     password:
   jpa:
+    # H2 em modo PostgreSQL não aceita o tinyint da coluna tipo_revisao do Envers (ver DialetoH2).
+    database-platform: br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.DialetoH2
     hibernate:
       ddl-auto: create-drop
   h2:

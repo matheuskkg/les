@@ -14,12 +14,15 @@ import jakarta.persistence.Index;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
+import org.hibernate.envers.Audited;
+
 import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /** Tabela {@code usuario} do MER (DEC-14, DEC-16). A situação não é gravada: é derivada de {@code inativado_em}. */
+@Audited
 @Entity
 @Table(name = "usuario", indexes = {
         @Index(name = "ix_usuario_email", columnList = "email"),
