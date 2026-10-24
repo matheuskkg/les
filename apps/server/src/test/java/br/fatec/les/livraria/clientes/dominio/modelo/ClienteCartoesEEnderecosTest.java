@@ -47,6 +47,24 @@ class ClienteCartoesEEnderecosTest {
     }
 
     @Test
+    void dec06_excluirOPreferencialPromoveOMaisRecenteAindaValido() {
+        Cartao vencido = new Cartao(12L, "4111111111111111", "ANA SOUZA", VISA, YearMonth.of(2026, 9), false);
+        Cliente cliente = cliente(1L, 2L).comCartao(cartao(10L)).comCartao(cartao(11L)).comCartao(vencido)
+                .semCartao(10L, YearMonth.of(2026, 10));
+
+        assertThat(cliente.cartao(11L).orElseThrow().preferencial()).isTrue();
+        assertThat(cliente.cartao(12L).orElseThrow().preferencial()).isFalse();
+    }
+
+    @Test
+    void rnCli004_reconheceCartaoJaCadastradoComOuSemMascara() {
+        Cliente cliente = cliente(1L, 2L).comCartao(cartao(10L));
+
+        assertThat(cliente.temCartaoComNumero("4111 1111 1111 1111")).isTrue();
+        assertThat(cliente.temCartaoComNumero("5555555555554444")).isFalse();
+    }
+
+    @Test
     void rfCli007_excluirCartaoNaoPreferencialMantemOPreferencial() {
         Cliente cliente = cliente(1L, 2L).comCartao(cartao(10L)).comCartao(cartao(11L)).semCartao(11L);
 

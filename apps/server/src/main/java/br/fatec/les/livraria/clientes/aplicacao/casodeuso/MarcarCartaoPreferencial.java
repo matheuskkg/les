@@ -26,7 +26,7 @@ public class MarcarCartaoPreferencial {
      */
     @Transactional
     public void executar(Long usuarioId, Long cartaoId) {
-        Cliente cliente = clienteDoUsuario.buscar(usuarioId);
+        Cliente cliente = clienteDoUsuario.buscarParaAlterar(usuarioId);
         if (cliente.cartao(cartaoId).isEmpty()) {
             throw new ExcecaoDeRecursoNaoEncontrado("Cartão não encontrado.");
         }

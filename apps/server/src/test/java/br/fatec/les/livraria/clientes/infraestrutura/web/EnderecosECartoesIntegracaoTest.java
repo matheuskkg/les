@@ -155,6 +155,28 @@ class EnderecosECartoesIntegracaoTest {
     }
 
     @Test
+    void rnCli004_mesmoCartaoDuasVezesResponde422() throws Exception {
+        String visaDaAna = """
+                { "numero": "4111 1111 1111 1111", "nomeImpresso": "ANA SOUZA", "bandeiraId": 1, "validade": "2030-12" }
+                """;
+        escrever(post("/api/me/cartoes"), ANA, visaDaAna)
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.violacoes[*].mensagem", hasItem("Este cartão já está cadastrado.")));
+    }
+
+    @Test
+    void rfCli007_alterarCartaoSemNumeroMantemONumeroGravado() throws Exception {
+        String semNumero = """
+                { "numero": "", "nomeImpresso": "ANA S SOUZA", "bandeiraId": 1, "validade": "2031-06" }
+                """;
+        escrever(put("/api/me/cartoes/1"), ANA, semNumero)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nomeImpresso").value("ANA S SOUZA"))
+                .andExpect(jsonPath("$.numeroMascarado", endsWith("1111")))
+                .andExpect(jsonPath("$.preferencial").value(true));
+    }
+
+    @Test
     void rnCli005_bandeiraNaoRegistradaResponde422() throws Exception {
         escrever(post("/api/me/cartoes"), ANA, cartao(99, "2030-01"))
                 .andExpect(status().isUnprocessableContent())

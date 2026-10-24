@@ -1,6 +1,7 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,9 +37,12 @@ public class AdicionarEndereco {
     @Transactional
     public Endereco executar(Long usuarioId, NovoEndereco comando) {
         Violacoes.verificar(comando, enderecoCompleto, tamanhosMaximos);
-        Cliente cliente = clienteDoUsuario.buscar(usuarioId);
+        Cliente cliente = clienteDoUsuario.buscarParaAlterar(usuarioId);
+        Set<Long> existentes = cliente.getEnderecos().stream().map(Endereco::id).collect(Collectors.toSet());
         Cliente salvo = clientes.salvar(cliente.comEndereco(Endereco.de(comando, null)));
-        List<Endereco> enderecos = salvo.getEnderecos();
-        return enderecos.get(enderecos.size() - 1);
+        return salvo.getEnderecos().stream()
+                .filter(endereco -> !existentes.contains(endereco.id()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Endereço gravado não encontrado no cliente."));
     }
 }

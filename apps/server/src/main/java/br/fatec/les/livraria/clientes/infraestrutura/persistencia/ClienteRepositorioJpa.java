@@ -43,6 +43,12 @@ public class ClienteRepositorioJpa implements ClienteRepositorio {
 
     @Override
     @Transactional
+    public Optional<Cliente> buscarPorUsuarioIdParaAlterar(Long usuarioId) {
+        return repositorio.buscarPorUsuarioIdParaAlterar(usuarioId).map(mapper::paraDominio);
+    }
+
+    @Override
+    @Transactional
     public Cliente alterarDados(Long clienteId, String nome, Genero genero, LocalDate dataNascimento, Cpf cpf) {
         ClienteJpa entidade = repositorio.findById(clienteId)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));

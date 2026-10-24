@@ -1,6 +1,7 @@
 package br.fatec.les.livraria.clientes.dominio.modelo;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -147,6 +148,14 @@ public class Cliente {
      * (RF-CLI-007, DEC-10). Sem cartões, nenhum fica preferencial.
      */
     public Cliente semCartao(Long cartaoId) {
+        return semCartao(cartaoId, null);
+    }
+
+    /**
+     * Remove o cartão; se ele era o preferencial, assume o cartão restante mais recente ainda válido em
+     * {@code mesAtual} (ou o mais recente, se todos estiverem vencidos) (RF-CLI-007, DEC-06, DEC-10).
+     */
+    public Cliente semCartao(Long cartaoId, YearMonth mesAtual) {
         List<Cartao> lista = new ArrayList<>(cartoes);
         Cartao removido = null;
         for (Cartao cartao : lista) {
@@ -160,10 +169,18 @@ public class Cliente {
         }
         lista.remove(removido);
         if (removido.preferencial() && !lista.isEmpty()) {
-            Cartao maisRecente = maisRecente(lista);
+            List<Cartao> validos = mesAtual == null ? lista
+                    : lista.stream().filter(cartao -> !cartao.validade().isBefore(mesAtual)).toList();
+            Cartao maisRecente = maisRecente(validos.isEmpty() ? lista : validos);
             lista.replaceAll(cartao -> comPreferencial(cartao, cartao == maisRecente));
         }
         return novaLista(enderecos, lista);
+    }
+
+    /** {@code true} se o cliente já tem um cartão com este número, com ou sem máscara (RN-CLI-004). */
+    public boolean temCartaoComNumero(String numero) {
+        String digitos = numero.replaceAll("\\D", "");
+        return cartoes.stream().anyMatch(cartao -> cartao.numero().equals(digitos));
     }
 
     private Cliente novaLista(List<Endereco> novosEnderecos, List<Cartao> novosCartoes) {

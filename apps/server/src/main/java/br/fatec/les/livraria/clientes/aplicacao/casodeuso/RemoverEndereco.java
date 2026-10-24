@@ -30,7 +30,7 @@ public class RemoverEndereco {
      */
     @Transactional
     public void executar(Long usuarioId, Long enderecoId) {
-        Cliente cliente = clienteDoUsuario.buscar(usuarioId);
+        Cliente cliente = clienteDoUsuario.buscarParaAlterar(usuarioId);
         if (cliente.endereco(enderecoId).isEmpty()) {
             throw new ExcecaoDeRecursoNaoEncontrado("Endereço não encontrado.");
         }

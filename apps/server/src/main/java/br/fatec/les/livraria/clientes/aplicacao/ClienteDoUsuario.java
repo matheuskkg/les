@@ -21,4 +21,10 @@ public class ClienteDoUsuario {
         return clientes.buscarPorUsuarioId(usuarioId)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));
     }
+
+    /** Cliente travado para uma alteração de endereços ou cartões, na transação de quem chama. */
+    public Cliente buscarParaAlterar(Long usuarioId) {
+        return clientes.buscarPorUsuarioIdParaAlterar(usuarioId)
+                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));
+    }
 }

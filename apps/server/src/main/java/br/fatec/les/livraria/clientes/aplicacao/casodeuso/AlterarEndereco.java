@@ -35,7 +35,7 @@ public class AlterarEndereco {
      */
     @Transactional
     public Endereco executar(Long usuarioId, AlteracaoDeEndereco comando) {
-        Cliente cliente = clienteDoUsuario.buscar(usuarioId);
+        Cliente cliente = clienteDoUsuario.buscarParaAlterar(usuarioId);
         Endereco atual = cliente.endereco(comando.id())
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Endereço não encontrado."));
         NovoEndereco dados = comando.dados();

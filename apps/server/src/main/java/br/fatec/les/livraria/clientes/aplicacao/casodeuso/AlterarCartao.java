@@ -45,11 +45,15 @@ public class AlterarCartao {
      */
     @Transactional
     public Cartao executar(Long usuarioId, AlteracaoDeCartao comando) {
-        Cliente cliente = clienteDoUsuario.buscar(usuarioId);
+        Cliente cliente = clienteDoUsuario.buscarParaAlterar(usuarioId);
         Cartao atual = cliente.cartao(comando.id())
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cartão não encontrado."));
 
-        NovoCartao dados = comando.dados();
+        // O número só volta mascarado na API: em branco, a edição mantém o número gravado (DEC-10).
+        NovoCartao informado = comando.dados();
+        NovoCartao dados = informado.numero() == null || informado.numero().isBlank()
+                ? new NovoCartao(atual.numero(), informado.nomeImpresso(), informado.bandeiraId(), informado.validade())
+                : informado;
         Violacoes violacoes = new Violacoes();
         cartaoCompleto.validar(dados, violacoes);
         tamanhosMaximos.validar(dados, violacoes);

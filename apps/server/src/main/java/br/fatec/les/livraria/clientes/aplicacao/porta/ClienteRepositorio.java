@@ -20,6 +20,12 @@ public interface ClienteRepositorio {
     Optional<Cliente> buscarPorUsuarioId(Long usuarioId);
 
     /**
+     * Como {@link #buscarPorUsuarioId(Long)}, travando o cliente até o fim da transação: duas alterações simultâneas de
+     * endereços ou cartões não se sobrepõem (DEC-10: um só cartão preferencial).
+     */
+    Optional<Cliente> buscarPorUsuarioIdParaAlterar(Long usuarioId);
+
+    /**
      * Altera os dados cadastrais que ficam no {@code Cliente} (RF-CLI-002). E-mail e telefone são alterados no
      * {@code acesso}, pelo caso de uso público {@code AlterarContato} (DEC-08, DEC-10).
      */

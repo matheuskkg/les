@@ -253,6 +253,11 @@ public final class ClientesDeTeste {
         }
 
         @Override
+        public Optional<Cliente> buscarPorUsuarioIdParaAlterar(Long usuarioId) {
+            return buscarPorUsuarioId(usuarioId);
+        }
+
+        @Override
         public Optional<Cliente> buscarPorUsuarioId(Long usuarioId) {
             for (int i = salvos.size() - 1; i >= 0; i--) {
                 if (salvos.get(i).getUsuarioId().equals(usuarioId)) {

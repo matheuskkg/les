@@ -1,7 +1,8 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,18 +44,24 @@ public class AdicionarCartao {
      */
     @Transactional
     public Cartao executar(Long usuarioId, NovoCartao comando) {
+        Cliente cliente = clienteDoUsuario.buscarParaAlterar(usuarioId);
         Violacoes violacoes = new Violacoes();
         cartaoCompleto.validar(comando, violacoes);
         tamanhosMaximos.validar(comando, violacoes);
         validadeDoCartao.validar(comando, violacoes);
         Optional<Bandeira> bandeira = bandeiraRegistrada.validar(comando, violacoes, bandeiras);
+        if (comando.numero() != null && cliente.temCartaoComNumero(comando.numero())) {
+            violacoes.adicionar("RN-CLI-004", "Este cartão já está cadastrado.");
+        }
         violacoes.lancarSeHouver();
 
         Bandeira registrada = bandeira
                 .orElseThrow(() -> new IllegalStateException("Bandeira validada não encontrada."));
-        Cliente cliente = clienteDoUsuario.buscar(usuarioId);
+        Set<Long> existentes = cliente.getCartoes().stream().map(Cartao::id).collect(Collectors.toSet());
         Cliente salvo = clientes.salvar(cliente.comCartao(Cartao.de(comando, registrada, null, false)));
-        List<Cartao> cartoes = salvo.getCartoes();
-        return cartoes.get(cartoes.size() - 1);
+        return salvo.getCartoes().stream()
+                .filter(cartao -> !existentes.contains(cartao.id()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Cartão gravado não encontrado no cliente."));
     }
 }
