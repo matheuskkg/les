@@ -13,9 +13,16 @@ public interface UsuarioAtual {
     String ANONIMO = "anonimo";
     String SISTEMA = "sistema";
 
+    /** Id e e-mail do autor resolvidos de uma só vez, para que a revisão não leia o contexto duas vezes. */
+    Autor autor();
+
     /** Id do usuário autenticado; vazio quando não há login ou fora de uma requisição HTTP. */
-    Optional<Long> usuarioId();
+    default Optional<Long> usuarioId() {
+        return Optional.ofNullable(autor().usuarioId());
+    }
 
     /** E-mail do usuário autenticado, {@link #ANONIMO} ou {@link #SISTEMA}. */
-    String usuario();
+    default String usuario() {
+        return autor().usuario();
+    }
 }

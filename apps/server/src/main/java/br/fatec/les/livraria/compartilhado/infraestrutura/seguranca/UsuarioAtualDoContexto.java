@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Autor;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.UsuarioAtual;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.UsuarioAutenticado;
 
@@ -15,19 +16,13 @@ import br.fatec.les.livraria.compartilhado.aplicacao.porta.UsuarioAutenticado;
 public class UsuarioAtualDoContexto implements UsuarioAtual {
 
     @Override
-    public Optional<Long> usuarioId() {
+    public Autor autor() {
         if (foraDeRequisicaoHttp()) {
-            return Optional.empty();
+            return new Autor(null, SISTEMA);
         }
-        return autenticado().map(UsuarioAutenticado::usuarioId);
-    }
-
-    @Override
-    public String usuario() {
-        if (foraDeRequisicaoHttp()) {
-            return SISTEMA;
-        }
-        return autenticado().map(UsuarioAutenticado::email).orElse(ANONIMO);
+        return autenticado()
+                .map(usuario -> new Autor(usuario.usuarioId(), usuario.email()))
+                .orElseGet(() -> new Autor(null, ANONIMO));
     }
 
     private static boolean foraDeRequisicaoHttp() {

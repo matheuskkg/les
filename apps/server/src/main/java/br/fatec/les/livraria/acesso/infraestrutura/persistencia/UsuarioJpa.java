@@ -15,6 +15,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
 import lombok.Getter;
@@ -41,6 +42,8 @@ public class UsuarioJpa {
     @Column(nullable = false, length = 254)
     private String email;
 
+    /** Fora da auditoria: {@code usuario_aud} nunca guarda o hash da senha (RNF-CLI-003). */
+    @NotAudited
     @Column(name = "senha_hash", nullable = false, length = 72)
     private String senhaHash;
 

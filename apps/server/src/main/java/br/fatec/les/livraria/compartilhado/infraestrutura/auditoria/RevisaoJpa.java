@@ -22,8 +22,7 @@ import lombok.Setter;
  * Revisão do Hibernate Envers com o autor e a data/hora da escrita (RNF-GER-002, DEC-08). As tabelas
  * {@code _aud} apontam para cá pela coluna {@code revisao} (DEC-14).
  *
- * <p>O id usa a sequence {@code revisao_seq} a partir de 10000, como as demais entidades (DEC-14); a faixa
- * 1 a 9999 fica reservada ao seed.</p>
+ * <p>O id usa a sequence {@code revisao_seq} a partir de 10000, como as demais entidades (DEC-14).</p>
  */
 @Getter
 @Setter

@@ -14,6 +14,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import br.fatec.les.livraria.acesso.infraestrutura.seguranca.PrincipalDaSessao;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Autor;
 
 /** Autor das escritas (RNF-GER-002, DEC-08) nos três contextos da tabela. */
 class UsuarioAtualDoContextoTest {
@@ -33,6 +34,7 @@ class UsuarioAtualDoContextoTest {
 
         assertThat(usuarioAtual.usuarioId()).contains(7L);
         assertThat(usuarioAtual.usuario()).isEqualTo("cliente@livraria.test");
+        assertThat(usuarioAtual.autor()).isEqualTo(new Autor(7L, "cliente@livraria.test"));
     }
 
     @Test
@@ -41,6 +43,7 @@ class UsuarioAtualDoContextoTest {
 
         assertThat(usuarioAtual.usuarioId()).isEmpty();
         assertThat(usuarioAtual.usuario()).isEqualTo("anonimo");
+        assertThat(usuarioAtual.autor()).isEqualTo(new Autor(null, "anonimo"));
     }
 
     @Test
@@ -49,6 +52,7 @@ class UsuarioAtualDoContextoTest {
 
         assertThat(usuarioAtual.usuarioId()).isEmpty();
         assertThat(usuarioAtual.usuario()).isEqualTo("sistema");
+        assertThat(usuarioAtual.autor()).isEqualTo(new Autor(null, "sistema"));
     }
 
     private static void dentroDeRequisicao() {
