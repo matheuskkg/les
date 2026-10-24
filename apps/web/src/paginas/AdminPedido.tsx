@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { useRoute } from 'preact-iso';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/cliente';
 import type { components } from '../api/esquema';
@@ -47,11 +47,14 @@ export default function AdminPedido() {
   const { params } = useRoute();
   const id = params.id ?? '';
   const [resultado, definirResultado] = useState<Resultado | null>(null);
-  const [enviando, definirEnviando] = useState(false);
-  const [problemaDaAcao, definirProblemaDaAcao] = useState<ProblemaDetalhe | null>(null);
+  // Ação em andamento e erro dela ficam presos ao pedido da tela; trocar de pedido não os herda.
+  const [enviandoEm, definirEnviandoEm] = useState<string | null>(null);
+  const [problemaDaAcao, definirProblemaDaAcao] = useState<{ id: string; problema: ProblemaDetalhe } | null>(null);
+  const [recarga, definirRecarga] = useState(0);
+  const idDaTela = useRef(id);
+  idDaTela.current = id;
 
   useEffect(() => {
-    definirProblemaDaAcao(null);
     const numero = Number(id);
     if (!/^\d+$/.test(id) || !Number.isSafeInteger(numero)) {
       definirResultado({ id, pedido: null, problema: { status: 404, detail: 'Pedido não encontrado.' } });
@@ -79,14 +82,19 @@ export default function AdminPedido() {
         }
       });
     return () => controle.abort();
-  }, [id]);
+  }, [id, recarga]);
 
   const visivel = resultado?.id === id ? resultado : null;
   const pedido = visivel?.pedido ?? null;
   const acao = pedido === null ? undefined : ACOES[pedido.status];
 
+  /**
+   * Despacha ou confirma a entrega. Sem a resposta do pedido (409 porque outra aba já mudou o status, ou corpo
+   * vazio), o pedido é recarregado para a tela mostrar o status atual e a ação certa.
+   */
   async function executar(atual: PedidoDetalhe, escolhida: Acao) {
-    definirEnviando(true);
+    const daTela = id;
+    definirEnviandoEm(daTela);
     definirProblemaDaAcao(null);
     try {
       const caminho = { params: { path: { id: atual.id } } };
@@ -94,15 +102,26 @@ export default function AdminPedido() {
         escolhida === 'despachar'
           ? await cliente.POST('/api/admin/pedidos/{id}/despachar', caminho)
           : await cliente.POST('/api/admin/pedidos/{id}/confirmar-entrega', caminho);
-      if (response.ok && data) {
-        definirResultado({ id: String(data.id), pedido: data, problema: null });
-      } else {
-        definirProblemaDaAcao(interpretarProblema(error, response.status));
+      if (idDaTela.current !== daTela) {
+        return;
       }
+      if (response.ok && data) {
+        definirResultado({ id: daTela, pedido: data, problema: null });
+        return;
+      }
+      if (!response.ok) {
+        definirProblemaDaAcao({ id: daTela, problema: interpretarProblema(error, response.status) });
+      }
+      definirRecarga((atualizacao) => atualizacao + 1);
     } catch {
-      definirProblemaDaAcao({ status: 0, detail: 'Não foi possível alterar o pedido. Tente novamente.' });
+      if (idDaTela.current === daTela) {
+        definirProblemaDaAcao({
+          id: daTela,
+          problema: { status: 0, detail: 'Não foi possível alterar o pedido. Tente novamente.' },
+        });
+      }
     } finally {
-      definirEnviando(false);
+      definirEnviandoEm((emCurso) => (emCurso === daTela ? null : emCurso));
     }
   }
 
@@ -135,12 +154,12 @@ export default function AdminPedido() {
             </dl>
             {acao && (
               <div class="acoes">
-                <button class="botao" type="button" disabled={enviando} onClick={() => void executar(pedido, acao.acao)}>
+                <button class="botao" type="button" disabled={enviandoEm === id} onClick={() => void executar(pedido, acao.acao)}>
                   {acao.rotulo}
                 </button>
               </div>
             )}
-            {problemaDaAcao && <Erro problema={problemaDaAcao} />}
+            {problemaDaAcao?.id === id && <Erro problema={problemaDaAcao.problema} />}
           </div>
 
           <div class="cartao">

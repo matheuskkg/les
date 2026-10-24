@@ -237,7 +237,7 @@ class PedidoAdminControllerTest {
     void rfVen009_acaoEmPedidoInexistenteResponde404EExigeAdmin() throws Exception {
         mvc.perform(comoAdmin(post(ROTA + "/999999/despachar").with(csrf()))).andExpect(status().isNotFound());
         mvc.perform(comoAdmin(post(ROTA + "/999999/confirmar-entrega").with(csrf()))).andExpect(status().isNotFound());
-        mvc.perform(post(ROTA + "/" + aprovadoDaAna + "/despachar").cookie(cookieDoUsuario(2L)))
+        mvc.perform(post(ROTA + "/" + aprovadoDaAna + "/despachar").with(csrf()).cookie(cookieDoUsuario(2L)))
                 .andExpect(status().isForbidden());
     }
 
