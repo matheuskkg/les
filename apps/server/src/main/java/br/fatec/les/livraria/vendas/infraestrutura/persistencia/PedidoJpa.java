@@ -46,7 +46,8 @@ import lombok.Setter;
 @Table(name = "pedido", indexes = {
         @Index(name = "ix_pedido_cliente", columnList = "cliente_id"),
         @Index(name = "ix_pedido_checkout_status", columnList = "checkout_id, status"),
-        @Index(name = "ix_pedido_realizado_em", columnList = "realizado_em") })
+        @Index(name = "ix_pedido_realizado_em", columnList = "realizado_em"),
+        @Index(name = "ix_pedido_status_realizado_em", columnList = "status, realizado_em") })
 public class PedidoJpa {
 
     @Id

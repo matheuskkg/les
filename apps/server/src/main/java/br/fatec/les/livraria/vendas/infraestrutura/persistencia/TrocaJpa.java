@@ -38,7 +38,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Audited
-@Table(name = "troca", indexes = @Index(name = "ix_troca_pedido", columnList = "pedido_id"))
+@Table(name = "troca", indexes = {
+        @Index(name = "ix_troca_pedido", columnList = "pedido_id"),
+        @Index(name = "ix_troca_status", columnList = "status") })
 public class TrocaJpa {
 
     @Id
