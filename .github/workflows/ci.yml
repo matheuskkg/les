@@ -1,13 +1,18 @@
-# Integração contínua (INF-09): testes do server e do web a cada push e pull request, e os E2E com os dois no ar.
+# Integração contínua (INF-09): testes do server e do web a cada push no master e pull request, e os E2E com os dois no ar.
 name: CI
 
 on:
   push:
+    branches: [master]
   pull_request:
 
+permissions:
+  contents: read
+
+# Um push novo cancela a execução anterior do mesmo PR; no master, cada commit tem a sua.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
   server:
@@ -47,7 +52,8 @@ jobs:
           git diff --exit-code src/api/esquema.d.ts
       - run: npm run typecheck
       - run: npm test
-      - run: npm run build
+      # O typecheck já conferiu os tipos; aqui só o bundle do Vite.
+      - run: npx vite build
 
   e2e:
     name: E2E (Playwright)

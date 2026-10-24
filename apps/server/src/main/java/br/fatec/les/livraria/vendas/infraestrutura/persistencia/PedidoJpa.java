@@ -36,7 +36,8 @@ import lombok.Setter;
  * Tabela {@code pedido} do MER (DEC-12, DEC-16). Cliente e endereços são snapshots imutáveis em JSON com o id de
  * origem; o {@code cliente_id} também é coluna, só pelo id, para filtrar os pedidos do cliente. O checkout de origem é
  * FK, porque é do mesmo módulo, e o índice com o status atende à busca do pedido em processamento do checkout (DEC-13).
- * O índice de {@code realizado_em} atende ao período e à ordenação padrão da consulta do admin (RF-VEN-009).
+ * O índice de {@code realizado_em} atende ao período e à ordenação padrão da consulta do admin (RF-VEN-009), e o de
+ * status com {@code realizado_em}, ao filtro por status dessa consulta e aos pedidos vendidos da análise (RF-ANA-001).
  */
 @Getter
 @Setter

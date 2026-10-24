@@ -51,7 +51,7 @@ npm run e2e                                 # Playwright com o Chrome instalado;
 npm run e2e:relatorio                       # abre o relatório HTML da última execução
 ```
 
-A CI (`.github/workflows/ci.yml`, GitHub Actions) roda a cada push e pull request: `mvn test` no `server`; tipos da
+A CI (`.github/workflows/ci.yml`, GitHub Actions) roda a cada push no `master` e em pull requests: `mvn test` no `server`; tipos da
 API em dia com o `openapi.json`, `typecheck`, `test` e `build` no `web`; e, se os dois passarem, os E2E.
 
 O jar único da demonstração é montado rodando `npm run build` em `apps/web` e depois `mvn package` em

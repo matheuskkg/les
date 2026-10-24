@@ -31,7 +31,8 @@ import lombok.Setter;
 
 /**
  * Tabela {@code troca} do MER (DEC-12, DEC-16): o "pedido de troca" de um pedido entregue. O cupom de troca gerado no
- * recebimento é FK única, nula até lá; o índice do pedido atende à leitura das trocas de cada pedido.
+ * recebimento é FK única, nula até lá; o índice do pedido atende à leitura das trocas de cada pedido, e o do status ao
+ * filtro da lista de trocas do admin (RF-VEN-013, RNF-GER-001).
  */
 @Getter
 @Setter
