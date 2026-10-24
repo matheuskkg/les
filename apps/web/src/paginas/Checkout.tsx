@@ -4,7 +4,7 @@ import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/clien
 import type { components } from '../api/esquema';
 import { montarEndereco, type EnderecoDoFormulario } from '../cadastroDeCliente';
 import { Erro } from '../componentes/Erro';
-import { PagamentoDaCompra, SEM_CHECKOUT } from '../componentes/PagamentoDaCompra';
+import { PagamentoDaCompra, SEM_CHECKOUT, type CompraFinalizada } from '../componentes/PagamentoDaCompra';
 import { SelecaoDeEndereco } from '../componentes/SelecaoDeEndereco';
 import { Violacoes } from '../componentes/Violacoes';
 import { useRecargaPorNotificacao } from '../contextoDeNotificacoes';
@@ -30,7 +30,8 @@ function Problema({ problema }: { problema: ProblemaDetalhe | null }) {
  *
  * Endereços de entrega e de cobrança (RF-VEN-005, DEC-10): cadastrados ou novos, com a opção de salvar no cadastro; a
  * cobrança vem igual à entrega. O frete é recalculado a cada troca do endereço de entrega (RF-VEN-004, DEC-05.3). A
- * forma de pagamento fica em {@link PagamentoDaCompra} (RF-VEN-006, RF-VEN-007).
+ * forma de pagamento e a finalização ficam em {@link PagamentoDaCompra} (RF-VEN-006 a RF-VEN-008); aprovado o pedido,
+ * a tela mostra o número dele no lugar do checkout, que foi concluído.
  */
 export default function Checkout() {
   const { route } = useLocation();
@@ -43,6 +44,7 @@ export default function Checkout() {
   const [cobranca, definirCobranca] = useState<EscolhaDeEndereco | null>(null);
   const [problemaDoEndereco, definirProblemaDoEndereco] = useState<ProblemaDetalhe | null>(null);
   const [frete, definirFrete] = useState<FreteDto | null>(null);
+  const [aprovada, definirAprovada] = useState<CompraFinalizada | null>(null);
 
   const carregar = useCallback(async () => {
     const { data, error, response } = await cliente.GET('/api/me/checkout');
@@ -187,7 +189,17 @@ export default function Checkout() {
       <h1>Pagamento</h1>
       <Problema problema={problema} />
 
-      {checkout === undefined ? (
+      {aprovada ? (
+        <div class="cartao" data-testid="pedido-aprovado">
+          <p class="aviso" role="status">
+            Pedido nº {aprovada.pedidoId} realizado em {formatarDataHora(aprovada.realizadoEm)}: pagamento de{' '}
+            {formatarDinheiro(aprovada.total)} aprovado.
+          </p>
+          <a class="botao" href="/">
+            Continuar comprando
+          </a>
+        </div>
+      ) : checkout === undefined ? (
         <p class="aviso" role="status">
           Carregando…
         </p>
@@ -288,7 +300,13 @@ export default function Checkout() {
             )}
           </dl>
 
-          <PagamentoDaCompra checkoutId={checkout.id} entrega={entrega} aoPerderCheckout={recarregar} />
+          <PagamentoDaCompra
+            checkoutId={checkout.id}
+            entrega={entrega}
+            cobranca={cobrancaIgual ? entrega : cobranca}
+            aoPerderCheckout={recarregar}
+            aoAprovar={definirAprovada}
+          />
           <p class="campo__ajuda">
             Os itens ficam reservados até {formatarDataHora(checkout.expiraEm)}. Para mudar quantidades, volte ao
             carrinho.

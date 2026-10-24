@@ -5,6 +5,7 @@ import { cartaoVazio, montarCartao, type CartaoDoFormulario } from '../cadastroD
 import type { EscolhaDeEndereco } from '../escolhaDeEndereco';
 import { formatarData, formatarDinheiro } from '../formatacao';
 import {
+  montarFinalizacao,
   montarPagamento,
   problemasDosCartoes,
   valorParaCampo,
@@ -18,13 +19,18 @@ import { Violacoes } from './Violacoes';
 type CartaoCadastrado = components['schemas']['CartaoDaResposta'];
 type CupomDeTroca = components['schemas']['CupomDeTrocaDto'];
 type PagamentoConferido = components['schemas']['PagamentoConferidoDto'];
+export type CompraFinalizada = components['schemas']['CompraFinalizadaDto'];
 
 interface Props {
   checkoutId: number;
   /** Endereço de entrega, que define o frete; sem ele, o pagamento não é conferido. */
   entrega: EscolhaDeEndereco | null;
+  /** Endereço de cobrança, exigido na finalização (RF-VEN-005). */
+  cobranca: EscolhaDeEndereco | null;
   /** Chamado quando a API responde que não há checkout aberto, para a tela recarregá-lo. */
   aoPerderCheckout: () => void;
+  /** Chamado com o pedido aprovado; o checkout foi concluído (DEC-12). */
+  aoAprovar: (compra: CompraFinalizada) => void;
 }
 
 /** Valor e código de segurança digitados para um cartão, pela chave do cartão na tela. */
@@ -50,8 +56,11 @@ function Problema({ problema }: { problema: ProblemaDetalhe | null }) {
  * Forma de pagamento (RF-VEN-006, RF-VEN-007, DEC-11): um cupom promocional pelo código, os cupons de troca do
  * cliente e os cartões, cadastrados ou novos, cada um com o valor e o código de segurança. A distribuição é conferida
  * a cada mudança dos cupons, o que já avisa de cupom desnecessário (RN-VEN-006); os cartões, ao conferir o pagamento.
+ *
+ * "Finalizar compra" (RF-VEN-008, DEC-13) envia tudo com o código de segurança e fica desabilitado enquanto envia. Na
+ * reprovação (RN-VEN-008), os cartões recusados aparecem com o motivo e o checkout continua aberto para outra tentativa.
  */
-export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Props) {
+export function PagamentoDaCompra({ checkoutId, entrega, cobranca, aoPerderCheckout, aoAprovar }: Props) {
   const [cartoes, definirCartoes] = useState<CartaoCadastrado[]>([]);
   const [cupons, definirCupons] = useState<CupomDeTroca[]>([]);
   const [codigo, definirCodigo] = useState('');
@@ -67,6 +76,8 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
   const [problemaDosCartoes, definirProblemaDosCartoes] = useState<ProblemaDetalhe | null>(null);
   const [enviando, definirEnviando] = useState(false);
   const [salvando, definirSalvando] = useState(false);
+  const [finalizando, definirFinalizando] = useState(false);
+  const [reprovada, definirReprovada] = useState<CompraFinalizada | null>(null);
   /** Muda a cada mudança de cupons ou endereço, para descartar uma conferência que chegou atrasada. */
   const selecao = useRef(0);
 
@@ -138,6 +149,7 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
 
   function digitar(chave: string, campo: keyof Digitado, valor: string) {
     definirConferido(null);
+    definirReprovada(null);
     definirDigitados((atuais) => ({ ...atuais, [chave]: { ...digitado(chave), ...atuais[chave], [campo]: valor } }));
   }
 
@@ -191,13 +203,10 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
     }
   }
 
-  async function conferir() {
-    if (entrega === null || resumo === null || enviando) {
-      return;
-    }
+  /** Cartões que pagam o restante, ou `null` se algum tiver problema, já apontado na tela. */
+  function cartoesConferidosNaTela(restante: string): CartaoNaCompra[] | null {
     // Com os cupons cobrindo tudo, os cartões escolhidos antes ficam fora (DEC-11: restante zero não aceita cartão).
-    const naCompra = resumo.restante === '0.00' ? [] : cartoesNaCompra();
-    const versao = selecao.current;
+    const naCompra = restante === '0.00' ? [] : cartoesNaCompra();
     const problemas = problemasDosCartoes(naCompra);
     if (problemas.length > 0) {
       definirProblemaDosCartoes({
@@ -205,6 +214,18 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
         detail: 'Confira os cartões.',
         violacoes: problemas.map((mensagem) => ({ codigo: 'RN-VEN-004', mensagem })),
       });
+      return null;
+    }
+    return naCompra;
+  }
+
+  async function conferir() {
+    if (entrega === null || resumo === null || enviando || finalizando) {
+      return;
+    }
+    const versao = selecao.current;
+    const naCompra = cartoesConferidosNaTela(resumo.restante);
+    if (naCompra === null) {
       return;
     }
     definirEnviando(true);
@@ -225,6 +246,45 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
       definirProblemaDosCartoes({ status: 0, detail: 'Não foi possível conferir o pagamento. Tente novamente.' });
     } finally {
       definirEnviando(false);
+    }
+  }
+
+  async function finalizar() {
+    if (entrega === null || cobranca === null || resumo === null || enviando || finalizando) {
+      return;
+    }
+    const naCompra = cartoesConferidosNaTela(resumo.restante);
+    if (naCompra === null) {
+      return;
+    }
+    definirFinalizando(true);
+    definirProblemaDosCartoes(null);
+    definirReprovada(null);
+    try {
+      const { data, error, response } = await cliente.POST('/api/me/checkout/finalizar', {
+        body: montarFinalizacao(entrega, cobranca, promocional, selecionados, naCompra),
+      });
+      if (!data) {
+        const problema = interpretarProblema(error, response.status);
+        if (problema.status === 404 && problema.detail === SEM_CHECKOUT) {
+          aoPerderCheckout();
+          return;
+        }
+        definirProblemaDosCartoes(problema);
+        return;
+      }
+      if (data.status === 'APROVADA') {
+        aoAprovar(data);
+        return;
+      }
+      definirReprovada(data);
+    } catch {
+      definirProblemaDosCartoes({
+        status: 0,
+        detail: 'Não foi possível finalizar a compra. Confira em instantes se o pedido foi registrado.',
+      });
+    } finally {
+      definirFinalizando(false);
     }
   }
 
@@ -366,9 +426,30 @@ export function PagamentoDaCompra({ checkoutId, entrega, aoPerderCheckout }: Pro
                 .join('; ')}
         </p>
       )}
+      {reprovada && (
+        <div class="erro" role="alert" data-testid="reprovacao">
+          <p>
+            O pagamento do pedido nº {reprovada.pedidoId} foi reprovado. Os cupons voltaram para você e os itens
+            continuam reservados: corrija os cartões e tente de novo.
+          </p>
+          <ul>
+            {reprovada.recusas.map((recusa) => (
+              <li key={recusa.ultimosDigitos}>
+                Cartão final {recusa.ultimosDigitos}: {recusa.motivo}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div class="acoes">
-        <button class="botao" type="button" disabled={resumo === null || enviando} onClick={() => void conferir()}>
+        <button class="botao botao--secundario" type="button" disabled={resumo === null || enviando || finalizando}
+          onClick={() => void conferir()}>
           {enviando ? 'Conferindo…' : 'Conferir pagamento'}
+        </button>
+        <button class="botao" type="button"
+          disabled={resumo === null || cobranca === null || enviando || finalizando}
+          onClick={() => void finalizar()}>
+          {finalizando ? 'Finalizando…' : 'Finalizar compra'}
         </button>
       </div>
     </section>

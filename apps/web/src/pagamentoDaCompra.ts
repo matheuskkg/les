@@ -3,6 +3,7 @@ import { montarCartao, type CartaoDoFormulario } from './cadastroDeCliente.ts';
 import { escolhaParaApi, type EscolhaDeEndereco } from './escolhaDeEndereco.ts';
 
 type PagamentoProposto = components['schemas']['PagamentoPropostoDto'];
+type Finalizacao = components['schemas']['FinalizacaoDto'];
 
 /**
  * Cartão escolhido para pagar parte da compra (RF-VEN-006, RN-VEN-004): um cadastrado ou um novo, com o valor e o
@@ -72,6 +73,29 @@ export function montarPagamento(
         ? { cartaoId: cartao.escolha.cartaoId }
         : { novo: montarCartao(cartao.escolha.novo) }),
       valor: valorParaApi(cartao.valor) ?? '',
+    })),
+  };
+}
+
+/**
+ * Corpo de `POST /api/me/checkout/finalizar` (RF-VEN-008, DEC-10): a forma de pagamento conferida, o endereço de
+ * cobrança e o código de segurança de cada cartão, que segue só para a operadora.
+ */
+export function montarFinalizacao(
+  entrega: EscolhaDeEndereco,
+  cobranca: EscolhaDeEndereco,
+  promocional: string | null,
+  cuponsDeTroca: ReadonlyArray<number>,
+  cartoes: ReadonlyArray<CartaoNaCompra>,
+): Finalizacao {
+  const pagamento = montarPagamento(entrega, promocional, cuponsDeTroca, cartoes);
+  return {
+    ...pagamento,
+    entrega: escolhaParaApi(entrega),
+    cobranca: escolhaParaApi(cobranca),
+    cartoes: (pagamento.cartoes ?? []).map((cartao, indice) => ({
+      ...cartao,
+      codigoSeguranca: cartoes[indice]?.cvv.trim() ?? '',
     })),
   };
 }

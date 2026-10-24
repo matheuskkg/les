@@ -344,6 +344,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/checkout/finalizar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Finaliza a compra: grava o pedido, consulta a operadora e o aprova ou reprova */
+        post: operations["finalizar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me/checkout/frete": {
         parameters: {
             query?: never;
@@ -659,6 +676,15 @@ export interface components {
              */
             valor: string;
         };
+        CartaoDaFinalizacaoDto: {
+            /** Format: int64 */
+            cartaoId?: number;
+            /** @example 123 */
+            codigoSeguranca: string;
+            novo?: components["schemas"]["CartaoInformadoDto"];
+            /** @example 49.88 */
+            valor: string;
+        };
         CartaoDaResposta: {
             bandeira: components["schemas"]["BandeiraDaResposta"];
             /** Format: int64 */
@@ -701,6 +727,10 @@ export interface components {
             numero: string;
             /** @example 2027-08 */
             validade: string;
+        };
+        CartaoRecusadoDto: {
+            motivo: string;
+            ultimosDigitos: string;
         };
         CategoriaDto: {
             /** Format: int64 */
@@ -756,6 +786,20 @@ export interface components {
             /** @enum {string} */
             situacao: "ATIVA" | "INATIVA" | "ENCERRADA";
             telefone?: string;
+        };
+        CompraFinalizadaDto: {
+            /** Format: int64 */
+            pedidoId: number;
+            /** Format: date-time */
+            realizadoEm: string;
+            recusas: components["schemas"]["CartaoRecusadoDto"][];
+            /** @enum {string} */
+            status: "EM_PROCESSAMENTO" | "APROVADA" | "REPROVADA" | "EM_TRANSPORTE" | "ENTREGUE";
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            total: string;
         };
         ContagemDeNaoLidasDto: {
             /** Format: int64 */
@@ -862,6 +906,13 @@ export interface components {
             /** Format: int64 */
             enderecoId?: number;
             novo?: components["schemas"]["EnderecoInformadoDto"];
+        };
+        FinalizacaoDto: {
+            cartoes?: components["schemas"]["CartaoDaFinalizacaoDto"][];
+            cobranca: components["schemas"]["EscolhaDeEnderecoDto"];
+            cuponsDeTroca?: number[];
+            cuponsPromocionais?: string[];
+            entrega: components["schemas"]["EscolhaDeEnderecoDto"];
         };
         FreteDto: {
             /**
@@ -1925,6 +1976,57 @@ export interface operations {
                 };
             };
             /** @description Carrinho vazio, livro fora de venda ou estoque insuficiente */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    finalizar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FinalizacaoDto"];
+            };
+        };
+        responses: {
+            /** @description Pedido criado, APROVADA ou REPROVADA; na reprovação, o checkout continua aberto para outra tentativa */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CompraFinalizadaDto"];
+                };
+            };
+            /** @description Nenhum checkout aberto, ou endereço, cupom de troca ou cartão que não é do cliente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Pagamento desta compra já em processamento, ou cupom usado por outro pedido */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Itens sem reserva ou fora de venda, código de segurança, cupons ou cartões inválidos */
             422: {
                 headers: {
                     [name: string]: unknown;

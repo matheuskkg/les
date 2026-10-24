@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   cvvValido,
+  montarFinalizacao,
   montarPagamento,
   problemasDosCartoes,
   valorParaApi,
@@ -56,4 +57,16 @@ test('RF-VEN-007: o pagamento vai sem o código de segurança', () => {
   });
   assert.equal(JSON.stringify(corpo).includes('456'), false);
   assert.deepEqual(montarPagamento({ enderecoId: 1 }, null, []).cartoes, []);
+});
+
+test('RF-VEN-008: a finalização leva a cobrança e o código de segurança de cada cartão', () => {
+  const corpo = montarFinalizacao({ enderecoId: 1 }, { enderecoId: 2 }, 'BEMVINDO10', [3], [
+    { escolha: { cartaoId: 1 }, valor: '49,88', cvv: ' 123 ' },
+  ]);
+
+  assert.deepEqual(corpo.entrega, { enderecoId: 1 });
+  assert.deepEqual(corpo.cobranca, { enderecoId: 2 });
+  assert.deepEqual(corpo.cuponsPromocionais, ['BEMVINDO10']);
+  assert.deepEqual(corpo.cuponsDeTroca, [3]);
+  assert.deepEqual(corpo.cartoes, [{ cartaoId: 1, valor: '49.88', codigoSeguranca: '123' }]);
 });
