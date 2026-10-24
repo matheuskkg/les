@@ -30,16 +30,28 @@ function Endereco({ titulo, endereco }: { titulo: string; endereco: EnderecoNoPe
   );
 }
 
+type Acao = 'despachar' | 'confirmar-entrega';
+
+/** Ação do admin disponível em cada status do diagrama do DEC-12 (RN-VEN-009, RN-VEN-010). */
+const ACOES: Partial<Record<PedidoDetalhe['status'], { acao: Acao; rotulo: string }>> = {
+  APROVADA: { acao: 'despachar', rotulo: 'Despachar' },
+  EM_TRANSPORTE: { acao: 'confirmar-entrega', rotulo: 'Confirmar entrega' },
+};
+
 /**
  * Detalhe do pedido para o administrador com as cópias gravadas na finalização: cliente, endereços, itens,
- * cartões, cupons e valores (RF-VEN-009, RF-VEN-010, DEC-12).
+ * cartões, cupons e valores (RF-VEN-009, RF-VEN-010, DEC-12). Daqui o admin despacha o pedido aprovado e
+ * confirma a entrega do pedido em transporte.
  */
 export default function AdminPedido() {
   const { params } = useRoute();
   const id = params.id ?? '';
   const [resultado, definirResultado] = useState<Resultado | null>(null);
+  const [enviando, definirEnviando] = useState(false);
+  const [problemaDaAcao, definirProblemaDaAcao] = useState<ProblemaDetalhe | null>(null);
 
   useEffect(() => {
+    definirProblemaDaAcao(null);
     const numero = Number(id);
     if (!/^\d+$/.test(id) || !Number.isSafeInteger(numero)) {
       definirResultado({ id, pedido: null, problema: { status: 404, detail: 'Pedido não encontrado.' } });
@@ -71,6 +83,28 @@ export default function AdminPedido() {
 
   const visivel = resultado?.id === id ? resultado : null;
   const pedido = visivel?.pedido ?? null;
+  const acao = pedido === null ? undefined : ACOES[pedido.status];
+
+  async function executar(atual: PedidoDetalhe, escolhida: Acao) {
+    definirEnviando(true);
+    definirProblemaDaAcao(null);
+    try {
+      const caminho = { params: { path: { id: atual.id } } };
+      const { data, error, response } =
+        escolhida === 'despachar'
+          ? await cliente.POST('/api/admin/pedidos/{id}/despachar', caminho)
+          : await cliente.POST('/api/admin/pedidos/{id}/confirmar-entrega', caminho);
+      if (response.ok && data) {
+        definirResultado({ id: String(data.id), pedido: data, problema: null });
+      } else {
+        definirProblemaDaAcao(interpretarProblema(error, response.status));
+      }
+    } catch {
+      definirProblemaDaAcao({ status: 0, detail: 'Não foi possível alterar o pedido. Tente novamente.' });
+    } finally {
+      definirEnviando(false);
+    }
+  }
 
   return (
     <section class="pagina">
@@ -99,6 +133,14 @@ export default function AdminPedido() {
                 <div><dt>Entregue em</dt><dd>{formatarDataHora(pedido.entregueEm)}</dd></div>
               )}
             </dl>
+            {acao && (
+              <div class="acoes">
+                <button class="botao" type="button" disabled={enviando} onClick={() => void executar(pedido, acao.acao)}>
+                  {acao.rotulo}
+                </button>
+              </div>
+            )}
+            {problemaDaAcao && <Erro problema={problemaDaAcao} />}
           </div>
 
           <div class="cartao">

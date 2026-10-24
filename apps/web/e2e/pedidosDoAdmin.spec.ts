@@ -3,7 +3,7 @@ import { entrarComo, expect, test } from './fixtures';
 // Um Dom Casmurro (R$ 47,88) para o primeiro endereço da Ana, em SP (frete R$ 12,00), pago com o Visa final 1111.
 const ANA = { login: 'ana.souza@livraria.test', senha: 'Senha@123' };
 
-test('admin encontra o pedido aprovado pelos filtros e abre o detalhe (RF-VEN-009, RF-VEN-010, DEC-12)', async ({
+test('admin encontra o pedido aprovado pelos filtros, despacha e confirma a entrega (RF-VEN-009, RF-VEN-010, DEC-12)', async ({
   page,
 }) => {
   await entrarComo(page, ANA.login, ANA.senha);
@@ -46,4 +46,12 @@ test('admin encontra o pedido aprovado pelos filtros e abre o detalhe (RF-VEN-00
   await expect(page.getByRole('cell', { name: /Dom Casmurro/ })).toBeVisible();
   await expect(page.getByText('Visa final 1111: R$ 59,88')).toBeVisible();
   await expect(page.getByTestId('total-do-pedido')).toHaveText('R$ 59,88');
+
+  // RN-VEN-009 e RN-VEN-010: APROVADA → EM TRANSPORTE → ENTREGUE, sem ação depois da entrega.
+  await page.getByRole('button', { name: 'Despachar' }).click();
+  await expect(page.getByTestId('status-do-pedido')).toHaveText('EM TRANSPORTE');
+  await page.getByRole('button', { name: 'Confirmar entrega' }).click();
+  await expect(page.getByTestId('status-do-pedido')).toHaveText('ENTREGUE');
+  await expect(page.getByText('Entregue em')).toBeVisible();
+  await expect(page.getByRole('button', { name: /Despachar|Confirmar entrega/ })).toHaveCount(0);
 });
