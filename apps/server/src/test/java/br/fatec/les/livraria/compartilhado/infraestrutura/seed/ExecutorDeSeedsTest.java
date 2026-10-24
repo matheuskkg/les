@@ -29,6 +29,14 @@ class ExecutorDeSeedsTest {
                 "jdbc:h2:mem:" + UUID.randomUUID() + ";MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
                 "sa", "");
         jdbc = JdbcClient.create(dataSource);
+        // No teste unitário não há Hibernate: a tabela que em produção é criada pela entidade
+        // SeedExecucaoJpa é criada aqui.
+        jdbc.sql("""
+                create table seed_execucao (
+                    arquivo varchar(255) primary key,
+                    checksum varchar(64) not null,
+                    executado_em timestamp not null
+                )""").update();
     }
 
     @Test

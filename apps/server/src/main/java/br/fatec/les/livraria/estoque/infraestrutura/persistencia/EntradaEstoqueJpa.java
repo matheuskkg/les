@@ -30,7 +30,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "entrada_estoque", indexes = {
-        @Index(name = "ix_entrada_estoque_livro", columnList = "livro_id"),
         @Index(name = "ix_entrada_estoque_livro_data", columnList = "livro_id, data_entrada"),
         @Index(name = "ix_entrada_estoque_fornecedor", columnList = "fornecedor_id"),
         @Index(name = "ix_entrada_estoque_data", columnList = "data_entrada") })

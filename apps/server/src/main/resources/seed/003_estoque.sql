@@ -31,8 +31,10 @@ INSERT INTO entrada_estoque (id, livro_id, fornecedor_id, quantidade, custo, dat
     (26, 18, 2, 7, 42.20, '2026-03-30'),
     (27, 19, 3, 5, 58.00, '2026-04-08');
 
--- Saldo por livro, derivado das entradas (DEC-15.3). O id do saldo é o do livro, na faixa do seed.
+-- Saldo por livro, derivado das entradas (DEC-15.3). Todo livro tem exatamente um saldo, inclusive o livro 20,
+-- sem entradas, com quantidade zero. O id do saldo é o do livro, na faixa do seed.
 INSERT INTO estoque (id, livro_id, quantidade)
-SELECT livro_id, livro_id, SUM(quantidade)
-FROM entrada_estoque
-GROUP BY livro_id;
+SELECT l.id, l.id, COALESCE(SUM(e.quantidade), 0)
+FROM livro l
+LEFT JOIN entrada_estoque e ON e.livro_id = l.id
+GROUP BY l.id;

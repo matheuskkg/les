@@ -31,8 +31,8 @@ import lombok.Setter;
 @Entity
 @Table(name = "livro", indexes = {
         @Index(name = "ix_livro_titulo", columnList = "titulo"),
-        @Index(name = "ix_livro_isbn", columnList = "isbn"),
-        @Index(name = "ix_livro_ativo", columnList = "ativo"),
+        @Index(name = "ux_livro_isbn", columnList = "isbn", unique = true),
+        @Index(name = "ux_livro_codigo_barras", columnList = "codigo_barras", unique = true),
         @Index(name = "ix_livro_editora", columnList = "editora_id"),
         @Index(name = "ix_livro_grupo_precificacao", columnList = "grupo_precificacao_id") })
 public class LivroJpa {

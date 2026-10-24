@@ -24,24 +24,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.SeedExecucaoJpa;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Executa os scripts de seed (RNF-LIV-002) na inicialização, depois de o Hibernate gerar o schema. Cada script roda
- * uma única vez: a execução fica registrada em {@code seed_execucao} junto com o checksum do arquivo.
+ * uma única vez: a execução fica registrada em {@code seed_execucao} (ver {@link SeedExecucaoJpa}) junto com o
+ * checksum do arquivo.
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ExecutorDeSeeds implements ApplicationRunner {
-
-    private static final String CRIAR_TABELA = """
-            create table if not exists seed_execucao (
-                arquivo varchar(255) primary key,
-                checksum varchar(64) not null,
-                executado_em timestamp not null
-            )""";
 
     private final DataSource dataSource;
     private final PlatformTransactionManager transacoes;
@@ -58,7 +53,6 @@ public class ExecutorDeSeeds implements ApplicationRunner {
             return;
         }
         JdbcClient jdbc = JdbcClient.create(dataSource);
-        jdbc.sql(CRIAR_TABELA).update();
         TransactionTemplate transacao = new TransactionTemplate(transacoes);
 
         for (Resource script : scripts()) {

@@ -12,6 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.annotations.Check;
+
 /**
  * Saldo em mãos por livro (DEC-15.3). O {@code livro_id} é único e referência a outro módulo, sem
  * {@code @ManyToOne} e sem FK (DEC-16).
@@ -20,6 +22,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
+@Check(constraints = "quantidade >= 0")
 @Table(name = "estoque", indexes = @Index(name = "uk_estoque_livro", columnList = "livro_id", unique = true))
 public class EstoqueJpa {
 

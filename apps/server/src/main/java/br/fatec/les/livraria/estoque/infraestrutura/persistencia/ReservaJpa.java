@@ -26,8 +26,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "reserva", indexes = {
-        @Index(name = "ix_reserva_livro", columnList = "livro_id"),
-        @Index(name = "ix_reserva_expira_em", columnList = "expira_em"),
+        @Index(name = "ix_reserva_livro_expira_em", columnList = "livro_id, expira_em"),
         @Index(name = "ix_reserva_origem", columnList = "origem, origem_id") })
 public class ReservaJpa {
 
