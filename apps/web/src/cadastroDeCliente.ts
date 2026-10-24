@@ -7,6 +7,8 @@ export type TipoDeTelefone = components['schemas']['TelefoneDoCadastro']['tipo']
 export type TipoDeEndereco = components['schemas']['EnderecoDoCadastro']['tipoEndereco'];
 export type TipoDeLogradouro = components['schemas']['EnderecoDoCadastro']['tipoLogradouro'];
 export type Uf = components['schemas']['EnderecoDoCadastro']['uf'];
+export type EnderecoDaApi = components['schemas']['EnderecoDoCadastro'];
+export type CartaoDaApi = components['schemas']['CartaoDoCadastro'];
 
 export interface OpcaoDeCadastro<T extends string = string> {
   valor: T;
@@ -239,24 +241,34 @@ export function montarCadastro(formulario: FormularioDeCadastro): CadastroDeClie
     },
     senha: formulario.senha,
     confirmacaoSenha: formulario.confirmacaoSenha,
-    enderecos: formulario.enderecos.map((endereco) => ({
-      nomeCurto: endereco.nomeCurto.trim(),
-      tipoEndereco: endereco.tipoEndereco as TipoDeEndereco,
-      tipoLogradouro: endereco.tipoLogradouro as TipoDeLogradouro,
-      logradouro: endereco.logradouro.trim(),
-      numero: endereco.numero.trim(),
-      bairro: endereco.bairro.trim(),
-      cep: somenteDigitos(endereco.cep),
-      cidade: endereco.cidade.trim(),
-      uf: endereco.uf as Uf,
-      observacoes: endereco.observacoes.trim(),
-    })),
-    cartoes: formulario.cartoes.map((cartao) => ({
-      numero: somenteDigitos(cartao.numero),
-      nomeImpresso: cartao.nomeImpresso.trim(),
-      bandeiraId: Number(cartao.bandeiraId),
-      validade: validadeParaApi(cartao.validade),
-    })),
+    enderecos: formulario.enderecos.map(montarEndereco),
+    cartoes: formulario.cartoes.map(montarCartao),
+  };
+}
+
+/** Endereço do formulário no formato da API, usado no cadastro e em "Minha conta" (RN-CLI-003). */
+export function montarEndereco(endereco: EnderecoDoFormulario): EnderecoDaApi {
+  return {
+    nomeCurto: endereco.nomeCurto.trim(),
+    tipoEndereco: endereco.tipoEndereco as TipoDeEndereco,
+    tipoLogradouro: endereco.tipoLogradouro as TipoDeLogradouro,
+    logradouro: endereco.logradouro.trim(),
+    numero: endereco.numero.trim(),
+    bairro: endereco.bairro.trim(),
+    cep: somenteDigitos(endereco.cep),
+    cidade: endereco.cidade.trim(),
+    uf: endereco.uf as Uf,
+    observacoes: endereco.observacoes.trim(),
+  };
+}
+
+/** Cartão do formulário no formato da API, usado no cadastro e em "Minha conta" (RN-CLI-004). */
+export function montarCartao(cartao: CartaoDoFormulario): CartaoDaApi {
+  return {
+    numero: somenteDigitos(cartao.numero),
+    nomeImpresso: cartao.nomeImpresso.trim(),
+    bandeiraId: Number(cartao.bandeiraId),
+    validade: validadeParaApi(cartao.validade),
   };
 }
 
