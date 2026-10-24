@@ -35,7 +35,7 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 
 | ID | Status | Onde no código | Observação |
 |---|---|---|---|
-| RF-ANA-001 | ❌ |  | Por categoria copiada no pedido; item com várias categorias entra com valor cheio em cada uma ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
+| RF-ANA-001 | ❌ |  | Por categoria copiada no pedido; item com várias categorias entra com valor cheio em cada uma ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). As categorias vêm do snapshot JSON do livro e são agregadas em Java ([DEC-16](../decisoes/DEC-16-modelo-de-dados.md)). |
 | RF-ANA-002 | ❌ |  |  |
 | RF-ANA-003 | ❌ |  |  |
 | RF-ANA-004 | ❌ |  | Só CSV (`mes`, `categoria`, `valor`; UTF-8 com BOM, `;`, vírgula decimal), gerado pelo `server` ([DEC-15.4](../decisoes/DEC-15.4-acesso-consultas-e-exportacao.md)). |

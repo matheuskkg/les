@@ -1,0 +1,1241 @@
+{
+  "legenda": [
+    "PK = chave primária; FK = chave estrangeira com restrição no banco, entre tabelas do mesmo módulo; UK = único; ? no tipo = aceita NULL.",
+    "REF → tabela: referência a outro módulo, coluna sem restrição de FK e sem linha no diagrama (módulos não acessam a persistência um do outro, docs/arquitetura.md).",
+    "Toda PK `id` é bigint gerado por sequence <tabela>_seq com início 10000; 1 a 9999 ficam para o seed (DEC-14).",
+    "E-mail, telefone e CPF não têm UK: a unicidade vale só entre contas em uso e é checada pela aplicação (DEC-10).",
+    "Colunas json são snapshots imutáveis: o objeto como era no momento da compra, com o id de origem.",
+    "Toda tabela de escrita tem uma <tabela>_aud do Envers (colunas da tabela + rev → revisao.id + revtype) (DEC-14)."
+  ],
+  "modulos": [
+    {
+      "id": "acesso",
+      "nome": "acesso",
+      "tabelas": [
+        {
+          "nome": "usuario",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "email",
+              "varchar(254)",
+              ""
+            ],
+            [
+              "senha_hash",
+              "varchar(72)",
+              ""
+            ],
+            [
+              "papel",
+              "varchar(20)",
+              ""
+            ],
+            [
+              "situacao",
+              "varchar(20)",
+              ""
+            ],
+            [
+              "inativado_em",
+              "timestamp",
+              "null"
+            ],
+            [
+              "telefone_tipo",
+              "varchar(20)",
+              "null"
+            ],
+            [
+              "telefone_ddd",
+              "varchar(2)",
+              "null"
+            ],
+            [
+              "telefone_numero",
+              "varchar(9)",
+              "null"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "clientes",
+      "nome": "clientes",
+      "tabelas": [
+        {
+          "nome": "cliente",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "usuario_id",
+              "bigint",
+              "REF → usuario UK"
+            ],
+            [
+              "nome",
+              "varchar(120)",
+              ""
+            ],
+            [
+              "genero",
+              "varchar(20)",
+              ""
+            ],
+            [
+              "data_nascimento",
+              "date",
+              ""
+            ],
+            [
+              "cpf",
+              "varchar(11)",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "endereco",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "cliente_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "nome_curto",
+              "varchar(40)",
+              ""
+            ],
+            [
+              "tipo_endereco",
+              "varchar(20)",
+              ""
+            ],
+            [
+              "tipo_logradouro",
+              "varchar(20)",
+              ""
+            ],
+            [
+              "logradouro",
+              "varchar(120)",
+              ""
+            ],
+            [
+              "numero",
+              "varchar(10)",
+              ""
+            ],
+            [
+              "bairro",
+              "varchar(80)",
+              ""
+            ],
+            [
+              "cep",
+              "varchar(8)",
+              ""
+            ],
+            [
+              "cidade",
+              "varchar(80)",
+              ""
+            ],
+            [
+              "uf",
+              "varchar(2)",
+              ""
+            ],
+            [
+              "pais",
+              "varchar(40)",
+              ""
+            ],
+            [
+              "observacoes",
+              "varchar(255)",
+              "null"
+            ]
+          ]
+        },
+        {
+          "nome": "cartao",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "cliente_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "bandeira_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "numero",
+              "varchar(19)",
+              ""
+            ],
+            [
+              "nome_impresso",
+              "varchar(60)",
+              ""
+            ],
+            [
+              "validade",
+              "varchar(7)",
+              ""
+            ],
+            [
+              "preferencial",
+              "boolean",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "bandeira",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "nome",
+              "varchar(40)",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "catalogo",
+      "nome": "catalogo",
+      "tabelas": [
+        {
+          "nome": "livro",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "editora_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "grupo_precificacao_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "titulo",
+              "varchar(200)",
+              ""
+            ],
+            [
+              "ano",
+              "integer",
+              ""
+            ],
+            [
+              "edicao",
+              "varchar(40)",
+              ""
+            ],
+            [
+              "isbn",
+              "varchar(13)",
+              ""
+            ],
+            [
+              "paginas",
+              "integer",
+              ""
+            ],
+            [
+              "sinopse",
+              "text",
+              ""
+            ],
+            [
+              "altura",
+              "numeric(6,2)",
+              ""
+            ],
+            [
+              "largura",
+              "numeric(6,2)",
+              ""
+            ],
+            [
+              "profundidade",
+              "numeric(6,2)",
+              ""
+            ],
+            [
+              "peso",
+              "numeric(6,3)",
+              ""
+            ],
+            [
+              "codigo_barras",
+              "varchar(20)",
+              ""
+            ],
+            [
+              "ativo",
+              "boolean",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "livro_autor",
+          "colunas": [
+            [
+              "livro_id",
+              "bigint",
+              "PK FK"
+            ],
+            [
+              "autor_id",
+              "bigint",
+              "PK FK"
+            ]
+          ]
+        },
+        {
+          "nome": "livro_categoria",
+          "colunas": [
+            [
+              "livro_id",
+              "bigint",
+              "PK FK"
+            ],
+            [
+              "categoria_id",
+              "bigint",
+              "PK FK"
+            ]
+          ]
+        },
+        {
+          "nome": "autor",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "nome",
+              "varchar(120)",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "categoria",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "nome",
+              "varchar(60)",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "editora",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "nome",
+              "varchar(120)",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "grupo_precificacao",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "nome",
+              "varchar(60)",
+              ""
+            ],
+            [
+              "margem",
+              "numeric(5,4)",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "estoque",
+      "nome": "estoque",
+      "tabelas": [
+        {
+          "nome": "estoque",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "livro_id",
+              "bigint",
+              "REF → livro UK"
+            ],
+            [
+              "quantidade",
+              "integer",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "entrada_estoque",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "livro_id",
+              "bigint",
+              "REF → livro"
+            ],
+            [
+              "fornecedor_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "quantidade",
+              "integer",
+              ""
+            ],
+            [
+              "custo",
+              "numeric(12,2)",
+              ""
+            ],
+            [
+              "data_entrada",
+              "date",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "fornecedor",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "nome",
+              "varchar(120)",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "reserva",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "livro_id",
+              "bigint",
+              "REF → livro"
+            ],
+            [
+              "quantidade",
+              "integer",
+              ""
+            ],
+            [
+              "expira_em",
+              "timestamp",
+              ""
+            ],
+            [
+              "origem",
+              "varchar(20)",
+              ""
+            ],
+            [
+              "origem_id",
+              "bigint",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vendas",
+      "nome": "vendas",
+      "tabelas": [
+        {
+          "nome": "carrinho",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "cliente_id",
+              "bigint",
+              "REF → cliente UK"
+            ],
+            [
+              "expira_em",
+              "timestamp",
+              "null"
+            ],
+            [
+              "aviso_enviado_em",
+              "timestamp",
+              "null"
+            ]
+          ]
+        },
+        {
+          "nome": "item_carrinho",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "carrinho_id",
+              "bigint",
+              "FK UK1"
+            ],
+            [
+              "livro_id",
+              "bigint",
+              "REF → livro UK1"
+            ],
+            [
+              "quantidade",
+              "integer",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "item_removido_carrinho",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "carrinho_id",
+              "bigint",
+              "FK UK1"
+            ],
+            [
+              "livro_id",
+              "bigint",
+              "REF → livro UK1"
+            ],
+            [
+              "quantidade",
+              "integer",
+              ""
+            ],
+            [
+              "removido_em",
+              "timestamp",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "checkout",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "cliente_id",
+              "bigint",
+              "REF → cliente"
+            ],
+            [
+              "situacao",
+              "varchar(20)",
+              ""
+            ],
+            [
+              "iniciado_em",
+              "timestamp",
+              ""
+            ],
+            [
+              "expira_em",
+              "timestamp",
+              ""
+            ],
+            [
+              "aviso_enviado_em",
+              "timestamp",
+              "null"
+            ],
+            [
+              "version",
+              "bigint",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "item_checkout",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "checkout_id",
+              "bigint",
+              "FK UK1"
+            ],
+            [
+              "livro_id",
+              "bigint",
+              "REF → livro UK1"
+            ],
+            [
+              "quantidade",
+              "integer",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "pedido",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "checkout_id",
+              "bigint",
+              "FK null"
+            ],
+            [
+              "cliente_id",
+              "bigint",
+              "REF → cliente"
+            ],
+            [
+              "status",
+              "varchar(20)",
+              ""
+            ],
+            [
+              "realizado_em",
+              "timestamp",
+              ""
+            ],
+            [
+              "entregue_em",
+              "timestamp",
+              "null"
+            ],
+            [
+              "cliente",
+              "json",
+              "",
+              "snapshot: id, nome, cpf, email, telefone"
+            ],
+            [
+              "endereco_entrega",
+              "json",
+              "",
+              "snapshot: id e campos do endereço"
+            ],
+            [
+              "endereco_cobranca",
+              "json",
+              "",
+              "snapshot: id e campos do endereço"
+            ],
+            [
+              "subtotal_itens",
+              "numeric(12,2)",
+              ""
+            ],
+            [
+              "frete",
+              "numeric(12,2)",
+              ""
+            ],
+            [
+              "desconto_promocional",
+              "numeric(12,2)",
+              ""
+            ],
+            [
+              "total",
+              "numeric(12,2)",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "item_pedido",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "pedido_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "livro",
+              "json",
+              "",
+              "snapshot: id, título, autores, editora, edição, ISBN, categorias [{id, nome}]"
+            ],
+            [
+              "preco_unitario",
+              "numeric(12,2)",
+              ""
+            ],
+            [
+              "quantidade",
+              "integer",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "pagamento_cartao",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "pedido_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "cartao",
+              "json",
+              "",
+              "snapshot: id (se salvo), bandeira, últimos 4 dígitos"
+            ],
+            [
+              "valor",
+              "numeric(12,2)",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "cupom_pedido",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "pedido_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "cupom",
+              "json",
+              "",
+              "snapshot: id, código, categoria, tipo"
+            ],
+            [
+              "valor_abatido",
+              "numeric(12,2)",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "cupom_promocional",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "codigo",
+              "varchar(40)",
+              "UK"
+            ],
+            [
+              "tipo",
+              "varchar(20)",
+              ""
+            ],
+            [
+              "valor",
+              "numeric(12,2)",
+              "null"
+            ],
+            [
+              "validade",
+              "date",
+              ""
+            ],
+            [
+              "valor_minimo",
+              "numeric(12,2)",
+              "null"
+            ]
+          ]
+        },
+        {
+          "nome": "uso_cupom_promocional",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "cupom_promocional_id",
+              "bigint",
+              "FK UK1"
+            ],
+            [
+              "cliente_id",
+              "bigint",
+              "REF → cliente UK1"
+            ],
+            [
+              "pedido_id",
+              "bigint",
+              "FK UK"
+            ]
+          ]
+        },
+        {
+          "nome": "cupom",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "cliente_id",
+              "bigint",
+              "REF → cliente"
+            ],
+            [
+              "codigo",
+              "varchar(40)",
+              "UK"
+            ],
+            [
+              "valor",
+              "numeric(12,2)",
+              ""
+            ],
+            [
+              "validade",
+              "date",
+              "null"
+            ],
+            [
+              "situacao",
+              "varchar(20)",
+              ""
+            ],
+            [
+              "gerado_em",
+              "timestamp",
+              ""
+            ],
+            [
+              "version",
+              "bigint",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "troca",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "pedido_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "cupom_id",
+              "bigint",
+              "FK UK null"
+            ],
+            [
+              "status",
+              "varchar(20)",
+              ""
+            ],
+            [
+              "solicitada_em",
+              "timestamp",
+              ""
+            ],
+            [
+              "motivo_recusa",
+              "varchar(500)",
+              "null"
+            ],
+            [
+              "valor_cupom",
+              "numeric(12,2)",
+              "null"
+            ]
+          ]
+        },
+        {
+          "nome": "item_troca",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "item_pedido_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "troca_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "quantidade",
+              "integer",
+              ""
+            ],
+            [
+              "volta_estoque",
+              "boolean",
+              "null"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "notificacoes",
+      "nome": "notificacoes",
+      "tabelas": [
+        {
+          "nome": "notificacao",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "usuario_id",
+              "bigint",
+              "REF → usuario"
+            ],
+            [
+              "tipo",
+              "varchar(40)",
+              ""
+            ],
+            [
+              "mensagem",
+              "varchar(500)",
+              ""
+            ],
+            [
+              "recurso",
+              "varchar(40)",
+              "null"
+            ],
+            [
+              "recurso_id",
+              "bigint",
+              "null"
+            ],
+            [
+              "criada_em",
+              "timestamp",
+              ""
+            ],
+            [
+              "lida_em",
+              "timestamp",
+              "null"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "compartilhado",
+      "nome": "compartilhado",
+      "tabelas": [
+        {
+          "nome": "revisao",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "momento",
+              "timestamp",
+              ""
+            ],
+            [
+              "usuario_id",
+              "bigint",
+              "REF → usuario null"
+            ],
+            [
+              "usuario",
+              "varchar(254)",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "seed_execucao",
+          "colunas": [
+            [
+              "arquivo",
+              "varchar(255)",
+              "PK"
+            ],
+            [
+              "checksum",
+              "varchar(64)",
+              ""
+            ],
+            [
+              "executado_em",
+              "timestamp",
+              ""
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "relacionamentos": [
+    {
+      "de": "endereco.cliente_id",
+      "para": "cliente",
+      "card": "N:1",
+      "min": "1"
+    },
+    {
+      "de": "cartao.cliente_id",
+      "para": "cliente",
+      "card": "N:1",
+      "min": "0"
+    },
+    {
+      "de": "cartao.bandeira_id",
+      "para": "bandeira",
+      "card": "N:1"
+    },
+    {
+      "de": "livro.editora_id",
+      "para": "editora",
+      "card": "N:1"
+    },
+    {
+      "de": "livro.grupo_precificacao_id",
+      "para": "grupo_precificacao",
+      "card": "N:1"
+    },
+    {
+      "de": "livro_autor.livro_id",
+      "para": "livro",
+      "card": "N:1",
+      "min": "1"
+    },
+    {
+      "de": "livro_autor.autor_id",
+      "para": "autor",
+      "card": "N:1"
+    },
+    {
+      "de": "livro_categoria.livro_id",
+      "para": "livro",
+      "card": "N:1",
+      "min": "1"
+    },
+    {
+      "de": "livro_categoria.categoria_id",
+      "para": "categoria",
+      "card": "N:1"
+    },
+    {
+      "de": "entrada_estoque.fornecedor_id",
+      "para": "fornecedor",
+      "card": "N:1"
+    },
+    {
+      "de": "item_carrinho.carrinho_id",
+      "para": "carrinho",
+      "card": "N:1"
+    },
+    {
+      "de": "item_removido_carrinho.carrinho_id",
+      "para": "carrinho",
+      "card": "N:1"
+    },
+    {
+      "de": "item_checkout.checkout_id",
+      "para": "checkout",
+      "card": "N:1",
+      "min": "1"
+    },
+    {
+      "de": "pedido.checkout_id",
+      "para": "checkout",
+      "card": "N:1",
+      "opcional": true
+    },
+    {
+      "de": "item_pedido.pedido_id",
+      "para": "pedido",
+      "card": "N:1",
+      "min": "1"
+    },
+    {
+      "de": "pagamento_cartao.pedido_id",
+      "para": "pedido",
+      "card": "N:1",
+      "min": "0"
+    },
+    {
+      "de": "cupom_pedido.pedido_id",
+      "para": "pedido",
+      "card": "N:1",
+      "min": "0"
+    },
+    {
+      "de": "uso_cupom_promocional.cupom_promocional_id",
+      "para": "cupom_promocional",
+      "card": "N:1"
+    },
+    {
+      "de": "uso_cupom_promocional.pedido_id",
+      "para": "pedido",
+      "card": "1:1",
+      "min": "0"
+    },
+    {
+      "de": "troca.pedido_id",
+      "para": "pedido",
+      "card": "N:1",
+      "min": "0"
+    },
+    {
+      "de": "troca.cupom_id",
+      "para": "cupom",
+      "card": "1:1",
+      "opcional": true
+    },
+    {
+      "de": "item_troca.troca_id",
+      "para": "troca",
+      "card": "N:1",
+      "min": "1"
+    },
+    {
+      "de": "item_troca.item_pedido_id",
+      "para": "item_pedido",
+      "card": "N:1",
+      "min": "0"
+    }
+  ]
+}

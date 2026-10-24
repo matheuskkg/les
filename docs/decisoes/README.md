@@ -21,6 +21,7 @@ Escopos:
 | [DEC-13](DEC-13-processamento-do-pedido-e-notificacoes.md) | Processamento do pedido e notificações | Aceita |
 | [DEC-14](DEC-14-ids-nomes-e-seed.md) | IDs, nomes e seed | Aceita |
 | [DEC-15.3](DEC-15.3-saldo-de-estoque.md) | Saldo de estoque | Aceita |
+| [DEC-16](DEC-16-modelo-de-dados.md) | Modelo de dados | Aceita |
 
 ### Negócio
 

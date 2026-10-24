@@ -61,7 +61,7 @@ as entidades dele. A faixa do nome define a ordem de execução:
 
 | Faixa | Conteúdo | Card |
 |---|---|---|
-| `0NN` | domínios (autor, editora, categoria, grupo de precificação, fornecedor, bandeira), livros e entradas de estoque | INF-05 |
+| `0NN` | domínios (autor, editora, categoria, grupo de precificação, fornecedor, bandeira (alterado pelo [DEC-16](DEC-16-modelo-de-dados.md): bandeira no `2NN`)), livros e entradas de estoque | INF-05 |
 | `1NN` | administrador e usuários | INF-06 |
 | `2NN` | clientes, com endereços e cartões | CLI-01 |
 | `3NN` | cupons promocionais e cupons de troca | VEN-06 |

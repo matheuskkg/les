@@ -32,7 +32,8 @@ e os efeitos da inativação (RF-CLI-003).
 
 - O checkout pede o endereço de **entrega** e o de **cobrança**, ambos entre os do cliente ou um novo (RF-VEN-005); a
   cobrança vem preenchida igual à entrega.
-- O pedido guarda uma **cópia** dos dois endereços e, de cada cartão, bandeira, 4 últimos dígitos e valor pago. Por
+- O pedido guarda uma **cópia** dos dois endereços e, de cada cartão, bandeira, 4 últimos dígitos e valor pago (alterado
+  pelo [DEC-16](DEC-16-modelo-de-dados.md): as cópias são snapshots em JSON com o id de origem). Por
   isso alterar ou excluir um endereço ou cartão do cadastro não muda pedidos antigos.
 
 ### Cartão de crédito

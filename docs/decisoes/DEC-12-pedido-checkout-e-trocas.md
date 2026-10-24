@@ -72,7 +72,8 @@ entrega (`entregueEm`).
 
 ### Cópia no pedido
 
-Tudo o que pode mudar com o tempo é copiado, não referenciado:
+Tudo o que pode mudar com o tempo é copiado, não referenciado (alterado pelo [DEC-16](DEC-16-modelo-de-dados.md): as
+cópias são snapshots em JSON com o id de origem, e as categorias ficam no snapshot do livro):
 
 | Origem | O pedido guarda |
 |---|---|

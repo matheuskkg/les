@@ -180,6 +180,15 @@ Definidos no [DEC-14](decisoes/DEC-14-ids-nomes-e-seed.md):
 - Índices em `@Table(indexes = ...)` nas colunas filtradas ou ordenadas e nas chaves estrangeiras consultadas
   (RNF-GER-001).
 
+### Modelo de dados
+
+Definido no [DEC-16](decisoes/DEC-16-modelo-de-dados.md):
+
+- MER conceitual e lógico em `docs/modelo/mer.drawio` (com os PNGs), gerado por `docs/modelo/gerar_mer.py` a partir
+  de `mer.spec.json` e `conceitual.spec.json`. Mudanças no modelo entram nos specs, e o diagrama é gerado de novo.
+- Referência a tabela de outro módulo é só a coluna de id: sem `@ManyToOne` entre módulos e sem FK no banco.
+- As cópias do pedido são snapshots imutáveis em colunas JSON, com o id de origem.
+
 ## Decisões por requisito
 
 - **Reserva × baixa de estoque.**
@@ -196,7 +205,8 @@ Definidos no [DEC-14](decisoes/DEC-14-ids-nomes-e-seed.md):
 - **Expiração do carrinho e do checkout.**
   - A tarefa `ExpirarReservas` (`TarefaPorTempo`, a cada 30 s) avisa antes do vencimento e, vencido o prazo, remove
     as reservas e retira todos os itens do mesmo produto (RN-VEN-015).
-  - Os itens removidos ficam registrados para exibição no carrinho (RNF-VEN-001).
+  - Os itens removidos ficam registrados para exibição no carrinho (RNF-VEN-001), em `item_removido_carrinho`
+    ([DEC-16](decisoes/DEC-16-modelo-de-dados.md)).
   - Os prazos são parâmetros de configuração.
   - Aviso e expiração chegam ao `web` como notificação. O `expiraEm` devolvido serve só para exibição
     ([DEC-13](decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)).

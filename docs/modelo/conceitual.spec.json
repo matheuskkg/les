@@ -1,0 +1,660 @@
+{
+  "legenda": [
+    "Notação de Peter Chen (estilo brModelo): retângulo = entidade; losango = relacionamento; círculo cheio = atributo identificador; círculo vazio = atributo.",
+    "Cardinalidades (mín, máx) junto à entidade, lidas do outro lado do relacionamento.",
+    "Cada cliente usa cada cupom promocional uma vez (DEC-15.2).",
+    "Snapshots: cópia imutável do objeto no momento da compra, com o id de origem."
+  ],
+  "entidades": [
+    {
+      "nome": "Usuário",
+      "grupo": "acesso",
+      "atributos": [
+        "#id",
+        "e-mail",
+        "senha (hash)",
+        "papel",
+        "situação",
+        "inativado em",
+        "telefone (tipo, DDD, número)"
+      ]
+    },
+    {
+      "nome": "Cliente",
+      "grupo": "clientes",
+      "atributos": [
+        "#código",
+        "nome",
+        "gênero",
+        "data de nascimento",
+        "CPF"
+      ]
+    },
+    {
+      "nome": "Endereço",
+      "grupo": "clientes",
+      "atributos": [
+        "#id",
+        "nome curto",
+        "tipo de endereço",
+        "tipo de logradouro",
+        "logradouro",
+        "número",
+        "bairro",
+        "CEP",
+        "cidade",
+        "UF",
+        "país",
+        "observações"
+      ]
+    },
+    {
+      "nome": "Cartão",
+      "grupo": "clientes",
+      "atributos": [
+        "#id",
+        "número",
+        "nome impresso",
+        "validade",
+        "preferencial"
+      ]
+    },
+    {
+      "nome": "Bandeira",
+      "grupo": "clientes",
+      "atributos": [
+        "#id",
+        "nome"
+      ]
+    },
+    {
+      "nome": "Livro",
+      "grupo": "catalogo",
+      "atributos": [
+        "#código",
+        "título",
+        "ano",
+        "edição",
+        "ISBN",
+        "páginas",
+        "sinopse",
+        "dimensões (altura, largura, profundidade, peso)",
+        "código de barras",
+        "ativo"
+      ]
+    },
+    {
+      "nome": "Autor",
+      "grupo": "catalogo",
+      "atributos": [
+        "#id",
+        "nome"
+      ]
+    },
+    {
+      "nome": "Categoria",
+      "grupo": "catalogo",
+      "atributos": [
+        "#id",
+        "nome"
+      ]
+    },
+    {
+      "nome": "Editora",
+      "grupo": "catalogo",
+      "atributos": [
+        "#id",
+        "nome"
+      ]
+    },
+    {
+      "nome": "Grupo de precificação",
+      "grupo": "catalogo",
+      "atributos": [
+        "#id",
+        "nome",
+        "margem"
+      ]
+    },
+    {
+      "nome": "Fornecedor",
+      "grupo": "estoque",
+      "atributos": [
+        "#id",
+        "nome"
+      ]
+    },
+    {
+      "nome": "Entrada de estoque",
+      "grupo": "estoque",
+      "atributos": [
+        "#id",
+        "quantidade",
+        "custo",
+        "data de entrada"
+      ]
+    },
+    {
+      "nome": "Saldo de estoque",
+      "grupo": "estoque",
+      "atributos": [
+        "#id",
+        "quantidade"
+      ]
+    },
+    {
+      "nome": "Reserva",
+      "grupo": "estoque",
+      "atributos": [
+        "#id",
+        "quantidade",
+        "expira em",
+        "origem (carrinho ou checkout)"
+      ]
+    },
+    {
+      "nome": "Carrinho",
+      "grupo": "vendas",
+      "atributos": [
+        "#id",
+        "expira em",
+        "aviso enviado em"
+      ]
+    },
+    {
+      "nome": "Checkout",
+      "grupo": "vendas",
+      "atributos": [
+        "#id",
+        "situação",
+        "iniciado em",
+        "expira em",
+        "aviso enviado em"
+      ]
+    },
+    {
+      "nome": "Pedido",
+      "grupo": "vendas",
+      "atributos": [
+        "#número",
+        "status",
+        "realizado em",
+        "entregue em",
+        "snapshot do cliente",
+        "snapshot do endereço de entrega",
+        "snapshot do endereço de cobrança",
+        "subtotal",
+        "frete",
+        "desconto",
+        "total"
+      ]
+    },
+    {
+      "nome": "Item do pedido",
+      "grupo": "vendas",
+      "fraca": true,
+      "atributos": [
+        "#id",
+        "snapshot do livro (com categorias)",
+        "preço unitário",
+        "quantidade"
+      ]
+    },
+    {
+      "nome": "Pagamento com cartão",
+      "grupo": "vendas",
+      "fraca": true,
+      "atributos": [
+        "#id",
+        "snapshot do cartão",
+        "valor"
+      ]
+    },
+    {
+      "nome": "Cupom promocional",
+      "grupo": "vendas",
+      "atributos": [
+        "#código",
+        "tipo",
+        "valor",
+        "validade",
+        "valor mínimo"
+      ]
+    },
+    {
+      "nome": "Cupom de troca",
+      "grupo": "vendas",
+      "atributos": [
+        "#código",
+        "valor",
+        "validade",
+        "situação",
+        "gerado em"
+      ]
+    },
+    {
+      "nome": "Troca",
+      "grupo": "vendas",
+      "atributos": [
+        "#id",
+        "status",
+        "solicitada em",
+        "motivo da recusa",
+        "valor do cupom"
+      ]
+    },
+    {
+      "nome": "Notificação",
+      "grupo": "notificacoes",
+      "atributos": [
+        "#id",
+        "tipo",
+        "mensagem",
+        "referência (recurso, id)",
+        "criada em",
+        "lida em"
+      ]
+    }
+  ],
+  "relacionamentos": [
+    {
+      "nome": "é",
+      "lados": [
+        [
+          "Usuário",
+          "1,1"
+        ],
+        [
+          "Cliente",
+          "0,1"
+        ]
+      ]
+    },
+    {
+      "nome": "possui",
+      "lados": [
+        [
+          "Cliente",
+          "1,1"
+        ],
+        [
+          "Endereço",
+          "1,N"
+        ]
+      ]
+    },
+    {
+      "nome": "possui",
+      "lados": [
+        [
+          "Cliente",
+          "1,1"
+        ],
+        [
+          "Cartão",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "é da",
+      "lados": [
+        [
+          "Cartão",
+          "0,N"
+        ],
+        [
+          "Bandeira",
+          "1,1"
+        ]
+      ]
+    },
+    {
+      "nome": "escreve",
+      "lados": [
+        [
+          "Autor",
+          "1,N"
+        ],
+        [
+          "Livro",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "classifica",
+      "lados": [
+        [
+          "Categoria",
+          "1,N"
+        ],
+        [
+          "Livro",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "publica",
+      "lados": [
+        [
+          "Editora",
+          "1,1"
+        ],
+        [
+          "Livro",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "precifica",
+      "lados": [
+        [
+          "Grupo de precificação",
+          "1,1"
+        ],
+        [
+          "Livro",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "recebe",
+      "lados": [
+        [
+          "Livro",
+          "1,1"
+        ],
+        [
+          "Entrada de estoque",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "fornece",
+      "lados": [
+        [
+          "Fornecedor",
+          "1,1"
+        ],
+        [
+          "Entrada de estoque",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "tem saldo",
+      "lados": [
+        [
+          "Livro",
+          "1,1"
+        ],
+        [
+          "Saldo de estoque",
+          "0,1"
+        ]
+      ]
+    },
+    {
+      "nome": "bloqueia",
+      "lados": [
+        [
+          "Livro",
+          "1,1"
+        ],
+        [
+          "Reserva",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "tem",
+      "lados": [
+        [
+          "Cliente",
+          "1,1"
+        ],
+        [
+          "Carrinho",
+          "0,1"
+        ]
+      ]
+    },
+    {
+      "nome": "contém",
+      "atributos": [
+        "quantidade"
+      ],
+      "lados": [
+        [
+          "Carrinho",
+          "0,N"
+        ],
+        [
+          "Livro",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "removeu",
+      "atributos": [
+        "quantidade",
+        "removido em"
+      ],
+      "lados": [
+        [
+          "Carrinho",
+          "0,N"
+        ],
+        [
+          "Livro",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "abre",
+      "lados": [
+        [
+          "Cliente",
+          "1,1"
+        ],
+        [
+          "Checkout",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "reúne",
+      "atributos": [
+        "quantidade"
+      ],
+      "lados": [
+        [
+          "Checkout",
+          "0,N"
+        ],
+        [
+          "Livro",
+          "1,N"
+        ]
+      ]
+    },
+    {
+      "nome": "gera",
+      "lados": [
+        [
+          "Checkout",
+          "0,1"
+        ],
+        [
+          "Pedido",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "faz",
+      "lados": [
+        [
+          "Cliente",
+          "1,1"
+        ],
+        [
+          "Pedido",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "compõe",
+      "identificador": true,
+      "lados": [
+        [
+          "Pedido",
+          "1,1"
+        ],
+        [
+          "Item do pedido",
+          "1,N"
+        ]
+      ]
+    },
+    {
+      "nome": "refere",
+      "lados": [
+        [
+          "Item do pedido",
+          "0,N"
+        ],
+        [
+          "Livro",
+          "1,1"
+        ]
+      ]
+    },
+    {
+      "nome": "paga",
+      "identificador": true,
+      "lados": [
+        [
+          "Pedido",
+          "1,1"
+        ],
+        [
+          "Pagamento com cartão",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "usa",
+      "atributos": [
+        "valor abatido"
+      ],
+      "lados": [
+        [
+          "Pedido",
+          "0,N"
+        ],
+        [
+          "Cupom promocional",
+          "0,1"
+        ]
+      ]
+    },
+    {
+      "nome": "abate",
+      "atributos": [
+        "valor abatido"
+      ],
+      "lados": [
+        [
+          "Pedido",
+          "0,N"
+        ],
+        [
+          "Cupom de troca",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "pertence",
+      "lados": [
+        [
+          "Cliente",
+          "1,1"
+        ],
+        [
+          "Cupom de troca",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "solicita",
+      "lados": [
+        [
+          "Pedido",
+          "1,1"
+        ],
+        [
+          "Troca",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "inclui",
+      "atributos": [
+        "quantidade",
+        "volta ao estoque"
+      ],
+      "lados": [
+        [
+          "Troca",
+          "0,N"
+        ],
+        [
+          "Item do pedido",
+          "1,N"
+        ]
+      ]
+    },
+    {
+      "nome": "gera",
+      "lados": [
+        [
+          "Troca",
+          "0,1"
+        ],
+        [
+          "Cupom de troca",
+          "0,1"
+        ]
+      ]
+    },
+    {
+      "nome": "recebe",
+      "lados": [
+        [
+          "Usuário",
+          "1,1"
+        ],
+        [
+          "Notificação",
+          "0,N"
+        ]
+      ]
+    }
+  ]
+}
