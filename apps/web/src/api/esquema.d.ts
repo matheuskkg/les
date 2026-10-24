@@ -11,7 +11,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar_6"];
+        get: operations["listar_7"];
         put?: never;
         post?: never;
         delete?: never;
@@ -128,7 +128,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar_5"];
+        get: operations["listar_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -179,6 +179,56 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["despachar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/trocas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listar_5"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/trocas/{id}/autorizar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Autoriza uma troca EM TROCA */
+        post: operations["autorizar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/trocas/{id}/recusar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Recusa uma troca EM TROCA, com motivo */
+        post: operations["recusar"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1349,6 +1399,17 @@ export interface components {
             /** Format: int32 */
             totalPaginas: number;
         };
+        PaginaTrocaListadaDto: {
+            itens: components["schemas"]["TrocaListadaDto"][];
+            /** Format: int32 */
+            pagina: number;
+            /** Format: int32 */
+            tamanho: number;
+            /** Format: int64 */
+            totalItens: number;
+            /** Format: int32 */
+            totalPaginas: number;
+        };
         PedidoDeFrete: {
             entrega: components["schemas"]["EscolhaDeEnderecoDto"];
         };
@@ -1423,6 +1484,9 @@ export interface components {
             /** Format: uri */
             type?: string;
         };
+        RecusaDeTrocaDto: {
+            motivo?: string;
+        };
         Sessao: {
             email: string;
             /** @enum {string} */
@@ -1460,6 +1524,22 @@ export interface components {
              */
             valorCupom?: string;
         };
+        TrocaListadaDto: {
+            clienteCpf: string;
+            /** Format: int64 */
+            clienteId: number;
+            clienteNome: string;
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            pedidoId: number;
+            /** Format: date-time */
+            solicitadaEm: string;
+            /** @enum {string} */
+            status: "EM_TROCA" | "TROCA_AUTORIZADA" | "TROCA_RECUSADA" | "TROCADO";
+            /** Format: int64 */
+            unidades: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -1469,7 +1549,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    listar_6: {
+    listar_7: {
         parameters: {
             query?: {
                 nome?: string;
@@ -1642,12 +1722,13 @@ export interface operations {
             };
         };
     };
-    listar_5: {
+    listar_6: {
         parameters: {
             query?: {
                 numero?: number;
                 clienteId?: number;
                 status?: ("EM_PROCESSAMENTO" | "APROVADA" | "REPROVADA" | "EM_TRANSPORTE" | "ENTREGUE")[];
+                situacao?: ("EM_TROCA" | "TROCA_AUTORIZADA" | "TROCA_RECUSADA" | "TROCADO")[];
                 cliente?: string;
                 cpf?: string;
                 realizadoEmDe?: string;
@@ -1738,6 +1819,127 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PedidoDetalheDto"];
+                };
+            };
+        };
+    };
+    listar_5: {
+        parameters: {
+            query?: {
+                status?: ("EM_TROCA" | "TROCA_AUTORIZADA" | "TROCA_RECUSADA" | "TROCADO")[];
+                /** @description Página, a partir de 0. */
+                pagina?: number;
+                /** @description Itens por página (padrão 20, máximo 100). */
+                tamanho?: number;
+                /** @description Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: solicitadaEm, id. Padrão: solicitadaEm,desc. */
+                ordem?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginaTrocaListadaDto"];
+                };
+            };
+        };
+    };
+    autorizar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Troca autorizada; devolve o pedido dela */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PedidoDetalheDto"];
+                };
+            };
+            /** @description Troca inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description A troca não está EM TROCA */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    recusar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecusaDeTrocaDto"];
+            };
+        };
+        responses: {
+            /** @description Troca recusada; devolve o pedido dela */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PedidoDetalheDto"];
+                };
+            };
+            /** @description Troca inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description A troca não está EM TROCA */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Motivo ausente ou longo demais */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
         };

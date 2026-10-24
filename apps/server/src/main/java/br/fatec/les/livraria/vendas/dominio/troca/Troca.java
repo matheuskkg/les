@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
 
 /**
  * O "pedido de troca" do RN-VEN-011 (DEC-12): itens de um pedido entregue com a quantidade de cada um. Um pedido pode
@@ -55,6 +56,35 @@ public class Troca {
                 .filter(item -> item.itemPedidoId().equals(itemPedidoId))
                 .mapToInt(ItemTroca::quantidade)
                 .sum();
+    }
+
+    /**
+     * O administrador autoriza a troca: {@code EM TROCA} → {@code TROCA AUTORIZADA} (RF-VEN-012, DEC-12).
+     *
+     * @throws ExcecaoDeConflito se a troca não estiver {@code EM TROCA}
+     */
+    public void autorizar() {
+        exigirEmTroca("autorizada");
+        status = StatusTroca.TROCA_AUTORIZADA;
+    }
+
+    /**
+     * O administrador recusa a troca com um motivo: {@code EM TROCA} → {@code TROCA RECUSADA} (DEC-12). As regras do
+     * motivo ficam em {@code vendas.dominio.regra}.
+     *
+     * @throws ExcecaoDeConflito se a troca não estiver {@code EM TROCA}
+     */
+    public void recusar(String motivo) {
+        Objects.requireNonNull(motivo, "motivo");
+        exigirEmTroca("recusada");
+        status = StatusTroca.TROCA_RECUSADA;
+        motivoRecusa = motivo.strip();
+    }
+
+    private void exigirEmTroca(String acao) {
+        if (status != StatusTroca.EM_TROCA) {
+            throw new ExcecaoDeConflito("Só uma troca EM TROCA pode ser %s.".formatted(acao));
+        }
     }
 
     public boolean recusada() {

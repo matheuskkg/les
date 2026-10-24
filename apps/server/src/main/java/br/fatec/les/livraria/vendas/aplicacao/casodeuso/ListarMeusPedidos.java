@@ -36,7 +36,7 @@ public class ListarMeusPedidos {
     public Pagina<PedidoResumo> executar(Paginacao paginacao) {
         Objects.requireNonNull(paginacao, "paginacao");
         Long clienteId = identificarCliente.executar();
-        return pedidos.listar(new FiltroPedido(null, clienteId, List.of(), null, null, Optional.empty()),
+        return pedidos.listar(new FiltroPedido(null, clienteId, List.of(), List.of(), null, null, Optional.empty()),
                 paginacao);
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
+import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
 
 /**
  * Filtros da consulta de pedidos do admin como chegam da API (RF-VEN-009, DEC-07, DEC-12). Todos são opcionais e se
@@ -13,6 +14,7 @@ import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
  * @param numero número do pedido
  * @param clienteId código do cliente
  * @param status status desejados; vazio não filtra
+ * @param situacaoDaTroca situações do indicador de troca (status da troca mais recente), com OU; vazio não filtra
  * @param cliente trecho do nome do cliente
  * @param cpf CPF do cliente, com ou sem máscara
  * @param realizadoEmDe dia inicial da finalização, inclusive
@@ -22,6 +24,7 @@ public record ConsultaDePedidos(
         Long numero,
         Long clienteId,
         List<StatusPedido> status,
+        List<StatusTroca> situacaoDaTroca,
         String cliente,
         String cpf,
         LocalDate realizadoEmDe,
@@ -29,5 +32,7 @@ public record ConsultaDePedidos(
 
     public ConsultaDePedidos {
         status = status == null ? List.of() : status.stream().filter(Objects::nonNull).distinct().toList();
+        situacaoDaTroca = situacaoDaTroca == null ? List.of()
+                : situacaoDaTroca.stream().filter(Objects::nonNull).distinct().toList();
     }
 }

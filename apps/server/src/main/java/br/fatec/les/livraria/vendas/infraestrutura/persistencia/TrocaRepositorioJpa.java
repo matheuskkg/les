@@ -1,6 +1,7 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,12 @@ public class TrocaRepositorioJpa implements TrocaRepositorio {
     }
 
     @Override
+    @Transactional
+    public Optional<Troca> buscarParaAlterar(Long id) {
+        return repositorio.buscarPorIdComLock(id).map(TrocaRepositorioJpa::paraDominio);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<Troca> listarDoPedido(Long pedidoId) {
         return repositorio.findByPedidoId(pedidoId).stream().map(TrocaRepositorioJpa::paraDominio).toList();
@@ -64,7 +71,7 @@ public class TrocaRepositorioJpa implements TrocaRepositorio {
         return entidade;
     }
 
-    private static Troca paraDominio(TrocaJpa entidade) {
+    static Troca paraDominio(TrocaJpa entidade) {
         return new Troca(entidade.getId(), entidade.getPedido().getId(), entidade.getStatus(),
                 entidade.getSolicitadaEm(),
                 entidade.getItens().stream()
