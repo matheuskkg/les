@@ -1,0 +1,47 @@
+package br.fatec.les.livraria.acesso.dominio.modelo;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+import br.fatec.les.livraria.compartilhado.dominio.Email;
+import lombok.Getter;
+
+/**
+ * Identidade de login do sistema (DEC-08, DEC-10): e-mail e telefone servem de login, a senha fica só como hash e a
+ * inativação guarda a data que origina a situação da conta (RF-CLI-003).
+ */
+@Getter
+public class Usuario {
+
+    private final Long id;
+    private final String email;
+    private final Telefone telefone;
+    private final String senhaHash;
+    private final Papel papel;
+    private LocalDateTime inativadoEm;
+
+    public Usuario(Long id, String email, Telefone telefone, String senhaHash, Papel papel, LocalDateTime inativadoEm) {
+        this.id = id;
+        this.email = new Email(email).endereco();
+        this.telefone = telefone;
+        this.senhaHash = Objects.requireNonNull(senhaHash, "senhaHash");
+        this.papel = Objects.requireNonNull(papel, "papel");
+        this.inativadoEm = inativadoEm;
+    }
+
+    /** Inativa a conta a partir de {@code agora} (RF-CLI-003); uma conta já inativa não pode ser inativada de novo. */
+    public void inativar(LocalDateTime agora) {
+        if (inativadoEm != null) {
+            throw new IllegalStateException("A conta já está inativa.");
+        }
+        inativadoEm = Objects.requireNonNull(agora, "agora");
+    }
+
+    /** Reativa a conta inativa (RF-CLI-003); uma conta já ativa não pode ser reativada. */
+    public void reativar() {
+        if (inativadoEm == null) {
+            throw new IllegalStateException("A conta já está ativa.");
+        }
+        inativadoEm = null;
+    }
+}
