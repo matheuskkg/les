@@ -21,10 +21,12 @@ import br.fatec.les.livraria.acesso.aplicacao.casodeuso.Autenticar;
 import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
 import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
 import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.IdentidadeDoLogout;
 import br.fatec.les.livraria.acesso.infraestrutura.seguranca.PrincipalDaSessao;
 import br.fatec.les.livraria.acesso.infraestrutura.seguranca.TokenDeSessao;
 import br.fatec.les.livraria.acesso.infraestrutura.web.dto.EntradaDeLogin;
 import br.fatec.les.livraria.acesso.infraestrutura.web.dto.Sessao;
+import br.fatec.les.livraria.notificacoes.aplicacao.casodeuso.EncerrarCanais;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -49,6 +51,8 @@ public class SessaoController {
     private final Autenticar autenticar;
     private final EmissorDeToken emissor;
     private final CsrfTokenRepository csrf;
+    private final EncerrarCanais encerrarCanais;
+    private final IdentidadeDoLogout identidadeDoLogout;
 
     @PostMapping
     @Operation(summary = "Entra no sistema e grava o cookie de sessão")
@@ -90,9 +94,10 @@ public class SessaoController {
     }
 
     @DeleteMapping
-    @Operation(summary = "Encerra a sessão e apaga o cookie")
+    @Operation(summary = "Encerra a sessão, fecha os canais SSE e apaga o cookie")
     @ApiResponses(@ApiResponse(responseCode = "204", description = "Sessão encerrada"))
     public ResponseEntity<Void> sair(HttpServletRequest requisicao, HttpServletResponse resposta) {
+        identidadeDoLogout.usuarioId(requisicao).ifPresent(encerrarCanais::executar);
         rotacionarCsrf(requisicao, resposta);
         resposta.addHeader(HttpHeaders.SET_COOKIE, emissor.cookieExpirado().toString());
         return ResponseEntity.noContent().build();
