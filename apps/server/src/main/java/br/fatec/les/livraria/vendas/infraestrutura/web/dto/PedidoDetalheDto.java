@@ -23,7 +23,8 @@ import br.fatec.les.livraria.vendas.dominio.troca.TrocasDoPedido;
  * Detalhe do pedido com as cópias gravadas na finalização (RF-VEN-009, RF-VEN-010, DEC-12): itens, cliente,
  * endereços, cartões, cupons e valores. Datas em UTC; {@code entregueEm} é nulo até a entrega. Com as trocas
  * (RF-VEN-011): o indicador {@code troca}, ausente sem troca, o último dia para pedir troca, ausente antes da entrega,
- * e as trocas da mais recente para a mais antiga.
+ * se o cliente ainda pode pedir troca agora ({@code podeSolicitarTroca}) e as trocas da mais recente para a mais
+ * antiga.
  */
 public record PedidoDetalheDto(
         Long id,
@@ -42,6 +43,7 @@ public record PedidoDetalheDto(
         Dinheiro total,
         @Nullable IndicadorDeTroca troca,
         @Nullable LocalDate trocaAte,
+        boolean podeSolicitarTroca,
         List<TrocaDto> trocas) {
 
     public static PedidoDetalheDto de(PedidoDetalhado detalhado) {
@@ -53,7 +55,7 @@ public record PedidoDetalheDto(
                 pedido.getItens().stream().map(item -> ItemDoPedidoDto.de(item, trocas)).toList(),
                 pedido.getCartoes(), pedido.getCupons(), pedido.getSubtotal(), pedido.getFrete(),
                 pedido.getDescontoPromocional(), pedido.getTotal(), trocas.indicador().orElse(null),
-                detalhado.trocaAte(), trocas.trocas().stream().map(TrocaDto::de).toList());
+                detalhado.trocaAte(), detalhado.podeSolicitarTroca(), trocas.trocas().stream().map(TrocaDto::de).toList());
     }
 
     static Instant emUtc(LocalDateTime data) {

@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,7 +27,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Audited
-@Table(name = "item_troca", indexes = @Index(name = "ix_item_troca_troca", columnList = "troca_id"))
+@Table(name = "item_troca", indexes = @Index(name = "ix_item_troca_troca", columnList = "troca_id"),
+        uniqueConstraints = @UniqueConstraint(name = "uk_item_troca_item", columnNames = {"troca_id", "item_pedido_id"}))
 public class ItemTrocaJpa {
 
     @Id

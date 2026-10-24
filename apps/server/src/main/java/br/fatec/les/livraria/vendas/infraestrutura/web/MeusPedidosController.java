@@ -1,6 +1,10 @@
 package br.fatec.les.livraria.vendas.infraestrutura.web;
 
+import java.net.URI;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +23,11 @@ import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PedidoDetalheDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PedidoListadoDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.SolicitacaoDeTrocaDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.TrocaDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -46,9 +55,25 @@ public class MeusPedidosController {
     }
 
     @PostMapping("/{id}/trocas")
+    @Operation(summary = "Solicita a troca de itens de um pedido entregue do cliente autenticado")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Troca EM TROCA criada; Location aponta para o pedido",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = TrocaDto.class))),
+            @ApiResponse(responseCode = "401", description = "Sem sessão válida",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Pedido inexistente ou de outro cliente",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Pedido não entregue, prazo vencido ou itens inválidos",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<TrocaDto> solicitarTroca(@PathVariable Long id,
             @RequestBody SolicitacaoDeTrocaDto solicitacao) {
         return ResponseEntity.status(HttpStatus.CREATED)
+                .location(URI.create("/api/me/pedidos/" + id))
                 .body(TrocaDto.de(solicitarTroca.executar(id, solicitacao.paraItens())));
     }
 }

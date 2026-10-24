@@ -46,17 +46,30 @@ class RegrasDaSolicitacaoDeTrocaTest {
     }
 
     @Test
-    void rfVen011_exigeItensDoPedidoSemRepeticao() {
+    void rfVen011_exigeAoMenosUmItem() {
         Pedido pedido = entregueHaDias(1);
-        DentroDoPrazoDeTroca prazo = new DentroDoPrazoDeTroca();
-        ItensDaTrocaInformados regra = new ItensDaTrocaInformados();
 
-        assertThat(violacoes(regra, solicitacao(pedido, List.of()))).hasSize(1);
+        assertThat(violacoes(new TrocaComItens(), solicitacao(pedido, List.of()))).hasSize(1);
+        assertThat(violacoes(new TrocaComItens(), solicitacao(pedido, List.of(), item(101L, 1)))).isEmpty();
+    }
+
+    @Test
+    void rfVen011_itensSaoDoProprioPedido() {
+        Pedido pedido = entregueHaDias(1);
+        ItensDaTrocaDoPedido regra = new ItensDaTrocaDoPedido();
+
         assertThat(violacoes(regra, solicitacao(pedido, List.of(), item(999L, 1)))).hasSize(1);
         assertThat(violacoes(regra, solicitacao(pedido, List.of(), new ItemSolicitado(null, 1)))).hasSize(1);
+        assertThat(violacoes(regra, solicitacao(pedido, List.of(), item(101L, 1), item(102L, 1)))).isEmpty();
+    }
+
+    @Test
+    void rfVen011_itemNaoSeRepeteNaTroca() {
+        Pedido pedido = entregueHaDias(1);
+        ItensDaTrocaSemRepeticao regra = new ItensDaTrocaSemRepeticao();
+
         assertThat(violacoes(regra, solicitacao(pedido, List.of(), item(101L, 1), item(101L, 1)))).hasSize(1);
         assertThat(violacoes(regra, solicitacao(pedido, List.of(), item(101L, 1), item(102L, 1)))).isEmpty();
-        assertThat(violacoes(prazo, solicitacao(pedido, List.of(), item(101L, 1)))).isEmpty();
     }
 
     @Test

@@ -5,6 +5,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -77,6 +78,7 @@ class SolicitacaoDeTrocaIntegracaoTest {
 
         solicitar(pedido.getId(), item, 1)
                 .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/api/me/pedidos/" + pedido.getId()))
                 .andExpect(jsonPath("$.status").value("EM_TROCA"))
                 .andExpect(jsonPath("$.pedidoId").value(pedido.getId()))
                 .andExpect(jsonPath("$.itens[0].itemPedidoId").value(item))
@@ -88,11 +90,13 @@ class SolicitacaoDeTrocaIntegracaoTest {
                 .andExpect(jsonPath("$.status").value("ENTREGUE"))
                 .andExpect(jsonPath("$.troca.situacao").value("EM_TROCA"))
                 .andExpect(jsonPath("$.troca.abrangencia").value("PARCIAL"))
+                .andExpect(jsonPath("$.podeSolicitarTroca").value(true))
                 .andExpect(jsonPath("$.itens[0].disponivelParaTroca").value(1))
                 .andExpect(jsonPath("$.itens[0].statusDaTroca").value("EM_TROCA"))
                 .andExpect(jsonPath("$.trocas.length()").value(1));
         assertThat(jdbc.queryForObject("select count(*) from notificacao where usuario_id = 1 and tipo = "
-                + "'TROCA_SOLICITADA' and recurso = 'troca'", Integer.class)).isEqualTo(1);
+                + "'TROCA_SOLICITADA' and recurso = 'pedido' and recurso_id = ?", Integer.class, pedido.getId()))
+                .isEqualTo(1);
     }
 
     @Test
@@ -101,6 +105,9 @@ class SolicitacaoDeTrocaIntegracaoTest {
         long item = pedido.getItens().getFirst().id();
 
         solicitar(pedido.getId(), item, 2).andExpect(status().isCreated());
+        entityManager.flush();
+        mvc.perform(get("/api/me/pedidos/" + pedido.getId()).cookie(cookieDoUsuario(2L)))
+                .andExpect(jsonPath("$.podeSolicitarTroca").value(false));
         solicitar(pedido.getId(), item, 1)
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes[0].codigo").value("RF-VEN-011"));
@@ -120,6 +127,8 @@ class SolicitacaoDeTrocaIntegracaoTest {
         aprovado.aprovar();
         aprovado = pedidos.salvar(aprovado);
         Pedido antigo = entregue(ANA, 30);
+        mvc.perform(get("/api/me/pedidos/" + antigo.getId()).cookie(cookieDoUsuario(2L)))
+                .andExpect(jsonPath("$.podeSolicitarTroca").value(false));
 
         solicitar(aprovado.getId(), aprovado.getItens().getFirst().id(), 1)
                 .andExpect(status().isUnprocessableContent())

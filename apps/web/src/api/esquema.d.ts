@@ -672,6 +672,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Solicita a troca de itens de um pedido entregue do cliente autenticado */
         post: operations["solicitarTroca"];
         delete?: never;
         options?: never;
@@ -1372,6 +1373,7 @@ export interface components {
             /** Format: int64 */
             id: number;
             itens: components["schemas"]["ItemDoPedidoDto"][];
+            podeSolicitarTroca: boolean;
             /** Format: date-time */
             realizadoEm: string;
             /** @enum {string} */
@@ -2972,13 +2974,40 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OK */
-            200: {
+            /** @description Troca EM TROCA criada; Location aponta para o pedido */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["TrocaDto"];
+                    "application/json": components["schemas"]["TrocaDto"];
+                };
+            };
+            /** @description Sem sessão válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Pedido inexistente ou de outro cliente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Pedido não entregue, prazo vencido ou itens inválidos */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
         };

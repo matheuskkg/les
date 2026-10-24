@@ -9,13 +9,13 @@ type PedidoDetalhe = components['schemas']['PedidoDetalheDto'];
 
 /**
  * Formulário em que o cliente escolhe os itens e quantas unidades de cada um quer trocar (RF-VEN-011, DEC-12). A
- * quantidade vai até a disponível do item; o server confere prazo e quantidades de novo.
+ * quantidade vai até a disponível do item; o server confere prazo e quantidades de novo. Depois de enviar, quem
+ * usa o formulário avisa o cliente e recarrega o pedido.
  */
 export function SolicitarTroca({ pedido, aoSolicitar }: { pedido: PedidoDetalhe; aoSolicitar: () => void }) {
   const [quantidades, definirQuantidades] = useState<Record<number, string>>({});
   const [enviando, definirEnviando] = useState(false);
   const [problema, definirProblema] = useState<ProblemaDetalhe | null>(null);
-  const [mensagem, definirMensagem] = useState<string | null>(null);
 
   async function enviar(evento: Event) {
     evento.preventDefault();
@@ -26,7 +26,6 @@ export function SolicitarTroca({ pedido, aoSolicitar }: { pedido: PedidoDetalhe;
     }
     definirEnviando(true);
     definirProblema(null);
-    definirMensagem(null);
     try {
       const { error, response } = await cliente.POST('/api/me/pedidos/{id}/trocas', {
         params: { path: { id: pedido.id } },
@@ -34,7 +33,6 @@ export function SolicitarTroca({ pedido, aoSolicitar }: { pedido: PedidoDetalhe;
       });
       if (response.ok) {
         definirQuantidades({});
-        definirMensagem('Troca solicitada. Avisaremos quando ela for autorizada.');
         aoSolicitar();
       } else {
         definirProblema(interpretarProblema(error, response.status));
@@ -76,11 +74,6 @@ export function SolicitarTroca({ pedido, aoSolicitar }: { pedido: PedidoDetalhe;
         <Violacoes violacoes={problema.violacoes} />
       ) : (
         <Erro problema={problema} />
-      )}
-      {mensagem && (
-        <p class="aviso" role="status">
-          {mensagem}
-        </p>
       )}
       <div class="acoes">
         <button class="botao" type="submit" disabled={enviando}>

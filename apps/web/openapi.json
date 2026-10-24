@@ -2043,17 +2043,48 @@
           "required" : true
         },
         "responses" : {
-          "200" : {
+          "201" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/TrocaDto"
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Troca EM TROCA criada; Location aponta para o pedido"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Sem sessão válida"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Pedido inexistente ou de outro cliente"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Pedido não entregue, prazo vencido ou itens inválidos"
           }
         },
+        "summary" : "Solicita a troca de itens de um pedido entregue do cliente autenticado",
         "tags" : [ "meus-pedidos-controller" ]
       }
     },
@@ -3749,6 +3780,9 @@
               "$ref" : "#/components/schemas/ItemDoPedidoDto"
             }
           },
+          "podeSolicitarTroca" : {
+            "type" : "boolean"
+          },
           "realizadoEm" : {
             "type" : "string",
             "format" : "date-time"
@@ -3781,7 +3815,7 @@
             }
           }
         },
-        "required" : [ "cartoes", "cliente", "cupons", "descontoPromocional", "enderecoCobranca", "enderecoEntrega", "frete", "id", "itens", "realizadoEm", "status", "subtotal", "total", "trocas" ]
+        "required" : [ "cartoes", "cliente", "cupons", "descontoPromocional", "enderecoCobranca", "enderecoEntrega", "frete", "id", "itens", "podeSolicitarTroca", "realizadoEm", "status", "subtotal", "total", "trocas" ]
       },
       "PedidoListadoDto" : {
         "type" : "object",

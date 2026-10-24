@@ -30,6 +30,7 @@ test('cliente pede a troca do pedido entregue e o admin vê a troca no pedido (R
   await page.getByRole('button', { name: 'Solicitar troca' }).click();
 
   // O pedido continua ENTREGUE; a troca aparece no indicador e o formulário some sem unidades disponíveis.
+  await expect(page.getByRole('status')).toHaveText('Troca solicitada. Avisaremos quando ela for analisada.');
   await expect(page.getByTestId('indicador-de-troca')).toHaveText('EM TROCA (total)');
   await expect(page.getByTestId('status-do-pedido')).toHaveText('ENTREGUE');
   await expect(page.getByTestId('trocas-do-pedido')).toContainText('1 × Dom Casmurro');

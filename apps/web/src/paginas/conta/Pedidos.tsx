@@ -7,7 +7,6 @@ import { Erro } from '../../componentes/Erro';
 import { SolicitarTroca } from '../../componentes/SolicitarTroca';
 import { TrocasDoPedido } from '../../componentes/TrocasDoPedido';
 import { formatarDataHora, formatarDinheiro, textoDoStatus } from '../../formatacao';
-import { hojeNaLoja, podeSolicitarTroca } from '../../solicitacaoDeTroca';
 
 type PaginaDePedidos = components['schemas']['PaginaPedidoListadoDto'];
 type PedidoDetalhe = components['schemas']['PedidoDetalheDto'];
@@ -144,6 +143,8 @@ export function MeuPedido({ id }: { id: string }) {
   const voltar = query.de === undefined ? '/minha-conta/pedidos' : urlDaPagina(Number.parseInt(query.de, 10) || 1);
   const [detalhe, definirDetalhe] = useState<Detalhe | null>(null);
   const [recarga, definirRecarga] = useState(0);
+  // Aviso da troca recém-pedida, preso ao pedido: sobrevive ao recarregamento, que pode esconder o formulário.
+  const [trocaSolicitadaEm, definirTrocaSolicitadaEm] = useState<string | null>(null);
 
   useEffect(() => {
     const numero = Number(id);
@@ -204,9 +205,21 @@ export function MeuPedido({ id }: { id: string }) {
               )}
             </dl>
           </div>
+          {trocaSolicitadaEm === id && (
+            <p class="aviso" role="status">
+              Troca solicitada. Avisaremos quando ela for analisada.
+            </p>
+          )}
           <TrocasDoPedido pedido={pedido} />
-          {podeSolicitarTroca(pedido, hojeNaLoja(new Date())) && (
-            <SolicitarTroca key={pedido.id} pedido={pedido} aoSolicitar={() => definirRecarga((atual) => atual + 1)} />
+          {pedido.podeSolicitarTroca && (
+            <SolicitarTroca
+              key={pedido.id}
+              pedido={pedido}
+              aoSolicitar={() => {
+                definirTrocaSolicitadaEm(id);
+                definirRecarga((atual) => atual + 1);
+              }}
+            />
           )}
           <CopiasDoPedido pedido={pedido} />
         </>

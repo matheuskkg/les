@@ -17,9 +17,11 @@ import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
 import br.fatec.les.livraria.vendas.aplicacao.porta.TrocaRepositorio;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
 import br.fatec.les.livraria.vendas.dominio.regra.DentroDoPrazoDeTroca;
-import br.fatec.les.livraria.vendas.dominio.regra.ItensDaTrocaInformados;
+import br.fatec.les.livraria.vendas.dominio.regra.ItensDaTrocaDoPedido;
+import br.fatec.les.livraria.vendas.dominio.regra.ItensDaTrocaSemRepeticao;
 import br.fatec.les.livraria.vendas.dominio.regra.PedidoEntregueParaTroca;
 import br.fatec.les.livraria.vendas.dominio.regra.QuantidadeDisponivelParaTroca;
+import br.fatec.les.livraria.vendas.dominio.regra.TrocaComItens;
 import br.fatec.les.livraria.vendas.dominio.troca.ItemTroca;
 import br.fatec.les.livraria.vendas.dominio.troca.SolicitacaoDeTroca;
 import br.fatec.les.livraria.vendas.dominio.troca.SolicitacaoDeTroca.ItemSolicitado;
@@ -30,7 +32,8 @@ import lombok.RequiredArgsConstructor;
 /**
  * O cliente pede a troca de itens de um pedido entregue, com a quantidade de cada um (RF-VEN-011, RN-VEN-011,
  * RN-VEN-013, DEC-12). A troca nasce {@code EM TROCA}, o pedido continua {@code ENTREGUE} e os administradores recebem
- * {@code TROCA_SOLICITADA} (DEC-13).
+ * {@code TROCA_SOLICITADA} (DEC-13), com
+ * referência ao pedido, cujo detalhe lista as trocas.
  *
  * <p>O pedido é travado antes de ler as trocas dele, para que duas solicitações ao mesmo tempo não usem a mesma
  * quantidade disponível. Pedido de outro cliente responde 404, antes de qualquer regra.</p>
@@ -47,7 +50,9 @@ public class SolicitarTroca {
     private final Relogio relogio;
     private final PedidoEntregueParaTroca pedidoEntregue; // RN-VEN-013
     private final DentroDoPrazoDeTroca dentroDoPrazo; // RN-VEN-013
-    private final ItensDaTrocaInformados itensInformados; // RF-VEN-011
+    private final TrocaComItens comItens; // RF-VEN-011
+    private final ItensDaTrocaDoPedido itensDoPedido; // RF-VEN-011
+    private final ItensDaTrocaSemRepeticao semRepeticao; // RF-VEN-011
     private final QuantidadeDisponivelParaTroca quantidadeDisponivel; // RF-VEN-011
 
     /**
@@ -68,13 +73,13 @@ public class SolicitarTroca {
                 new TrocasDoPedido(pedido, trocas.listarDoPedido(pedidoId)), itens == null ? List.of() : itens,
                 propriedades.prazo(), relogio.agora());
         Violacoes.verificar(solicitacao, pedidoEntregue, dentroDoPrazo);
-        Violacoes.verificar(solicitacao, itensInformados, quantidadeDisponivel);
+        Violacoes.verificar(solicitacao, comItens, itensDoPedido, semRepeticao, quantidadeDisponivel);
 
         Troca troca = trocas.salvar(Troca.solicitar(pedidoId, solicitacao.itens().stream()
                 .map(item -> new ItemTroca(null, item.itemPedidoId(), item.quantidade(), null))
                 .toList(), solicitacao.agora()));
         notificarAdministradores.executar(NotificarAdministradores.Comando.sobre(TipoNotificacao.TROCA_SOLICITADA,
-                "O pedido nº %d tem uma nova troca para autorizar.".formatted(pedidoId), "troca", troca.getId()));
+                "O pedido nº %d tem uma nova troca para autorizar.".formatted(pedidoId), "pedido", pedidoId));
         return troca;
     }
 }
