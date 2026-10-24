@@ -1,5 +1,4 @@
 import { useState } from 'preact/hooks';
-import { useLocation } from 'preact-iso';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../../api/cliente';
 import { Erro } from '../../componentes/Erro';
 import { useSessao } from '../../contextoDeSessao';
@@ -9,8 +8,7 @@ import { useSessao } from '../../contextoDeSessao';
  * própria página, encerra a sessão e lembra que entrar em até 7 dias reativa a conta.
  */
 export function InativarConta() {
-  const { definirUsuario } = useSessao();
-  const { route } = useLocation();
+  const { voltarAVitrineSemSessao } = useSessao();
   const [confirmando, definirConfirmando] = useState(false);
   const [problema, definirProblema] = useState<ProblemaDetalhe | null>(null);
   const [enviando, definirEnviando] = useState(false);
@@ -24,8 +22,7 @@ export function InativarConta() {
         definirProblema(interpretarProblema(error, response.status));
         return;
       }
-      definirUsuario(null);
-      route('/', true);
+      await voltarAVitrineSemSessao();
     } catch {
       definirProblema({ status: 0, detail: 'Não foi possível conectar ao servidor. Tente novamente.' });
     } finally {
