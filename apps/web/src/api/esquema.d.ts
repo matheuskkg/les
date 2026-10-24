@@ -1145,12 +1145,6 @@ export interface components {
              */
             subtotal: string;
         };
-        ItemDto: {
-            /** Format: int64 */
-            itemPedidoId?: number;
-            /** Format: int32 */
-            quantidade?: number;
-        };
         ItemRemovidoDoCarrinhoDto: {
             autores: string[];
             /** Format: int64 */
@@ -1160,6 +1154,12 @@ export interface components {
             /** Format: date-time */
             removidoEm: string;
             titulo?: string;
+        };
+        ItemSolicitadoDto: {
+            /** Format: int64 */
+            itemPedidoId?: number;
+            /** Format: int32 */
+            quantidade?: number;
         };
         LivroDetalheDto: {
             altura: number;
@@ -1429,7 +1429,7 @@ export interface components {
             usuarioId: number;
         };
         SolicitacaoDeTrocaDto: {
-            itens?: components["schemas"]["ItemDto"][];
+            itens?: components["schemas"]["ItemSolicitadoDto"][];
         };
         SseEmitter: {
             /** Format: int64 */

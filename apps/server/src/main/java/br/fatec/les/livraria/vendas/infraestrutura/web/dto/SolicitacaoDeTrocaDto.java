@@ -11,7 +11,7 @@ import br.fatec.les.livraria.vendas.dominio.troca.SolicitacaoDeTroca.ItemSolicit
  * Pedido de troca do cliente (RF-VEN-011, DEC-12): os itens do pedido e quantas unidades de cada um. Item ou
  * quantidade ausentes chegam às regras, que respondem 422.
  */
-public record SolicitacaoDeTrocaDto(@Nullable List<ItemDto> itens) {
+public record SolicitacaoDeTrocaDto(@Nullable List<ItemSolicitadoDto> itens) {
 
     public List<ItemSolicitado> paraItens() {
         return itens == null ? List.of() : itens.stream()
@@ -25,6 +25,6 @@ public record SolicitacaoDeTrocaDto(@Nullable List<ItemDto> itens) {
      * @param itemPedidoId item do pedido
      * @param quantidade   unidades a trocar
      */
-    public record ItemDto(@Nullable Long itemPedidoId, @Nullable Integer quantidade) {
+    public record ItemSolicitadoDto(@Nullable Long itemPedidoId, @Nullable Integer quantidade) {
     }
 }

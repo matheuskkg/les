@@ -4,6 +4,7 @@ import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/clien
 import type { components } from '../api/esquema';
 import { CopiasDoPedido } from '../componentes/CopiasDoPedido';
 import { Erro } from '../componentes/Erro';
+import { TrocasDoPedido } from '../componentes/TrocasDoPedido';
 import { formatarDataHora, textoDoStatus } from '../formatacao';
 
 type PedidoDetalhe = components['schemas']['PedidoDetalheDto'];
@@ -146,6 +147,7 @@ export default function AdminPedido() {
             {problemaDaAcao?.id === id && <Erro problema={problemaDaAcao.problema} />}
           </div>
 
+          <TrocasDoPedido pedido={pedido} />
           <CopiasDoPedido pedido={pedido} linkDoCliente={`/admin/clientes/${pedido.cliente.id}`} />
         </>
       )}

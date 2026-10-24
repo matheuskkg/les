@@ -4,7 +4,10 @@ import { cliente, interpretarProblema, type ProblemaDetalhe } from '../../api/cl
 import type { components } from '../../api/esquema';
 import { CopiasDoPedido } from '../../componentes/CopiasDoPedido';
 import { Erro } from '../../componentes/Erro';
+import { SolicitarTroca } from '../../componentes/SolicitarTroca';
+import { TrocasDoPedido } from '../../componentes/TrocasDoPedido';
 import { formatarDataHora, formatarDinheiro, textoDoStatus } from '../../formatacao';
+import { hojeNaLoja, podeSolicitarTroca } from '../../solicitacaoDeTroca';
 
 type PaginaDePedidos = components['schemas']['PaginaPedidoListadoDto'];
 type PedidoDetalhe = components['schemas']['PedidoDetalheDto'];
@@ -132,11 +135,15 @@ interface Detalhe {
   problema: ProblemaDetalhe | null;
 }
 
-/** Detalhe de um pedido do cliente logado, com as cópias gravadas na finalização (RF-CLI-005, DEC-12). */
+/**
+ * Detalhe de um pedido do cliente logado, com as cópias gravadas na finalização e as trocas (RF-CLI-005, DEC-12). Do
+ * pedido entregue, dentro do prazo, o cliente pede a troca de itens (RF-VEN-011).
+ */
 export function MeuPedido({ id }: { id: string }) {
   const { query } = useLocation();
   const voltar = query.de === undefined ? '/minha-conta/pedidos' : urlDaPagina(Number.parseInt(query.de, 10) || 1);
   const [detalhe, definirDetalhe] = useState<Detalhe | null>(null);
+  const [recarga, definirRecarga] = useState(0);
 
   useEffect(() => {
     const numero = Number(id);
@@ -166,7 +173,7 @@ export function MeuPedido({ id }: { id: string }) {
         }
       });
     return () => controle.abort();
-  }, [id]);
+  }, [id, recarga]);
 
   const visivel = detalhe?.id === id ? detalhe : null;
   const pedido = visivel?.pedido ?? null;
@@ -197,6 +204,10 @@ export function MeuPedido({ id }: { id: string }) {
               )}
             </dl>
           </div>
+          <TrocasDoPedido pedido={pedido} />
+          {podeSolicitarTroca(pedido, hojeNaLoja(new Date())) && (
+            <SolicitarTroca key={pedido.id} pedido={pedido} aoSolicitar={() => definirRecarga((atual) => atual + 1)} />
+          )}
           <CopiasDoPedido pedido={pedido} />
         </>
       )}

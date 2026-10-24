@@ -1,7 +1,7 @@
 import type { components } from '../api/esquema';
 import { formatarCep } from '../cadastroDeCliente';
 import { formatarCpf } from '../filtrosDeClientes';
-import { formatarDinheiro } from '../formatacao';
+import { formatarDinheiro, textoDoStatus } from '../formatacao';
 
 type PedidoDetalhe = components['schemas']['PedidoDetalheDto'];
 type EnderecoNoPedido = components['schemas']['EnderecoNoPedido'];
@@ -56,6 +56,7 @@ export function CopiasDoPedido({ pedido, linkDoCliente }: { pedido: PedidoDetalh
                 <th scope="col">Preço unitário</th>
                 <th scope="col">Quantidade</th>
                 <th scope="col">Subtotal</th>
+                <th scope="col">Troca</th>
               </tr>
             </thead>
             <tbody>
@@ -72,6 +73,7 @@ export function CopiasDoPedido({ pedido, linkDoCliente }: { pedido: PedidoDetalh
                   <td>{formatarDinheiro(item.precoUnitario)}</td>
                   <td>{item.quantidade}</td>
                   <td>{formatarDinheiro(item.subtotal)}</td>
+                  <td>{item.statusDaTroca ? textoDoStatus(item.statusDaTroca) : '—'}</td>
                 </tr>
               ))}
             </tbody>

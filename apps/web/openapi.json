@@ -3206,19 +3206,6 @@
         },
         "required" : [ "disponivelParaTroca", "id", "livro", "precoUnitario", "quantidade", "subtotal" ]
       },
-      "ItemDto" : {
-        "type" : "object",
-        "properties" : {
-          "itemPedidoId" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "quantidade" : {
-            "type" : "integer",
-            "format" : "int32"
-          }
-        }
-      },
       "ItemRemovidoDoCarrinhoDto" : {
         "type" : "object",
         "properties" : {
@@ -3245,6 +3232,19 @@
           }
         },
         "required" : [ "autores", "livroId", "quantidade", "removidoEm" ]
+      },
+      "ItemSolicitadoDto" : {
+        "type" : "object",
+        "properties" : {
+          "itemPedidoId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "quantidade" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
       },
       "LivroDetalheDto" : {
         "type" : "object",
@@ -3866,7 +3866,7 @@
           "itens" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/ItemDto"
+              "$ref" : "#/components/schemas/ItemSolicitadoDto"
             }
           }
         }
