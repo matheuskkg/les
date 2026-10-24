@@ -81,7 +81,13 @@ public class Troca {
         motivoRecusa = motivo.strip();
     }
 
-    private void exigirEmTroca(String acao) {
+    /**
+     * Confere, antes das regras da ação, que a troca ainda está {@code EM TROCA} (DEC-12).
+     *
+     * @param acao particípio da ação, para a mensagem ("autorizada", "recusada")
+     * @throws ExcecaoDeConflito se a troca não estiver {@code EM TROCA}
+     */
+    public void exigirEmTroca(String acao) {
         if (status != StatusTroca.EM_TROCA) {
             throw new ExcecaoDeConflito("Só uma troca EM TROCA pode ser %s.".formatted(acao));
         }

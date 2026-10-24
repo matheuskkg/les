@@ -147,8 +147,12 @@ export function MeuPedido({ id }: { id: string }) {
   // Aviso da troca recém-pedida, preso ao pedido: sobrevive ao recarregamento, que pode esconder o formulário.
   const [trocaSolicitadaEm, definirTrocaSolicitadaEm] = useState<string | null>(null);
 
-  // Autorização e recusa da troca pelo admin chegam por notificação e atualizam o detalhe (DEC-13).
-  useRecargaPorNotificacao('troca', () => definirRecarga((atual) => atual + 1));
+  // Autorização e recusa da troca deste pedido chegam por notificação e atualizam o detalhe (DEC-13).
+  useRecargaPorNotificacao('troca', (notificacao) => {
+    if (notificacao.recurso === 'pedido' && String(notificacao.recursoId) === id) {
+      definirRecarga((atual) => atual + 1);
+    }
+  });
 
   useEffect(() => {
     const numero = Number(id);

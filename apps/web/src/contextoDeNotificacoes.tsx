@@ -114,7 +114,10 @@ export function useNotificacoes(): ContextoDeNotificacoes {
  * Chama `aoChegar` quando chega uma notificação que afeta a tela informada, para que
  * ela recarregue os próprios dados (DEC-13).
  */
-export function useRecargaPorNotificacao(tela: TelaAfetada, aoChegar: () => void): void {
+export function useRecargaPorNotificacao(
+  tela: TelaAfetada,
+  aoChegar: (notificacao: Notificacao) => void,
+): void {
   const { ouvir } = useNotificacoes();
   const atual = useRef(aoChegar);
   atual.current = aoChegar;
@@ -123,7 +126,7 @@ export function useRecargaPorNotificacao(tela: TelaAfetada, aoChegar: () => void
     () =>
       ouvir((notificacao) => {
         if (telaAfetada(notificacao.tipo) === tela) {
-          atual.current();
+          atual.current(notificacao);
         }
       }),
     [ouvir, tela],

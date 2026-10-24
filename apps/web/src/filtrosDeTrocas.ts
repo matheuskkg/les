@@ -1,5 +1,5 @@
 import type { paths } from './api/esquema';
-import { textoDoStatus } from './formatacao.ts';
+import { SITUACOES_DA_TROCA } from './filtrosDePedidos.ts';
 
 /** Parâmetros de `GET /api/admin/trocas`, como definidos no contrato (RF-VEN-013, DEC-07). */
 export type ConsultaDeTrocas = NonNullable<paths['/api/admin/trocas']['get']['parameters']['query']>;
@@ -12,10 +12,7 @@ export const FILTRO_PADRAO: FiltroDeStatus = 'EM_TROCA';
 export const TAMANHO_DA_PAGINA = 20;
 
 export const OPCOES_DE_STATUS: readonly { valor: FiltroDeStatus; rotulo: string }[] = [
-  ...(['EM_TROCA', 'TROCA_AUTORIZADA', 'TROCA_RECUSADA', 'TROCADO'] as const).map((valor) => ({
-    valor,
-    rotulo: textoDoStatus(valor),
-  })),
+  ...SITUACOES_DA_TROCA,
   { valor: 'TODAS', rotulo: 'Todas' },
 ];
 

@@ -4,6 +4,7 @@ import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/clien
 import type { components } from '../api/esquema';
 import { CampoDeFormulario } from '../componentes/CampoDeFormulario';
 import { Erro } from '../componentes/Erro';
+import { OpcoesMarcaveis } from '../componentes/OpcoesMarcaveis';
 import { formatarCpf } from '../filtrosDeClientes';
 import {
   ORDENS,
@@ -30,41 +31,11 @@ interface Resultado {
 const NUMERO_INVALIDO = 'O número do pedido deve ter só dígitos.';
 const CODIGO_INVALIDO = 'O código do cliente deve ter só dígitos.';
 
-interface PropsDasOpcoes<T extends string> {
-  legenda: string;
-  name: string;
-  opcoes: readonly { valor: T; rotulo: string }[];
-  marcadas: T[];
-  aoMudar: (marcadas: T[]) => void;
-}
-
-/** Grupo de caixas combinadas com OU; as marcadas ficam na ordem da lista. */
-function OpcoesMarcaveis<T extends string>({ legenda, name, opcoes, marcadas, aoMudar }: PropsDasOpcoes<T>) {
-  return (
-    <fieldset class="grupo-de-categorias">
-      <legend>{legenda}</legend>
-      <div class="categorias">
-        {opcoes.map((opcao) => (
-          <label class="categoria-opcao" key={opcao.valor}>
-            <input
-              type="checkbox"
-              name={name}
-              value={opcao.valor}
-              checked={marcadas.includes(opcao.valor)}
-              onChange={() =>
-                aoMudar(
-                  marcadas.includes(opcao.valor)
-                    ? marcadas.filter((item) => item !== opcao.valor)
-                    : opcoes.map((item) => item.valor)
-                      .filter((valor) => valor === opcao.valor || marcadas.includes(valor)),
-                )}
-            />
-            {opcao.rotulo}
-          </label>
-        ))}
-      </div>
-    </fieldset>
-  );
+/** Marca ou desmarca o valor, mantendo a ordem da lista de opções. */
+function alternarNaOrdem<T extends string>(opcoes: readonly { valor: T }[], marcados: T[], valor: T): T[] {
+  return marcados.includes(valor)
+    ? marcados.filter((item) => item !== valor)
+    : opcoes.map((item) => item.valor).filter((item) => item === valor || marcados.includes(item));
 }
 
 /**
@@ -154,10 +125,15 @@ export default function AdminPedidos() {
         <CampoDeFormulario id="filtro-realizado-ate" rotulo="Realizado até" tipo="date" name="realizadoEmAte"
           valor={filtros.realizadoEmAte} aoMudar={(valor) => mudarCampo('realizadoEmAte', valor)} />
 
-        <OpcoesMarcaveis legenda="Status" name="status" opcoes={STATUS} marcadas={filtros.status}
-          aoMudar={(status) => definirFiltros((atual) => ({ ...atual, status }))} />
-        <OpcoesMarcaveis legenda="Situação da troca" name="situacao" opcoes={SITUACOES_DA_TROCA}
-          marcadas={filtros.situacao} aoMudar={(situacao) => definirFiltros((atual) => ({ ...atual, situacao }))} />
+        <OpcoesMarcaveis legenda="Status" nome="status" opcoes={STATUS} marcados={filtros.status}
+          alternar={(valor) =>
+            definirFiltros((atual) => ({ ...atual, status: alternarNaOrdem(STATUS, atual.status, valor) }))} />
+        <OpcoesMarcaveis legenda="Situação da troca" nome="situacao" opcoes={SITUACOES_DA_TROCA}
+          marcados={filtros.situacao}
+          alternar={(valor) => definirFiltros((atual) => ({
+            ...atual,
+            situacao: alternarNaOrdem(SITUACOES_DA_TROCA, atual.situacao, valor),
+          }))} />
 
         <div class="acoes">
           <button class="botao" type="submit" disabled={!numeroValido(filtros.numero) || !numeroValido(filtros.clienteId)}>

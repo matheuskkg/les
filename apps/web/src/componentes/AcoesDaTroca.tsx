@@ -4,7 +4,6 @@ import type { components } from '../api/esquema';
 import { Erro } from './Erro';
 import { Violacoes } from './Violacoes';
 
-type PedidoDetalhe = components['schemas']['PedidoDetalheDto'];
 type Troca = components['schemas']['TrocaDto'];
 
 /** Limite do motivo, o mesmo da regra do server (RF-VEN-012). */
@@ -12,8 +11,11 @@ const TAMANHO_MAXIMO_DO_MOTIVO = 300;
 
 interface Props {
   troca: Troca;
-  /** Pedido devolvido pela ação, ou nulo quando é preciso recarregá-lo (409 ou resposta sem corpo). */
-  aoAlterar: (pedido: PedidoDetalhe | null) => void;
+  /**
+   * Chamado depois da ação para a tela recarregar o pedido, com o erro quando a troca já tinha mudado (409): a troca
+   * deixa de estar `EM TROCA`, estas ações somem e o aviso fica com a tela.
+   */
+  aoAlterar: (conflito: ProblemaDetalhe | null) => void;
 }
 
 /**
@@ -35,18 +37,20 @@ export function AcoesDaTroca({ troca, aoAlterar }: Props) {
     definirProblema(null);
     try {
       const caminho = { params: { path: { id: troca.id } } };
-      const { data, error, response } =
+      const { error, response } =
         acao === 'autorizar'
           ? await cliente.POST('/api/admin/trocas/{id}/autorizar', caminho)
           : await cliente.POST('/api/admin/trocas/{id}/recusar', { ...caminho, body: { motivo } });
       if (response.ok) {
-        aoAlterar(data ?? null);
+        aoAlterar(null);
         return;
       }
-      definirProblema(interpretarProblema(error, response.status));
+      const problemaDaResposta = interpretarProblema(error, response.status);
       if (response.status === 409) {
-        aoAlterar(null);
+        aoAlterar(problemaDaResposta);
+        return;
       }
+      definirProblema(problemaDaResposta);
     } catch {
       definirProblema({ status: 0, detail: 'Não foi possível alterar a troca. Tente novamente.' });
     } finally {

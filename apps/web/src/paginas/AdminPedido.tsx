@@ -5,6 +5,7 @@ import type { components } from '../api/esquema';
 import { CopiasDoPedido } from '../componentes/CopiasDoPedido';
 import { AcoesDaTroca } from '../componentes/AcoesDaTroca';
 import { Erro } from '../componentes/Erro';
+import { useRecargaPorNotificacao } from '../contextoDeNotificacoes';
 import { TrocasDoPedido } from '../componentes/TrocasDoPedido';
 import { formatarDataHora, textoDoStatus } from '../formatacao';
 
@@ -37,8 +38,16 @@ export default function AdminPedido() {
   const [enviandoEm, definirEnviandoEm] = useState<string | null>(null);
   const [problemaDaAcao, definirProblemaDaAcao] = useState<{ id: string; problema: ProblemaDetalhe } | null>(null);
   const [recarga, definirRecarga] = useState(0);
+  const [problemaDaTroca, definirProblemaDaTroca] = useState<{ id: string; problema: ProblemaDetalhe } | null>(null);
   const idDaTela = useRef(id);
   idDaTela.current = id;
+
+  // Troca nova deste pedido chega por notificação e aparece com as ações (DEC-13).
+  useRecargaPorNotificacao('troca', (notificacao) => {
+    if (notificacao.recurso === 'pedido' && String(notificacao.recursoId) === idDaTela.current) {
+      definirRecarga((atual) => atual + 1);
+    }
+  });
 
   useEffect(() => {
     const numero = Number(id);
@@ -111,16 +120,16 @@ export default function AdminPedido() {
     }
   }
 
-  /** Resposta da ação numa troca; ignorada se o admin já foi para outro pedido. Sem pedido, recarrega a tela. */
-  function aoAlterarTroca(daTela: string, alterado: PedidoDetalhe | null) {
+  /**
+   * Depois de autorizar ou recusar, recarrega o pedido em vez de usar a resposta: com duas trocas alteradas ao mesmo
+   * tempo, a recarga mais recente é a que vê as duas. Ignorada se o admin já foi para outro pedido.
+   */
+  function aoAlterarTroca(daTela: string, conflito: ProblemaDetalhe | null) {
     if (idDaTela.current !== daTela) {
       return;
     }
-    if (alterado) {
-      definirResultado({ id: daTela, pedido: alterado, problema: null });
-    } else {
-      definirRecarga((atual) => atual + 1);
-    }
+    definirProblemaDaTroca(conflito === null ? null : { id: daTela, problema: conflito });
+    definirRecarga((atual) => atual + 1);
   }
 
   return (
@@ -160,6 +169,7 @@ export default function AdminPedido() {
             {problemaDaAcao?.id === id && <Erro problema={problemaDaAcao.problema} />}
           </div>
 
+          {problemaDaTroca?.id === id && <Erro problema={problemaDaTroca.problema} />}
           <TrocasDoPedido
             pedido={pedido}
             acoes={(troca) =>

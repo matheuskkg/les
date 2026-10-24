@@ -102,6 +102,7 @@ class TrocaAdminIntegracaoTest {
 
         acao(troca, "autorizar", null).andExpect(status().isConflict());
         acao(troca, "recusar", "{\"motivo\":\"Tarde demais\"}").andExpect(status().isConflict());
+        acao(troca, "recusar", "{}").andExpect(status().isConflict());
     }
 
     @Test

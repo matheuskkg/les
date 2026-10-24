@@ -25,7 +25,8 @@ import lombok.RequiredArgsConstructor;
 /**
  * O administrador recusa uma troca com motivo: {@code EM TROCA} → {@code TROCA RECUSADA} (DEC-12). As unidades
  * recusadas não voltam a ficar disponíveis para troca, e o cliente recebe {@code TROCA_RECUSADA} com o motivo
- * (DEC-13). A troca é travada até o fim da transação; autorizar ou recusar de novo responde 409.
+ * (DEC-13). A troca é travada até o fim da transação; autorizar ou recusar de novo responde 409, antes das regras
+ * do motivo.
  */
 @Component
 @RequiredArgsConstructor
@@ -52,7 +53,8 @@ public class RecusarTroca {
         Objects.requireNonNull(id, "id");
         Troca troca = trocas.buscarParaAlterar(id)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Troca não encontrada."));
-        Violacoes.verificar(new RecusaDeTroca(troca, motivo), motivoInformado, motivoNoLimite);
+        troca.exigirEmTroca("recusada");
+        Violacoes.verificar(new RecusaDeTroca(motivo), motivoInformado, motivoNoLimite);
         troca.recusar(Objects.requireNonNull(motivo));
         Troca recusada = trocas.salvar(troca);
         Pedido pedido = pedidos.buscar(troca.getPedidoId()).orElseThrow();

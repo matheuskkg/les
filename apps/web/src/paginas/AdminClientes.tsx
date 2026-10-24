@@ -4,6 +4,7 @@ import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/clien
 import type { components } from '../api/esquema';
 import { CampoDeFormulario } from '../componentes/CampoDeFormulario';
 import { Erro } from '../componentes/Erro';
+import { OpcoesMarcaveis } from '../componentes/OpcoesMarcaveis';
 import {
   GENEROS,
   ORDENS,
@@ -26,40 +27,6 @@ interface Resultado {
   busca: string;
   pagina: PaginaDeClientes | null;
   problema: ProblemaDetalhe | null;
-}
-
-function Opcoes<T extends string>({
-  legenda,
-  nome,
-  opcoes,
-  marcados,
-  alternar,
-}: {
-  legenda: string;
-  nome: string;
-  opcoes: readonly { valor: T; rotulo: string }[];
-  marcados: T[];
-  alternar: (valor: T) => void;
-}) {
-  return (
-    <fieldset class="grupo-de-categorias">
-      <legend>{legenda}</legend>
-      <div class="categorias">
-        {opcoes.map((opcao) => (
-          <label class="categoria-opcao" key={opcao.valor}>
-            <input
-              type="checkbox"
-              name={nome}
-              value={opcao.valor}
-              checked={marcados.includes(opcao.valor)}
-              onChange={() => alternar(opcao.valor)}
-            />
-            {opcao.rotulo}
-          </label>
-        ))}
-      </div>
-    </fieldset>
-  );
 }
 
 function alternado<T>(lista: T[], valor: T): T[] {
@@ -166,9 +133,9 @@ export default function AdminClientes() {
           </select>
         </div>
 
-        <Opcoes legenda="Gênero" nome="genero" opcoes={GENEROS} marcados={filtros.genero}
+        <OpcoesMarcaveis legenda="Gênero" nome="genero" opcoes={GENEROS} marcados={filtros.genero}
           alternar={(valor) => definirFiltros((atual) => ({ ...atual, genero: alternado(atual.genero, valor) }))} />
-        <Opcoes legenda="Situação" nome="situacao" opcoes={SITUACOES} marcados={filtros.situacao}
+        <OpcoesMarcaveis legenda="Situação" nome="situacao" opcoes={SITUACOES} marcados={filtros.situacao}
           alternar={(valor) =>
             definirFiltros((atual) => ({ ...atual, situacao: alternado(atual.situacao, valor) }))} />
 
