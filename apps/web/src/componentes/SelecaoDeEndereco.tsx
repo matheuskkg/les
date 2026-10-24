@@ -23,8 +23,11 @@ interface Props {
  * de incorporá-lo ao cadastro.
  */
 export function SelecaoDeEndereco({ legenda, prefixo, enderecos, escolha, aoEscolher, aoUsarNovo }: Props) {
-  const [outro, definirOutro] = useState(false);
-  const [formulario, definirFormulario] = useState<EnderecoDoFormulario>(enderecoVazio);
+  // Montado de novo (a cobrança aparece e some), retoma o endereço novo que já estiver em uso.
+  const [outro, definirOutro] = useState(() => escolha !== null && 'novo' in escolha);
+  const [formulario, definirFormulario] = useState<EnderecoDoFormulario>(() =>
+    escolha !== null && 'novo' in escolha ? escolha.novo : enderecoVazio(),
+  );
   const [salvar, definirSalvar] = useState(false);
   const [enviando, definirEnviando] = useState(false);
 

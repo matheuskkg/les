@@ -74,10 +74,8 @@ export default function Checkout() {
   }, []);
 
   const checkoutId = checkout?.id;
-  useEffect(() => {
-    if (checkoutId === undefined || enderecos !== null) {
-      return;
-    }
+  const carregarEscolhaInicial = useCallback(() => {
+    definirProblemaDoEndereco(null);
     void carregarEnderecos()
       .then((lidos) => {
         if (lidos) {
@@ -89,12 +87,19 @@ export default function Checkout() {
       .catch(() =>
         definirProblemaDoEndereco({ status: 0, detail: 'Não foi possível carregar os endereços. Tente novamente.' }),
       );
-  }, [checkoutId, enderecos, carregarEnderecos]);
+  }, [carregarEnderecos]);
+
+  useEffect(() => {
+    if (checkoutId !== undefined) {
+      carregarEscolhaInicial();
+    }
+  }, [checkoutId, carregarEscolhaInicial]);
 
   // RF-VEN-004: o frete depende só do endereço de entrega e dos itens do checkout.
   useEffect(() => {
     definirFrete(null);
     if (checkoutId === undefined || entrega === null) {
+      definirProblemaDoEndereco(null);
       return;
     }
     let ativo = true;
@@ -138,7 +143,8 @@ export default function Checkout() {
         definirProblemaDoEndereco(interpretarProblema(error, response.status));
         return false;
       }
-      await carregarEnderecos();
+      // Já gravado: entra na lista sem nova leitura, para que uma falha dela não leve a gravar de novo.
+      definirEnderecos((atuais) => [...(atuais ?? []), data]);
       definirEscolha({ enderecoId: data.id });
       return true;
     } catch {
@@ -215,7 +221,13 @@ export default function Checkout() {
                 <input
                   type="checkbox"
                   checked={cobrancaIgual}
-                  onChange={() => definirCobrancaIgual(!cobrancaIgual)}
+                  onChange={() => {
+                    // DEC-10: a cobrança separada começa igual à entrega atual.
+                    if (cobrancaIgual) {
+                      definirCobranca(entrega);
+                    }
+                    definirCobrancaIgual(!cobrancaIgual);
+                  }}
                 />
                 Cobrança no mesmo endereço da entrega
               </label>
@@ -232,6 +244,13 @@ export default function Checkout() {
             </>
           )}
           <Problema problema={problemaDoEndereco} />
+          {enderecos === null && problemaDoEndereco !== null && (
+            <div class="acoes">
+              <button class="botao botao--secundario" type="button" onClick={carregarEscolhaInicial}>
+                Carregar os endereços de novo
+              </button>
+            </div>
+          )}
 
           <dl class="checkout__valores">
             <div>
