@@ -31,7 +31,8 @@ public class Usuario {
     }
 
     /** Inativa a conta a partir de {@code agora} (RF-CLI-003); uma conta já inativa não pode ser inativada de novo. */
-    public void inativar(LocalDateTime agora) {        if (inativadoEm != null) {
+    public void inativar(LocalDateTime agora) {
+        if (inativadoEm != null) {
             throw new IllegalStateException("A conta já está inativa.");
         }
         inativadoEm = Objects.requireNonNull(agora, "agora");

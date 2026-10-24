@@ -1,5 +1,7 @@
 package br.fatec.les.livraria.acesso.aplicacao.casodeuso;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,10 +31,11 @@ public class InativarConta {
     public void executar(Long usuarioId) {
         Usuario usuario = usuarios.buscarPorId(usuarioId)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Usuário não encontrado."));
-        if (situacaoDaConta.calcular(usuario, relogio.agora()) != SituacaoConta.ATIVA) {
+        LocalDateTime agora = relogio.agora();
+        if (situacaoDaConta.calcular(usuario, agora) != SituacaoConta.ATIVA) {
             throw new ExcecaoDeConflito("A conta já está inativa.");
         }
-        usuario.inativar(relogio.agora());
+        usuario.inativar(agora);
         usuarios.salvar(usuario);
     }
 }

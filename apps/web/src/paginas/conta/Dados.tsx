@@ -48,7 +48,11 @@ export function Dados() {
         definirDados(data);
         definirFormulario(paraFormulario(data));
       })
-      .catch(() => undefined);
+      .catch(() => {
+        if (!controle.signal.aborted) {
+          definirProblema({ status: 0, detail: 'Não foi possível carregar os seus dados. Tente novamente.' });
+        }
+      });
     return () => controle.abort();
   }, []);
 
@@ -77,6 +81,11 @@ export function Dados() {
   async function salvar(evento: Event) {
     evento.preventDefault();
     if (formulario === null || enviando) {
+      return;
+    }
+    if (somenteDigitos(formulario.cpf ?? '').length !== 11) {
+      definirSalvo(false);
+      definirProblema({ status: 0, detail: 'Informe o CPF com 11 dígitos.' });
       return;
     }
     definirEnviando(true);
