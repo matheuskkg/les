@@ -19,9 +19,9 @@ public class ConsultarContato {
     private final UsuarioRepositorio usuarios;
 
     @Transactional(readOnly = true)
-    public ContatoDoUsuario executar(Long usuarioId) {
+    public DadosDeContato executar(Long usuarioId) {
         Usuario usuario = usuarios.buscarPorId(usuarioId)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Usuário não encontrado."));
-        return ContatoDoUsuario.de(usuario);
+        return DadosDeContato.de(usuario);
     }
 }

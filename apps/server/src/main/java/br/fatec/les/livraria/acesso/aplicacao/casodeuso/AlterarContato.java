@@ -24,12 +24,12 @@ public class AlterarContato {
      * @return o contato como ficou gravado, com o e-mail normalizado
      */
     @Transactional
-    public ContatoDoUsuario executar(Long usuarioId, ContatoDoUsuario contato) {
+    public DadosDeContato executar(Long usuarioId, DadosDeContato contato) {
         Usuario usuario = usuarios.buscarPorId(usuarioId)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Usuário não encontrado."));
         Telefone telefone = new Telefone(contato.tipoTelefone(),
                 Telefone.somenteDigitos(contato.ddd()), Telefone.somenteDigitos(contato.numero()));
         usuario.alterarContato(contato.email(), telefone);
-        return ContatoDoUsuario.de(usuarios.salvar(usuario));
+        return DadosDeContato.de(usuarios.salvar(usuario));
     }
 }

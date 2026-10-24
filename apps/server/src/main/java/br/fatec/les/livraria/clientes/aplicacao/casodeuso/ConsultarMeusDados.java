@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.ConsultarContato;
-import br.fatec.les.livraria.acesso.aplicacao.casodeuso.ContatoDoUsuario;
+import br.fatec.les.livraria.acesso.aplicacao.casodeuso.DadosDeContato;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
@@ -25,7 +25,7 @@ public class ConsultarMeusDados {
     public DadosDoCliente executar(Long usuarioId) {
         Cliente cliente = clientes.buscarPorUsuarioId(usuarioId)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));
-        ContatoDoUsuario contato = consultarContato.executar(usuarioId);
+        DadosDeContato contato = consultarContato.executar(usuarioId);
         return DadosDoCliente.de(cliente, contato);
     }
 }

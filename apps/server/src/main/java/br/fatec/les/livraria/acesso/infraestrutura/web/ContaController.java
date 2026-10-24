@@ -19,6 +19,7 @@ import br.fatec.les.livraria.acesso.aplicacao.casodeuso.TrocaDeSenha;
 import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
 import br.fatec.les.livraria.acesso.infraestrutura.web.dto.AlteracaoDeSenha;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.UsuarioAutenticado;
+import br.fatec.les.livraria.notificacoes.aplicacao.casodeuso.EncerrarCanais;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,8 +31,8 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Operações de conta do cliente logado que pertencem ao módulo {@code acesso} (RF-CLI-003, RF-CLI-008, DEC-08,
- * DEC-10): troca de senha, que mantém a sessão, e inativação, que encerra a sessão com o cookie expirado. O usuário
- * vem sempre do principal da sessão, nunca de um id na URL.
+ * DEC-10): troca de senha, que mantém a sessão, e inativação, que encerra a sessão com o cookie expirado e fecha os
+ * canais SSE (DEC-13). O usuário vem sempre do principal da sessão, nunca de um id na URL.
  */
 @RestController
 @RequestMapping("/api/me")
@@ -40,6 +41,7 @@ public class ContaController {
 
     private final AlterarSenha alterarSenhaCasoDeUso;
     private final InativarConta inativarConta;
+    private final EncerrarCanais encerrarCanais;
     private final EmissorDeToken emissor;
     private final CsrfTokenRepository csrf;
 
@@ -75,6 +77,7 @@ public class ContaController {
     public ResponseEntity<Void> inativar(@AuthenticationPrincipal UsuarioAutenticado usuario,
             HttpServletRequest requisicao, HttpServletResponse resposta) {
         inativarConta.executar(usuario.usuarioId());
+        encerrarCanais.executar(usuario.usuarioId());
         rotacionarCsrf(requisicao, resposta);
         resposta.addHeader(HttpHeaders.SET_COOKIE, emissor.cookieExpirado().toString());
         return ResponseEntity.noContent().build();

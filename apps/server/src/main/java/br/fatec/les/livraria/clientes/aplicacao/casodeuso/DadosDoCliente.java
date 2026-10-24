@@ -2,7 +2,7 @@ package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
 import java.time.LocalDate;
 
-import br.fatec.les.livraria.acesso.aplicacao.casodeuso.ContatoDoUsuario;
+import br.fatec.les.livraria.acesso.aplicacao.casodeuso.DadosDeContato;
 import br.fatec.les.livraria.acesso.dominio.modelo.TipoTelefone;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
@@ -22,7 +22,7 @@ public record DadosDoCliente(
         String ddd,
         String numero) {
 
-    public static DadosDoCliente de(Cliente cliente, ContatoDoUsuario contato) {
+    public static DadosDoCliente de(Cliente cliente, DadosDeContato contato) {
         return new DadosDoCliente(
                 cliente.codigo(),
                 cliente.getNome(),

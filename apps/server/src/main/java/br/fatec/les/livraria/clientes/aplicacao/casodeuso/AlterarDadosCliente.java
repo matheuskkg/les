@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.AlterarContato;
-import br.fatec.les.livraria.acesso.aplicacao.casodeuso.ContatoDoUsuario;
+import br.fatec.les.livraria.acesso.aplicacao.casodeuso.DadosDeContato;
 import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
 import br.fatec.les.livraria.clientes.aplicacao.regra.CpfUnicoNaAlteracao;
@@ -56,7 +56,7 @@ public class AlterarDadosCliente {
                 : new Cpf(comando.cpf());
         clientes.alterarDados(cliente.getId(), comando.nome().strip(), comando.genero(),
                 comando.dataNascimento(), cpf);
-        alterarContato.executar(comando.usuarioId(), new ContatoDoUsuario(comando.email(), comando.tipoTelefone(),
+        alterarContato.executar(comando.usuarioId(), new DadosDeContato(comando.email(), comando.tipoTelefone(),
                 Telefone.somenteDigitos(comando.ddd()), Telefone.somenteDigitos(comando.numero())));
         return consultarMeusDados.executar(comando.usuarioId());
     }
