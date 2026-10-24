@@ -45,6 +45,7 @@ export default function Checkout() {
   const [problemaDoEndereco, definirProblemaDoEndereco] = useState<ProblemaDetalhe | null>(null);
   const [frete, definirFrete] = useState<FreteDto | null>(null);
   const [aprovada, definirAprovada] = useState<CompraFinalizada | null>(null);
+  const [finalizando, definirFinalizando] = useState(false);
 
   const carregar = useCallback(async () => {
     const { data, error, response } = await cliente.GET('/api/me/checkout');
@@ -306,6 +307,7 @@ export default function Checkout() {
             cobranca={cobrancaIgual ? entrega : cobranca}
             aoPerderCheckout={recarregar}
             aoAprovar={definirAprovada}
+            aoMudarFinalizacao={definirFinalizando}
           />
           <p class="campo__ajuda">
             Os itens ficam reservados até {formatarDataHora(checkout.expiraEm)}. Para mudar quantidades, volte ao
@@ -315,7 +317,7 @@ export default function Checkout() {
             <button
               class="botao botao--secundario"
               type="button"
-              disabled={voltando}
+              disabled={voltando || finalizando}
               onClick={() => void voltar()}
             >
               Voltar ao carrinho

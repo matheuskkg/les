@@ -57,6 +57,12 @@ public class ReprovarPedido {
                 .ifPresent(pedido -> reprovar(pedido, CHECKOUT_ENCERRADO));
     }
 
+    /** Reprova o pedido em processamento já travado por quem chama, porque a compra acabou antes da aprovação. */
+    @Transactional
+    public Pedido reprovarPendente(Pedido pedido) {
+        return reprovar(pedido, CHECKOUT_ENCERRADO);
+    }
+
     private Pedido reprovar(Pedido pedido, String motivo) {
         pedido.reprovar();
         Pedido reprovado = pedidos.salvar(pedido);

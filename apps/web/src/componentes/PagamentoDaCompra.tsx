@@ -31,6 +31,8 @@ interface Props {
   aoPerderCheckout: () => void;
   /** Chamado com o pedido aprovado; o checkout foi concluído (DEC-12). */
   aoAprovar: (compra: CompraFinalizada) => void;
+  /** Avisa quando a finalização começa e termina, para a tela travar o que pode encerrar o checkout. */
+  aoMudarFinalizacao: (finalizando: boolean) => void;
 }
 
 /** Valor e código de segurança digitados para um cartão, pela chave do cartão na tela. */
@@ -60,7 +62,14 @@ function Problema({ problema }: { problema: ProblemaDetalhe | null }) {
  * "Finalizar compra" (RF-VEN-008, DEC-13) envia tudo com o código de segurança e fica desabilitado enquanto envia. Na
  * reprovação (RN-VEN-008), os cartões recusados aparecem com o motivo e o checkout continua aberto para outra tentativa.
  */
-export function PagamentoDaCompra({ checkoutId, entrega, cobranca, aoPerderCheckout, aoAprovar }: Props) {
+export function PagamentoDaCompra({
+  checkoutId,
+  entrega,
+  cobranca,
+  aoPerderCheckout,
+  aoAprovar,
+  aoMudarFinalizacao,
+}: Props) {
   const [cartoes, definirCartoes] = useState<CartaoCadastrado[]>([]);
   const [cupons, definirCupons] = useState<CupomDeTroca[]>([]);
   const [codigo, definirCodigo] = useState('');
@@ -100,6 +109,7 @@ export function PagamentoDaCompra({ checkoutId, entrega, cobranca, aoPerderCheck
   // RN-VEN-006: a distribuição sem cartões mostra o restante e já recusa cupons desnecessários.
   useEffect(() => {
     selecao.current += 1;
+    definirReprovada(null);
     definirResumo(null);
     definirConferido(null);
     if (entrega === null) {
@@ -258,6 +268,7 @@ export function PagamentoDaCompra({ checkoutId, entrega, cobranca, aoPerderCheck
       return;
     }
     definirFinalizando(true);
+    aoMudarFinalizacao(true);
     definirProblemaDosCartoes(null);
     definirReprovada(null);
     try {
@@ -277,6 +288,11 @@ export function PagamentoDaCompra({ checkoutId, entrega, cobranca, aoPerderCheck
         aoAprovar(data);
         return;
       }
+      if (data.recusas.length === 0) {
+        // O prazo da compra acabou antes da aprovação: o pedido foi reprovado e o checkout não existe mais.
+        aoPerderCheckout();
+        return;
+      }
       definirReprovada(data);
     } catch {
       definirProblemaDosCartoes({
@@ -285,6 +301,7 @@ export function PagamentoDaCompra({ checkoutId, entrega, cobranca, aoPerderCheck
       });
     } finally {
       definirFinalizando(false);
+      aoMudarFinalizacao(false);
     }
   }
 
@@ -304,116 +321,119 @@ export function PagamentoDaCompra({ checkoutId, entrega, cobranca, aoPerderCheck
     <section class="pagamento-da-compra" aria-labelledby="titulo-pagamento">
       <h2 id="titulo-pagamento">Forma de pagamento</h2>
 
-      <form
-        class="pagamento-da-compra__promocional"
-        noValidate
-        onSubmit={(evento) => {
-          evento.preventDefault();
-          definirPromocional(codigo.trim() === '' ? null : codigo.trim().toUpperCase());
-        }}
-      >
-        <CampoDeFormulario id="cupom-promocional" rotulo="Cupom promocional" valor={codigo}
-          aoMudar={definirCodigo} ajuda="Um cupom promocional por compra." />
-        <div class="acoes">
-          <button class="botao botao--secundario" type="submit">Aplicar cupom</button>
-          {promocional && (
-            <button class="botao botao--secundario" type="button"
-              onClick={() => {
-                definirPromocional(null);
-                definirCodigo('');
-              }}>
-              Retirar {promocional}
-            </button>
-          )}
-        </div>
-      </form>
-
-      {cupons.length > 0 && (
-        <fieldset class="grupo-de-categorias escolha-de-endereco">
-          <legend>Cupons de troca</legend>
-          {cupons.map((cupom) => (
-            <label class="categoria-opcao" key={cupom.id}>
-              <input type="checkbox" checked={selecionados.includes(cupom.id)} onChange={() => alternarCupom(cupom.id)} />
-              <span>
-                {cupom.codigo} — {formatarDinheiro(cupom.valor)}
-                {cupom.validade && ` (vale até ${formatarData(cupom.validade)})`}
-              </span>
-            </label>
-          ))}
-        </fieldset>
-      )}
-      <Problema problema={problemaDosCupons} />
-
-      {resumo && (
-        <dl class="checkout__valores" data-testid="resumo-do-pagamento">
-          {resumo.descontoPromocional !== '0.00' && (
-            <div>
-              <dt>Desconto do cupom promocional:</dt> <dd>− {formatarDinheiro(resumo.descontoPromocional)}</dd>
-            </div>
-          )}
-          {resumo.cuponsDeTroca.map((cupom) => (
-            <div key={cupom.id}>
-              <dt>Cupom {cupom.codigo}:</dt> <dd>− {formatarDinheiro(cupom.abatido)}</dd>
-            </div>
-          ))}
-          {resumo.troco !== '0.00' && (
-            <div>
-              <dt>Troco, gerado como cupom de troca:</dt> <dd>{formatarDinheiro(resumo.troco)}</dd>
-            </div>
-          )}
-          <div class="carrinho__total">
-            <dt>A pagar com cartão:</dt>{' '}
-            <dd>
-              <strong data-testid="restante">{formatarDinheiro(resumo.restante)}</strong>
-            </dd>
+      {/* Enquanto finaliza, nada do pagamento muda: a tela continua igual ao que foi enviado. */}
+      <fieldset class="pagamento-da-compra__campos" disabled={finalizando}>
+        <form
+          class="pagamento-da-compra__promocional"
+          noValidate
+          onSubmit={(evento) => {
+            evento.preventDefault();
+            definirPromocional(codigo.trim() === '' ? null : codigo.trim().toUpperCase());
+          }}
+        >
+          <CampoDeFormulario id="cupom-promocional" rotulo="Cupom promocional" valor={codigo}
+            aoMudar={definirCodigo} ajuda="Um cupom promocional por compra." />
+          <div class="acoes">
+            <button class="botao botao--secundario" type="submit">Aplicar cupom</button>
+            {promocional && (
+              <button class="botao botao--secundario" type="button"
+                onClick={() => {
+                  definirPromocional(null);
+                  definirCodigo('');
+                }}>
+                Retirar {promocional}
+              </button>
+            )}
           </div>
-        </dl>
-      )}
+        </form>
 
-      {resumo && resumo.restante !== '0.00' && (
-        <fieldset class="grupo-de-categorias escolha-de-endereco">
-          <legend>Cartões</legend>
-          {cartoes.map((cartao) => {
-            const chave = String(cartao.id);
-            return (
-              <div key={cartao.id}>
-                <label class="categoria-opcao">
-                  <input type="checkbox" checked={emUso.includes(chave)} onChange={() => alternarCartao(chave)} />
-                  <span>
-                    {cartao.bandeira.nome} {cartao.numeroMascarado}
-                    {cartao.preferencial && ' (preferencial)'}
-                  </span>
-                </label>
-                {emUso.includes(chave) && camposDoPagamento(chave)}
+        {cupons.length > 0 && (
+          <fieldset class="grupo-de-categorias escolha-de-endereco">
+            <legend>Cupons de troca</legend>
+            {cupons.map((cupom) => (
+              <label class="categoria-opcao" key={cupom.id}>
+                <input type="checkbox" checked={selecionados.includes(cupom.id)} onChange={() => alternarCupom(cupom.id)} />
+                <span>
+                  {cupom.codigo} — {formatarDinheiro(cupom.valor)}
+                  {cupom.validade && ` (vale até ${formatarData(cupom.validade)})`}
+                </span>
+              </label>
+            ))}
+          </fieldset>
+        )}
+        <Problema problema={problemaDosCupons} />
+
+        {resumo && (
+          <dl class="checkout__valores" data-testid="resumo-do-pagamento">
+            {resumo.descontoPromocional !== '0.00' && (
+              <div>
+                <dt>Desconto do cupom promocional:</dt> <dd>− {formatarDinheiro(resumo.descontoPromocional)}</dd>
               </div>
-            );
-          })}
-          <label class="categoria-opcao">
-            <input type="checkbox" checked={emUso.includes(NOVO)} onChange={() => alternarCartao(NOVO)} />
-            Outro cartão
-          </label>
-          {emUso.includes(NOVO) && (
-            <div class="escolha-de-endereco__novo">
-              <CamposDoCartao prefixo="cartao-novo" formulario={novo}
-                aoMudar={(campo, valor) => {
-                  definirConferido(null);
-                  definirNovo((atual) => ({ ...atual, [campo]: valor }));
-                }} />
-              {camposDoPagamento(NOVO)}
-              <div class="acoes">
-                <button class="botao botao--secundario" type="button" disabled={salvando}
-                  onClick={() => void salvarNovo()}>
-                  Salvar no meu cadastro
-                </button>
+            )}
+            {resumo.cuponsDeTroca.map((cupom) => (
+              <div key={cupom.id}>
+                <dt>Cupom {cupom.codigo}:</dt> <dd>− {formatarDinheiro(cupom.abatido)}</dd>
               </div>
+            ))}
+            {resumo.troco !== '0.00' && (
+              <div>
+                <dt>Troco, gerado como cupom de troca:</dt> <dd>{formatarDinheiro(resumo.troco)}</dd>
+              </div>
+            )}
+            <div class="carrinho__total">
+              <dt>A pagar com cartão:</dt>{' '}
+              <dd>
+                <strong data-testid="restante">{formatarDinheiro(resumo.restante)}</strong>
+              </dd>
             </div>
-          )}
-          <p class="campo__ajuda">
-            Mínimo de R$ 10,00 por cartão, exceto quando cupons deixam menos que isso a pagar. O código de segurança não
-            fica gravado.
-          </p>
-        </fieldset>
-      )}
+          </dl>
+        )}
+
+        {resumo && resumo.restante !== '0.00' && (
+          <fieldset class="grupo-de-categorias escolha-de-endereco">
+            <legend>Cartões</legend>
+            {cartoes.map((cartao) => {
+              const chave = String(cartao.id);
+              return (
+                <div key={cartao.id}>
+                  <label class="categoria-opcao">
+                    <input type="checkbox" checked={emUso.includes(chave)} onChange={() => alternarCartao(chave)} />
+                    <span>
+                      {cartao.bandeira.nome} {cartao.numeroMascarado}
+                      {cartao.preferencial && ' (preferencial)'}
+                    </span>
+                  </label>
+                  {emUso.includes(chave) && camposDoPagamento(chave)}
+                </div>
+              );
+            })}
+            <label class="categoria-opcao">
+              <input type="checkbox" checked={emUso.includes(NOVO)} onChange={() => alternarCartao(NOVO)} />
+              Outro cartão
+            </label>
+            {emUso.includes(NOVO) && (
+              <div class="escolha-de-endereco__novo">
+                <CamposDoCartao prefixo="cartao-novo" formulario={novo}
+                  aoMudar={(campo, valor) => {
+                    definirConferido(null);
+                    definirNovo((atual) => ({ ...atual, [campo]: valor }));
+                  }} />
+                {camposDoPagamento(NOVO)}
+                <div class="acoes">
+                  <button class="botao botao--secundario" type="button" disabled={salvando}
+                    onClick={() => void salvarNovo()}>
+                    Salvar no meu cadastro
+                  </button>
+                </div>
+              </div>
+            )}
+            <p class="campo__ajuda">
+              Mínimo de R$ 10,00 por cartão, exceto quando cupons deixam menos que isso a pagar. O código de segurança não
+              fica gravado.
+            </p>
+          </fieldset>
+        )}
+      </fieldset>
 
       <Problema problema={problemaDosCartoes} />
       {conferido && (
@@ -433,8 +453,8 @@ export function PagamentoDaCompra({ checkoutId, entrega, cobranca, aoPerderCheck
             continuam reservados: corrija os cartões e tente de novo.
           </p>
           <ul>
-            {reprovada.recusas.map((recusa) => (
-              <li key={recusa.ultimosDigitos}>
+            {reprovada.recusas.map((recusa, indice) => (
+              <li key={indice}>
                 Cartão final {recusa.ultimosDigitos}: {recusa.motivo}
               </li>
             ))}

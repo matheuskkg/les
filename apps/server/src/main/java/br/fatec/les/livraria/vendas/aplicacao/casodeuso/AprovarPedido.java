@@ -32,7 +32,8 @@ import lombok.RequiredArgsConstructor;
  * cupom de troca, o checkout é concluído e o cliente e os administradores são notificados.
  *
  * <p>Trava o checkout e depois o pedido, na mesma ordem da expiração. Se a expiração já reprovou o pedido, nada muda e
- * o pedido volta como está.</p>
+ * o pedido volta como está. Se o prazo do checkout venceu antes da aprovação, as reservas já não seguram o estoque: o
+ * pedido é reprovado como na expiração, sem baixa.</p>
  */
 @Component
 @RequiredArgsConstructor
@@ -46,6 +47,7 @@ public class AprovarPedido {
     private final ConsultarUsuarioDoCliente consultarUsuario;
     private final Notificar notificar;
     private final NotificarAdministradores notificarAdministradores;
+    private final ReprovarPedido reprovarPedido;
     private final Relogio relogio;
 
     /** @param troco excedente dos cupons de troca, calculado na distribuição do pagamento (RN-VEN-006) */
@@ -58,10 +60,13 @@ public class AprovarPedido {
         if (!pedido.emProcessamento()) {
             return pedido;
         }
+        LocalDateTime agora = relogio.agora();
+        if (!checkout.aberto() || checkout.venceuEm(agora)) {
+            return reprovarPedido.reprovarPendente(pedido);
+        }
         pedido.aprovar();
         Pedido aprovado = pedidos.salvar(pedido);
         baixarEstoque.executar(OrigemReserva.CHECKOUT, checkout.getId(), quantidades(aprovado));
-        LocalDateTime agora = relogio.agora();
         if (troco.ehPositivo()) {
             cuponsDeTroca.gerar(new CupomTroca(null, aprovado.getClienteId(), "TROCO-" + aprovado.getId(), troco,
                     propriedadesDoCupom.validadeDeUmCupomGeradoEm(agora.toLocalDate()), SituacaoCupom.DISPONIVEL,

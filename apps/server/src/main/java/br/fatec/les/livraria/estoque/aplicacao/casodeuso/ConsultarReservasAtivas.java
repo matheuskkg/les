@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.estoque.aplicacao.casodeuso;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -29,8 +30,9 @@ public class ConsultarReservasAtivas {
     public Map<Long, Integer> executar(OrigemReserva origem, Long origemId) {
         Objects.requireNonNull(origem, "origem");
         Objects.requireNonNull(origemId, "origemId");
+        LocalDateTime agora = relogio.agora();
         return reservas.listarPorOrigem(origem, origemId).stream()
-                .filter(reserva -> reserva.ativaEm(relogio.agora()))
-                .collect(Collectors.toMap(Reserva::getLivroId, Reserva::getQuantidade));
+                .filter(reserva -> reserva.ativaEm(agora))
+                .collect(Collectors.toMap(Reserva::getLivroId, Reserva::getQuantidade, Integer::sum));
     }
 }

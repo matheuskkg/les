@@ -36,9 +36,12 @@ import com.jayway.jsonpath.JsonPath;
 import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
 import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.AprovarPedido;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ExpirarReservas;
 import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
 import br.fatec.les.livraria.vendas.dominio.pagamento.SituacaoCupom;
+import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
 import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
 import br.fatec.les.livraria.vendas.infraestrutura.persistencia.CupomJpa;
@@ -86,6 +89,9 @@ class FinalizacaoIntegracaoTest {
 
     @Autowired
     private ExpirarReservas expirarReservas;
+
+    @Autowired
+    private AprovarPedido aprovarPedido;
 
     @Autowired
     private JdbcClient jdbc;
@@ -207,6 +213,19 @@ class FinalizacaoIntegracaoTest {
 
         assertThat(pedidos.buscarParaAlterar(pendente).orElseThrow().getStatus()).isEqualTo(StatusPedido.REPROVADA);
         assertThat(statusAuditados(pendente)).containsExactly("EM_PROCESSAMENTO", "REPROVADA");
+        assertThat(saldo()).isEqualTo(saldoInicial);
+    }
+
+    @Test
+    void dec13_aprovacaoDepoisDoPrazoReprovaSemBaixarOEstoque() throws Exception {
+        Cliente ana = novoCliente();
+        long checkoutId = iniciarCheckout(ana);
+        Pedido pendente = pedidos.salvar(Pedidos.emProcessamento(checkoutId, ana.clienteId()));
+
+        AGORA.set(INICIO.plusMinutes(61));
+        Pedido resultado = aprovarPedido.executar(pendente, Dinheiro.ZERO);
+
+        assertThat(resultado.getStatus()).isEqualTo(StatusPedido.REPROVADA);
         assertThat(saldo()).isEqualTo(saldoInicial);
     }
 

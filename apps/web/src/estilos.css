@@ -1017,6 +1017,13 @@ textarea.campo__entrada {
   border-top: 1px solid var(--cor-borda);
 }
 
+.pagamento-da-compra__campos {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 .pagamento-da-compra h2 {
   margin: 0;
 }
