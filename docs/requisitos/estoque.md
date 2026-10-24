@@ -34,11 +34,11 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 |---|---|---|---|
 | RF-EST-001 | ❌ |  |  |
 | RF-EST-002 | ✅ | `apps/server/src/main/java/br/fatec/les/livraria/catalogo/dominio/calculo/CalcularPrecoVenda.java`, `apps/server/src/main/java/br/fatec/les/livraria/catalogo/aplicacao/casodeuso/ConsultarPrecosDeVenda.java` | Maior custo × (1 + margem), arredondado a 2 casas com `HALF_UP` só no fim ([DEC-15.1](../decisoes/DEC-15.1-arredondamento.md)). |
-| RF-EST-003 | ❌ |  | Baixa na transação de aprovação, consumindo as reservas do checkout ([DEC-13](../decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)), com lock pessimista na linha de saldo do livro ([DEC-15.3](../decisoes/DEC-15.3-saldo-de-estoque.md)). |
+| RF-EST-003 | ✅ | `apps/server/src/main/java/br/fatec/les/livraria/estoque/aplicacao/casodeuso/BaixarEstoque.java`, `apps/server/src/main/java/br/fatec/les/livraria/vendas/aplicacao/casodeuso/AprovarPedido.java` | Baixa na transação de aprovação, consumindo as reservas do checkout ([DEC-13](../decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)), com lock pessimista na linha de saldo do livro ([DEC-15.3](../decisoes/DEC-15.3-saldo-de-estoque.md)). |
 | RF-EST-004 | ❌ |  | Reentrada por item da troca marcado como "volta ao estoque" ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)); soma ao saldo, sem nova entrada ([DEC-15.3](../decisoes/DEC-15.3-saldo-de-estoque.md)). |
 | RN-EST-001 | 🟡 | `apps/server/src/main/java/br/fatec/les/livraria/estoque/infraestrutura/persistencia/EntradaEstoqueJpa.java`, `apps/server/src/main/resources/seed/003_estoque.sql` | Colunas obrigatórias no schema; entradas inseridas pelo seed (entrada manual fora do MVP). |
 | RN-EST-002 | ✅ | `apps/server/src/main/java/br/fatec/les/livraria/estoque/aplicacao/casodeuso/ConsultarMaiorCusto.java` | O maior custo vem de `entrada_estoque` ([DEC-15.3](../decisoes/DEC-15.3-saldo-de-estoque.md)). |
 | RN-EST-003 | ❌ |  |  |
 | RN-EST-004 | ❌ |  |  |
 | RN-EST-005 | ❌ |  |  |
-| RN-EST-006 | ❌ |  | Desvio: na reprovação, as reservas continuam no checkout para nova tentativa e só são liberadas quando ele expira ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
+| RN-EST-006 | ✅ | `apps/server/src/main/java/br/fatec/les/livraria/estoque/aplicacao/casodeuso/BaixarEstoque.java`, `apps/server/src/main/java/br/fatec/les/livraria/vendas/aplicacao/casodeuso/AprovarPedido.java`, `apps/server/src/main/java/br/fatec/les/livraria/vendas/aplicacao/casodeuso/ReprovarPedido.java` | Desvio: na reprovação, as reservas continuam no checkout para nova tentativa e só são liberadas quando ele expira ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). A baixa só acontece na aprovação. |
