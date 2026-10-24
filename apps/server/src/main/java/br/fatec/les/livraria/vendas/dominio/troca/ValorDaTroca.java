@@ -20,11 +20,7 @@ public final class ValorDaTroca {
     public static Dinheiro de(Troca troca, Pedido pedido) {
         Dinheiro total = Dinheiro.ZERO;
         for (ItemTroca item : troca.getItens()) {
-            ItemPedido doPedido = pedido.getItens().stream()
-                    .filter(candidato -> candidato.id().equals(item.itemPedidoId()))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "Item %d não pertence ao pedido %d.".formatted(item.itemPedidoId(), pedido.getId())));
+            ItemPedido doPedido = pedido.item(item.itemPedidoId());
             total = total.somar(doPedido.precoUnitario().multiplicar(item.quantidade()));
         }
         return total;

@@ -35,7 +35,7 @@ export function RecebimentoDaTroca({ troca, tituloDoItem, aoAlterar }: Props) {
         body: {
           itens: troca.itens.map((item) => ({
             itemPedidoId: item.itemPedidoId,
-            voltaEstoque: voltaEstoque[item.itemPedidoId] ?? true,
+            voltaEstoque: voltaEstoque[item.itemPedidoId] === true,
           })),
         },
       });
@@ -65,7 +65,7 @@ export function RecebimentoDaTroca({ troca, tituloDoItem, aoAlterar }: Props) {
             <label class="categoria-opcao" key={item.itemPedidoId}>
               <input
                 type="checkbox"
-                checked={voltaEstoque[item.itemPedidoId] ?? true}
+                checked={voltaEstoque[item.itemPedidoId] === true}
                 onChange={(evento) => {
                   const marcado = evento.currentTarget.checked;
                   definirVoltaEstoque((atual) => ({ ...atual, [item.itemPedidoId]: marcado }));

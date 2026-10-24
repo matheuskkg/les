@@ -181,6 +181,18 @@ public class Pedido {
         return itens;
     }
 
+    /**
+     * @param itemPedidoId id do item do pedido
+     * @throws IllegalArgumentException se o item não for deste pedido
+     */
+    public ItemPedido item(Long itemPedidoId) {
+        return itens.stream()
+                .filter(item -> item.id() != null && item.id().equals(itemPedidoId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Item %d não pertence ao pedido %d.".formatted(itemPedidoId, id)));
+    }
+
     public List<PagamentoCartao> getCartoes() {
         return cartoes;
     }

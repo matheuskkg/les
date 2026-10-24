@@ -29,12 +29,14 @@ public class ReentrarEstoque {
      */
     @Transactional
     public void executar(Map<Long, Integer> quantidades) {
-        new TreeMap<>(quantidades).forEach((livroId, devolvida) -> {
-            int emMaos = estoque.quantidadeComLock(livroId)
-                    .orElseThrow(() -> new IllegalStateException("Livro sem saldo de estoque: " + livroId));
+        quantidades.forEach((livroId, devolvida) -> {
             if (devolvida < 1) {
                 throw new IllegalStateException("Reentrada de %d unidades do livro %d.".formatted(devolvida, livroId));
             }
+        });
+        new TreeMap<>(quantidades).forEach((livroId, devolvida) -> {
+            int emMaos = estoque.quantidadeComLock(livroId)
+                    .orElseThrow(() -> new IllegalStateException("Livro sem saldo de estoque: " + livroId));
             estoque.gravarQuantidade(livroId, emMaos + devolvida);
         });
     }

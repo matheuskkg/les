@@ -1,6 +1,8 @@
 package br.fatec.les.livraria.vendas.dominio.troca;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
@@ -17,6 +19,15 @@ public record RecebimentoDeTroca(Troca troca, List<ItemRecebido> itens) {
     public RecebimentoDeTroca {
         Objects.requireNonNull(troca, "troca");
         itens = List.copyOf(Objects.requireNonNull(itens, "itens"));
+    }
+
+    /**
+     * Decisão de cada item informado; chamado depois das regras, que garantem uma decisão por item da troca.
+     */
+    public Map<Long, Boolean> voltaEstoquePorItem() {
+        Map<Long, Boolean> porItem = new HashMap<>();
+        itens.forEach(item -> porItem.put(item.itemPedidoId(), item.voltaEstoque()));
+        return porItem;
     }
 
     /**

@@ -25,7 +25,6 @@ import br.fatec.les.livraria.vendas.aplicacao.porta.PedidosConsultas;
 import br.fatec.les.livraria.vendas.aplicacao.porta.TrocaRepositorio;
 import br.fatec.les.livraria.vendas.dominio.pagamento.CupomTroca;
 import br.fatec.les.livraria.vendas.dominio.pagamento.SituacaoCupom;
-import br.fatec.les.livraria.vendas.dominio.pedido.ItemPedido;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
 import br.fatec.les.livraria.vendas.dominio.regra.RetornoAoEstoqueDeCadaItem;
 import br.fatec.les.livraria.vendas.dominio.troca.ItemTroca;
@@ -41,7 +40,8 @@ import lombok.RequiredArgsConstructor;
  * passa a {@code TROCADO} e gera um cupom de troca do cliente no valor dos itens, também para os que não voltam. O
  * pedido continua {@code ENTREGUE}, e o cliente recebe {@code TROCA_CONCLUIDA}.
  *
- * <p>A troca é travada até o fim da transação; confirmar de novo responde 409, antes das regras do recebimento.</p>
+ * <p>A troca é travada até o fim da transação; confirmar de novo responde 409, antes das regras do recebimento. A
+ * reentrada vem antes do cupom, para que uma falha no estoque não chegue a gravar o código.</p>
  */
 @Component
 @RequiredArgsConstructor
@@ -72,23 +72,23 @@ public class ConfirmarRecebimentoDaTroca {
         Troca troca = trocas.buscarParaAlterar(id)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Troca não encontrada."));
         troca.exigirAutorizada();
-        Violacoes.verificar(new RecebimentoDeTroca(troca, itens == null ? List.of() : itens), retornoDeCadaItem);
+        RecebimentoDeTroca recebimento = new RecebimentoDeTroca(troca, itens == null ? List.of() : itens);
+        Violacoes.verificar(recebimento, retornoDeCadaItem);
 
         Pedido pedido = pedidos.buscar(troca.getPedidoId()).orElseThrow();
+        Map<Long, Boolean> voltaEstoque = recebimento.voltaEstoquePorItem();
+        Map<Long, Integer> devolvidos = devolvidosPorLivro(troca, pedido, voltaEstoque);
+        if (!devolvidos.isEmpty()) {
+            reentrarEstoque.executar(devolvidos);
+        }
         LocalDateTime agora = relogio.agora();
         Dinheiro valor = ValorDaTroca.de(troca, pedido);
         CupomTroca cupom = cuponsDeTroca.gerar(new CupomTroca(null, pedido.getClienteId(), "TROCA-" + id, valor,
                 propriedadesDoCupom.validadeDeUmCupomGeradoEm(agora.toLocalDate()), SituacaoCupom.DISPONIVEL,
                 agora));
-        Map<Long, Boolean> voltaEstoque = new HashMap<>();
-        itens.forEach(item -> voltaEstoque.put(item.itemPedidoId(), item.voltaEstoque()));
         troca.confirmarRecebimento(voltaEstoque, valor, cupom.id());
-        Troca trocada = trocas.salvar(troca);
+        trocas.salvar(troca);
 
-        Map<Long, Integer> devolvidos = devolvidosPorLivro(trocada, pedido);
-        if (!devolvidos.isEmpty()) {
-            reentrarEstoque.executar(devolvidos);
-        }
         consultarUsuario.executar(pedido.getClienteId()).ifPresent(usuarioId -> notificar.executar(
                 Notificar.Comando.sobre(usuarioId, TipoNotificacao.TROCA_CONCLUIDA,
                         "A troca nº %d do pedido nº %d foi concluída. O cupom de troca %s, de %s, já pode ser usado."
@@ -98,15 +98,12 @@ public class ConfirmarRecebimentoDaTroca {
     }
 
     /** Unidades dos itens que voltam ao estoque, somadas por livro (RF-EST-004). */
-    private static Map<Long, Integer> devolvidosPorLivro(Troca troca, Pedido pedido) {
+    private static Map<Long, Integer> devolvidosPorLivro(Troca troca, Pedido pedido,
+            Map<Long, Boolean> voltaEstoque) {
         Map<Long, Integer> porLivro = new HashMap<>();
         for (ItemTroca item : troca.getItens()) {
-            if (Boolean.TRUE.equals(item.voltaEstoque())) {
-                ItemPedido doPedido = pedido.getItens().stream()
-                        .filter(candidato -> candidato.id().equals(item.itemPedidoId()))
-                        .findFirst()
-                        .orElseThrow();
-                porLivro.merge(doPedido.livro().id(), item.quantidade(), Integer::sum);
+            if (Boolean.TRUE.equals(voltaEstoque.get(item.itemPedidoId()))) {
+                porLivro.merge(pedido.item(item.itemPedidoId()).livro().id(), item.quantidade(), Integer::sum);
             }
         }
         return porLivro;

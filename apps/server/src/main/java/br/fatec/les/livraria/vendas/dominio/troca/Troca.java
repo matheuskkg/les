@@ -89,14 +89,20 @@ public class Troca {
      *
      * @param voltaEstoque decisão por item do pedido; precisa cobrir todos os itens da troca
      * @throws ExcecaoDeConflito se a troca não estiver {@code TROCA AUTORIZADA}
+     * @throws IllegalArgumentException se faltar a decisão de algum item
      */
     public void confirmarRecebimento(Map<Long, Boolean> voltaEstoque, Dinheiro valor, Long cupomGerado) {
         Objects.requireNonNull(voltaEstoque, "voltaEstoque");
         exigirAutorizada();
+        for (ItemTroca item : itens) {
+            if (voltaEstoque.get(item.itemPedidoId()) == null) {
+                throw new IllegalArgumentException("Falta informar se o item %d volta ao estoque."
+                        .formatted(item.itemPedidoId()));
+            }
+        }
         itens = itens.stream()
                 .map(item -> new ItemTroca(item.id(), item.itemPedidoId(), item.quantidade(),
-                        Objects.requireNonNull(voltaEstoque.get(item.itemPedidoId()),
-                                "voltaEstoque do item " + item.itemPedidoId())))
+                        voltaEstoque.get(item.itemPedidoId())))
                 .toList();
         status = StatusTroca.TROCADO;
         valorCupom = Objects.requireNonNull(valor, "valor");
