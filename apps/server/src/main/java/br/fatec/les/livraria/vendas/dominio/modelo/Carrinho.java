@@ -162,6 +162,19 @@ public class Carrinho {
         }
     }
 
+    /**
+     * Retira os itens para o checkout (DEC-12): o carrinho fica vazio, sem prazo, e pode receber itens novos. Os
+     * itens removidos por expiração continuam à mostra.
+     *
+     * @return os itens retirados
+     */
+    public List<ItemCarrinho> retirarItens() {
+        List<ItemCarrinho> retirados = List.copyOf(itens);
+        itens.clear();
+        encerrarExpiracao();
+        return retirados;
+    }
+
     /** Esvazia o carrinho e os itens removidos, como na inativação da conta (DEC-10). */
     public void esvaziar() {
         itens.clear();

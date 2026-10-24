@@ -7,6 +7,7 @@ import {
   AdminClientes,
   Cadastro,
   Carrinho,
+  Checkout,
   Livro,
   Login,
   MinhaConta,
@@ -71,6 +72,14 @@ function CarrinhoDoCliente() {
   );
 }
 
+function CheckoutDoCliente() {
+  return (
+    <Protegida papel="CLIENTE">
+      <Checkout />
+    </Protegida>
+  );
+}
+
 export function App() {
   return (
     <div class="aplicacao">
@@ -87,6 +96,7 @@ export function App() {
           <Route path="/login" component={Login} />
           <Route path="/cadastro" component={Cadastro} />
           <Route path="/carrinho" component={CarrinhoDoCliente} />
+          <Route path="/checkout" component={CheckoutDoCliente} />
           <Route path="/minha-conta/notificacoes" component={NotificacoesDoCliente} />
           <Route path="/admin/notificacoes" component={NotificacoesDoAdmin} />
           <Route path="/minha-conta" component={AreaDoCliente} />

@@ -14,14 +14,14 @@ import br.fatec.les.livraria.vendas.aplicacao.consulta.CarrinhoConsultado;
  * carrinho está vazio. {@code removidos} traz os livros retirados por expiração (RNF-VEN-001).
  */
 public record CarrinhoDto(
-        List<ItemDoCarrinhoDto> itens,
+        List<ItemComPrecoDto> itens,
         Dinheiro subtotal,
         int quantidadeDeItens,
         @Nullable Instant expiraEm,
         List<ItemRemovidoDoCarrinhoDto> removidos) {
 
     public static CarrinhoDto de(CarrinhoConsultado carrinho) {
-        return new CarrinhoDto(carrinho.itens().stream().map(ItemDoCarrinhoDto::de).toList(), carrinho.subtotal(),
+        return new CarrinhoDto(carrinho.itens().stream().map(ItemComPrecoDto::de).toList(), carrinho.subtotal(),
                 carrinho.quantidadeDeItens(),
                 carrinho.expiraEm() == null ? null : carrinho.expiraEm().atZone(RelogioDoSistema.FUSO).toInstant(),
                 carrinho.removidos().stream().map(ItemRemovidoDoCarrinhoDto::de).toList());

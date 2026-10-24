@@ -212,7 +212,7 @@ export interface paths {
             cookie?: never;
         };
         /** Mostra o carrinho do cliente com o preço atual de cada livro */
-        get: operations["ver"];
+        get: operations["ver_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -320,6 +320,41 @@ export interface paths {
         put?: never;
         /** Marca o cartão como o único preferencial */
         post: operations["marcarPreferencial"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/checkout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mostra o checkout aberto do cliente */
+        get: operations["ver"];
+        put?: never;
+        /** Leva os itens e as reservas do carrinho para um checkout novo */
+        post: operations["iniciar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/checkout/voltar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Encerra o checkout e devolve os itens ao carrinho */
+        post: operations["voltar"];
         delete?: never;
         options?: never;
         head?: never;
@@ -552,7 +587,7 @@ export interface components {
         CarrinhoDto: {
             /** Format: date-time */
             expiraEm?: string;
-            itens: components["schemas"]["ItemDoCarrinhoDto"][];
+            itens: components["schemas"]["ItemComPrecoDto"][];
             /** Format: int32 */
             quantidadeDeItens: number;
             removidos: components["schemas"]["ItemRemovidoDoCarrinhoDto"][];
@@ -594,6 +629,22 @@ export interface components {
             /** Format: int64 */
             id: number;
             nome: string;
+        };
+        CheckoutDto: {
+            /** Format: date-time */
+            expiraEm: string;
+            /** Format: int64 */
+            id: number;
+            /** Format: date-time */
+            iniciadoEm: string;
+            itens: components["schemas"]["ItemComPrecoDto"][];
+            /** Format: int32 */
+            quantidadeDeItens: number;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            subtotal: string;
         };
         ClienteCriado: {
             /** Format: int64 */
@@ -688,7 +739,7 @@ export interface components {
             login: string;
             senha: string;
         };
-        ItemDoCarrinhoDto: {
+        ItemComPrecoDto: {
             autores: string[];
             /** Format: int64 */
             livroId: number;
@@ -1274,7 +1325,7 @@ export interface operations {
             };
         };
     };
-    ver: {
+    ver_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1624,6 +1675,111 @@ export interface operations {
             };
             /** @description Cartão inexistente ou de outro cliente */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    ver: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Checkout aberto */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CheckoutDto"];
+                };
+            };
+            /** @description Nenhum checkout aberto */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    iniciar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Checkout aberto */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CheckoutDto"];
+                };
+            };
+            /** @description Já existe um checkout aberto */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Carrinho vazio, livro fora de venda ou estoque insuficiente */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    voltar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Carrinho com os itens devolvidos */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CarrinhoDto"];
+                };
+            };
+            /** @description Nenhum checkout aberto */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Estoque insuficiente para a soma dos itens */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -1,3 +1,4 @@
+import { useLocation } from 'preact-iso';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/cliente';
 import type { components } from '../api/esquema';
@@ -7,7 +8,7 @@ import { useRecargaPorNotificacao } from '../contextoDeNotificacoes';
 import { formatarDataHora, formatarDinheiro } from '../formatacao';
 
 type CarrinhoDto = components['schemas']['CarrinhoDto'];
-type Item = components['schemas']['ItemDoCarrinhoDto'];
+type Item = components['schemas']['ItemComPrecoDto'];
 type Removido = components['schemas']['ItemRemovidoDoCarrinhoDto'];
 
 function LinhaDoCarrinho({
@@ -123,8 +124,10 @@ function ItensRemovidos({
  * (DEC-13); a tela recarrega quando chega uma notificação do carrinho.
  */
 export default function Carrinho() {
+  const { route } = useLocation();
   const [carrinho, definirCarrinho] = useState<CarrinhoDto | null>(null);
   const [problema, definirProblema] = useState<ProblemaDetalhe | null>(null);
+  const [iniciando, definirIniciando] = useState(false);
 
   const carregar = useCallback(async () => {
     const { data, error, response } = await cliente.GET('/api/me/carrinho');
@@ -162,6 +165,25 @@ export default function Carrinho() {
 
   function remover(livroId: number) {
     void aplicar(cliente.DELETE('/api/me/carrinho/itens/{livroId}', { params: { path: { livroId } } }));
+  }
+
+  // RF-VEN-003, DEC-12: os itens e as reservas vão para o checkout; com um já aberto (409), o cliente volta a ele.
+  async function irParaPagamento() {
+    definirIniciando(true);
+    definirProblema(null);
+    try {
+      const { data, error, response } = await cliente.POST('/api/me/checkout');
+      if (data || response.status === 409) {
+        route('/checkout');
+        return;
+      }
+      definirProblema(interpretarProblema(error, response.status));
+      await carregar();
+    } catch {
+      definirProblema({ status: 0, detail: 'Não foi possível ir para o pagamento. Tente novamente.' });
+    } finally {
+      definirIniciando(false);
+    }
   }
 
   function readicionar(removido: Removido) {
@@ -212,6 +234,16 @@ export default function Carrinho() {
               Os itens ficam reservados até {formatarDataHora(carrinho.expiraEm)}. Incluir um livro renova o prazo.
             </p>
           )}
+          <div class="acoes carrinho__acoes">
+            <button
+              class="botao"
+              type="button"
+              disabled={iniciando || carrinho.itens.some((item) => !item.precoUnitario)}
+              onClick={() => void irParaPagamento()}
+            >
+              Ir para pagamento
+            </button>
+          </div>
         </div>
       )}
 

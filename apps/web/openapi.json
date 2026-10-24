@@ -688,7 +688,7 @@
     },
     "/api/me/carrinho" : {
       "get" : {
-        "operationId" : "ver",
+        "operationId" : "ver_1",
         "responses" : {
           "200" : {
             "content" : {
@@ -1101,6 +1101,111 @@
         },
         "summary" : "Marca o cartão como o único preferencial",
         "tags" : [ "cartao-controller" ]
+      }
+    },
+    "/api/me/checkout" : {
+      "get" : {
+        "operationId" : "ver",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CheckoutDto"
+                }
+              }
+            },
+            "description" : "Checkout aberto"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Nenhum checkout aberto"
+          }
+        },
+        "summary" : "Mostra o checkout aberto do cliente",
+        "tags" : [ "checkout-controller" ]
+      },
+      "post" : {
+        "operationId" : "iniciar",
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CheckoutDto"
+                }
+              }
+            },
+            "description" : "Checkout aberto"
+          },
+          "409" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Já existe um checkout aberto"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Carrinho vazio, livro fora de venda ou estoque insuficiente"
+          }
+        },
+        "summary" : "Leva os itens e as reservas do carrinho para um checkout novo",
+        "tags" : [ "checkout-controller" ]
+      }
+    },
+    "/api/me/checkout/voltar" : {
+      "post" : {
+        "operationId" : "voltar",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CarrinhoDto"
+                }
+              }
+            },
+            "description" : "Carrinho com os itens devolvidos"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Nenhum checkout aberto"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Estoque insuficiente para a soma dos itens"
+          }
+        },
+        "summary" : "Encerra o checkout e devolve os itens ao carrinho",
+        "tags" : [ "checkout-controller" ]
       }
     },
     "/api/me/enderecos" : {
@@ -1733,7 +1838,7 @@
           "itens" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/ItemDoCarrinhoDto"
+              "$ref" : "#/components/schemas/ItemComPrecoDto"
             }
           },
           "quantidadeDeItens" : {
@@ -1841,6 +1946,39 @@
           }
         },
         "required" : [ "id", "nome" ]
+      },
+      "CheckoutDto" : {
+        "type" : "object",
+        "properties" : {
+          "expiraEm" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "iniciadoEm" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "itens" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ItemComPrecoDto"
+            }
+          },
+          "quantidadeDeItens" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "subtotal" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          }
+        },
+        "required" : [ "expiraEm", "id", "iniciadoEm", "itens", "quantidadeDeItens", "subtotal" ]
       },
       "ClienteCriado" : {
         "type" : "object",
@@ -2087,7 +2225,7 @@
         },
         "required" : [ "login", "senha" ]
       },
-      "ItemDoCarrinhoDto" : {
+      "ItemComPrecoDto" : {
         "type" : "object",
         "properties" : {
           "autores" : {

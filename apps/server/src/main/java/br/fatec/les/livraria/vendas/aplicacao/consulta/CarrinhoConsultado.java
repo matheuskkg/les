@@ -20,7 +20,7 @@ import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
  * @param removidos         livros retirados por expiração, ainda não readicionados nem dispensados (RNF-VEN-001)
  */
 public record CarrinhoConsultado(
-        List<ItemDoCarrinho> itens,
+        List<ItemComPreco> itens,
         Dinheiro subtotal,
         int quantidadeDeItens,
         @Nullable LocalDateTime expiraEm,

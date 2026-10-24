@@ -1,0 +1,82 @@
+package br.fatec.les.livraria.vendas.infraestrutura.web;
+
+import java.net.URI;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.IniciarCheckout;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.VerCheckout;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.VoltarAoCarrinho;
+import br.fatec.les.livraria.vendas.infraestrutura.web.dto.CarrinhoDto;
+import br.fatec.les.livraria.vendas.infraestrutura.web.dto.CheckoutDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
+
+/**
+ * Sessão de compra do cliente logado (RF-VEN-003, DEC-07, DEC-12): "Ir para pagamento", consulta do checkout aberto
+ * e "Voltar ao carrinho". O cliente vem da sessão.
+ */
+@RestController
+@RequestMapping("/api/me/checkout")
+@RequiredArgsConstructor
+public class CheckoutController {
+
+    private final IniciarCheckout iniciarCheckout;
+    private final VerCheckout verCheckout;
+    private final VoltarAoCarrinho voltarAoCarrinho;
+
+    @GetMapping
+    @Operation(summary = "Mostra o checkout aberto do cliente")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Checkout aberto"),
+            @ApiResponse(responseCode = "404", description = "Nenhum checkout aberto",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public CheckoutDto ver() {
+        return CheckoutDto.de(verCheckout.executar());
+    }
+
+    @PostMapping
+    @Operation(summary = "Leva os itens e as reservas do carrinho para um checkout novo")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Checkout aberto"),
+            @ApiResponse(responseCode = "409", description = "Já existe um checkout aberto",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Carrinho vazio, livro fora de venda ou estoque "
+                    + "insuficiente", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<CheckoutDto> iniciar() {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .location(URI.create("/api/me/checkout"))
+                .body(CheckoutDto.de(iniciarCheckout.executar()));
+    }
+
+    @PostMapping("/voltar")
+    @Operation(summary = "Encerra o checkout e devolve os itens ao carrinho")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Carrinho com os itens devolvidos"),
+            @ApiResponse(responseCode = "404", description = "Nenhum checkout aberto",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Estoque insuficiente para a soma dos itens",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public CarrinhoDto voltar() {
+        return CarrinhoDto.de(voltarAoCarrinho.executar());
+    }
+}

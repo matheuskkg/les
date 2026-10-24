@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.vendas.aplicacao.casodeuso;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,9 +13,11 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Esvazia o carrinho e libera as reservas quando o cliente inativa a conta (DEC-10). É chamado pelo
- * {@code InativarConta} do {@code acesso}, na mesma transação, pela porta {@link EfeitoDaInativacao}.
+ * {@code InativarConta} do {@code acesso}, na mesma transação, pela porta {@link EfeitoDaInativacao}. Roda antes do
+ * {@link EncerrarCheckoutNaInativacao}: as travas seguem a ordem carrinho, depois checkout.
  */
 @Component
+@Order(1)
 @RequiredArgsConstructor
 public class EsvaziarCarrinhoNaInativacao implements EfeitoDaInativacao {
 

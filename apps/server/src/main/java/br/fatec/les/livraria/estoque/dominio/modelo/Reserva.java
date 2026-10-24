@@ -14,8 +14,8 @@ public class Reserva {
 
     private final Long id;
     private final Long livroId;
-    private final OrigemReserva origem;
-    private final Long origemId;
+    private OrigemReserva origem;
+    private Long origemId;
     private int quantidade;
     private LocalDateTime expiraEm;
 
@@ -43,6 +43,16 @@ public class Reserva {
 
     /** Renova o prazo do bloqueio quando o carrinho recebe um item novo (DEC-05.1). */
     public void renovarPrazo(LocalDateTime expiraEm) {
+        this.expiraEm = Objects.requireNonNull(expiraEm, "expiraEm");
+    }
+
+    /**
+     * Passa a reserva a outro dono com novo prazo, como do carrinho ao checkout (DEC-12, DEC-16). A quantidade não
+     * muda.
+     */
+    public void transferir(OrigemReserva origem, Long origemId, LocalDateTime expiraEm) {
+        this.origem = Objects.requireNonNull(origem, "origem");
+        this.origemId = Objects.requireNonNull(origemId, "origemId");
         this.expiraEm = Objects.requireNonNull(expiraEm, "expiraEm");
     }
 

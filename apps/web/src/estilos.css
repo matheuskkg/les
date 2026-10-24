@@ -973,3 +973,7 @@ textarea.campo__entrada {
   font-size: 1.125rem;
   text-align: right;
 }
+
+.carrinho__acoes {
+  justify-content: flex-end;
+}

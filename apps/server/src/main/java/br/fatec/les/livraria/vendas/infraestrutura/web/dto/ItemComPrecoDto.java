@@ -5,13 +5,13 @@ import java.util.List;
 import org.jspecify.annotations.Nullable;
 
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
-import br.fatec.les.livraria.vendas.aplicacao.consulta.ItemDoCarrinho;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.ItemComPreco;
 
 /**
- * Item do carrinho na API (RF-VEN-001, DEC-07): preço de venda atual e subtotal em string decimal, ausentes quando o
+ * Item do carrinho ou do checkout na API (RF-VEN-001, RF-VEN-003, DEC-07): preço de venda atual e subtotal em string decimal, ausentes quando o
  * livro saiu de venda.
  */
-public record ItemDoCarrinhoDto(
+public record ItemComPrecoDto(
         Long livroId,
         @Nullable String titulo,
         List<String> autores,
@@ -19,8 +19,8 @@ public record ItemDoCarrinhoDto(
         int quantidade,
         @Nullable Dinheiro subtotal) {
 
-    public static ItemDoCarrinhoDto de(ItemDoCarrinho item) {
-        return new ItemDoCarrinhoDto(item.livroId(), item.titulo(), item.autores(), item.precoUnitario(),
+    public static ItemComPrecoDto de(ItemComPreco item) {
+        return new ItemComPrecoDto(item.livroId(), item.titulo(), item.autores(), item.precoUnitario(),
                 item.quantidade(), item.subtotal());
     }
 }
