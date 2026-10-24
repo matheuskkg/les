@@ -55,7 +55,7 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 
 | ID | Status | Onde no código | Observação |
 |---|---|---|---|
-| RF-VEN-001 | ❌ |  |  |
+| RF-VEN-001 | ❌ |  | Carrinho só com login de cliente ([DEC-15.4](../decisoes/DEC-15.4-acesso-consultas-e-exportacao.md)). |
 | RF-VEN-002 | ❌ |  |  |
 | RF-VEN-003 | ❌ |  | "Ir para pagamento" move os itens e as reservas do carrinho para um checkout com prazo `livraria.checkout.prazo` (padrão 60 min); um checkout aberto por cliente ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
 | RF-VEN-004 | ❌ |  | Frete fake definido em [DEC-05.3](../decisoes/DEC-05.3-frete.md): base pela região do CEP + R$ 2,00 por 0,5 kg adicional (maior entre peso real e cúbico). |
@@ -73,7 +73,7 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 | RNF-VEN-001 | ❌ |  | Vale também para itens de checkout expirado ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
 | RN-VEN-001 | ❌ |  |  |
 | RN-VEN-002 | ❌ |  | Itens do checkout ficam reservados; a finalização revalida o estoque, e itens perdidos por expiração são notificados ([DEC-13](../decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)). |
-| RN-VEN-003 | ❌ |  | Vale para os quatro tipos de promocional, inclusive os de frete (`FRETE_GRATIS`, `FRETE_VALOR_FIXO`) ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). Extensão: o DRS não prevê cupom de frete. |
+| RN-VEN-003 | ❌ |  | Vale para os quatro tipos de promocional, inclusive os de frete (`FRETE_GRATIS`, `FRETE_VALOR_FIXO`) ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). Extensão: o DRS não prevê cupom de frete. Cada cliente usa cada promocional uma vez, com o uso registrado por cliente ([DEC-15.2](../decisoes/DEC-15.2-uso-do-cupom-promocional.md)). |
 | RN-VEN-004 | ❌ |  | O cliente informa o valor de cada cartão; a soma fecha o restante após os cupons ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). |
 | RN-VEN-005 | ❌ |  | Exceção: havendo cupom e restante menor que R$ 10,00, um único cartão paga o restante ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). |
 | RN-VEN-006 | ❌ |  | Só cupom de troca gera troco; o excedente do promocional se perde. Cupom desnecessário (sem ele os demais cobrem o total) recusa a compra com 422 ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). |

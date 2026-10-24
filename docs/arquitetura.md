@@ -184,6 +184,8 @@ Definidos no [DEC-14](decisoes/DEC-14-ids-nomes-e-seed.md):
 
 - **Reserva × baixa de estoque.**
   - O bloqueio ao adicionar ao carrinho (RN-VEN-014) é uma `Reserva` com validade, e não altera o estoque.
+  - O saldo é uma linha `estoque` por livro, derivada das entradas no seed; as entradas guardam o histórico e o
+    custo ([DEC-15.3](decisoes/DEC-15.3-saldo-de-estoque.md)).
   - Disponível = quantidade em estoque − reservas ativas.
   - Em "Ir para pagamento", as reservas passam do carrinho para o `Checkout`, que tem prazo próprio
     ([DEC-12](decisoes/DEC-12-pedido-checkout-e-trocas.md)).
@@ -217,12 +219,13 @@ Definidos no [DEC-14](decisoes/DEC-14-ids-nomes-e-seed.md):
   - Chegam ao `web` por SSE (`SseEmitter`), enviadas depois do commit.
   - O `web` também pode listá-las e marcá-las como lidas
     ([DEC-13](decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)).
-- **Dinheiro.** Value object `Dinheiro` sobre `BigDecimal`, com escala 2 e `HALF_EVEN`. Nunca `double`.
+- **Dinheiro.** Value object `Dinheiro` sobre `BigDecimal`, com escala 2 e `HALF_UP`, arredondado só no fim de
+  cada cálculo ([DEC-15.1](decisoes/DEC-15.1-arredondamento.md)). Nunca `double`.
 - **Senhas.** BCrypt, por meio da porta `CodificadorDeSenha` (RNF-CLI-003).
 - **Análise (ANA).** Consulta nativa agregada por mês e categoria copiada no pedido, considerando só os status
   válidos e descontando as trocas concluídas (RN-ANA-004, [DEC-12](decisoes/DEC-12-pedido-checkout-e-trocas.md)).
   O preenchimento de meses sem venda com R$ 0,00 (RN-ANA-003) e a validação do período (RN-ANA-002) ficam em
-  regras e no caso de uso. A exportação é em CSV ou XLSX.
+  regras e no caso de uso. A exportação é em CSV ([DEC-15.4](decisoes/DEC-15.4-acesso-consultas-e-exportacao.md)).
 - **Recomendação (REC).** Porta `AssistenteDeLivros` com adapter fake por padrão. O provedor de IA real será definido
   quando o módulo for implementado.
 

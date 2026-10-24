@@ -51,7 +51,7 @@ inválidos."), sem dizer qual dos dois errou.
 
 | Rotas | Acesso |
 |---|---|
-| `GET /api/livros/**`, `POST /api/clientes` (autocadastro), `/api/sessao`, `GET /v3/api-docs` | público |
+| `GET /api/livros/**`, `POST /api/clientes` (autocadastro), `/api/sessao`, `GET /v3/api-docs` (alterado pelo [DEC-15.4](DEC-15.4-acesso-consultas-e-exportacao.md): também as rotas e os arquivos do `web` e, no profile `e2e`, `/api/teste/**` sem CSRF) | público |
 | `/api/me/**` | papel `CLIENTE` |
 | `/api/admin/**` | papel `ADMIN` |
 | demais rotas `/api/**` | autenticado |
@@ -74,7 +74,8 @@ inválidos."), sem dizer qual dos dois errou.
 - A situação fica no `Usuario`; inativar o cliente inativa o seu usuário.
 - O login de usuário inativo responde 401 com "Cadastro inativo.". (Alterado pelo [DEC-10](DEC-10-cliente-enderecos-e-cartoes.md): em até 7 dias após a
   inativação, o login reativa a conta; depois disso ela fica encerrada e o login responde como identificador
-  desconhecido.)
+  desconhecido.) (Alterado pelo [DEC-15.4](DEC-15.4-acesso-consultas-e-exportacao.md): não há mensagem própria para conta inativa; senha errada responde
+  "Login ou senha inválidos.".)
 - A cada requisição autenticada, o conversor do JWT carrega o usuário pelo `sub` (consulta pela chave primária). Se
   ele não existir mais ou estiver inativo, responde 401, e o `web` volta ao login. O papel usado na autorização é o do
   banco, não o do token.

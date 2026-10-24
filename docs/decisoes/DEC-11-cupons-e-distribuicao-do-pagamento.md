@@ -18,7 +18,8 @@ cupons e cartões são aplicados, nem o que acontece com dois pedidos usando o m
 ### Cupom
 
 Uma única tabela `cupom`, com a categoria `PROMOCIONAL` ou `TROCA`. Campos comuns: código, validade (data, opcional)
-e situação (disponível/usado).
+e situação (disponível/usado). (Alterado pelo [DEC-15.2](DEC-15.2-uso-do-cupom-promocional.md): promocional em `cupom_promocional`, sem situação, com o uso
+registrado por cliente em `uso_cupom_promocional`; `cupom` fica só com os de troca.)
 
 **Promocional** (criado pelo seed):
 
@@ -70,7 +71,8 @@ cobrem). Com R$ 20 e R$ 40, nenhum é desnecessário: a compra é aceita e gera 
 
 - Os cupons são marcados como **usados ao finalizar** a compra (pedido `EM PROCESSAMENTO`), com bloqueio otimista
   (`@Version`). De dois pedidos simultâneos com o mesmo cupom, o segundo recebe 409
-  ([DEC-07](DEC-07-convencoes-da-api-rest.md)).
+  ([DEC-07](DEC-07-convencoes-da-api-rest.md)). (Alterado pelo [DEC-15.2](DEC-15.2-uso-do-cupom-promocional.md): o promocional grava um uso por cliente, com
+  `UNIQUE (cupom_promocional_id, cliente_id)`, apagado na reprovação.)
 - A finalização valida a validade e a disponibilidade dos cupons (RN-VEN-007). Pedido `REPROVADA` devolve os cupons
   (voltam a disponíveis).
 - O cupom de troco só é gerado quando o pedido é `APROVADA`.

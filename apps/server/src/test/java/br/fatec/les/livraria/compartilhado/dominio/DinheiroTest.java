@@ -9,9 +9,11 @@ import org.junit.jupiter.api.Test;
 class DinheiroTest {
 
     @Test
-    void normalizaParaDuasCasasComHalfEven() {
-        assertThat(Dinheiro.de("10.005").valor()).isEqualByComparingTo("10.00");
+    void normalizaParaDuasCasasComHalfUp() {
+        assertThat(Dinheiro.de("10.005").valor()).isEqualByComparingTo("10.01");
         assertThat(Dinheiro.de("10.015").valor()).isEqualByComparingTo("10.02");
+        assertThat(Dinheiro.de("10.004").valor()).isEqualByComparingTo("10.00");
+        assertThat(Dinheiro.de("-10.005").valor()).isEqualByComparingTo("-10.01");
         assertThat(Dinheiro.de("10").valor().scale()).isEqualTo(2);
     }
 

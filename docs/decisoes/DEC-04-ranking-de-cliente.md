@@ -52,5 +52,6 @@ Exemplo: 3 pedidos somando R$ 450,00, o último há 20 dias → V = 60, F = 60, 
 ## Consequências
 
 - Como é calculado na consulta, a recência fica sempre correta sem job de recálculo; em compensação, ordenar a
-  consulta de clientes por ranking exige calcular para todos os filtrados.
+  consulta de clientes por ranking exige calcular para todos os filtrados (alterado pelo [DEC-15.4](DEC-15.4-acesso-consultas-e-exportacao.md): a consulta não
+  ordena por ranking).
 - Cada faixa e a fórmula são testáveis isoladamente (uma regra por arquivo).

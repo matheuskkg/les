@@ -4,11 +4,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
-/** Valor monetário em reais, sempre com 2 casas decimais e arredondamento {@code HALF_EVEN}. */
+/** Valor monetário em reais, sempre com 2 casas decimais e arredondamento {@code HALF_UP} (DEC-15.1). */
 public record Dinheiro(BigDecimal valor) implements Comparable<Dinheiro> {
 
     private static final int ESCALA = 2;
-    private static final RoundingMode ARREDONDAMENTO = RoundingMode.HALF_EVEN;
+    private static final RoundingMode ARREDONDAMENTO = RoundingMode.HALF_UP;
 
     public static final Dinheiro ZERO = new Dinheiro(BigDecimal.ZERO);
 
