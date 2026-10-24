@@ -8,6 +8,7 @@ import br.fatec.les.livraria.catalogo.aplicacao.consulta.CategoriaDoLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.FiltroLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroDetalhe;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroParaVenda;
+import br.fatec.les.livraria.catalogo.aplicacao.consulta.MedidasDoLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroResumo;
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
@@ -45,4 +46,12 @@ public interface CatalogoConsultas {
      * @return os livros encontrados, em ordem indeterminada; id inexistente não aparece
      */
     List<LivroParaVenda> buscarParaVenda(Collection<Long> livroIds);
+
+    /**
+     * Peso e dimensões dos livros pelos ids, ativos ou não, para o cálculo de frete (RF-VEN-004, RN-LIV-001).
+     *
+     * @param livroIds livros a consultar
+     * @return as medidas encontradas, em ordem indeterminada; id inexistente não aparece
+     */
+    List<MedidasDoLivro> buscarMedidas(Collection<Long> livroIds);
 }

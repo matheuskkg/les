@@ -1169,6 +1169,55 @@
         "tags" : [ "checkout-controller" ]
       }
     },
+    "/api/me/checkout/frete" : {
+      "post" : {
+        "operationId" : "calcularFrete",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PedidoDeFrete"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FreteDto"
+                }
+              }
+            },
+            "description" : "Frete e total"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Nenhum checkout aberto ou endereço não encontrado"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Endereço não escolhido ou endereço novo inválido"
+          }
+        },
+        "summary" : "Calcula o frete do checkout para um endereço de entrega, cadastrado ou novo",
+        "tags" : [ "checkout-controller" ]
+      }
+    },
     "/api/me/checkout/voltar" : {
       "post" : {
         "operationId" : "voltar",
@@ -2211,6 +2260,45 @@
         },
         "required" : [ "bairro", "cep", "cidade", "id", "logradouro", "nomeCurto", "numero", "pais", "tipoEndereco", "tipoLogradouro", "uf" ]
       },
+      "EnderecoInformadoDto" : {
+        "type" : "object",
+        "properties" : {
+          "bairro" : {
+            "type" : "string"
+          },
+          "cep" : {
+            "type" : "string"
+          },
+          "cidade" : {
+            "type" : "string"
+          },
+          "logradouro" : {
+            "type" : "string"
+          },
+          "nomeCurto" : {
+            "type" : "string"
+          },
+          "numero" : {
+            "type" : "string"
+          },
+          "observacoes" : {
+            "type" : "string"
+          },
+          "tipoEndereco" : {
+            "type" : "string",
+            "enum" : [ "CASA", "TRABALHO" ]
+          },
+          "tipoLogradouro" : {
+            "type" : "string",
+            "enum" : [ "RUA", "AVENIDA", "ALAMEDA", "TRAVESSA", "PRACA", "ESTRADA", "RODOVIA", "OUTRO" ]
+          },
+          "uf" : {
+            "type" : "string",
+            "enum" : [ "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO" ]
+          }
+        },
+        "required" : [ "bairro", "cep", "cidade", "logradouro", "nomeCurto", "numero", "observacoes", "tipoEndereco", "tipoLogradouro", "uf" ]
+      },
       "EntradaDeLogin" : {
         "type" : "object",
         "properties" : {
@@ -2224,6 +2312,39 @@
           }
         },
         "required" : [ "login", "senha" ]
+      },
+      "EscolhaDeEnderecoDto" : {
+        "type" : "object",
+        "properties" : {
+          "enderecoId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "novo" : {
+            "$ref" : "#/components/schemas/EnderecoInformadoDto"
+          }
+        }
+      },
+      "FreteDto" : {
+        "type" : "object",
+        "properties" : {
+          "frete" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          },
+          "subtotal" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          },
+          "total" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          }
+        },
+        "required" : [ "frete", "subtotal", "total" ]
       },
       "ItemComPrecoDto" : {
         "type" : "object",
@@ -2578,6 +2699,15 @@
           }
         },
         "required" : [ "itens", "pagina", "tamanho", "totalItens", "totalPaginas" ]
+      },
+      "PedidoDeFrete" : {
+        "type" : "object",
+        "properties" : {
+          "entrega" : {
+            "$ref" : "#/components/schemas/EscolhaDeEnderecoDto"
+          }
+        },
+        "required" : [ "entrega" ]
       },
       "ProblemDetail" : {
         "type" : "object",

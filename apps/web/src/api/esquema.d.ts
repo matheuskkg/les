@@ -344,6 +344,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/checkout/frete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Calcula o frete do checkout para um endereço de entrega, cadastrado ou novo */
+        post: operations["calcularFrete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me/checkout/voltar": {
         parameters: {
             query?: never;
@@ -735,9 +752,46 @@ export interface components {
             /** @enum {string} */
             uf: "AC" | "AL" | "AP" | "AM" | "BA" | "CE" | "DF" | "ES" | "GO" | "MA" | "MT" | "MS" | "MG" | "PA" | "PB" | "PR" | "PE" | "PI" | "RJ" | "RN" | "RS" | "RO" | "RR" | "SC" | "SP" | "SE" | "TO";
         };
+        EnderecoInformadoDto: {
+            bairro: string;
+            cep: string;
+            cidade: string;
+            logradouro: string;
+            nomeCurto: string;
+            numero: string;
+            observacoes: string;
+            /** @enum {string} */
+            tipoEndereco: "CASA" | "TRABALHO";
+            /** @enum {string} */
+            tipoLogradouro: "RUA" | "AVENIDA" | "ALAMEDA" | "TRAVESSA" | "PRACA" | "ESTRADA" | "RODOVIA" | "OUTRO";
+            /** @enum {string} */
+            uf: "AC" | "AL" | "AP" | "AM" | "BA" | "CE" | "DF" | "ES" | "GO" | "MA" | "MT" | "MS" | "MG" | "PA" | "PB" | "PR" | "PE" | "PI" | "RJ" | "RN" | "RS" | "RO" | "RR" | "SC" | "SP" | "SE" | "TO";
+        };
         EntradaDeLogin: {
             login: string;
             senha: string;
+        };
+        EscolhaDeEnderecoDto: {
+            /** Format: int64 */
+            enderecoId?: number;
+            novo?: components["schemas"]["EnderecoInformadoDto"];
+        };
+        FreteDto: {
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            frete: string;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            subtotal: string;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            total: string;
         };
         ItemComPrecoDto: {
             autores: string[];
@@ -884,6 +938,9 @@ export interface components {
             totalItens: number;
             /** Format: int32 */
             totalPaginas: number;
+        };
+        PedidoDeFrete: {
+            entrega: components["schemas"]["EscolhaDeEnderecoDto"];
         };
         ProblemDetail: {
             detail?: string;
@@ -1741,6 +1798,48 @@ export interface operations {
                 };
             };
             /** @description Carrinho vazio, livro fora de venda ou estoque insuficiente */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    calcularFrete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedidoDeFrete"];
+            };
+        };
+        responses: {
+            /** @description Frete e total */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FreteDto"];
+                };
+            };
+            /** @description Nenhum checkout aberto ou endereço não encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Endereço não escolhido ou endereço novo inválido */
             422: {
                 headers: {
                     [name: string]: unknown;

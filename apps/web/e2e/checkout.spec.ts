@@ -35,4 +35,31 @@ test.describe('Checkout', () => {
     await page.getByRole('link', { name: 'Ir para o carrinho' }).click();
     await expect(page.locator('.item-removido', { hasText: 'Dom Casmurro' })).toBeVisible();
   });
+
+  test('calcula o frete pelo endereço de entrega, cadastrado ou novo (RF-VEN-004, RF-VEN-005)', async ({ page }) => {
+    // Dom Casmurro pesa 0,32 kg (1 bloco); o primeiro endereço da Ana tem CEP de SP (R$ 12,00)
+    await expect(page.getByTestId('frete')).toHaveText('R$ 12,00');
+    await expect(page.getByTestId('total')).toHaveText('R$ 59,88');
+
+    const entrega = page.getByRole('group', { name: 'Endereço de entrega' });
+    await entrega.getByLabel('Outro endereço').check();
+    await expect(page.getByTestId('frete')).toHaveText('escolha o endereço de entrega');
+    await page.locator('#entrega-nome').fill('Presente');
+    await page.locator('#entrega-logradouro').fill('Rua Ramos Ferreira');
+    await page.locator('#entrega-numero').fill('10');
+    await page.locator('#entrega-bairro').fill('Centro');
+    await page.locator('#entrega-cep').fill('69005040');
+    await page.locator('#entrega-cidade').fill('Manaus');
+    await page.locator('#entrega-uf').selectOption('AM');
+    await entrega.getByRole('button', { name: 'Usar este endereço' }).click();
+
+    await expect(page.getByTestId('frete')).toHaveText('R$ 30,00');
+    await expect(page.getByTestId('total')).toHaveText('R$ 77,88');
+
+    await page.getByLabel('Cobrança no mesmo endereço da entrega').uncheck();
+    await expect(page.getByRole('group', { name: 'Endereço de cobrança' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Voltar ao carrinho' }).click();
+    await expect(page).toHaveURL(/\/carrinho$/);
+  });
 });

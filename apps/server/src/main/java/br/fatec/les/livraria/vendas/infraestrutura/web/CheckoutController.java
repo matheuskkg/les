@@ -8,14 +8,18 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.CalcularFrete;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.IniciarCheckout;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.VerCheckout;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.VoltarAoCarrinho;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.CarrinhoDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.CheckoutDto;
+import br.fatec.les.livraria.vendas.infraestrutura.web.dto.FreteDto;
+import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PedidoDeFrete;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,8 +28,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Sessão de compra do cliente logado (RF-VEN-003, DEC-07, DEC-12): "Ir para pagamento", consulta do checkout aberto
- * e "Voltar ao carrinho". O cliente vem da sessão.
+ * Sessão de compra do cliente logado (RF-VEN-003, DEC-07, DEC-12): "Ir para pagamento", consulta do checkout aberto,
+ * frete para o endereço de entrega (RF-VEN-004, RF-VEN-005) e "Voltar ao carrinho". O cliente vem da sessão.
  */
 @RestController
 @RequestMapping("/api/me/checkout")
@@ -35,6 +39,7 @@ public class CheckoutController {
     private final IniciarCheckout iniciarCheckout;
     private final VerCheckout verCheckout;
     private final VoltarAoCarrinho voltarAoCarrinho;
+    private final CalcularFrete calcularFrete;
 
     @GetMapping
     @Operation(summary = "Mostra o checkout aberto do cliente")
@@ -78,5 +83,20 @@ public class CheckoutController {
     })
     public CarrinhoDto voltar() {
         return CarrinhoDto.de(voltarAoCarrinho.executar());
+    }
+
+    @PostMapping("/frete")
+    @Operation(summary = "Calcula o frete do checkout para um endereço de entrega, cadastrado ou novo")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Frete e total"),
+            @ApiResponse(responseCode = "404", description = "Nenhum checkout aberto ou endereço não encontrado",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Endereço não escolhido ou endereço novo inválido",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public FreteDto calcularFrete(@RequestBody PedidoDeFrete pedido) {
+        return FreteDto.de(calcularFrete.executar(pedido.paraEscolha()));
     }
 }

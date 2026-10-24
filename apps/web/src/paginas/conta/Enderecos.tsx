@@ -3,15 +3,12 @@ import { cliente, interpretarProblema, type ProblemaDetalhe } from '../../api/cl
 import type { components } from '../../api/esquema';
 import {
   TIPOS_DE_ENDERECO,
-  TIPOS_DE_LOGRADOURO,
-  UFS,
   enderecoVazio,
   formatarCep,
   montarEndereco,
   type EnderecoDoFormulario,
 } from '../../cadastroDeCliente';
-import { CampoDeFormulario } from '../../componentes/CampoDeFormulario';
-import { CampoDeSelecao } from '../../componentes/CampoDeSelecao';
+import { CamposDoEndereco } from '../../componentes/CamposDoEndereco';
 import { Erro } from '../../componentes/Erro';
 import { Violacoes } from '../../componentes/Violacoes';
 
@@ -159,34 +156,7 @@ export function Enderecos() {
         <form class="formulario" noValidate onSubmit={(evento) => void salvar(evento)}>
           <h3>{edicao.id === null ? 'Novo endereço' : 'Alterar endereço'}</h3>
           {erros}
-          <div class="grade-do-cadastro">
-            <CampoDeFormulario id="endereco-nome" rotulo="Nome curto" required valor={edicao.formulario.nomeCurto}
-              aoMudar={(valor) => mudar('nomeCurto', valor)} placeholder="Ex.: Casa da praia" />
-            <CampoDeSelecao id="endereco-tipo" rotulo="Tipo" required valor={edicao.formulario.tipoEndereco}
-              opcoes={TIPOS_DE_ENDERECO} placeholder="Selecione" aoMudar={(valor) => mudar('tipoEndereco', valor)} />
-            <CampoDeSelecao id="endereco-logradouro-tipo" rotulo="Tipo de logradouro" required
-              valor={edicao.formulario.tipoLogradouro} opcoes={TIPOS_DE_LOGRADOURO} placeholder="Selecione"
-              aoMudar={(valor) => mudar('tipoLogradouro', valor)} />
-            <div class="campo--largo">
-              <CampoDeFormulario id="endereco-logradouro" rotulo="Logradouro" required
-                valor={edicao.formulario.logradouro} aoMudar={(valor) => mudar('logradouro', valor)} />
-            </div>
-            <CampoDeFormulario id="endereco-numero" rotulo="Número" required valor={edicao.formulario.numero}
-              aoMudar={(valor) => mudar('numero', valor)} />
-            <CampoDeFormulario id="endereco-bairro" rotulo="Bairro" required valor={edicao.formulario.bairro}
-              aoMudar={(valor) => mudar('bairro', valor)} />
-            <CampoDeFormulario id="endereco-cep" rotulo="CEP" required inputMode="numeric"
-              valor={edicao.formulario.cep} aoMudar={(valor) => mudar('cep', formatarCep(valor))} />
-            <CampoDeFormulario id="endereco-cidade" rotulo="Cidade" required valor={edicao.formulario.cidade}
-              aoMudar={(valor) => mudar('cidade', valor)} />
-            <CampoDeSelecao id="endereco-uf" rotulo="UF" required valor={edicao.formulario.uf} opcoes={UFS}
-              placeholder="Selecione" aoMudar={(valor) => mudar('uf', valor)} />
-            <div class="campo--largo">
-              <CampoDeFormulario id="endereco-observacoes" rotulo="Observações"
-                valor={edicao.formulario.observacoes} aoMudar={(valor) => mudar('observacoes', valor)} />
-            </div>
-          </div>
-          <p class="campo__ajuda">País: Brasil.</p>
+          <CamposDoEndereco prefixo="endereco" formulario={edicao.formulario} aoMudar={mudar} />
           <div class="acoes">
             <button class="botao" type="submit" disabled={enviando}>
               {enviando ? 'Salvando…' : 'Salvar endereço'}

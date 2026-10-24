@@ -2,23 +2,45 @@ import { useLocation } from 'preact-iso';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/cliente';
 import type { components } from '../api/esquema';
+import { montarEndereco, type EnderecoDoFormulario } from '../cadastroDeCliente';
 import { Erro } from '../componentes/Erro';
+import { SelecaoDeEndereco } from '../componentes/SelecaoDeEndereco';
 import { Violacoes } from '../componentes/Violacoes';
 import { useRecargaPorNotificacao } from '../contextoDeNotificacoes';
+import { escolhaInicial, escolhaParaApi, type EscolhaDeEndereco } from '../escolhaDeEndereco';
 import { formatarDataHora, formatarDinheiro } from '../formatacao';
 
 type CheckoutDto = components['schemas']['CheckoutDto'];
+type EnderecoCadastrado = components['schemas']['EnderecoDaResposta'];
+type FreteDto = components['schemas']['FreteDto'];
+
+function Problema({ problema }: { problema: ProblemaDetalhe | null }) {
+  return problema?.violacoes && problema.violacoes.length > 0 ? (
+    <Violacoes violacoes={problema.violacoes} />
+  ) : (
+    <Erro problema={problema} />
+  );
+}
 
 /**
  * Sessão de compra (RF-VEN-003, DEC-12): itens levados do carrinho, reservados até o fim do prazo, só exibido
  * (DEC-13). Para mudar quantidades, o cliente volta ao carrinho. A tela recarrega quando chega uma notificação do
  * checkout; expirado, o checkout deixa de existir e os itens ficam nos removidos do carrinho.
+ *
+ * Endereços de entrega e de cobrança (RF-VEN-005, DEC-10): cadastrados ou novos, com a opção de salvar no cadastro; a
+ * cobrança vem igual à entrega. O frete é recalculado a cada troca do endereço de entrega (RF-VEN-004, DEC-05.3).
  */
 export default function Checkout() {
   const { route } = useLocation();
   const [checkout, definirCheckout] = useState<CheckoutDto | null | undefined>(undefined);
   const [problema, definirProblema] = useState<ProblemaDetalhe | null>(null);
   const [voltando, definirVoltando] = useState(false);
+  const [enderecos, definirEnderecos] = useState<EnderecoCadastrado[] | null>(null);
+  const [entrega, definirEntrega] = useState<EscolhaDeEndereco | null>(null);
+  const [cobrancaIgual, definirCobrancaIgual] = useState(true);
+  const [cobranca, definirCobranca] = useState<EscolhaDeEndereco | null>(null);
+  const [problemaDoEndereco, definirProblemaDoEndereco] = useState<ProblemaDetalhe | null>(null);
+  const [frete, definirFrete] = useState<FreteDto | null>(null);
 
   const carregar = useCallback(async () => {
     const { data, error, response } = await cliente.GET('/api/me/checkout');
@@ -41,6 +63,90 @@ export default function Checkout() {
 
   useRecargaPorNotificacao('checkout', () => void carregar().catch(() => undefined));
 
+  const carregarEnderecos = useCallback(async () => {
+    const { data, error, response } = await cliente.GET('/api/me/enderecos');
+    if (!data) {
+      definirProblemaDoEndereco(interpretarProblema(error, response.status));
+      return null;
+    }
+    definirEnderecos(data);
+    return data;
+  }, []);
+
+  const checkoutId = checkout?.id;
+  useEffect(() => {
+    if (checkoutId === undefined || enderecos !== null) {
+      return;
+    }
+    void carregarEnderecos()
+      .then((lidos) => {
+        if (lidos) {
+          const inicial = escolhaInicial(lidos);
+          definirEntrega(inicial);
+          definirCobranca(inicial);
+        }
+      })
+      .catch(() =>
+        definirProblemaDoEndereco({ status: 0, detail: 'Não foi possível carregar os endereços. Tente novamente.' }),
+      );
+  }, [checkoutId, enderecos, carregarEnderecos]);
+
+  // RF-VEN-004: o frete depende só do endereço de entrega e dos itens do checkout.
+  useEffect(() => {
+    definirFrete(null);
+    if (checkoutId === undefined || entrega === null) {
+      return;
+    }
+    let ativo = true;
+    void (async () => {
+      const { data, error, response } = await cliente.POST('/api/me/checkout/frete', {
+        body: { entrega: escolhaParaApi(entrega) },
+      });
+      if (!ativo) {
+        return;
+      }
+      if (!data) {
+        definirProblemaDoEndereco(interpretarProblema(error, response.status));
+        return;
+      }
+      definirProblemaDoEndereco(null);
+      definirFrete(data);
+    })().catch(() => {
+      if (ativo) {
+        definirProblemaDoEndereco({ status: 0, detail: 'Não foi possível calcular o frete. Tente novamente.' });
+      }
+    });
+    return () => {
+      ativo = false;
+    };
+  }, [checkoutId, entrega]);
+
+  /** Usa um endereço novo; com `salvar`, grava no cadastro (RF-CLI-006) e passa a usá-lo pelo id. */
+  async function usarNovo(
+    formulario: EnderecoDoFormulario,
+    salvar: boolean,
+    definirEscolha: (escolha: EscolhaDeEndereco) => void,
+  ): Promise<boolean> {
+    definirProblemaDoEndereco(null);
+    if (!salvar) {
+      definirEscolha({ novo: formulario });
+      return true;
+    }
+    try {
+      const { data, error, response } = await cliente.POST('/api/me/enderecos', { body: montarEndereco(formulario) });
+      if (!data) {
+        definirProblemaDoEndereco(interpretarProblema(error, response.status));
+        return false;
+      }
+      await carregarEnderecos();
+      definirEscolha({ enderecoId: data.id });
+      return true;
+    } catch {
+      definirProblemaDoEndereco({ status: 0, detail: 'Não foi possível salvar o endereço. Tente novamente.' });
+      return false;
+    }
+  }
+
   async function voltar() {
     definirVoltando(true);
     definirProblema(null);
@@ -62,11 +168,7 @@ export default function Checkout() {
   return (
     <section class="pagina">
       <h1>Pagamento</h1>
-      {problema?.violacoes && problema.violacoes.length > 0 ? (
-        <Violacoes violacoes={problema.violacoes} />
-      ) : (
-        <Erro problema={problema} />
-      )}
+      <Problema problema={problema} />
 
       {checkout === undefined ? (
         <p class="aviso" role="status">
@@ -99,10 +201,62 @@ export default function Checkout() {
               </li>
             ))}
           </ul>
-          <p class="carrinho__total">
-            Subtotal ({checkout.quantidadeDeItens} {checkout.quantidadeDeItens === 1 ? 'item' : 'itens'}):{' '}
-            <strong>{formatarDinheiro(checkout.subtotal)}</strong>
-          </p>
+          {enderecos !== null && (
+            <>
+              <SelecaoDeEndereco
+                legenda="Endereço de entrega"
+                prefixo="entrega"
+                enderecos={enderecos}
+                escolha={entrega}
+                aoEscolher={definirEntrega}
+                aoUsarNovo={(formulario, salvar) => usarNovo(formulario, salvar, definirEntrega)}
+              />
+              <label class="categoria-opcao">
+                <input
+                  type="checkbox"
+                  checked={cobrancaIgual}
+                  onChange={() => definirCobrancaIgual(!cobrancaIgual)}
+                />
+                Cobrança no mesmo endereço da entrega
+              </label>
+              {!cobrancaIgual && (
+                <SelecaoDeEndereco
+                  legenda="Endereço de cobrança"
+                  prefixo="cobranca"
+                  enderecos={enderecos}
+                  escolha={cobranca}
+                  aoEscolher={definirCobranca}
+                  aoUsarNovo={(formulario, salvar) => usarNovo(formulario, salvar, definirCobranca)}
+                />
+              )}
+            </>
+          )}
+          <Problema problema={problemaDoEndereco} />
+
+          <dl class="checkout__valores">
+            <div>
+              <dt>Subtotal ({checkout.quantidadeDeItens} {checkout.quantidadeDeItens === 1 ? 'item' : 'itens'}):</dt>{' '}
+              <dd>{formatarDinheiro(checkout.subtotal)}</dd>
+            </div>
+            <div>
+              <dt>Frete:</dt>{' '}
+              <dd data-testid="frete">
+                {frete ? formatarDinheiro(frete.frete) : entrega === null
+                    ? 'escolha o endereço de entrega'
+                    : problemaDoEndereco
+                      ? '—'
+                      : 'calculando…'}
+              </dd>
+            </div>
+            {frete && (
+              <div class="carrinho__total">
+                <dt>Total:</dt>{' '}
+                <dd>
+                  <strong data-testid="total">{formatarDinheiro(frete.total)}</strong>
+                </dd>
+              </div>
+            )}
+          </dl>
           <p class="campo__ajuda">
             Os itens ficam reservados até {formatarDataHora(checkout.expiraEm)}. Para mudar quantidades, volte ao
             carrinho.
