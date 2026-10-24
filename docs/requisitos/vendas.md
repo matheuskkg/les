@@ -55,8 +55,8 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 
 | ID | Status | Onde no código | Observação |
 |---|---|---|---|
-| RF-VEN-001 | ❌ |  | Carrinho só com login de cliente ([DEC-15.4](../decisoes/DEC-15.4-acesso-consultas-e-exportacao.md)). |
-| RF-VEN-002 | ❌ |  |  |
+| RF-VEN-001 | ✅ | `apps/server/src/main/java/br/fatec/les/livraria/vendas/aplicacao/casodeuso/AdicionarAoCarrinho.java`, `apps/server/src/main/java/br/fatec/les/livraria/vendas/infraestrutura/web/CarrinhoController.java`, `apps/web/src/paginas/Carrinho.tsx` | Carrinho só com login de cliente ([DEC-15.4](../decisoes/DEC-15.4-acesso-consultas-e-exportacao.md)). |
+| RF-VEN-002 | ✅ | `apps/server/src/main/java/br/fatec/les/livraria/vendas/aplicacao/casodeuso/AlterarQuantidade.java`, `apps/server/src/main/java/br/fatec/les/livraria/vendas/dominio/regra/QuantidadeDoItem.java` |  |
 | RF-VEN-003 | ❌ |  | "Ir para pagamento" move os itens e as reservas do carrinho para um checkout com prazo `livraria.checkout.prazo` (padrão 60 min); um checkout aberto por cliente ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
 | RF-VEN-004 | ❌ |  | Frete fake definido em [DEC-05.3](../decisoes/DEC-05.3-frete.md): base pela região do CEP + R$ 2,00 por 0,5 kg adicional (maior entre peso real e cúbico). |
 | RF-VEN-005 | ❌ |  | O checkout também pede o endereço de cobrança (padrão: igual à entrega); o pedido guarda cópia dos dois ([DEC-10](../decisoes/DEC-10-cliente-enderecos-e-cartoes.md)). |
@@ -71,7 +71,7 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 | RF-VEN-014 | ❌ |  | Retorno ao estoque informado por item da troca ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
 | RF-VEN-015 | ❌ |  | Valor = preço unitário do item no pedido × quantidade, sem frete; validade por `livraria.cupom.troca.validade` (padrão: sem validade) ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). Um cupom por troca, gerado também para itens que não voltam ao estoque ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). |
 | RNF-VEN-001 | ❌ |  | Vale também para itens de checkout expirado ([DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md)). Itens em `item_removido_carrinho` até o cliente readicionar o livro ou dispensar o aviso ([DEC-16](../decisoes/DEC-16-modelo-de-dados.md)). |
-| RN-VEN-001 | ❌ |  |  |
+| RN-VEN-001 | ✅ | `apps/server/src/main/java/br/fatec/les/livraria/estoque/aplicacao/casodeuso/Reservar.java`, `apps/server/src/main/java/br/fatec/les/livraria/vendas/aplicacao/ReservarItensDoCarrinho.java` |  |
 | RN-VEN-002 | ❌ |  | Itens do checkout ficam reservados; a finalização revalida o estoque, e itens perdidos por expiração são notificados ([DEC-13](../decisoes/DEC-13-processamento-do-pedido-e-notificacoes.md)). |
 | RN-VEN-003 | ❌ |  | Vale para os quatro tipos de promocional, inclusive os de frete (`FRETE_GRATIS`, `FRETE_VALOR_FIXO`) ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). Extensão: o DRS não prevê cupom de frete. Cada cliente usa cada promocional uma vez, com o uso registrado por cliente ([DEC-15.2](../decisoes/DEC-15.2-uso-do-cupom-promocional.md)). |
 | RN-VEN-004 | ❌ |  | O cliente informa o valor de cada cartão; a soma fecha o restante após os cupons ([DEC-11](../decisoes/DEC-11-cupons-e-distribuicao-do-pagamento.md)). |
