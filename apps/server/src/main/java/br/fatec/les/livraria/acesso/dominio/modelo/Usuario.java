@@ -15,6 +15,7 @@ public class Usuario {
 
     private final Long id;
     private final String email;
+    /** Opcional: o administrador não tem telefone (DEC-10). */
     private final Telefone telefone;
     private final String senhaHash;
     private final Papel papel;

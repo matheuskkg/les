@@ -1,7 +1,6 @@
 package br.fatec.les.livraria.acesso.aplicacao.casodeuso;
 
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.acesso.aplicacao.CredenciaisInvalidas;
 import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
@@ -20,23 +19,32 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Autenticar {
 
+    /**
+     * Hash BCrypt válido e fixo, conferido quando o login não existe ou a conta está encerrada, para que o tempo de
+     * resposta não revele se o identificador existe (DEC-15.4).
+     */
+    private static final String HASH_FICTICIO = "$2a$12$tBL/lwtgoCE9aT4jnhIMt.708q6gcto91xPB4CKYHcrN5zYPrys.e";
+
     private final UsuarioRepositorio usuarios;
     private final CodificadorDeSenha senhas;
     private final Relogio relogio;
     private final SituacaoDaConta situacaoDaConta;
 
-    @Transactional
+    /**
+     * Sem {@code @Transactional} de propósito: o BCrypt não deve segurar uma transação/consulta aberta. A gravação da
+     * reativação é transacional no próprio {@code save} do Spring Data.
+     */
     public Usuario executar(Credenciais credenciais) {
         if (credenciais == null || credenciais.login() == null || credenciais.senha() == null) {
             throw new CredenciaisInvalidas();
         }
-        Usuario usuario = usuarios.buscarPorLogin(credenciais.login())
-                .orElseThrow(CredenciaisInvalidas::new);
-        if (!senhas.confere(credenciais.senha(), usuario.getSenhaHash())) {
+        Usuario usuario = usuarios.buscarPorLogin(credenciais.login()).orElse(null);
+        SituacaoConta situacao = usuario == null ? null : situacaoDaConta.calcular(usuario, relogio.agora());
+        if (usuario == null || situacao == SituacaoConta.ENCERRADA) {
+            senhas.confere(credenciais.senha(), HASH_FICTICIO);
             throw new CredenciaisInvalidas();
         }
-        SituacaoConta situacao = situacaoDaConta.calcular(usuario, relogio.agora());
-        if (situacao == SituacaoConta.ENCERRADA) {
+        if (!senhas.confere(credenciais.senha(), usuario.getSenhaHash())) {
             throw new CredenciaisInvalidas();
         }
         if (situacao == SituacaoConta.INATIVA) {

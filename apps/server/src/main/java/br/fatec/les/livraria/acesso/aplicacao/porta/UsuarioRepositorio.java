@@ -16,7 +16,8 @@ public interface UsuarioRepositorio {
     Optional<Usuario> buscarPorId(Long id);
 
     /**
-     * Busca pelo login (DEC-10): com {@code @}, é o e-mail; sem, é o telefone, comparado só pelos dígitos.
+     * Busca pelo login (DEC-10): com {@code @}, é o e-mail; sem, é o telefone, comparado só pelos dígitos. O telefone
+     * pode vir com o código do país ({@code +55}); ele é descartado antes da validação de 10 ou 11 dígitos.
      */
     Optional<Usuario> buscarPorLogin(String login);
 

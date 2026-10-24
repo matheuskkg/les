@@ -48,6 +48,7 @@ public class UsuarioJpa {
     @Column(name = "inativado_em")
     private LocalDateTime inativadoEm;
 
+    /** Opcional: o administrador não tem telefone (DEC-10). */
     @Embedded
     private TelefoneJpa telefone;
 }

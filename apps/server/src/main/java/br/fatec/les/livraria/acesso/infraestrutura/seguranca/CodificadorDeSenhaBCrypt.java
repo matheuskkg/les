@@ -1,5 +1,7 @@
 package br.fatec.les.livraria.acesso.infraestrutura.seguranca;
 
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +22,10 @@ public class CodificadorDeSenhaBCrypt implements CodificadorDeSenha {
 
     @Override
     public boolean confere(String senha, String senhaHash) {
+        if (senha == null || senhaHash == null
+                || senha.getBytes(StandardCharsets.UTF_8).length > TAMANHO_MAXIMO_EM_BYTES) {
+            return false;
+        }
         return codificador.matches(senha, senhaHash);
     }
 }

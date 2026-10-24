@@ -43,10 +43,10 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
             return Optional.empty();
         }
         String identificador = login.strip();
-        Optional<UsuarioJpa> encontrado = identificador.contains("@")
+        List<UsuarioJpa> encontrados = identificador.contains("@")
                 ? repositorio.buscarPorEmailEmUso(identificador.toLowerCase(Locale.ROOT), limiteEmUso())
                 : buscarPorTelefone(identificador);
-        return encontrado.map(mapper::paraDominio);
+        return encontrados.stream().findFirst().map(mapper::paraDominio);
     }
 
     @Override
@@ -71,10 +71,10 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
         return repositorio.listarIdsPorPapel(Papel.ADMIN);
     }
 
-    private Optional<UsuarioJpa> buscarPorTelefone(String telefone) {
+    private List<UsuarioJpa> buscarPorTelefone(String telefone) {
         String digitos = somenteDigitos(telefone);
         if (!telefoneValido(digitos)) {
-            return Optional.empty();
+            return List.of();
         }
         return repositorio.buscarPorTelefoneEmUso(ddd(digitos), numero(digitos), limiteEmUso());
     }
@@ -96,7 +96,9 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
         return digitos.substring(2);
     }
 
+    /** Só os dígitos, sem o código do país quando digitado: {@code +55 (11) 98888-7777} vira {@code 11988887777}. */
     private static String somenteDigitos(String telefone) {
-        return telefone == null ? "" : telefone.replaceAll("\\D", "");
+        String digitos = telefone == null ? "" : telefone.replaceAll("\\D", "");
+        return digitos.length() == 13 && digitos.startsWith("55") ? digitos.substring(2) : digitos;
     }
 }

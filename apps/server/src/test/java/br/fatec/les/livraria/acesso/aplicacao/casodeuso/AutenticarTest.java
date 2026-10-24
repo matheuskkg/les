@@ -81,6 +81,7 @@ class AutenticarTest {
 
         assertThat(ana.getInativadoEm()).isEqualTo(AGORA.minusDays(8));
         assertThat(usuarios.salvamentos()).isZero();
+        assertThat(senhas.conferencias()).isEqualTo(1);
     }
 
     @Test
@@ -109,6 +110,8 @@ class AutenticarTest {
         assertThatThrownBy(() -> autenticar.executar(new Autenticar.Credenciais("ninguem@teste.test", SENHA)))
                 .isInstanceOf(CredenciaisInvalidas.class)
                 .hasMessage(MENSAGEM_INVALIDO);
+        // O hash fictício é conferido mesmo sem conta, para o tempo não revelar que o login não existe.
+        assertThat(senhas.conferencias()).isEqualTo(1);
     }
 
     @Test
@@ -126,6 +129,24 @@ class AutenticarTest {
         Usuario autenticado = autenticar.executar(new Autenticar.Credenciais("(11) 90000-0000", SENHA));
 
         assertThat(autenticado.getId()).isEqualTo(1L);
+    }
+
+    @Test
+    void autenticaPorTelefoneComCodigoDoPais_DEC_10() {
+        usuarios.adicionar(usuario(1L, "ana@teste.test", new Telefone(TipoTelefone.CELULAR, "11", "988887777"), null));
+
+        Usuario autenticado = autenticar.executar(new Autenticar.Credenciais("+55 (11) 98888-7777", SENHA));
+
+        assertThat(autenticado.getId()).isEqualTo(1L);
+    }
+
+    @Test
+    void loginPorTelefoneNaoEncontraUsuarioSemTelefone_DEC_10() {
+        usuarios.adicionar(usuario(1L, "admin@teste.test", null, null));
+
+        assertThatThrownBy(() -> autenticar.executar(new Autenticar.Credenciais("(11) 90000-0000", SENHA)))
+                .isInstanceOf(CredenciaisInvalidas.class)
+                .hasMessage(MENSAGEM_INVALIDO);
     }
 
     private static Usuario usuario(Long id, String email, Telefone telefone, LocalDateTime inativadoEm) {
@@ -148,6 +169,12 @@ class AutenticarTest {
 
     private static final class CodificadorFake implements CodificadorDeSenha {
 
+        private int conferencias;
+
+        private int conferencias() {
+            return conferencias;
+        }
+
         @Override
         public String codificar(String senha) {
             return "hash-de-" + senha;
@@ -155,6 +182,7 @@ class AutenticarTest {
 
         @Override
         public boolean confere(String senha, String senhaHash) {
+            conferencias++;
             return senhaHash.equals(codificar(senha));
         }
     }
@@ -202,7 +230,7 @@ class AutenticarTest {
 
         @Override
         public boolean existeTelefoneEmUso(String telefone) {
-            String digitos = telefone == null ? "" : telefone.replaceAll("\\D", "");
+            String digitos = somenteDigitos(telefone);
             return porId.values().stream()
                     .anyMatch(usuario -> usuario.getTelefone() != null
                             && usuario.getTelefone().digitos().equals(digitos));
@@ -220,8 +248,13 @@ class AutenticarTest {
             if (login.contains("@")) {
                 return usuario.getEmail().equalsIgnoreCase(login);
             }
-            String digitos = login.replaceAll("\\D", "");
+            String digitos = somenteDigitos(login);
             return usuario.getTelefone() != null && usuario.getTelefone().digitos().equals(digitos);
+        }
+
+        private static String somenteDigitos(String telefone) {
+            String digitos = telefone == null ? "" : telefone.replaceAll("\\D", "");
+            return digitos.length() == 13 && digitos.startsWith("55") ? digitos.substring(2) : digitos;
         }
     }
 }
