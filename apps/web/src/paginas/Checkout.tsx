@@ -4,6 +4,7 @@ import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/clien
 import type { components } from '../api/esquema';
 import { montarEndereco, type EnderecoDoFormulario } from '../cadastroDeCliente';
 import { Erro } from '../componentes/Erro';
+import { PagamentoDaCompra } from '../componentes/PagamentoDaCompra';
 import { SelecaoDeEndereco } from '../componentes/SelecaoDeEndereco';
 import { Violacoes } from '../componentes/Violacoes';
 import { useRecargaPorNotificacao } from '../contextoDeNotificacoes';
@@ -28,7 +29,8 @@ function Problema({ problema }: { problema: ProblemaDetalhe | null }) {
  * checkout; expirado, o checkout deixa de existir e os itens ficam nos removidos do carrinho.
  *
  * Endereços de entrega e de cobrança (RF-VEN-005, DEC-10): cadastrados ou novos, com a opção de salvar no cadastro; a
- * cobrança vem igual à entrega. O frete é recalculado a cada troca do endereço de entrega (RF-VEN-004, DEC-05.3).
+ * cobrança vem igual à entrega. O frete é recalculado a cada troca do endereço de entrega (RF-VEN-004, DEC-05.3). A
+ * forma de pagamento fica em {@link PagamentoDaCompra} (RF-VEN-006, RF-VEN-007).
  */
 export default function Checkout() {
   const { route } = useLocation();
@@ -61,7 +63,10 @@ export default function Checkout() {
     );
   }, [carregar]);
 
-  useRecargaPorNotificacao('checkout', () => void carregar().catch(() => undefined));
+  // Estável entre renderizações: é dependência do efeito que confere o pagamento.
+  const recarregar = useCallback(() => void carregar().catch(() => undefined), [carregar]);
+
+  useRecargaPorNotificacao('checkout', recarregar);
 
   const carregarEnderecos = useCallback(async () => {
     const { data, error, response } = await cliente.GET('/api/me/enderecos');
@@ -110,6 +115,11 @@ export default function Checkout() {
       if (!ativo) {
         return;
       }
+      if (response.status === 404) {
+        // O checkout acabou (expirou ou foi encerrado): a tela passa a mostrar que não há compra em andamento.
+        void carregar().catch(() => undefined);
+        return;
+      }
       if (!data) {
         definirProblemaDoEndereco(interpretarProblema(error, response.status));
         return;
@@ -124,7 +134,7 @@ export default function Checkout() {
     return () => {
       ativo = false;
     };
-  }, [checkoutId, entrega]);
+  }, [checkoutId, entrega, carregar]);
 
   /** Usa um endereço novo; com `salvar`, grava no cadastro (RF-CLI-006) e passa a usá-lo pelo id. */
   async function usarNovo(
@@ -276,6 +286,8 @@ export default function Checkout() {
               </div>
             )}
           </dl>
+
+          <PagamentoDaCompra checkoutId={checkout.id} entrega={entrega} aoPerderCheckout={recarregar} />
           <p class="campo__ajuda">
             Os itens ficam reservados até {formatarDataHora(checkout.expiraEm)}. Para mudar quantidades, volte ao
             carrinho.

@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'preact/hooks';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../../api/cliente';
 import type { components } from '../../api/esquema';
-import { BANDEIRAS } from '../../bandeiras';
 import { cartaoVazio, formatarValidade, montarCartao, type CartaoDoFormulario } from '../../cadastroDeCliente';
-import { CampoDeFormulario } from '../../componentes/CampoDeFormulario';
-import { CampoDeSelecao } from '../../componentes/CampoDeSelecao';
+import { CamposDoCartao } from '../../componentes/CamposDoCartao';
 import { Erro } from '../../componentes/Erro';
 import { Violacoes } from '../../componentes/Violacoes';
 
 type Cartao = components['schemas']['CartaoDaResposta'];
-
-const OPCOES_DE_BANDEIRA = BANDEIRAS.map((bandeira) => ({ valor: String(bandeira.id), rotulo: bandeira.nome }));
 
 /**
  * Cartões do cliente logado: vários cartões, um preferencial, número sempre mascarado e sem código de segurança
@@ -123,18 +119,8 @@ export function Cartoes() {
         <form class="formulario" noValidate onSubmit={(evento) => void adicionar(evento)}>
           <h3>Novo cartão</h3>
           {erros}
-          <div class="grade-do-cadastro">
-            <CampoDeFormulario id="cartao-numero" rotulo="Número do cartão" required inputMode="numeric"
-              autoComplete="cc-number" valor={novo.numero}
-              aoMudar={(valor) => definirNovo({ ...novo, numero: valor })} />
-            <CampoDeFormulario id="cartao-nome" rotulo="Nome impresso" required autoComplete="cc-name"
-              valor={novo.nomeImpresso} aoMudar={(valor) => definirNovo({ ...novo, nomeImpresso: valor })} />
-            <CampoDeSelecao id="cartao-bandeira" rotulo="Bandeira" required valor={novo.bandeiraId}
-              opcoes={OPCOES_DE_BANDEIRA} placeholder="Selecione"
-              aoMudar={(valor) => definirNovo({ ...novo, bandeiraId: valor })} />
-            <CampoDeFormulario id="cartao-validade" rotulo="Validade" tipo="month" required
-              valor={novo.validade} aoMudar={(valor) => definirNovo({ ...novo, validade: valor })} />
-          </div>
+          <CamposDoCartao prefixo="cartao" formulario={novo}
+            aoMudar={(campo, valor) => definirNovo({ ...novo, [campo]: valor })} />
           <p class="campo__ajuda">O código de segurança é pedido só na hora da compra e não fica gravado.</p>
           <div class="acoes">
             <button class="botao" type="submit" disabled={enviando}>

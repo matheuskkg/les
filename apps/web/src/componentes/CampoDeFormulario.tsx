@@ -8,7 +8,7 @@ interface Props {
   tipo?: TipoDeCampo;
   name?: string;
   autoComplete?: string;
-  inputMode?: 'numeric' | 'tel' | 'email';
+  inputMode?: 'numeric' | 'decimal' | 'tel' | 'email';
   required?: boolean;
   disabled?: boolean;
   ajuda?: string;

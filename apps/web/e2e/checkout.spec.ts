@@ -14,7 +14,7 @@ test.describe('Checkout', () => {
   });
 
   test('vai para o pagamento e volta ao carrinho com os itens (RF-VEN-003, DEC-12)', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Pagamento' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Pagamento', exact: true })).toBeVisible();
     await expect(page.locator('.item-da-conta', { hasText: 'Dom Casmurro' })).toContainText('R$ 47,88');
 
     await page.getByRole('button', { name: 'Voltar ao carrinho' }).click();
@@ -58,6 +58,35 @@ test.describe('Checkout', () => {
 
     await page.getByLabel('Cobrança no mesmo endereço da entrega').uncheck();
     await expect(page.getByRole('group', { name: 'Endereço de cobrança' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Voltar ao carrinho' }).click();
+    await expect(page).toHaveURL(/\/carrinho$/);
+  });
+
+  test('confere cupons de troca e o cartão pelo restante (RF-VEN-006, RF-VEN-007, RN-VEN-005, RN-VEN-006)', async ({
+    page,
+  }) => {
+    // Dom Casmurro (R$ 47,88) + frete de SP (R$ 12,00)
+    await expect(page.getByTestId('restante')).toHaveText('R$ 59,88');
+
+    const cupons = page.getByRole('group', { name: 'Cupons de troca' });
+    await cupons.getByLabel(/TROCA-ANA-20/).check();
+    await cupons.getByLabel(/TROCA-ANA-35/).check();
+    await expect(page.getByTestId('restante')).toHaveText('R$ 4,88');
+
+    await cupons.getByLabel(/TROCA-ANA-40/).check();
+    await expect(page.getByText(/é desnecessário/).first()).toBeVisible();
+    await cupons.getByLabel(/TROCA-ANA-40/).uncheck();
+    await expect(page.getByTestId('restante')).toHaveText('R$ 4,88');
+
+    await page.getByRole('group', { name: 'Cartões' }).getByLabel(/1111/).check();
+    await expect(page.locator('#cartao-1-valor')).toHaveValue('4,88');
+    await page.getByRole('button', { name: 'Conferir pagamento' }).click();
+    await expect(page.getByText('informe o código de segurança', { exact: false })).toBeVisible();
+
+    await page.locator('#cartao-1-cvv').fill('123');
+    await page.getByRole('button', { name: 'Conferir pagamento' }).click();
+    await expect(page.getByText('Pagamento conferido: Visa **** **** **** 1111: R$ 4,88')).toBeVisible();
 
     await page.getByRole('button', { name: 'Voltar ao carrinho' }).click();
     await expect(page).toHaveURL(/\/carrinho$/);

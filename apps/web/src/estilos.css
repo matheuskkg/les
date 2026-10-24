@@ -1007,3 +1007,21 @@ textarea.campo__entrada {
   display: inline;
   margin: 0;
 }
+
+/* Forma de pagamento da compra (RF-VEN-006, RF-VEN-007). */
+.pagamento-da-compra {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.pagamento-da-compra h2 {
+  margin: 0;
+}
+
+.pagamento-da-compra__promocional {
+  display: grid;
+  gap: 0.5rem;
+}
