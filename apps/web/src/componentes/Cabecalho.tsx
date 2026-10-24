@@ -15,6 +15,7 @@ export function Cabecalho() {
 
       <nav class="navegacao" aria-label="Principal">
         <a href="/">Vitrine</a>
+        {usuario?.papel === 'CLIENTE' && <a href="/carrinho">Carrinho</a>}
         {usuario?.papel === 'CLIENTE' && <a href="/minha-conta">Minha conta</a>}
         {usuario?.papel === 'ADMIN' && <a href="/admin">Administração</a>}
       </nav>

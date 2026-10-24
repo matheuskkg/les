@@ -204,6 +204,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/carrinho": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mostra o carrinho do cliente com o preço atual de cada livro */
+        get: operations["ver"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/carrinho/itens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Adiciona um livro ao carrinho, somando à linha existente */
+        post: operations["adicionar_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/carrinho/itens/{livroId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Altera a quantidade de um livro do carrinho */
+        put: operations["alterar_3"];
+        post?: never;
+        /** Remove um livro do carrinho e libera a reserva */
+        delete: operations["remover_2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me/cartoes": {
         parameters: {
             query?: never;
@@ -435,6 +487,12 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AdicaoAoCarrinho: {
+            /** Format: int64 */
+            livroId: number;
+            /** Format: int32 */
+            quantidade: number;
+        };
         AlteracaoDeDadosCliente: {
             cpf?: string;
             /** Format: date */
@@ -473,6 +531,18 @@ export interface components {
             nome: string;
             senha: string;
             telefone: components["schemas"]["TelefoneDoCadastro"];
+        };
+        CarrinhoDto: {
+            /** Format: date-time */
+            expiraEm?: string;
+            itens: components["schemas"]["ItemDoCarrinhoDto"][];
+            /** Format: int32 */
+            quantidadeDeItens: number;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            subtotal: string;
         };
         CartaoDaResposta: {
             bandeira: components["schemas"]["BandeiraDaResposta"];
@@ -600,6 +670,24 @@ export interface components {
             login: string;
             senha: string;
         };
+        ItemDoCarrinhoDto: {
+            autores: string[];
+            /** Format: int64 */
+            livroId: number;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            precoUnitario: string;
+            /** Format: int32 */
+            quantidade: number;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            subtotal: string;
+            titulo: string;
+        };
         LivroDetalheDto: {
             altura: number;
             /** Format: int32 */
@@ -669,6 +757,10 @@ export interface components {
             recursoId?: number;
             /** @enum {string} */
             tipo: "CARRINHO_EXPIRANDO" | "CHECKOUT_EXPIRANDO" | "CARRINHO_EXPIRADO" | "CHECKOUT_EXPIRADO" | "PEDIDO_APROVADO" | "PEDIDO_REPROVADO" | "PEDIDO_DESPACHADO" | "PEDIDO_ENTREGUE" | "TROCA_AUTORIZADA" | "TROCA_RECUSADA" | "TROCA_CONCLUIDA" | "TROCA_SOLICITADA" | "PEDIDO_AGUARDANDO_DESPACHO";
+        };
+        NovaQuantidade: {
+            /** Format: int32 */
+            quantidade: number;
         };
         PaginaCategoriaDto: {
             itens: components["schemas"]["CategoriaDto"][];
@@ -1145,6 +1237,134 @@ export interface operations {
             };
             /** @description Dados violam regras de negócio */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    ver: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CarrinhoDto"];
+                };
+            };
+        };
+    };
+    adicionar_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdicaoAoCarrinho"];
+            };
+        };
+        responses: {
+            /** @description Carrinho atualizado */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CarrinhoDto"];
+                };
+            };
+            /** @description Quantidade inválida, livro indisponível ou estoque insuficiente */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    alterar_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                livroId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NovaQuantidade"];
+            };
+        };
+        responses: {
+            /** @description Carrinho atualizado */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CarrinhoDto"];
+                };
+            };
+            /** @description Livro fora do carrinho */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Quantidade inválida ou estoque insuficiente */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    remover_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                livroId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Carrinho atualizado */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CarrinhoDto"];
+                };
+            };
+            /** @description Livro fora do carrinho */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

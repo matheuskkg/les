@@ -6,6 +6,7 @@ import {
   AdminCliente,
   AdminClientes,
   Cadastro,
+  Carrinho,
   Livro,
   Login,
   MinhaConta,
@@ -62,6 +63,14 @@ function ClienteDoAdmin() {
   );
 }
 
+function CarrinhoDoCliente() {
+  return (
+    <Protegida papel="CLIENTE">
+      <Carrinho />
+    </Protegida>
+  );
+}
+
 export function App() {
   return (
     <div class="aplicacao">
@@ -77,6 +86,7 @@ export function App() {
           <Route path="/livros/:id" component={Livro} />
           <Route path="/login" component={Login} />
           <Route path="/cadastro" component={Cadastro} />
+          <Route path="/carrinho" component={CarrinhoDoCliente} />
           <Route path="/minha-conta/notificacoes" component={NotificacoesDoCliente} />
           <Route path="/admin/notificacoes" component={NotificacoesDoAdmin} />
           <Route path="/minha-conta" component={AreaDoCliente} />

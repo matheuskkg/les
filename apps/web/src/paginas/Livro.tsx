@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { useRoute } from 'preact-iso';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/cliente';
 import type { components } from '../api/esquema';
+import { AdicionarAoCarrinho } from '../componentes/AdicionarAoCarrinho';
 import { Erro } from '../componentes/Erro';
 import { formatarDecimal, formatarDinheiro } from '../formatacao';
 
@@ -161,6 +162,9 @@ export default function Livro() {
         <p class="livro__estoque">
           {livro.disponivel > 0 ? `Em estoque: ${livro.disponivel}` : 'Esgotado'}
         </p>
+        {livro.precoVenda && livro.disponivel > 0 && (
+          <AdicionarAoCarrinho livroId={livro.id} disponivel={livro.disponivel} />
+        )}
       </div>
 
       <section class="cartao">

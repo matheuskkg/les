@@ -13,4 +13,5 @@ export const Admin = lazy(() => import('./Admin'));
 export const Notificacoes = lazy(() => import('./Notificacoes'));
 export const AdminClientes = lazy(() => import('./AdminClientes'));
 export const AdminCliente = lazy(() => import('./AdminCliente'));
+export const Carrinho = lazy(() => import('./Carrinho'));
 export const NaoEncontrada = lazy(() => import('./NaoEncontrada'));
