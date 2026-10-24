@@ -34,7 +34,11 @@ import org.springframework.web.context.WebApplicationContext;
 import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
 import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
+import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
 import br.fatec.les.livraria.vendas.infraestrutura.persistencia.CupomPromocionalJpaRepository;
+import br.fatec.les.livraria.vendas.infraestrutura.persistencia.PedidoJpa;
+import br.fatec.les.livraria.vendas.infraestrutura.persistencia.PedidoJpaRepository;
 import br.fatec.les.livraria.vendas.infraestrutura.persistencia.UsoCupomPromocionalJpa;
 import br.fatec.les.livraria.vendas.infraestrutura.persistencia.UsoCupomPromocionalJpaRepository;
 import jakarta.servlet.http.Cookie;
@@ -78,6 +82,12 @@ class PagamentoIntegracaoTest {
 
     @Autowired
     private UsoCupomPromocionalJpaRepository usos;
+
+    @Autowired
+    private PedidoRepositorio pedidos;
+
+    @Autowired
+    private PedidoJpaRepository pedidosJpa;
 
     private MockMvc mvc;
 
@@ -183,7 +193,7 @@ class PagamentoIntegracaoTest {
         UsoCupomPromocionalJpa uso = new UsoCupomPromocionalJpa();
         uso.setCupomPromocional(promocionais.findByCodigo("FRETEGRATIS").orElseThrow());
         uso.setClienteId(1L);
-        uso.setPedidoId(999L);
+        uso.setPedido(pedidoGravado());
         usos.saveAndFlush(uso);
         conferir(ANA, "{" + ENTREGA + ",\"cuponsPromocionais\":[\"FRETEGRATIS\"]}")
                 .andExpect(status().isUnprocessableContent())
@@ -269,5 +279,9 @@ class PagamentoIntegracaoTest {
     private Cookie sessaoDe(long usuarioId) {
         String token = emissor.emitir(usuarios.buscarPorId(usuarioId).orElseThrow()).valor();
         return new Cookie(EmissorDeToken.COOKIE, token);
+    }
+
+    private PedidoJpa pedidoGravado() {
+        return pedidosJpa.getReferenceById(pedidos.salvar(Pedidos.emProcessamento(null, 1L)).getId());
     }
 }

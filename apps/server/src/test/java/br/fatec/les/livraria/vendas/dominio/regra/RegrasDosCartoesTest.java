@@ -4,6 +4,7 @@ import static br.fatec.les.livraria.vendas.dominio.pagamento.Cupons.reais;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,7 @@ import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.dominio.pagamento.CartoesDaCompra;
 import br.fatec.les.livraria.vendas.dominio.pagamento.PagamentoEmCartao;
 
-/** RN-VEN-004, RN-VEN-005, DEC-11: valor e quantidade de cartões no pagamento. */
+/** RN-VEN-004, RN-VEN-005, RN-CLI-004, DEC-11: valor, quantidade e código de segurança dos cartões no pagamento. */
 class RegrasDosCartoesTest {
 
     @Test
@@ -89,6 +90,13 @@ class RegrasDosCartoesTest {
                 List.of(new PagamentoEmCartao("4111", null))))).hasSize(1);
         assertThat(violacoes(regra, new CartoesDaCompra(reais("10.00"), false, List.of(cartao("4111", "10.000")))))
                 .isEmpty();
+    }
+
+    @Test
+    void rnCli004_codigoDeSegurancaComTresOuQuatroDigitosEmCadaCartao() {
+        assertThat(violacoes(new CodigosDeSeguranca(), List.of("123", "1234"))).isEmpty();
+        assertThat(violacoes(new CodigosDeSeguranca(), Arrays.asList("12", null, "12a", "12345")))
+                .extracting(Violacao::codigo).containsExactly("RN-CLI-004", "RN-CLI-004", "RN-CLI-004", "RN-CLI-004");
     }
 
     private static PagamentoEmCartao cartao(String numero, String valor) {

@@ -1,0 +1,23 @@
+package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
+import jakarta.persistence.LockModeType;
+
+public interface PedidoJpaRepository extends JpaRepository<PedidoJpa, Long> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from PedidoJpa p where p.id = :id")
+    Optional<PedidoJpa> buscarPorIdComLock(@Param("id") Long id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from PedidoJpa p where p.checkout.id = :checkoutId and p.status = :status")
+    Optional<PedidoJpa> buscarPorCheckoutComLock(@Param("checkoutId") Long checkoutId,
+            @Param("status") StatusPedido status);
+}

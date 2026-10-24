@@ -20,7 +20,7 @@ import lombok.Setter;
 /**
  * Tabela {@code uso_cupom_promocional} do MER (DEC-15.2): cada cliente usa cada promocional uma vez, garantido pelo
  * {@code UNIQUE (cupom_promocional_id, cliente_id)}. O {@code cliente_id} é referência ao módulo {@code clientes} só
- * pelo id; o {@code pedido_id} aponta o pedido que usou o cupom.
+ * pelo id; o {@code pedido_id} é FK do pedido que usou o cupom, e o uso é apagado na reprovação.
  */
 @Getter
 @Setter
@@ -46,6 +46,7 @@ public class UsoCupomPromocionalJpa {
     @Column(name = "cliente_id", nullable = false)
     private Long clienteId;
 
-    @Column(name = "pedido_id", nullable = false)
-    private Long pedidoId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "pedido_id", nullable = false)
+    private PedidoJpa pedido;
 }
