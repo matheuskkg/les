@@ -5,6 +5,7 @@ import type { components } from '../api/esquema';
 import { CopiasDoPedido } from '../componentes/CopiasDoPedido';
 import { AcoesDaTroca } from '../componentes/AcoesDaTroca';
 import { Erro } from '../componentes/Erro';
+import { RecebimentoDaTroca } from '../componentes/RecebimentoDaTroca';
 import { useRecargaPorNotificacao } from '../contextoDeNotificacoes';
 import { TrocasDoPedido } from '../componentes/TrocasDoPedido';
 import { formatarDataHora, textoDoStatus } from '../formatacao';
@@ -28,7 +29,8 @@ const ACOES: Partial<Record<PedidoDetalhe['status'], { acao: Acao; rotulo: strin
 /**
  * Detalhe do pedido para o administrador com as cópias gravadas na finalização: cliente, endereços, itens,
  * cartões, cupons e valores (RF-VEN-009, RF-VEN-010, DEC-12). Daqui o admin despacha o pedido aprovado e
- * confirma a entrega do pedido em transporte, e autoriza ou recusa as trocas `EM TROCA` (RF-VEN-012).
+ * confirma a entrega do pedido em transporte, autoriza ou recusa as trocas `EM TROCA` (RF-VEN-012) e confirma o
+ * recebimento das autorizadas (RF-VEN-014).
  */
 export default function AdminPedido() {
   const { params } = useRoute();
@@ -174,7 +176,13 @@ export default function AdminPedido() {
             pedido={pedido}
             acoes={(troca) =>
               troca.status === 'EM_TROCA' ? (
-                <AcoesDaTroca key={`${pedido.id}-${troca.id}`} troca={troca} aoAlterar={(alterado) => aoAlterarTroca(id, alterado)} />
+                <AcoesDaTroca key={`${pedido.id}-${troca.id}`} troca={troca}
+                  aoAlterar={(conflito) => aoAlterarTroca(id, conflito)} />
+              ) : troca.status === 'TROCA_AUTORIZADA' ? (
+                <RecebimentoDaTroca key={`${pedido.id}-${troca.id}`} troca={troca}
+                  tituloDoItem={(itemPedidoId) =>
+                    pedido.itens.find((item) => item.id === itemPedidoId)?.livro.titulo ?? `Item ${itemPedidoId}`}
+                  aoAlterar={(conflito) => aoAlterarTroca(id, conflito)} />
               ) : null}
           />
           <CopiasDoPedido pedido={pedido} linkDoCliente={`/admin/clientes/${pedido.cliente.id}`} />

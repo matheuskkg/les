@@ -111,7 +111,7 @@ test('admin encontra a troca, recusa com motivo e o cliente vê a recusa (RF-VEN
   await expect(page.getByText(/foi recusada\. Motivo: Livro com marcas de uso/)).toBeVisible();
 });
 
-test('admin autoriza a troca e o pedido aparece pela situação da troca (RF-VEN-012, RN-VEN-016, DEC-12)', async ({
+test('admin autoriza a troca, confirma o recebimento e o cliente recebe o cupom (RF-VEN-012, RF-VEN-014, RF-VEN-015, RN-VEN-016)', async ({
   page,
 }) => {
   const numero = await pedidoEntregueDaAna(page);
@@ -128,10 +128,18 @@ test('admin autoriza a troca e o pedido aparece pela situação da troca (RF-VEN
   await page.getByRole('group', { name: 'Situação da troca' }).getByLabel('TROCA AUTORIZADA').check();
   await page.getByRole('button', { name: 'Filtrar' }).click();
   await expect(page).toHaveURL(/situacao=TROCA_AUTORIZADA/);
-  await expect(page.getByRole('row', { name: new RegExp(numero) })).toBeVisible();
+  await page.getByRole('row', { name: new RegExp(numero) }).getByRole('link', { name: numero }).click();
+
+  // RF-VEN-014: o item volta ao estoque; RF-VEN-015: o cupom vale o preço do item, sem frete.
+  await expect(page.getByRole('group', { name: 'Voltam ao estoque' }).getByLabel('Dom Casmurro')).toBeChecked();
+  await page.getByRole('button', { name: 'Confirmar recebimento' }).click();
+  await expect(page.getByTestId('indicador-de-troca')).toHaveText('TROCADO (total)');
+  await expect(page.getByTestId('trocas-do-pedido')).toContainText('R$ 47,88');
+  await expect(page.getByRole('button', { name: 'Confirmar recebimento' })).toHaveCount(0);
 
   await sair(page);
   await entrarComo(page, ANA.login, ANA.senha);
   await page.goto('/minha-conta/notificacoes');
   await expect(page.getByText(/foi autorizada/)).toBeVisible();
+  await expect(page.getByText(/foi concluída\. O cupom de troca TROCA-\d+, de R\$ 47,88/)).toBeVisible();
 });
