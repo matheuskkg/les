@@ -22,11 +22,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.envers.Audited;
+
 /**
  * Tabela {@code cliente} do MER (DEC-14, DEC-16). {@code usuario_id} é apenas a coluna de id: o usuário pertence ao
  * módulo {@code acesso}, então não há {@code @ManyToOne} nem FK (DEC-16).
  */
 @Entity
+@Audited
 @Table(name = "cliente", indexes = {
         @Index(name = "ix_cliente_cpf", columnList = "cpf"),
         @Index(name = "ix_cliente_usuario_id", columnList = "usuario_id")

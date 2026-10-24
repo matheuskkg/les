@@ -21,11 +21,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.envers.Audited;
+
 /** Tabela {@code endereco} do MER (RN-CLI-003, DEC-10, DEC-14, DEC-16), com FK para o cliente do mesmo módulo. */
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
+@Audited
 @Table(name = "endereco", indexes = @Index(name = "ix_endereco_cliente_id", columnList = "cliente_id"))
 public class EnderecoJpa {
 

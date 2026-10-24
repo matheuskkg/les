@@ -11,11 +11,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.envers.Audited;
+
 /** Tabela {@code bandeira} do MER (RN-CLI-005, DEC-14, DEC-16); o seed é do card CLI-01. */
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
+@Audited
 @Table(name = "bandeira")
 public class BandeiraJpa {
 

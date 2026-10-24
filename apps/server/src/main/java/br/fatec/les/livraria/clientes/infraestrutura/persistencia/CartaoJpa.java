@@ -15,6 +15,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.envers.Audited;
+
 /**
  * Tabela {@code cartao} do MER (RN-CLI-004, RN-CLI-005, DEC-06, DEC-10, DEC-14, DEC-16). Guarda a validade como
  * {@code AAAA-MM} e não guarda o código de segurança. Bandeira e cliente são FKs do próprio módulo.
@@ -23,6 +25,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
+@Audited
 @Table(name = "cartao", indexes = {
         @Index(name = "ix_cartao_cliente_id", columnList = "cliente_id"),
         @Index(name = "ix_cartao_bandeira_id", columnList = "bandeira_id")
