@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio;
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -39,6 +40,11 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
         ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, excecao.getMessage());
         problema.setProperty("parametro", excecao.getParametro());
         return problema;
+    }
+
+    @ExceptionHandler(ExcecaoDeRecursoNaoEncontrado.class)
+    public ProblemDetail tratar(ExcecaoDeRecursoNaoEncontrado excecao) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, excecao.getMessage());
     }
 
     @ExceptionHandler(ExcecaoDeConflito.class)

@@ -3,6 +3,7 @@ package br.fatec.les.livraria.compartilhado.infraestrutura.persistencia;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
 import org.springframework.data.jpa.domain.Specification;
 
@@ -31,13 +32,26 @@ public final class Especificacoes {
 
     /** "Contém" em texto, sem diferenciar maiúsculas nem acentos. */
     public static <T> Specification<T> contem(String campo, String termo) {
+        return contem(raiz -> raiz.get(campo), termo);
+    }
+
+    /**
+     * "Contém" em texto de um campo de um relacionamento muitos-para-um, sem diferenciar maiúsculas nem
+     * acentos. Diferente de {@link #existe(String, String, Collection)}, não filtra muitos-para-muitos: a
+     * navegação para um único registro não duplica linhas.
+     */
+    public static <T> Specification<T> contem(String relacao, String campo, String termo) {
+        return contem(raiz -> raiz.get(relacao).get(campo), termo);
+    }
+
+    private static <T> Specification<T> contem(Function<Root<T>, Path<String>> caminho, String termo) {
         String limpo = textoLimpo(termo);
         if (limpo == null) {
             return semFiltro();
         }
         String escapado = escaparLike(limpo);
         return (raiz, consulta, cb) -> {
-            Expression<String> coluna = normalizada(cb, raiz.get(campo));
+            Expression<String> coluna = normalizada(cb, caminho.apply(raiz));
             Expression<String> valor = normalizada(cb, cb.literal(escapado));
             return cb.like(coluna, cb.concat(cb.concat(cb.literal("%"), valor), cb.literal("%")), ESCAPE);
         };
@@ -121,6 +135,29 @@ public final class Especificacoes {
             return semFiltro();
         }
         return existe(relacao, campo, List.of(limpo));
+    }
+
+    /**
+     * "Contém" em um campo de texto de um relacionamento muitos-para-muitos, por {@code exists}, para não
+     * duplicar linhas nem quebrar a contagem da paginação. Como {@link #contem(String, String)}, não diferencia
+     * maiúsculas nem acentos.
+     */
+    public static <T> Specification<T> existeContem(String relacao, String campo, String termo) {
+        String limpo = textoLimpo(termo);
+        if (limpo == null) {
+            return semFiltro();
+        }
+        String escapado = escaparLike(limpo);
+        return (raiz, consulta, cb) -> {
+            Subquery<Integer> subconsulta = consulta.subquery(Integer.class);
+            Root<T> externa = subconsulta.correlate(raiz);
+            Join<T, ?> juncao = externa.join(relacao);
+            Expression<String> coluna = normalizada(cb, juncao.get(campo));
+            Expression<String> valor = normalizada(cb, cb.literal(escapado));
+            subconsulta.select(cb.literal(1)).where(cb.like(coluna,
+                    cb.concat(cb.concat(cb.literal("%"), valor), cb.literal("%")), ESCAPE));
+            return cb.exists(subconsulta);
+        };
     }
 
     private static Expression<String> normalizada(CriteriaBuilder cb, Expression<String> expressao) {

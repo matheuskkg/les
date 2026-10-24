@@ -1,5 +1,7 @@
 package br.fatec.les.livraria.estoque.infraestrutura.persistencia;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,4 +19,12 @@ public interface EstoqueJpaRepository extends JpaRepository<EstoqueJpa, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select e from EstoqueJpa e where e.livroId = :livroId")
     Optional<EstoqueJpa> buscarPorLivroIdComLock(@Param("livroId") Long livroId);
+
+    /** Quantidade em mãos de vários livros em uma única consulta (DEC-15.3). */
+    @Query("""
+            select e.livroId as livroId, e.quantidade as quantidade
+            from EstoqueJpa e
+            where e.livroId in :livroIds
+            """)
+    List<QuantidadeDoLivroProjecao> buscarQuantidades(@Param("livroIds") Collection<Long> livroIds);
 }
