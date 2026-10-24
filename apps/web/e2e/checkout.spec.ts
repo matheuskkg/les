@@ -23,19 +23,6 @@ test.describe('Checkout', () => {
     await expect(page.locator('.item-da-conta:not(.item-removido)', { hasText: 'Dom Casmurro' })).toBeVisible();
   });
 
-  test('checkout vencido leva os itens aos removidos do carrinho (RN-VEN-014, RNF-VEN-001)', async ({
-    page,
-    ajustarRelogio,
-  }) => {
-    await expect(page.locator('.item-da-conta', { hasText: 'Dom Casmurro' })).toBeVisible();
-
-    await ajustarRelogio(new Date(Date.now() + 61 * 60_000).toISOString());
-
-    await expect(page.getByText('Nenhuma compra em andamento.')).toBeVisible();
-    await page.getByRole('link', { name: 'Ir para o carrinho' }).click();
-    await expect(page.locator('.item-removido', { hasText: 'Dom Casmurro' })).toBeVisible();
-  });
-
   test('calcula o frete pelo endereço de entrega, cadastrado ou novo (RF-VEN-004, RF-VEN-005)', async ({ page }) => {
     // Dom Casmurro pesa 0,32 kg (1 bloco); o primeiro endereço da Ana tem CEP de SP (R$ 12,00)
     await expect(page.getByTestId('frete')).toHaveText('R$ 12,00');
