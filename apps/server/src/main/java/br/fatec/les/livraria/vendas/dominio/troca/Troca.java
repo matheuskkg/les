@@ -1,0 +1,95 @@
+package br.fatec.les.livraria.vendas.dominio.troca;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+
+import org.jspecify.annotations.Nullable;
+
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
+/**
+ * O "pedido de troca" do RN-VEN-011 (DEC-12): itens de um pedido entregue com a quantidade de cada um. Um pedido pode
+ * ter várias trocas; o status do pedido não muda.
+ */
+public class Troca {
+
+    private final @Nullable Long id;
+    private final Long pedidoId;
+    private final LocalDateTime solicitadaEm;
+    private final List<ItemTroca> itens;
+    private StatusTroca status;
+    private @Nullable String motivoRecusa;
+    private @Nullable Dinheiro valorCupom;
+    private @Nullable Long cupomId;
+
+    public Troca(@Nullable Long id, Long pedidoId, StatusTroca status, LocalDateTime solicitadaEm,
+            List<ItemTroca> itens, @Nullable String motivoRecusa, @Nullable Dinheiro valorCupom,
+            @Nullable Long cupomId) {
+        this.id = id;
+        this.pedidoId = Objects.requireNonNull(pedidoId, "pedidoId");
+        this.status = Objects.requireNonNull(status, "status");
+        this.solicitadaEm = Objects.requireNonNull(solicitadaEm, "solicitadaEm");
+        this.itens = List.copyOf(Objects.requireNonNull(itens, "itens"));
+        this.motivoRecusa = motivoRecusa;
+        this.valorCupom = valorCupom;
+        this.cupomId = cupomId;
+    }
+
+    /**
+     * Cria a troca {@code EM TROCA} pedida pelo cliente (RF-VEN-011, RN-VEN-011). As regras da solicitação ficam em
+     * {@code vendas.dominio.regra}.
+     *
+     * @throws IllegalArgumentException se não houver itens
+     */
+    public static Troca solicitar(Long pedidoId, List<ItemTroca> itens, LocalDateTime agora) {
+        if (itens.isEmpty()) {
+            throw new IllegalArgumentException("A troca precisa de ao menos um item.");
+        }
+        return new Troca(null, pedidoId, StatusTroca.EM_TROCA, agora, itens, null, null, null);
+    }
+
+    /** Quantidade deste item do pedido incluída na troca; zero se ele não faz parte dela. */
+    public int quantidadeDo(Long itemPedidoId) {
+        return itens.stream()
+                .filter(item -> item.itemPedidoId().equals(itemPedidoId))
+                .mapToInt(ItemTroca::quantidade)
+                .sum();
+    }
+
+    public boolean recusada() {
+        return status == StatusTroca.TROCA_RECUSADA;
+    }
+
+    public @Nullable Long getId() {
+        return id;
+    }
+
+    public Long getPedidoId() {
+        return pedidoId;
+    }
+
+    public StatusTroca getStatus() {
+        return status;
+    }
+
+    public LocalDateTime getSolicitadaEm() {
+        return solicitadaEm;
+    }
+
+    public List<ItemTroca> getItens() {
+        return itens;
+    }
+
+    public @Nullable String getMotivoRecusa() {
+        return motivoRecusa;
+    }
+
+    public @Nullable Dinheiro getValorCupom() {
+        return valorCupom;
+    }
+
+    public @Nullable Long getCupomId() {
+        return cupomId;
+    }
+}

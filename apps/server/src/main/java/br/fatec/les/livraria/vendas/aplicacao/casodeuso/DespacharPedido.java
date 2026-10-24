@@ -9,6 +9,8 @@ import br.fatec.les.livraria.clientes.aplicacao.casodeuso.ConsultarUsuarioDoClie
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
 import br.fatec.les.livraria.notificacoes.aplicacao.casodeuso.Notificar;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.TipoNotificacao;
+import br.fatec.les.livraria.vendas.aplicacao.DetalharPedido;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.PedidoDetalhado;
 import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class DespacharPedido {
     private final PedidoRepositorio pedidos;
     private final ConsultarUsuarioDoCliente consultarUsuario;
     private final Notificar notificar;
+    private final DetalharPedido detalharPedido;
 
     /**
      * @param id número do pedido
@@ -33,7 +36,7 @@ public class DespacharPedido {
      * @throws br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito se o pedido não estiver aprovado
      */
     @Transactional
-    public Pedido executar(Long id) {
+    public PedidoDetalhado executar(Long id) {
         Objects.requireNonNull(id, "id");
         Pedido pedido = pedidos.buscarParaAlterar(id)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Pedido não encontrado."));
@@ -43,6 +46,6 @@ public class DespacharPedido {
                 Notificar.Comando.sobre(usuarioId, TipoNotificacao.PEDIDO_DESPACHADO,
                         "O pedido nº %d saiu para entrega.".formatted(despachado.getId()), "pedido",
                         despachado.getId())));
-        return despachado;
+        return detalharPedido.executar(despachado);
     }
 }

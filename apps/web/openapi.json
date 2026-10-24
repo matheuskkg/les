@@ -2020,6 +2020,43 @@
         "tags" : [ "meus-pedidos-controller" ]
       }
     },
+    "/api/me/pedidos/{id}/trocas" : {
+      "post" : {
+        "operationId" : "solicitarTroca",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SolicitacaoDeTrocaDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrocaDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "meus-pedidos-controller" ]
+      }
+    },
     "/api/me/senha" : {
       "post" : {
         "operationId" : "alterarSenha",
@@ -3070,6 +3107,20 @@
         },
         "required" : [ "frete", "subtotal", "total" ]
       },
+      "IndicadorDeTroca" : {
+        "type" : "object",
+        "properties" : {
+          "abrangencia" : {
+            "type" : "string",
+            "enum" : [ "PARCIAL", "TOTAL" ]
+          },
+          "situacao" : {
+            "type" : "string",
+            "enum" : [ "EM_TROCA", "TROCA_AUTORIZADA", "TROCA_RECUSADA", "TROCADO" ]
+          }
+        },
+        "required" : [ "abrangencia", "situacao" ]
+      },
       "ItemComPrecoDto" : {
         "type" : "object",
         "properties" : {
@@ -3103,9 +3154,30 @@
         },
         "required" : [ "autores", "livroId", "quantidade" ]
       },
+      "ItemDaTrocaDto" : {
+        "type" : "object",
+        "properties" : {
+          "itemPedidoId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "quantidade" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "voltaEstoque" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "itemPedidoId", "quantidade" ]
+      },
       "ItemDoPedidoDto" : {
         "type" : "object",
         "properties" : {
+          "disponivelParaTroca" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "id" : {
             "type" : "integer",
             "format" : "int64"
@@ -3122,13 +3194,30 @@
             "type" : "integer",
             "format" : "int32"
           },
+          "statusDaTroca" : {
+            "type" : "string",
+            "enum" : [ "EM_TROCA", "TROCA_AUTORIZADA", "TROCA_RECUSADA", "TROCADO" ]
+          },
           "subtotal" : {
             "type" : "string",
             "format" : "decimal",
             "example" : "1234.56"
           }
         },
-        "required" : [ "id", "livro", "precoUnitario", "quantidade", "subtotal" ]
+        "required" : [ "disponivelParaTroca", "id", "livro", "precoUnitario", "quantidade", "subtotal" ]
+      },
+      "ItemDto" : {
+        "type" : "object",
+        "properties" : {
+          "itemPedidoId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "quantidade" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
       },
       "ItemRemovidoDoCarrinhoDto" : {
         "type" : "object",
@@ -3677,9 +3766,22 @@
             "type" : "string",
             "format" : "decimal",
             "example" : "1234.56"
+          },
+          "troca" : {
+            "$ref" : "#/components/schemas/IndicadorDeTroca"
+          },
+          "trocaAte" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "trocas" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TrocaDto"
+            }
           }
         },
-        "required" : [ "cartoes", "cliente", "cupons", "descontoPromocional", "enderecoCobranca", "enderecoEntrega", "frete", "id", "itens", "realizadoEm", "status", "subtotal", "total" ]
+        "required" : [ "cartoes", "cliente", "cupons", "descontoPromocional", "enderecoCobranca", "enderecoEntrega", "frete", "id", "itens", "realizadoEm", "status", "subtotal", "total", "trocas" ]
       },
       "PedidoListadoDto" : {
         "type" : "object",
@@ -3758,6 +3860,17 @@
         },
         "required" : [ "email", "papel", "usuarioId" ]
       },
+      "SolicitacaoDeTrocaDto" : {
+        "type" : "object",
+        "properties" : {
+          "itens" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ItemDto"
+            }
+          }
+        }
+      },
       "SseEmitter" : {
         "type" : "object",
         "properties" : {
@@ -3782,6 +3895,42 @@
           }
         },
         "required" : [ "ddd", "numero", "tipo" ]
+      },
+      "TrocaDto" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "itens" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ItemDaTrocaDto"
+            }
+          },
+          "motivoRecusa" : {
+            "type" : "string"
+          },
+          "pedidoId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "solicitadaEm" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "EM_TROCA", "TROCA_AUTORIZADA", "TROCA_RECUSADA", "TROCADO" ]
+          },
+          "valorCupom" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          }
+        },
+        "required" : [ "id", "itens", "pedidoId", "solicitadaEm", "status" ]
       }
     }
   }

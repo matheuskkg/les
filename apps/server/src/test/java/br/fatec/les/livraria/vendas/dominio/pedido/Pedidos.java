@@ -35,4 +35,20 @@ public final class Pedidos {
                                 Dinheiro.de("40.00"))),
                 Dinheiro.de("12.00"), Dinheiro.de("10.00"));
     }
+
+    /**
+     * Pedido gravado e entregue em {@code entregueEm}, com o item 101 (dois Dom Casmurro) e o item 102 (um Memórias
+     * Póstumas de Brás Cubas).
+     */
+    public static Pedido entregue(LocalDateTime entregueEm) {
+        Pedido base = emProcessamento(10L, 1L);
+        LivroNoPedido memorias = new LivroNoPedido(2L, "Memórias Póstumas de Brás Cubas", List.of("Machado de Assis"),
+                "Editora Garnier", "1ª", "9788535911664", List.of(new CategoriaNoPedido(1L, "Romance")));
+        List<ItemPedido> itens = List.of(
+                new ItemPedido(101L, base.getItens().getFirst().livro(), Dinheiro.de("47.88"), 2),
+                new ItemPedido(102L, memorias, Dinheiro.de("39.90"), 1));
+        return new Pedido(1L, 10L, 1L, StatusPedido.ENTREGUE, REALIZADO_EM, entregueEm, base.getCliente(),
+                base.getEnderecoEntrega(), base.getEnderecoCobranca(), itens, base.getCartoes(), base.getCupons(),
+                Dinheiro.de("135.66"), base.getFrete(), base.getDescontoPromocional(), Dinheiro.de("137.66"));
+    }
 }

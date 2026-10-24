@@ -10,6 +10,8 @@ import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
 import br.fatec.les.livraria.notificacoes.aplicacao.casodeuso.Notificar;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.TipoNotificacao;
+import br.fatec.les.livraria.vendas.aplicacao.DetalharPedido;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.PedidoDetalhado;
 import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class ConfirmarEntrega {
     private final PedidoRepositorio pedidos;
     private final ConsultarUsuarioDoCliente consultarUsuario;
     private final Notificar notificar;
+    private final DetalharPedido detalharPedido;
     private final Relogio relogio;
 
     /**
@@ -35,7 +38,7 @@ public class ConfirmarEntrega {
      * @throws br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito se o pedido não estiver em transporte
      */
     @Transactional
-    public Pedido executar(Long id) {
+    public PedidoDetalhado executar(Long id) {
         Objects.requireNonNull(id, "id");
         Pedido pedido = pedidos.buscarParaAlterar(id)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Pedido não encontrado."));
@@ -44,6 +47,6 @@ public class ConfirmarEntrega {
         consultarUsuario.executar(entregue.getClienteId()).ifPresent(usuarioId -> notificar.executar(
                 Notificar.Comando.sobre(usuarioId, TipoNotificacao.PEDIDO_ENTREGUE,
                         "O pedido nº %d foi entregue.".formatted(entregue.getId()), "pedido", entregue.getId())));
-        return entregue;
+        return detalharPedido.executar(entregue);
     }
 }

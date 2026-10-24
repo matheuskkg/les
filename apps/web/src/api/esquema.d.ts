@@ -663,6 +663,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/pedidos/{id}/trocas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["solicitarTroca"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me/senha": {
         parameters: {
             query?: never;
@@ -1077,6 +1093,12 @@ export interface components {
              */
             total: string;
         };
+        IndicadorDeTroca: {
+            /** @enum {string} */
+            abrangencia: "PARCIAL" | "TOTAL";
+            /** @enum {string} */
+            situacao: "EM_TROCA" | "TROCA_AUTORIZADA" | "TROCA_RECUSADA" | "TROCADO";
+        };
         ItemComPrecoDto: {
             autores: string[];
             /** Format: int64 */
@@ -1095,7 +1117,16 @@ export interface components {
             subtotal?: string;
             titulo?: string;
         };
+        ItemDaTrocaDto: {
+            /** Format: int64 */
+            itemPedidoId: number;
+            /** Format: int32 */
+            quantidade: number;
+            voltaEstoque?: boolean;
+        };
         ItemDoPedidoDto: {
+            /** Format: int32 */
+            disponivelParaTroca: number;
             /** Format: int64 */
             id: number;
             livro: components["schemas"]["LivroNoPedido"];
@@ -1106,11 +1137,19 @@ export interface components {
             precoUnitario: string;
             /** Format: int32 */
             quantidade: number;
+            /** @enum {string} */
+            statusDaTroca?: "EM_TROCA" | "TROCA_AUTORIZADA" | "TROCA_RECUSADA" | "TROCADO";
             /**
              * Format: decimal
              * @example 1234.56
              */
             subtotal: string;
+        };
+        ItemDto: {
+            /** Format: int64 */
+            itemPedidoId?: number;
+            /** Format: int32 */
+            quantidade?: number;
         };
         ItemRemovidoDoCarrinhoDto: {
             autores: string[];
@@ -1347,6 +1386,10 @@ export interface components {
              * @example 1234.56
              */
             total: string;
+            troca?: components["schemas"]["IndicadorDeTroca"];
+            /** Format: date */
+            trocaAte?: string;
+            trocas: components["schemas"]["TrocaDto"][];
         };
         PedidoListadoDto: {
             clienteCpf: string;
@@ -1385,6 +1428,9 @@ export interface components {
             /** Format: int64 */
             usuarioId: number;
         };
+        SolicitacaoDeTrocaDto: {
+            itens?: components["schemas"]["ItemDto"][];
+        };
         SseEmitter: {
             /** Format: int64 */
             timeout?: number;
@@ -1394,6 +1440,23 @@ export interface components {
             numero: string;
             /** @enum {string} */
             tipo: "CELULAR" | "FIXO";
+        };
+        TrocaDto: {
+            /** Format: int64 */
+            id: number;
+            itens: components["schemas"]["ItemDaTrocaDto"][];
+            motivoRecusa?: string;
+            /** Format: int64 */
+            pedidoId: number;
+            /** Format: date-time */
+            solicitadaEm: string;
+            /** @enum {string} */
+            status: "EM_TROCA" | "TROCA_AUTORIZADA" | "TROCA_RECUSADA" | "TROCADO";
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            valorCupom?: string;
         };
     };
     responses: never;
@@ -2890,6 +2953,32 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PedidoDetalheDto"];
+                };
+            };
+        };
+    };
+    solicitarTroca: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SolicitacaoDeTrocaDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TrocaDto"];
                 };
             };
         };
