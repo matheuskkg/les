@@ -10,7 +10,7 @@ import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
 
 /**
  * Detalhe de um cliente para o admin (RF-CLI-004, RNF-CLI-005, DEC-07, DEC-10): dados pessoais, contato, situação
- * da conta, endereços e cartões mascarados.
+ * da conta, ranking (RN-CLI-007), endereços e cartões mascarados.
  */
 public record ClienteDetalheDto(
         Long id,
@@ -21,6 +21,7 @@ public record ClienteDetalheDto(
         String email,
         @Nullable String telefone,
         SituacaoConta situacao,
+        int ranking,
         List<EnderecoDoClienteDto> enderecos,
         List<CartaoDoClienteDto> cartoes) {
 }

@@ -1002,6 +1002,8 @@ export interface components {
             /** Format: int64 */
             id: number;
             nome: string;
+            /** Format: int32 */
+            ranking: number;
             /** @enum {string} */
             situacao: "ATIVA" | "INATIVA" | "ENCERRADA";
             telefone?: string;
@@ -1016,6 +1018,8 @@ export interface components {
             /** Format: int64 */
             id: number;
             nome: string;
+            /** Format: int32 */
+            ranking: number;
             /** @enum {string} */
             situacao: "ATIVA" | "INATIVA" | "ENCERRADA";
             telefone?: string;
@@ -1340,6 +1344,8 @@ export interface components {
             /** Format: int64 */
             id: number;
             nome: string;
+            /** Format: int32 */
+            ranking: number;
             telefone: components["schemas"]["TelefoneDoCadastro"];
         };
         NotificacaoDto: {

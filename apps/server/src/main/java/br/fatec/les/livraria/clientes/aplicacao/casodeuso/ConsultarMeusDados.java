@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.ConsultarContato;
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.DadosDeContato;
+import br.fatec.les.livraria.clientes.aplicacao.CalcularRanking;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
@@ -20,12 +21,13 @@ public class ConsultarMeusDados {
 
     private final ClienteRepositorio clientes;
     private final ConsultarContato consultarContato;
+    private final CalcularRanking calcularRanking;
 
     @Transactional(readOnly = true)
     public DadosDoCliente executar(Long usuarioId) {
         Cliente cliente = clientes.buscarPorUsuarioId(usuarioId)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));
         DadosDeContato contato = consultarContato.executar(usuarioId);
-        return DadosDoCliente.de(cliente, contato);
+        return DadosDoCliente.de(cliente, contato, calcularRanking.executar(cliente.getId()));
     }
 }

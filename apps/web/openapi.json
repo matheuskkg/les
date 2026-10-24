@@ -3090,6 +3090,10 @@
           "nome" : {
             "type" : "string"
           },
+          "ranking" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "situacao" : {
             "type" : "string",
             "enum" : [ "ATIVA", "INATIVA", "ENCERRADA" ]
@@ -3098,7 +3102,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "cartoes", "cpf", "dataNascimento", "email", "enderecos", "genero", "id", "nome", "situacao" ]
+        "required" : [ "cartoes", "cpf", "dataNascimento", "email", "enderecos", "genero", "id", "nome", "ranking", "situacao" ]
       },
       "ClienteListadoDto" : {
         "type" : "object",
@@ -3124,6 +3128,10 @@
           "nome" : {
             "type" : "string"
           },
+          "ranking" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "situacao" : {
             "type" : "string",
             "enum" : [ "ATIVA", "INATIVA", "ENCERRADA" ]
@@ -3132,7 +3140,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "cpf", "dataNascimento", "email", "genero", "id", "nome", "situacao" ]
+        "required" : [ "cpf", "dataNascimento", "email", "genero", "id", "nome", "ranking", "situacao" ]
       },
       "ClienteNoPedido" : {
         "type" : "object",
@@ -3884,11 +3892,15 @@
           "nome" : {
             "type" : "string"
           },
+          "ranking" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "telefone" : {
             "$ref" : "#/components/schemas/TelefoneDoCadastro"
           }
         },
-        "required" : [ "cpf", "dataNascimento", "email", "genero", "id", "nome", "telefone" ]
+        "required" : [ "cpf", "dataNascimento", "email", "genero", "id", "nome", "ranking", "telefone" ]
       },
       "NotificacaoDto" : {
         "type" : "object",

@@ -14,6 +14,7 @@ import br.fatec.les.livraria.acesso.aplicacao.casodeuso.BuscarUsuariosPorContato
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.BuscarUsuariosPorSituacao;
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.ConsultarUsuarios;
 import br.fatec.les.livraria.acesso.aplicacao.consulta.ContatoDoUsuario;
+import br.fatec.les.livraria.clientes.aplicacao.CalcularRanking;
 import br.fatec.les.livraria.clientes.aplicacao.consulta.ClienteListado;
 import br.fatec.les.livraria.clientes.aplicacao.consulta.ClienteResumo;
 import br.fatec.les.livraria.clientes.aplicacao.consulta.ConsultaDeClientes;
@@ -40,6 +41,7 @@ public class ListarClientes {
     private final BuscarUsuariosPorSituacao buscarUsuariosPorSituacao;
     private final ConsultarUsuarios consultarUsuarios;
     private final Relogio relogio;
+    private final CalcularRanking calcularRanking;
 
     /**
      * @param consulta filtros informados pelo admin; não pode ser nula
@@ -66,9 +68,13 @@ public class ListarClientes {
                 .map(ClienteResumo::usuarioId)
                 .toList(), agora);
 
+        Map<Long, Integer> rankings = calcularRanking.executar(pagina.itens().stream()
+                .map(ClienteResumo::id)
+                .toList());
         return pagina.map(resumo -> new ClienteListado(resumo,
                 Objects.requireNonNull(contatos.get(resumo.usuarioId()),
-                        "Contato do usuário " + resumo.usuarioId() + " não encontrado.")));
+                        "Contato do usuário " + resumo.usuarioId() + " não encontrado."),
+                rankings.getOrDefault(resumo.id(), 0)));
     }
 
 

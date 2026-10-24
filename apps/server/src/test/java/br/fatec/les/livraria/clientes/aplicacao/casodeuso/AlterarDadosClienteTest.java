@@ -11,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
 import br.fatec.les.livraria.acesso.dominio.modelo.TipoTelefone;
 import br.fatec.les.livraria.clientes.ClientesDeTeste.FakeClienteRepositorio;
 import br.fatec.les.livraria.clientes.ClientesDeTeste.FakeUsuarioRepositorio;
+import br.fatec.les.livraria.clientes.aplicacao.CalcularRanking;
 import br.fatec.les.livraria.clientes.aplicacao.regra.CpfUnicoNaAlteracao;
 import br.fatec.les.livraria.clientes.aplicacao.regra.DataNascimentoValida;
 import br.fatec.les.livraria.clientes.aplicacao.regra.EmailUnicoNaAlteracao;
@@ -58,7 +60,8 @@ class AlterarDadosClienteTest {
                 new TelefoneUnicoNaAlteracao(contas),
                 clientes,
                 new AlterarContato(usuarios),
-                new ConsultarMeusDados(clientes, new ConsultarContato(usuarios)));
+                new ConsultarMeusDados(clientes, new ConsultarContato(usuarios),
+                        new CalcularRanking((ids, desde) -> Map.of(), relogio())));
     }
 
     @Test

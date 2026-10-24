@@ -9,7 +9,7 @@ import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
 
 /**
  * Dados do próprio cliente (RF-CLI-002, DEC-07): o cadastro que fica no {@code Cliente} mais o e-mail e o telefone
- * que ficam no {@code Usuario} do {@code acesso}. Endereços e cartões têm rotas próprias e não entram aqui.
+ * que ficam no {@code Usuario} do {@code acesso}, e o ranking calculado na consulta (RN-CLI-007, DEC-04). Endereços e cartões têm rotas próprias e não entram aqui.
  */
 public record DadosDoCliente(
         Long id,
@@ -20,9 +20,10 @@ public record DadosDoCliente(
         String email,
         TipoTelefone tipoTelefone,
         String ddd,
-        String numero) {
+        String numero,
+        int ranking) {
 
-    public static DadosDoCliente de(Cliente cliente, DadosDeContato contato) {
+    public static DadosDoCliente de(Cliente cliente, DadosDeContato contato, int ranking) {
         return new DadosDoCliente(
                 cliente.codigo(),
                 cliente.getNome(),
@@ -32,6 +33,7 @@ public record DadosDoCliente(
                 contato.email(),
                 contato.tipoTelefone(),
                 contato.ddd(),
-                contato.numero());
+                contato.numero(),
+                ranking);
     }
 }

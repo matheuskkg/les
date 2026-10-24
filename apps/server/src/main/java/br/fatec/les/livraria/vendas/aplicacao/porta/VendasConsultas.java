@@ -1,11 +1,15 @@
 package br.fatec.les.livraria.vendas.aplicacao.porta;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import br.fatec.les.livraria.clientes.dominio.ranking.CompraDoCliente;
 
 import br.fatec.les.livraria.vendas.aplicacao.consulta.ItemVendido;
 
-/** Porta de saída dos itens vendidos num período, para a análise de vendas (RF-ANA-001, RN-ANA-004, DEC-12). */
+/** Porta de saída das vendas consideradas na análise (RF-ANA-001, RN-ANA-004) e no ranking (RN-CLI-007), DEC-12. */
 public interface VendasConsultas {
 
     /**
@@ -15,4 +19,12 @@ public interface VendasConsultas {
      *         concluídas
      */
     List<ItemVendido> itensVendidos(LocalDateTime inicio, LocalDateTime fimExclusivo);
+
+    /**
+     * @param clienteIds clientes desejados
+     * @param desde início do período, inclusive
+     * @return as compras de cada cliente cujo status conta como venda, com o total menos os cupons das trocas
+     *         concluídas do pedido (RN-CLI-007, DEC-04, DEC-12)
+     */
+    Map<Long, List<CompraDoCliente>> comprasDosClientes(Collection<Long> clienteIds, LocalDateTime desde);
 }

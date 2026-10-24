@@ -86,6 +86,7 @@ export default function AdminCliente() {
               <div><dt>Nascimento</dt><dd>{formatarData(visivel.cliente.dataNascimento)}</dd></div>
               <div><dt>Gênero</dt><dd>{rotuloDe(GENEROS, visivel.cliente.genero)}</dd></div>
               <div><dt>Situação</dt><dd>{rotuloDe(SITUACOES, visivel.cliente.situacao)}</dd></div>
+              <div><dt>Ranking</dt><dd>{visivel.cliente.ranking} de 100</dd></div>
             </dl>
           </div>
 

@@ -11,8 +11,9 @@ import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
  *
  * @param cliente cliente com endereços e cartões
  * @param contato e-mail, telefone e situação do usuário
+ * @param ranking ranking de 0 a 100 (RN-CLI-007, DEC-04)
  */
-public record ClienteDetalhado(Cliente cliente, ContatoDoUsuario contato) {
+public record ClienteDetalhado(Cliente cliente, ContatoDoUsuario contato, int ranking) {
 
     public ClienteDetalhado {
         Objects.requireNonNull(cliente, "cliente");

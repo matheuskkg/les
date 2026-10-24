@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.ConsultarUsuarios;
 import br.fatec.les.livraria.acesso.aplicacao.consulta.ContatoDoUsuario;
+import br.fatec.les.livraria.clientes.aplicacao.CalcularRanking;
 import br.fatec.les.livraria.clientes.aplicacao.consulta.ClienteDetalhado;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClientesConsultas;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
@@ -27,6 +28,7 @@ public class ConsultarCliente {
     private final ClientesConsultas clientes;
     private final ConsultarUsuarios consultarUsuarios;
     private final Relogio relogio;
+    private final CalcularRanking calcularRanking;
 
     /**
      * @param id código do cliente
@@ -42,6 +44,6 @@ public class ConsultarCliente {
                 relogio.agora());
         ContatoDoUsuario contato = Objects.requireNonNull(contatos.get(cliente.getUsuarioId()),
                 "Contato do usuário " + cliente.getUsuarioId() + " não encontrado.");
-        return new ClienteDetalhado(cliente, contato);
+        return new ClienteDetalhado(cliente, contato, calcularRanking.executar(cliente.getId()));
     }
 }

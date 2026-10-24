@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -56,6 +57,24 @@ public interface TrocaJpaRepository extends JpaRepository<TrocaJpa, Long>, JpaSp
     List<QuantidadeTrocada> somarTrocadasDoPeriodo(@Param("statusDaTroca") StatusTroca statusDaTroca,
             @Param("status") Collection<StatusPedido> status, @Param("inicio") LocalDateTime inicio,
             @Param("fim") LocalDateTime fimExclusivo);
+
+    /**
+     * Soma dos cupons gerados pelas trocas com o status informado, por pedido dos clientes finalizado desde o
+     * instante com um dos status (RN-CLI-007, DEC-12).
+     */
+    @Query("select t.pedido.id as pedidoId, sum(t.valorCupom) as valor from TrocaJpa t "
+            + "where t.status = :statusDaTroca and t.pedido.clienteId in :clientes and t.pedido.status in :status "
+            + "and t.pedido.realizadoEm >= :desde group by t.pedido.id")
+    List<CuponsDoPedido> somarCuponsDosClientesDesde(@Param("statusDaTroca") StatusTroca statusDaTroca,
+            @Param("clientes") Collection<Long> clienteIds, @Param("status") Collection<StatusPedido> status,
+            @Param("desde") LocalDateTime desde);
+
+    interface CuponsDoPedido {
+
+        Long getPedidoId();
+
+        BigDecimal getValor();
+    }
 
     interface QuantidadeTrocada {
 

@@ -196,6 +196,7 @@ export default function AdminClientes() {
                   <th scope="col">Nascimento</th>
                   <th scope="col">Gênero</th>
                   <th scope="col">Situação</th>
+                  <th scope="col" class="tabela__numero">Ranking</th>
                 </tr>
               </thead>
               <tbody>
@@ -211,6 +212,7 @@ export default function AdminClientes() {
                     <td>{formatarData(item.dataNascimento)}</td>
                     <td>{rotuloDe(GENEROS, item.genero)}</td>
                     <td>{rotuloDe(SITUACOES, item.situacao)}</td>
+                    <td class="tabela__numero">{item.ranking}</td>
                   </tr>
                 ))}
               </tbody>

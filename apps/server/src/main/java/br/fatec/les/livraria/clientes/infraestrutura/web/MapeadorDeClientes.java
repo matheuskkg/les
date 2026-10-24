@@ -30,7 +30,8 @@ public class MapeadorDeClientes {
         ClienteResumo cliente = listado.cliente();
         ContatoDoUsuario contato = listado.contato();
         return new ClienteListadoDto(cliente.id(), cliente.nome(), cliente.cpf(), cliente.genero(),
-                cliente.dataNascimento(), contato.email(), contato.telefone() == null ? null : contato.telefone().formatado(), contato.situacao());
+                cliente.dataNascimento(), contato.email(), contato.telefone() == null ? null : contato.telefone().formatado(), contato.situacao(),
+                listado.ranking());
     }
 
     public ClienteDetalheDto paraDto(ClienteDetalhado detalhado) {
@@ -38,7 +39,8 @@ public class MapeadorDeClientes {
         ContatoDoUsuario contato = detalhado.contato();
         return new ClienteDetalheDto(cliente.getId(), cliente.getNome(), cliente.getCpf().numero(),
                 cliente.getGenero(), cliente.getDataNascimento(), contato.email(),
-                contato.telefone() == null ? null : contato.telefone().formatado(), contato.situacao(), enderecos(cliente.getEnderecos()),
+                contato.telefone() == null ? null : contato.telefone().formatado(), contato.situacao(), detalhado.ranking(),
+                enderecos(cliente.getEnderecos()),
                 cartoes(cliente.getCartoes()));
     }
 
