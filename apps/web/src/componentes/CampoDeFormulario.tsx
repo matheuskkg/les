@@ -1,4 +1,4 @@
-type TipoDeCampo = 'text' | 'email' | 'password' | 'tel' | 'search' | 'date';
+type TipoDeCampo = 'text' | 'email' | 'password' | 'tel' | 'search' | 'date' | 'month';
 
 interface Props {
   id: string;
@@ -8,6 +8,7 @@ interface Props {
   tipo?: TipoDeCampo;
   name?: string;
   autoComplete?: string;
+  inputMode?: 'numeric' | 'tel' | 'email';
   required?: boolean;
   disabled?: boolean;
   ajuda?: string;
@@ -26,6 +27,7 @@ export function CampoDeFormulario({
   tipo = 'text',
   name,
   autoComplete,
+  inputMode,
   required = false,
   disabled = false,
   ajuda,
@@ -60,6 +62,7 @@ export function CampoDeFormulario({
         required={required}
         disabled={disabled}
         autoComplete={autoComplete}
+        inputMode={inputMode}
         placeholder={placeholder}
         minLength={minLength}
         maxLength={maxLength}
