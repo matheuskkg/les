@@ -44,10 +44,10 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 | RF-LIV-004 | ❌ |  |  |
 | RF-LIV-005 | ❌ |  | Filtros por query params combinados com E, via `Specification` no adapter ([DEC-07](../decisoes/DEC-07-convencoes-da-api-rest.md)). |
 | RF-LIV-006 | ❌ |  |  |
-| RNF-LIV-001 | ❌ |  | O código é o id do livro (`Long` por sequence); o ISBN é atributo ([DEC-14](../decisoes/DEC-14-ids-nomes-e-seed.md)). |
-| RNF-LIV-002 | 🟡 | `apps/server/src/main/java/br/fatec/les/livraria/compartilhado/infraestrutura/seed/ExecutorDeSeeds.java` | Executor de seeds pronto; os scripts com as tabelas de domínio vêm no INF-05. Domínios, livros e estoque nos scripts `0NN` do seed, com IDs explícitos de 1 a 9999 ([DEC-14](../decisoes/DEC-14-ids-nomes-e-seed.md)). |
-| RN-LIV-001 | ❌ |  |  |
-| RN-LIV-002 | ❌ |  |  |
+| RNF-LIV-001 | 🟡 | `apps/server/src/main/java/br/fatec/les/livraria/catalogo/infraestrutura/persistencia/LivroJpa.java` | O código é o id do livro (`Long` por sequence); o ISBN é atributo ([DEC-14](../decisoes/DEC-14-ids-nomes-e-seed.md)). |
+| RNF-LIV-002 | 🟡 | `apps/server/src/main/java/br/fatec/les/livraria/compartilhado/infraestrutura/seed/ExecutorDeSeeds.java`, `apps/server/src/main/resources/seed/001_dominios.sql` | Autor, editora, categoria, grupo de precificação e fornecedor em `001_dominios.sql`, com IDs explícitos de 1 a 9999 ([DEC-14](../decisoes/DEC-14-ids-nomes-e-seed.md)). |
+| RN-LIV-001 | 🟡 | `apps/server/src/main/java/br/fatec/les/livraria/catalogo/infraestrutura/persistencia/LivroJpa.java`, `apps/server/src/main/resources/seed/002_livros.sql` | Colunas obrigatórias (`nullable = false`) no schema; livros inseridos pelo seed (CRUD fora do MVP). |
+| RN-LIV-002 | 🟡 | `apps/server/src/main/java/br/fatec/les/livraria/catalogo/infraestrutura/persistencia/LivroJpa.java` | `livro_categoria` muitos-para-muitos; o seed tem livros com mais de uma categoria. |
 | RN-LIV-003 | ❌ |  |  |
 | RN-LIV-004 | ❌ |  |  |
 | RN-LIV-005 | ❌ |  |  |
