@@ -4,6 +4,54 @@
  */
 
 export interface paths {
+    "/api/livros": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/livros/categorias": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listarCategorias"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/livros/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["buscar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sessao": {
         parameters: {
             query?: never;
@@ -27,9 +75,80 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        CategoriaDto: {
+            /** Format: int64 */
+            id: number;
+            nome: string;
+        };
         EntradaDeLogin: {
             login: string;
             senha: string;
+        };
+        LivroDetalheDto: {
+            altura: number;
+            /** Format: int32 */
+            ano: number;
+            autores: string[];
+            categorias: components["schemas"]["CategoriaDto"][];
+            codigoBarras: string;
+            /** Format: int32 */
+            disponivel: number;
+            edicao: string;
+            editora: string;
+            /** Format: int64 */
+            id: number;
+            isbn: string;
+            largura: number;
+            /** Format: int32 */
+            paginas: number;
+            peso: number;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            precoVenda?: string;
+            profundidade: number;
+            sinopse: string;
+            titulo: string;
+        };
+        LivroListadoDto: {
+            /** Format: int32 */
+            ano: number;
+            autores: string[];
+            categorias: components["schemas"]["CategoriaDto"][];
+            /** Format: int32 */
+            disponivel: number;
+            editora: string;
+            /** Format: int64 */
+            id: number;
+            /**
+             * Format: decimal
+             * @example 1234.56
+             */
+            precoVenda?: string;
+            titulo: string;
+        };
+        PaginaCategoriaDto: {
+            itens: components["schemas"]["CategoriaDto"][];
+            /** Format: int32 */
+            pagina: number;
+            /** Format: int32 */
+            tamanho: number;
+            /** Format: int64 */
+            totalItens: number;
+            /** Format: int32 */
+            totalPaginas: number;
+        };
+        PaginaLivroListadoDto: {
+            itens: components["schemas"]["LivroListadoDto"][];
+            /** Format: int32 */
+            pagina: number;
+            /** Format: int32 */
+            tamanho: number;
+            /** Format: int64 */
+            totalItens: number;
+            /** Format: int32 */
+            totalPaginas: number;
         };
         ProblemDetail: {
             detail?: string;
@@ -60,6 +179,94 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    listar: {
+        parameters: {
+            query?: {
+                titulo?: string;
+                autor?: string;
+                categoria?: number[];
+                editora?: string;
+                isbn?: string;
+                codigoBarras?: string;
+                anoDe?: number;
+                anoAte?: number;
+                edicao?: string;
+                paginasDe?: number;
+                paginasAte?: number;
+                codigo?: number;
+                /** @description Página, a partir de 0. */
+                pagina?: number;
+                /** @description Itens por página (padrão 20, máximo 100). */
+                tamanho?: number;
+                /** @description Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: titulo, ano, editora. Padrão: titulo,asc. */
+                ordem?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginaLivroListadoDto"];
+                };
+            };
+        };
+    };
+    listarCategorias: {
+        parameters: {
+            query?: {
+                /** @description Página, a partir de 0. */
+                pagina?: number;
+                /** @description Itens por página (padrão 20, máximo 100). */
+                tamanho?: number;
+                /** @description Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: nome. Padrão: nome,asc. */
+                ordem?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginaCategoriaDto"];
+                };
+            };
+        };
+    };
+    buscar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LivroDetalheDto"];
+                };
+            };
+        };
+    };
     obter: {
         parameters: {
             query?: never;

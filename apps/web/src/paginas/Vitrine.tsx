@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { useLocation } from 'preact-iso';
-import { cliente, lerProblema, type ProblemaDetalhe } from '../api/cliente';
+import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/cliente';
 import type { components } from '../api/esquema';
 import { CampoDeFormulario } from '../componentes/CampoDeFormulario';
 import { Erro } from '../componentes/Erro';
@@ -93,7 +93,7 @@ export default function Vitrine() {
 
     async function carregar(): Promise<void> {
       try {
-        const { data, response } = await cliente.GET('/api/livros', {
+        const { data, error, response } = await cliente.GET('/api/livros', {
           params: { query: consultaDoEstado(estado) },
           signal: controle.signal,
         });
@@ -104,7 +104,7 @@ export default function Vitrine() {
           definirResultado({
             busca: buscaPedida,
             pagina: null,
-            problema: await lerProblema(response),
+            problema: interpretarProblema(error, response.status),
             falha: null,
           });
           return;

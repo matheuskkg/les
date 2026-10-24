@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { useRoute } from 'preact-iso';
-import { cliente, lerProblema, type ProblemaDetalhe } from '../api/cliente';
+import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/cliente';
 import type { components } from '../api/esquema';
 import { Erro } from '../componentes/Erro';
 import { formatarDecimal, formatarDinheiro } from '../formatacao';
@@ -55,7 +55,7 @@ export default function Livro() {
 
     async function carregar(): Promise<void> {
       try {
-        const { data, response } = await cliente.GET('/api/livros/{id}', {
+        const { data, error, response } = await cliente.GET('/api/livros/{id}', {
           params: { path: { id } },
           signal: controle.signal,
         });
@@ -66,7 +66,7 @@ export default function Livro() {
           definirResultado({
             codigo: id,
             livro: null,
-            problema: await lerProblema(response),
+            problema: interpretarProblema(error, response.status),
             falha: null,
           });
           return;
