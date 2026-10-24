@@ -46,4 +46,12 @@ class DinheiroTest {
         assertThat(cinco.subtrair(dez).ehNegativo()).isTrue();
         assertThat(dez.ehPositivo()).isTrue();
     }
+
+    @Test
+    void emReaisFormataComoAUi() {
+        assertThat(Dinheiro.de("1234.5").emReais()).isEqualTo("R$ 1.234,50");
+        assertThat(Dinheiro.de("10").emReais()).isEqualTo("R$ 10,00");
+        assertThat(Dinheiro.de("1234567.89").emReais()).isEqualTo("R$ 1.234.567,89");
+        assertThat(Dinheiro.de("-5.1").emReais()).isEqualTo("-R$ 5,10");
+    }
 }

@@ -75,6 +75,21 @@ public record Dinheiro(BigDecimal valor) implements Comparable<Dinheiro> {
         return valor.compareTo(outro.valor);
     }
 
+    /** Valor como a UI o mostra, para mensagens: {@code R$ 1.234,56}. */
+    public String emReais() {
+        String digitos = valor.abs().toPlainString();
+        int ponto = digitos.indexOf('.');
+        String inteiro = digitos.substring(0, ponto);
+        StringBuilder milhares = new StringBuilder();
+        for (int i = 0; i < inteiro.length(); i++) {
+            if (i > 0 && (inteiro.length() - i) % 3 == 0) {
+                milhares.append('.');
+            }
+            milhares.append(inteiro.charAt(i));
+        }
+        return (valor.signum() < 0 ? "-R$ " : "R$ ") + milhares + "," + digitos.substring(ponto + 1);
+    }
+
     @Override
     public String toString() {
         return valor.toPlainString();
