@@ -36,6 +36,7 @@ import lombok.Setter;
  * Tabela {@code pedido} do MER (DEC-12, DEC-16). Cliente e endereços são snapshots imutáveis em JSON com o id de
  * origem; o {@code cliente_id} também é coluna, só pelo id, para filtrar os pedidos do cliente. O checkout de origem é
  * FK, porque é do mesmo módulo, e o índice com o status atende à busca do pedido em processamento do checkout (DEC-13).
+ * O índice de {@code realizado_em} atende ao período e à ordenação padrão da consulta do admin (RF-VEN-009).
  */
 @Getter
 @Setter
@@ -44,7 +45,8 @@ import lombok.Setter;
 @Audited
 @Table(name = "pedido", indexes = {
         @Index(name = "ix_pedido_cliente", columnList = "cliente_id"),
-        @Index(name = "ix_pedido_checkout_status", columnList = "checkout_id, status") })
+        @Index(name = "ix_pedido_checkout_status", columnList = "checkout_id, status"),
+        @Index(name = "ix_pedido_realizado_em", columnList = "realizado_em") })
 public class PedidoJpa {
 
     @Id

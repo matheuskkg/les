@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { useRoute } from 'preact-iso';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/cliente';
 import type { components } from '../api/esquema';
+import { formatarCep } from '../cadastroDeCliente';
 import { Erro } from '../componentes/Erro';
 import { formatarCpf } from '../filtrosDeClientes';
 import { formatarDataHora, formatarDinheiro, textoDoStatus } from '../formatacao';
@@ -13,11 +14,6 @@ interface Resultado {
   id: string;
   pedido: PedidoDetalhe | null;
   problema: ProblemaDetalhe | null;
-}
-
-function formatarCep(cep: string): string {
-  const digitos = cep.replace(/\D/g, '');
-  return digitos.length === 8 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : cep;
 }
 
 function Endereco({ titulo, endereco }: { titulo: string; endereco: EnderecoNoPedido }) {

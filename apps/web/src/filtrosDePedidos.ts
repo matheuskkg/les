@@ -1,17 +1,14 @@
 import type { paths } from './api/esquema';
+import { textoDoStatus } from './formatacao.ts';
 
 /** Parâmetros de `GET /api/admin/pedidos`, como definidos no contrato (RF-VEN-009, DEC-07). */
 export type ConsultaDePedidos = NonNullable<paths['/api/admin/pedidos']['get']['parameters']['query']>;
 export type StatusDoPedido = NonNullable<ConsultaDePedidos['status']>[number];
 
 /** Status do pedido na ordem do ciclo da venda, com o texto do DRS (DEC-12). */
-export const STATUS: readonly { valor: StatusDoPedido; rotulo: string }[] = [
-  { valor: 'EM_PROCESSAMENTO', rotulo: 'EM PROCESSAMENTO' },
-  { valor: 'APROVADA', rotulo: 'APROVADA' },
-  { valor: 'REPROVADA', rotulo: 'REPROVADA' },
-  { valor: 'EM_TRANSPORTE', rotulo: 'EM TRANSPORTE' },
-  { valor: 'ENTREGUE', rotulo: 'ENTREGUE' },
-];
+export const STATUS: readonly { valor: StatusDoPedido; rotulo: string }[] = (
+  ['EM_PROCESSAMENTO', 'APROVADA', 'REPROVADA', 'EM_TRANSPORTE', 'ENTREGUE'] as const
+).map((valor) => ({ valor, rotulo: textoDoStatus(valor) }));
 
 export const ORDENS: readonly { valor: string; rotulo: string }[] = [
   { valor: 'realizadoEm,desc', rotulo: 'Mais recentes primeiro' },

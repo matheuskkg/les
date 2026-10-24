@@ -40,4 +40,9 @@ class PeriodoDoPedidoTest {
         assertThatThrownBy(() -> PeriodoDoPedido.dosDias(LocalDate.of(2026, 10, 25), LocalDate.of(2026, 10, 24)))
                 .isInstanceOf(ParametroInvalido.class);
     }
+
+    @Test
+    void dec07_ultimoDiaRepresentavelEhParametroInvalido() {
+        assertThatThrownBy(() -> PeriodoDoPedido.dosDias(null, LocalDate.MAX)).isInstanceOf(ParametroInvalido.class);
+    }
 }

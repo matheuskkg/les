@@ -155,6 +155,10 @@ export default function AdminPedidos() {
         </p>
       ) : visivel.problema ? (
         <Erro problema={visivel.problema} />
+      ) : pagina !== null && pagina.itens.length === 0 && pagina.totalItens > 0 ? (
+        <p class="aviso">
+          Esta página não existe mais. <a href={urlDaConsulta({ ...estado, pagina: 1 })}>Ir para a primeira página</a>
+        </p>
       ) : pagina === null || pagina.itens.length === 0 ? (
         <p class="aviso">Nenhum pedido encontrado.</p>
       ) : (
