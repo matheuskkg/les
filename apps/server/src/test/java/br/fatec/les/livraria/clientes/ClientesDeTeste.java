@@ -291,6 +291,14 @@ public final class ClientesDeTeste {
                     .map(Cliente::getId)
                     .findFirst();
         }
+
+        @Override
+        public java.util.Optional<Long> buscarUsuarioIdPorClienteId(Long clienteId) {
+            return salvos.stream()
+                    .filter(cliente -> clienteId.equals(cliente.getId()))
+                    .map(Cliente::getUsuarioId)
+                    .findFirst();
+        }
     }
 
     public static class FakeBandeiraRepositorio implements BandeiraRepositorio {

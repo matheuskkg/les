@@ -37,6 +37,9 @@ public interface ClienteRepositorio {
      */
     Optional<Long> buscarIdPorUsuarioId(Long usuarioId);
 
+    /** Usuário de login do cliente, para notificar fora de uma requisição, como na expiração do carrinho (DEC-13). */
+    Optional<Long> buscarUsuarioIdPorClienteId(Long clienteId);
+
     /**
      * Ids dos usuários dos clientes com o CPF informado, em qualquer situação. A regra {@code CpfUnico} pergunta ao
      * {@code acesso} se algum deles ainda está em uso (DEC-10).

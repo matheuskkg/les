@@ -27,4 +27,7 @@ public interface ClienteJpaRepository extends JpaRepository<ClienteJpa, Long>, J
     /** Id do cliente do usuário de login, sem carregar endereços e cartões (DEC-07, DEC-15.4). */
     @Query("select c.id from ClienteJpa c where c.usuarioId = :usuarioId")
     Optional<Long> buscarIdPorUsuarioId(@Param("usuarioId") Long usuarioId);
+
+    @Query("select c.usuarioId from ClienteJpa c where c.id = :clienteId")
+    Optional<Long> buscarUsuarioIdPorId(@Param("clienteId") Long clienteId);
 }

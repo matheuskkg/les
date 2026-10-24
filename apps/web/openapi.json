@@ -838,6 +838,44 @@
         "tags" : [ "carrinho-controller" ]
       }
     },
+    "/api/me/carrinho/removidos/{livroId}" : {
+      "delete" : {
+        "operationId" : "dispensarRemovido",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "livroId",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CarrinhoDto"
+                }
+              }
+            },
+            "description" : "Carrinho atualizado"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Livro fora dos itens removidos"
+          }
+        },
+        "summary" : "Dispensa o aviso de um livro retirado do carrinho por expiração",
+        "tags" : [ "carrinho-controller" ]
+      }
+    },
     "/api/me/cartoes" : {
       "get" : {
         "operationId" : "listar_1",
@@ -1702,13 +1740,19 @@
             "type" : "integer",
             "format" : "int32"
           },
+          "removidos" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ItemRemovidoDoCarrinhoDto"
+            }
+          },
           "subtotal" : {
             "type" : "string",
             "format" : "decimal",
             "example" : "1234.56"
           }
         },
-        "required" : [ "itens", "quantidadeDeItens", "subtotal" ]
+        "required" : [ "itens", "quantidadeDeItens", "removidos", "subtotal" ]
       },
       "CartaoDaResposta" : {
         "type" : "object",
@@ -2075,6 +2119,33 @@
           }
         },
         "required" : [ "autores", "livroId", "quantidade" ]
+      },
+      "ItemRemovidoDoCarrinhoDto" : {
+        "type" : "object",
+        "properties" : {
+          "autores" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "livroId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "quantidade" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "removidoEm" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "titulo" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "autores", "livroId", "quantidade", "removidoEm" ]
       },
       "LivroDetalheDto" : {
         "type" : "object",

@@ -23,7 +23,8 @@ import lombok.Setter;
 
 /**
  * Tabela {@code carrinho} do MER (DEC-14, DEC-16): um carrinho por cliente. O {@code cliente_id} é referência ao
- * módulo {@code clientes} só pelo id, sem FK (DEC-16). O índice em {@code expira_em} atende à expiração (VEN-02).
+ * módulo {@code clientes} só pelo id, sem FK (DEC-16). O índice em {@code expira_em} atende à tarefa de expiração
+ * (DEC-13).
  */
 @Getter
 @Setter
@@ -53,4 +54,8 @@ public class CarrinhoJpa {
     @OneToMany(mappedBy = "carrinho", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
     private List<ItemCarrinhoJpa> itens = new ArrayList<>();
+
+    @OneToMany(mappedBy = "carrinho", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
+    private List<ItemRemovidoCarrinhoJpa> removidos = new ArrayList<>();
 }

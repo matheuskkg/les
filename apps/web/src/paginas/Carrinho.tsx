@@ -8,6 +8,7 @@ import { formatarDataHora, formatarDinheiro } from '../formatacao';
 
 type CarrinhoDto = components['schemas']['CarrinhoDto'];
 type Item = components['schemas']['ItemDoCarrinhoDto'];
+type Removido = components['schemas']['ItemRemovidoDoCarrinhoDto'];
 
 function LinhaDoCarrinho({
   item,
@@ -69,8 +70,57 @@ function LinhaDoCarrinho({
 }
 
 /**
+ * Livros retirados do carrinho porque o prazo de reserva acabou (RNF-VEN-001): sem opção de compra até serem
+ * adicionados de novo, o que apaga o aviso, assim como dispensá-lo.
+ */
+function ItensRemovidos({
+  removidos,
+  readicionar,
+  dispensar,
+}: {
+  removidos: Removido[];
+  readicionar: (removido: Removido) => void;
+  dispensar: (livroId: number) => void;
+}) {
+  return (
+    <div class="cartao">
+      <h2>Removidos por expiração</h2>
+      <p class="campo__ajuda">
+        O prazo de reserva acabou e estes livros saíram do carrinho. Para comprá-los, adicione-os de novo.
+      </p>
+      <ul class="itens-da-conta">
+        {removidos.map((removido) => (
+          <li key={removido.livroId} class="item-da-conta item-removido">
+            <div>
+              <a href={`/livros/${removido.livroId}`}>
+                <strong>{removido.titulo ?? `Livro ${removido.livroId}`}</strong>
+              </a>
+              <br />
+              {removido.quantidade} {removido.quantidade === 1 ? 'unidade' : 'unidades'} · removido em{' '}
+              {formatarDataHora(removido.removidoEm)}
+            </div>
+            <div class="item-da-conta__acoes">
+              <button class="botao" type="button" disabled title="Adicione o livro de novo para comprá-lo">
+                Comprar
+              </button>
+              <button class="botao botao--secundario" type="button" onClick={() => readicionar(removido)}>
+                Adicionar de novo
+              </button>
+              <button class="botao botao--secundario" type="button" onClick={() => dispensar(removido.livroId)}>
+                Dispensar
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/**
  * Carrinho do cliente: itens com o preço atual, alteração de quantidade, remoção e subtotal (RF-VEN-001,
- * RF-VEN-002). O prazo do bloqueio é só exibido (DEC-13); a tela recarrega quando chega uma notificação do carrinho.
+ * RF-VEN-002), além dos livros retirados por expiração (RN-VEN-014, RNF-VEN-001). O prazo do bloqueio é só exibido
+ * (DEC-13); a tela recarrega quando chega uma notificação do carrinho.
  */
 export default function Carrinho() {
   const [carrinho, definirCarrinho] = useState<CarrinhoDto | null>(null);
@@ -114,6 +164,18 @@ export default function Carrinho() {
     void aplicar(cliente.DELETE('/api/me/carrinho/itens/{livroId}', { params: { path: { livroId } } }));
   }
 
+  function readicionar(removido: Removido) {
+    void aplicar(
+      cliente.POST('/api/me/carrinho/itens', {
+        body: { livroId: removido.livroId, quantidade: removido.quantidade },
+      }),
+    );
+  }
+
+  function dispensar(livroId: number) {
+    void aplicar(cliente.DELETE('/api/me/carrinho/removidos/{livroId}', { params: { path: { livroId } } }));
+  }
+
   return (
     <section class="pagina">
       <h1>Carrinho</h1>
@@ -151,6 +213,10 @@ export default function Carrinho() {
             </p>
           )}
         </div>
+      )}
+
+      {carrinho && carrinho.removidos.length > 0 && (
+        <ItensRemovidos removidos={carrinho.removidos} readicionar={readicionar} dispensar={dispensar} />
       )}
     </section>
   );

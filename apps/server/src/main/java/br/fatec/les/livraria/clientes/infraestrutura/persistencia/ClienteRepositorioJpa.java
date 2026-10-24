@@ -68,4 +68,10 @@ public class ClienteRepositorioJpa implements ClienteRepositorio {
     public Optional<Long> buscarIdPorUsuarioId(Long usuarioId) {
         return repositorio.buscarIdPorUsuarioId(usuarioId);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Long> buscarUsuarioIdPorClienteId(Long clienteId) {
+        return repositorio.buscarUsuarioIdPorId(clienteId);
+    }
 }

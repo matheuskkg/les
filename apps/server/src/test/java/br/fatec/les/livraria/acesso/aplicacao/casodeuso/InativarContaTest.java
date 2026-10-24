@@ -6,6 +6,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,11 +26,13 @@ class InativarContaTest {
 
     private final FakeUsuarioRepositorio usuarios = new FakeUsuarioRepositorio();
 
+    private final List<Long> efeitos = new ArrayList<>();
+
     private InativarConta caso;
 
     @BeforeEach
     void montar() {
-        caso = new InativarConta(usuarios, relogio(), new SituacaoDaConta());
+        caso = new InativarConta(usuarios, relogio(), new SituacaoDaConta(), List.of(efeitos::add));
     }
 
     @Test
@@ -38,6 +42,7 @@ class InativarContaTest {
         caso.executar(2L);
 
         assertThat(usuarios.salvos.getLast().getInativadoEm()).isEqualTo(AGORA);
+        assertThat(efeitos).containsExactly(2L);
     }
 
     @Test
@@ -48,6 +53,7 @@ class InativarContaTest {
         assertThat(catchThrowableOfType(() -> caso.executar(2L), ExcecaoDeConflito.class))
                 .hasMessage("A conta já está inativa.");
         assertThat(usuarios.salvos).hasSize(salvosAntes);
+        assertThat(efeitos).isEmpty();
     }
 
     @Test

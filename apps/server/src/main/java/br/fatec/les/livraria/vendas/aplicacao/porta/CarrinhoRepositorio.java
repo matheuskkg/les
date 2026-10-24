@@ -1,5 +1,7 @@
 package br.fatec.les.livraria.vendas.aplicacao.porta;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import br.fatec.les.livraria.vendas.dominio.modelo.Carrinho;
@@ -16,6 +18,18 @@ public interface CarrinhoRepositorio {
      */
     Optional<Carrinho> buscarPorClienteParaAlterar(Long clienteId);
 
-    /** Grava o carrinho e sincroniza os itens, criando o id na primeira gravação. */
+    /** Carrinho pelo id, travado até o fim da transação, para a expiração (RN-VEN-014). */
+    Optional<Carrinho> buscarParaAlterar(Long carrinhoId);
+
+    /**
+     * Carrinhos ainda sem aviso cujo prazo vence entre {@code agora} (exclusive) e {@code limite} (inclusive), para o
+     * aviso de expiração (RN-VEN-014).
+     */
+    List<Long> listarIdsParaAvisar(LocalDateTime agora, LocalDateTime limite);
+
+    /** Carrinhos com prazo vencido até {@code agora}, para a expiração (RN-VEN-014). */
+    List<Long> listarIdsVencidos(LocalDateTime agora);
+
+    /** Grava o carrinho e sincroniza os itens e os removidos, criando o id na primeira gravação. */
     Carrinho salvar(Carrinho carrinho);
 }

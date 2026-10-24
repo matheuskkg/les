@@ -15,6 +15,7 @@ import br.fatec.les.livraria.vendas.aplicacao.casodeuso.AdicaoDeItem;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.AdicionarAoCarrinho;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.AlteracaoDeQuantidade;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.AlterarQuantidade;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.DispensarItemRemovido;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.RemoverDoCarrinho;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.VerCarrinho;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.AdicaoAoCarrinho;
@@ -29,7 +30,8 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Carrinho do cliente logado (RF-VEN-001, RF-VEN-002, RN-VEN-001, DEC-15.4). O cliente vem da sessão; toda resposta
- * de escrita devolve o carrinho atualizado. Estoque insuficiente responde 422 com {@code RN-VEN-001}.
+ * de escrita devolve o carrinho atualizado. Estoque insuficiente responde 422 com {@code RN-VEN-001}. Os livros
+ * retirados por expiração aparecem em {@code removidos} até serem adicionados de novo ou dispensados (RNF-VEN-001).
  */
 @RestController
 @RequestMapping("/api/me/carrinho")
@@ -40,6 +42,7 @@ public class CarrinhoController {
     private final AdicionarAoCarrinho adicionarAoCarrinho;
     private final AlterarQuantidade alterarQuantidade;
     private final RemoverDoCarrinho removerDoCarrinho;
+    private final DispensarItemRemovido dispensarItemRemovido;
 
     @GetMapping
     @Operation(summary = "Mostra o carrinho do cliente com o preço atual de cada livro")
@@ -84,5 +87,17 @@ public class CarrinhoController {
     })
     public CarrinhoDto remover(@PathVariable Long livroId) {
         return CarrinhoDto.de(removerDoCarrinho.executar(livroId));
+    }
+
+    @DeleteMapping("/removidos/{livroId}")
+    @Operation(summary = "Dispensa o aviso de um livro retirado do carrinho por expiração")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Carrinho atualizado"),
+            @ApiResponse(responseCode = "404", description = "Livro fora dos itens removidos",
+                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public CarrinhoDto dispensarRemovido(@PathVariable Long livroId) {
+        return CarrinhoDto.de(dispensarItemRemovido.executar(livroId));
     }
 }

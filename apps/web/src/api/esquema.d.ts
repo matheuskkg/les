@@ -256,6 +256,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/carrinho/removidos/{livroId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Dispensa o aviso de um livro retirado do carrinho por expiração */
+        delete: operations["dispensarRemovido"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me/cartoes": {
         parameters: {
             query?: never;
@@ -538,6 +555,7 @@ export interface components {
             itens: components["schemas"]["ItemDoCarrinhoDto"][];
             /** Format: int32 */
             quantidadeDeItens: number;
+            removidos: components["schemas"]["ItemRemovidoDoCarrinhoDto"][];
             /**
              * Format: decimal
              * @example 1234.56
@@ -686,6 +704,16 @@ export interface components {
              * @example 1234.56
              */
             subtotal?: string;
+            titulo?: string;
+        };
+        ItemRemovidoDoCarrinhoDto: {
+            autores: string[];
+            /** Format: int64 */
+            livroId: number;
+            /** Format: int32 */
+            quantidade: number;
+            /** Format: date-time */
+            removidoEm: string;
             titulo?: string;
         };
         LivroDetalheDto: {
@@ -1364,6 +1392,37 @@ export interface operations {
                 };
             };
             /** @description Livro fora do carrinho */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    dispensarRemovido: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                livroId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Carrinho atualizado */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CarrinhoDto"];
+                };
+            };
+            /** @description Livro fora dos itens removidos */
             404: {
                 headers: {
                     [name: string]: unknown;

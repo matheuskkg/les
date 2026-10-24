@@ -17,16 +17,19 @@ import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
  * @param subtotal          soma dos subtotais, zero quando o carrinho está vazio
  * @param quantidadeDeItens soma das quantidades dos itens
  * @param expiraEm          fim do bloqueio do carrinho, nulo quando não há itens
+ * @param removidos         livros retirados por expiração, ainda não readicionados nem dispensados (RNF-VEN-001)
  */
 public record CarrinhoConsultado(
         List<ItemDoCarrinho> itens,
         Dinheiro subtotal,
         int quantidadeDeItens,
-        @Nullable LocalDateTime expiraEm) {
+        @Nullable LocalDateTime expiraEm,
+        List<ItemRemovidoDoCarrinho> removidos) {
 
     public CarrinhoConsultado {
         Objects.requireNonNull(itens, "itens");
         Objects.requireNonNull(subtotal, "subtotal");
         itens = List.copyOf(itens);
+        removidos = List.copyOf(removidos);
     }
 }

@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.vendas.dominio.modelo;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,9 @@ import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado
  * criado na primeira adição. O prazo de bloqueio ({@code expiraEm}) é contado a partir do último item
  * incluído (DEC-05.1) e as reservas de estoque acompanham esse prazo.
  *
+ * <p>Vencido o prazo, os itens saem do carrinho e ficam nos itens removidos, à mostra até o cliente adicionar o
+ * livro de novo ou dispensar o aviso (RN-VEN-014, RN-VEN-015, RNF-VEN-001).</p>
+ *
  * <p>O carrinho não guarda preço: a leitura usa o preço de venda atual do catálogo. O pedido é que copia os
  * dados na finalização (DEC-12, DEC-16).</p>
  */
@@ -21,21 +25,23 @@ public class Carrinho {
     private final Long id;
     private final Long clienteId;
     private final List<ItemCarrinho> itens;
+    private final List<ItemRemovidoCarrinho> removidos;
     private LocalDateTime expiraEm;
     private LocalDateTime avisoEnviadoEm;
 
     public Carrinho(Long id, Long clienteId, LocalDateTime expiraEm, LocalDateTime avisoEnviadoEm,
-            List<ItemCarrinho> itens) {
+            List<ItemCarrinho> itens, List<ItemRemovidoCarrinho> removidos) {
         this.id = id;
         this.clienteId = Objects.requireNonNull(clienteId, "clienteId");
         this.itens = new ArrayList<>(Objects.requireNonNull(itens, "itens"));
+        this.removidos = new ArrayList<>(Objects.requireNonNull(removidos, "removidos"));
         this.expiraEm = expiraEm;
         this.avisoEnviadoEm = avisoEnviadoEm;
     }
 
     /** Carrinho ainda sem id e sem itens, para o primeiro item do cliente (criação preguiçosa). */
     public static Carrinho vazio(Long clienteId) {
-        return new Carrinho(null, clienteId, null, null, List.of());
+        return new Carrinho(null, clienteId, null, null, List.of(), List.of());
     }
 
     /** Quantidade já existente de um livro; zero quando ele não está no carrinho. */
@@ -49,7 +55,8 @@ public class Carrinho {
     }
 
     /**
-     * Adiciona um livro ou soma à linha existente (RF-VEN-001). A linha é única por livro (DEC-16).
+     * Adiciona um livro ou soma à linha existente (RF-VEN-001). A linha é única por livro (DEC-16). Um livro que
+     * estava nos itens removidos sai de lá, porque foi adicionado de novo (RNF-VEN-001).
      *
      * @throws IllegalArgumentException se a quantidade não for positiva
      */
@@ -60,6 +67,7 @@ public class Carrinho {
         }
         item(livroId).ifPresentOrElse(item -> item.somar(quantidade),
                 () -> itens.add(new ItemCarrinho(null, livroId, quantidade)));
+        removidos.removeIf(removido -> removido.livroId().equals(livroId));
     }
 
     /**
@@ -98,6 +106,72 @@ public class Carrinho {
         return itens.isEmpty();
     }
 
+    /** RN-VEN-014: o prazo venceu e ainda há itens bloqueados a retirar. */
+    public boolean venceuEm(LocalDateTime agora) {
+        return !itens.isEmpty() && expiraEm != null && !expiraEm.isAfter(agora);
+    }
+
+    /**
+     * RN-VEN-014: o aviso sai uma vez, quando faltar a antecedência ou menos para o vencimento. Um carrinho já
+     * vencido não recebe aviso atrasado: ele é expirado.
+     */
+    public boolean deveAvisarEm(LocalDateTime agora, Duration antecedencia) {
+        return !itens.isEmpty() && expiraEm != null && avisoEnviadoEm == null && expiraEm.isAfter(agora)
+                && !expiraEm.isAfter(agora.plus(antecedencia));
+    }
+
+    /** Registra que o aviso de expiração foi enviado, para não repeti-lo no mesmo prazo (DEC-16). */
+    public void registrarAviso(LocalDateTime agora) {
+        this.avisoEnviadoEm = Objects.requireNonNull(agora, "agora");
+    }
+
+    /**
+     * Retira todos os itens por vencimento do prazo e os guarda nos itens removidos (RN-VEN-014, RN-VEN-015,
+     * RNF-VEN-001). As reservas devem ser liberadas antes, pelo {@code estoque}.
+     *
+     * @return os itens retirados
+     */
+    public List<ItemRemovidoCarrinho> expirar(LocalDateTime agora) {
+        Objects.requireNonNull(agora, "agora");
+        List<ItemRemovidoCarrinho> retirados = itens.stream()
+                .map(item -> new ItemRemovidoCarrinho(item.getLivroId(), item.getQuantidade(), agora))
+                .toList();
+        registrarRemovidos(retirados);
+        itens.clear();
+        encerrarExpiracao();
+        return retirados;
+    }
+
+    /**
+     * Guarda itens retirados por expiração, um por livro (DEC-16): o registro mais recente de um livro substitui o
+     * anterior.
+     */
+    public void registrarRemovidos(List<ItemRemovidoCarrinho> novos) {
+        for (ItemRemovidoCarrinho novo : novos) {
+            removidos.removeIf(removido -> removido.livroId().equals(novo.livroId()));
+            removidos.add(novo);
+        }
+    }
+
+    /**
+     * Dispensa o aviso de um item removido (RNF-VEN-001).
+     *
+     * @throws ExcecaoDeRecursoNaoEncontrado se o livro não estiver nos itens removidos
+     */
+    public void dispensarRemovido(Long livroId) {
+        Objects.requireNonNull(livroId, "livroId");
+        if (!removidos.removeIf(removido -> removido.livroId().equals(livroId))) {
+            throw new ExcecaoDeRecursoNaoEncontrado("Item não encontrado entre os removidos do carrinho.");
+        }
+    }
+
+    /** Esvazia o carrinho e os itens removidos, como na inativação da conta (DEC-10). */
+    public void esvaziar() {
+        itens.clear();
+        removidos.clear();
+        encerrarExpiracao();
+    }
+
     private ItemCarrinho itemExigido(Long livroId) {
         return item(livroId)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Item não encontrado no carrinho."));
@@ -113,6 +187,10 @@ public class Carrinho {
 
     public List<ItemCarrinho> getItens() {
         return List.copyOf(itens);
+    }
+
+    public List<ItemRemovidoCarrinho> getRemovidos() {
+        return List.copyOf(removidos);
     }
 
     public LocalDateTime getExpiraEm() {
