@@ -18,7 +18,8 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Expira o checkout cujo prazo venceu (RN-VEN-014, RNF-VEN-001, DEC-12, DEC-13): libera as reservas no
- * {@code estoque}, leva os itens para os removidos do carrinho e notifica o cliente.
+ * {@code estoque}, leva os itens para os removidos do carrinho e notifica o cliente. O pedido que ficou em processamento
+ * por falha entre as transações da finalização é reprovado, devolvendo os cupons.
  *
  * <p>Trava o carrinho antes do checkout, na mesma ordem do {@link IniciarCheckout} e do {@link VoltarAoCarrinho}, e
  * confere de novo o vencimento depois de travar.</p>
@@ -36,6 +37,7 @@ public class ExpirarCheckout {
     private final LiberarItensDoCheckout liberarItens;
     private final ConsultarUsuarioDoCliente consultarUsuario;
     private final Notificar notificar;
+    private final ReprovarPedido reprovarPedido;
 
     /** @param checkoutId checkout com o prazo vencido */
     @Transactional
@@ -51,6 +53,7 @@ public class ExpirarCheckout {
     }
 
     private void expirar(Checkout checkout, Carrinho carrinho, LocalDateTime agora) {
+        reprovarPedido.executarPendenteDoCheckout(checkout.getId());
         liberarItens.executar(checkout);
         carrinho.registrarRemovidos(checkout.itensRemovidosEm(agora));
         carrinhos.salvar(carrinho);

@@ -87,6 +87,16 @@ public class Checkout {
         situacao = SituacaoCheckout.EXPIRADO;
     }
 
+    /**
+     * Conclui o checkout do pedido aprovado: as reservas viraram baixa de estoque (DEC-12).
+     *
+     * @throws ExcecaoDeConflito se o checkout não estiver aberto
+     */
+    public void concluir() {
+        exigirAberto();
+        situacao = SituacaoCheckout.CONCLUIDO;
+    }
+
     /** Itens retirados por expiração, para os removidos do carrinho (RNF-VEN-001). */
     public List<ItemRemovidoCarrinho> itensRemovidosEm(LocalDateTime agora) {
         return itens.stream()

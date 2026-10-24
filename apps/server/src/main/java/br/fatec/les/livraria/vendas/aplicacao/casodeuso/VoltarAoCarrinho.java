@@ -26,7 +26,8 @@ import lombok.RequiredArgsConstructor;
  * estiverem lá. O bloqueio do carrinho recomeça (DEC-05.1) e todos os itens são reservados de novo, com a conferência
  * do estoque (RN-VEN-001).
  *
- * <p>Trava o carrinho antes do checkout, na mesma ordem do {@link IniciarCheckout} e da expiração.</p>
+ * <p>Trava o carrinho antes do checkout, na mesma ordem do {@link IniciarCheckout} e da expiração. O pedido que ficou
+ * em processamento é reprovado (DEC-13).</p>
  */
 @Component
 @RequiredArgsConstructor
@@ -40,6 +41,7 @@ public class VoltarAoCarrinho {
     private final PropriedadesDoCarrinho propriedades;
     private final Relogio relogio;
     private final MontarCarrinhoConsultado montarCarrinho;
+    private final ReprovarPedido reprovarPedido;
 
     /**
      * @return o carrinho com os itens devolvidos
@@ -54,6 +56,7 @@ public class VoltarAoCarrinho {
         Checkout checkout = checkouts.buscarAbertoPorClienteParaAlterar(clienteId)
                 .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Nenhuma compra em andamento."));
 
+        reprovarPedido.executarPendenteDoCheckout(checkout.getId());
         liberarItensDoCheckout.executar(checkout);
         try {
             for (ItemCheckout item : checkout.getItens()) {

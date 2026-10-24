@@ -9,12 +9,14 @@ import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
  * Como o total da compra é pago (RF-VEN-007, RN-VEN-006, DEC-11): o desconto do promocional, o que cada cupom de troca
  * cobriu, o troco gerado e o restante a pagar com cartões.
  *
- * @param comCupom se a compra usa algum cupom, o que libera a exceção do RN-VEN-005
+ * @param promocional promocional usado; nulo se não houver
+ * @param comCupom    se a compra usa algum cupom, o que libera a exceção do RN-VEN-005
  */
 public record DistribuicaoDoPagamento(
         Dinheiro subtotal,
         Dinheiro frete,
         Dinheiro total,
+        CupomPromocional promocional,
         Dinheiro descontoPromocional,
         List<CupomAbatido> cuponsDeTroca,
         Dinheiro troco,

@@ -13,7 +13,8 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Encerra o checkout aberto e libera as reservas dele quando o cliente inativa a conta (DEC-10, DEC-12). É chamado
- * pelo {@code InativarConta} do {@code acesso}, na mesma transação, pela porta {@link EfeitoDaInativacao}.
+ * pelo {@code InativarConta} do {@code acesso}, na mesma transação, pela porta {@link EfeitoDaInativacao}. O pedido
+ * que ficou em processamento é reprovado (DEC-13).
  */
 @Component
 @Order(2)
@@ -23,6 +24,7 @@ public class EncerrarCheckoutNaInativacao implements EfeitoDaInativacao {
     private final ConsultarClienteDoUsuario consultarCliente;
     private final CheckoutRepositorio checkouts;
     private final LiberarItensDoCheckout liberarItens;
+    private final ReprovarPedido reprovarPedido;
 
     @Override
     @Transactional
@@ -33,6 +35,7 @@ public class EncerrarCheckoutNaInativacao implements EfeitoDaInativacao {
     }
 
     private void encerrar(Checkout checkout) {
+        reprovarPedido.executarPendenteDoCheckout(checkout.getId());
         liberarItens.executar(checkout);
         checkout.encerrar();
         checkouts.salvar(checkout);

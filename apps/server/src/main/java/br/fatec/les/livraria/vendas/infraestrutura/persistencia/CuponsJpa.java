@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.vendas.aplicacao.porta.CuponsDeTroca;
@@ -22,6 +23,7 @@ public class CuponsJpa implements CuponsPromocionais, CuponsDeTroca {
     private final CupomPromocionalJpaRepository promocionais;
     private final UsoCupomPromocionalJpaRepository usos;
     private final CupomJpaRepository cupons;
+    private final PedidoJpaRepository pedidos;
 
     @Override
     public Optional<CupomPromocional> buscarPorCodigo(String codigo) {
@@ -46,6 +48,57 @@ public class CuponsJpa implements CuponsPromocionais, CuponsDeTroca {
         return cupons.findByClienteIdAndSituacaoOrderByGeradoEmAscIdAsc(clienteId, SituacaoCupom.DISPONIVEL).stream()
                 .map(CuponsJpa::paraDominio)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public void registrarUso(Long cupomPromocionalId, Long clienteId, Long pedidoId) {
+        UsoCupomPromocionalJpa uso = new UsoCupomPromocionalJpa();
+        uso.setCupomPromocional(promocionais.getReferenceById(cupomPromocionalId));
+        uso.setClienteId(clienteId);
+        uso.setPedido(pedidos.getReferenceById(pedidoId));
+        usos.saveAndFlush(uso);
+    }
+
+    @Override
+    @Transactional
+    public void removerUso(Long pedidoId) {
+        usos.deleteByPedidoId(pedidoId);
+    }
+
+    @Override
+    @Transactional
+    public void marcarComoUsados(Collection<Long> ids) {
+        mudarSituacao(ids, SituacaoCupom.USADO);
+    }
+
+    @Override
+    @Transactional
+    public void devolver(Collection<Long> ids) {
+        mudarSituacao(ids, SituacaoCupom.DISPONIVEL);
+    }
+
+    @Override
+    @Transactional
+    public CupomTroca gerar(CupomTroca cupom) {
+        CupomJpa jpa = new CupomJpa();
+        jpa.setClienteId(cupom.clienteId());
+        jpa.setCodigo(cupom.codigo());
+        jpa.setValor(cupom.valor().valor());
+        jpa.setValidade(cupom.validade());
+        jpa.setSituacao(cupom.situacao());
+        jpa.setGeradoEm(cupom.geradoEm());
+        return paraDominio(cupons.saveAndFlush(jpa));
+    }
+
+    /** A versão é conferida no flush: se outra transação mudou o cupom, a gravação falha com 409 (DEC-11). */
+    private void mudarSituacao(Collection<Long> ids, SituacaoCupom situacao) {
+        List<CupomJpa> encontrados = cupons.findAllById(ids);
+        if (encontrados.size() != ids.size()) {
+            throw new IllegalStateException("Cupom de troca não encontrado: " + ids);
+        }
+        encontrados.forEach(cupom -> cupom.setSituacao(situacao));
+        cupons.flush();
     }
 
     private static CupomPromocional paraDominio(CupomPromocionalJpa jpa) {

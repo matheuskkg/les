@@ -14,11 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.CalcularFrete;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConferirPagamento;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.FinalizarCompra;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.IniciarCheckout;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.VerCheckout;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.VoltarAoCarrinho;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.CarrinhoDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.CheckoutDto;
+import br.fatec.les.livraria.vendas.infraestrutura.web.dto.CompraFinalizadaDto;
+import br.fatec.les.livraria.vendas.infraestrutura.web.dto.FinalizacaoDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.FreteDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PagamentoConferidoDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PagamentoPropostoDto;
@@ -32,8 +35,8 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Sessão de compra do cliente logado (RF-VEN-003, DEC-07, DEC-12): "Ir para pagamento", consulta do checkout aberto,
- * frete para o endereço de entrega (RF-VEN-004, RF-VEN-005), conferência do pagamento (RF-VEN-006, RF-VEN-007) e
- * "Voltar ao carrinho". O cliente vem da sessão.
+ * frete para o endereço de entrega (RF-VEN-004, RF-VEN-005), conferência do pagamento (RF-VEN-006, RF-VEN-007),
+ * "Finalizar compra" (RF-VEN-008) e "Voltar ao carrinho". O cliente vem da sessão.
  */
 @RestController
 @RequestMapping("/api/me/checkout")
@@ -45,6 +48,7 @@ public class CheckoutController {
     private final VoltarAoCarrinho voltarAoCarrinho;
     private final CalcularFrete calcularFrete;
     private final ConferirPagamento conferirPagamento;
+    private final FinalizarCompra finalizarCompra;
 
     @GetMapping
     @Operation(summary = "Mostra o checkout aberto do cliente")
@@ -120,5 +124,27 @@ public class CheckoutController {
     })
     public PagamentoConferidoDto conferirPagamento(@RequestBody PagamentoPropostoDto pagamento) {
         return PagamentoConferidoDto.de(conferirPagamento.executar(pagamento.paraPagamento()));
+    }
+
+    @PostMapping("/finalizar")
+    @Operation(summary = "Finaliza a compra: grava o pedido, consulta a operadora e o aprova ou reprova")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Pedido criado, APROVADA ou REPROVADA; na reprovação, o "
+                    + "checkout continua aberto para outra tentativa"),
+            @ApiResponse(responseCode = "404", description = "Nenhum checkout aberto, ou endereço, cupom de troca ou "
+                    + "cartão que não é do cliente", content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Pagamento desta compra já em processamento, ou cupom "
+                    + "usado por outro pedido", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Itens sem reserva ou fora de venda, código de segurança, "
+                    + "cupons ou cartões inválidos", content = @Content(
+                            mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<CompraFinalizadaDto> finalizar(@RequestBody FinalizacaoDto finalizacao) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(CompraFinalizadaDto.de(finalizarCompra.executar(finalizacao.paraFinalizacao())));
     }
 }

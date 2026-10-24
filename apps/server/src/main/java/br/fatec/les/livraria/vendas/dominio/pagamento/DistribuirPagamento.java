@@ -30,7 +30,7 @@ public final class DistribuirPagamento {
         }
 
         Dinheiro troco = Dinheiro.maior(somaDosCupons.subtrair(total.subtrair(desconto)), Dinheiro.ZERO);
-        return new DistribuicaoDoPagamento(compra.subtotal(), compra.frete(), total, desconto, abatidos, troco,
+        return new DistribuicaoDoPagamento(compra.subtotal(), compra.frete(), total, compra.promocional(), desconto, abatidos, troco,
                 aCobrir, compra.temCupom());
     }
 }

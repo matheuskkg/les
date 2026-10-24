@@ -1169,6 +1169,65 @@
         "tags" : [ "checkout-controller" ]
       }
     },
+    "/api/me/checkout/finalizar" : {
+      "post" : {
+        "operationId" : "finalizar",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FinalizacaoDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CompraFinalizadaDto"
+                }
+              }
+            },
+            "description" : "Pedido criado, APROVADA ou REPROVADA; na reprovação, o checkout continua aberto para outra tentativa"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Nenhum checkout aberto, ou endereço, cupom de troca ou cartão que não é do cliente"
+          },
+          "409" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Pagamento desta compra já em processamento, ou cupom usado por outro pedido"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Itens sem reserva ou fora de venda, código de segurança, cupons ou cartões inválidos"
+          }
+        },
+        "summary" : "Finaliza a compra: grava o pedido, consulta a operadora e o aprova ou reprova",
+        "tags" : [ "checkout-controller" ]
+      }
+    },
     "/api/me/checkout/frete" : {
       "post" : {
         "operationId" : "calcularFrete",
@@ -2000,6 +2059,27 @@
         },
         "required" : [ "bandeira", "numero", "valor" ]
       },
+      "CartaoDaFinalizacaoDto" : {
+        "type" : "object",
+        "properties" : {
+          "cartaoId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "codigoSeguranca" : {
+            "type" : "string",
+            "example" : "123"
+          },
+          "novo" : {
+            "$ref" : "#/components/schemas/CartaoInformadoDto"
+          },
+          "valor" : {
+            "type" : "string",
+            "example" : "49.88"
+          }
+        },
+        "required" : [ "codigoSeguranca", "valor" ]
+      },
       "CartaoDaResposta" : {
         "type" : "object",
         "properties" : {
@@ -2112,6 +2192,18 @@
           }
         },
         "required" : [ "bandeiraId", "nomeImpresso", "numero", "validade" ]
+      },
+      "CartaoRecusadoDto" : {
+        "type" : "object",
+        "properties" : {
+          "motivo" : {
+            "type" : "string"
+          },
+          "ultimosDigitos" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "motivo", "ultimosDigitos" ]
       },
       "CategoriaDto" : {
         "type" : "object",
@@ -2248,6 +2340,35 @@
           }
         },
         "required" : [ "cpf", "dataNascimento", "email", "genero", "id", "nome", "situacao" ]
+      },
+      "CompraFinalizadaDto" : {
+        "type" : "object",
+        "properties" : {
+          "pedidoId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "realizadoEm" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "recusas" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CartaoRecusadoDto"
+            }
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "EM_PROCESSAMENTO", "APROVADA", "REPROVADA", "EM_TRANSPORTE", "ENTREGUE" ]
+          },
+          "total" : {
+            "type" : "string",
+            "format" : "decimal",
+            "example" : "1234.56"
+          }
+        },
+        "required" : [ "pedidoId", "realizadoEm", "recusas", "status", "total" ]
       },
       "ContagemDeNaoLidasDto" : {
         "type" : "object",
@@ -2499,6 +2620,37 @@
             "$ref" : "#/components/schemas/EnderecoInformadoDto"
           }
         }
+      },
+      "FinalizacaoDto" : {
+        "type" : "object",
+        "properties" : {
+          "cartoes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CartaoDaFinalizacaoDto"
+            }
+          },
+          "cobranca" : {
+            "$ref" : "#/components/schemas/EscolhaDeEnderecoDto"
+          },
+          "cuponsDeTroca" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          },
+          "cuponsPromocionais" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "entrega" : {
+            "$ref" : "#/components/schemas/EscolhaDeEnderecoDto"
+          }
+        },
+        "required" : [ "cobranca", "entrega" ]
       },
       "FreteDto" : {
         "type" : "object",

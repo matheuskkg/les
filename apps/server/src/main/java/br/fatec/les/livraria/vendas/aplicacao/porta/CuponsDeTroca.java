@@ -13,4 +13,17 @@ public interface CuponsDeTroca {
 
     /** @return os cupons não usados do cliente, dos mais antigos aos mais novos, vencidos ou não */
     List<CupomTroca> listarNaoUsados(Long clienteId);
+
+    /**
+     * Marca os cupons como usados na finalização (DEC-11), conferindo a versão lida na mesma transação.
+     *
+     * @throws org.springframework.dao.OptimisticLockingFailureException se outro pedido usou um deles antes (409)
+     */
+    void marcarComoUsados(Collection<Long> ids);
+
+    /** Devolve ao cliente os cupons de um pedido reprovado (DEC-11, DEC-16). */
+    void devolver(Collection<Long> ids);
+
+    /** Grava um cupom novo, como o de troco (RN-VEN-006), e o devolve com o id. */
+    CupomTroca gerar(CupomTroca cupom);
 }
