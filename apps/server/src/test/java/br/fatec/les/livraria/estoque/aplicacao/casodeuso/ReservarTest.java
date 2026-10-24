@@ -5,17 +5,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio;
-import br.fatec.les.livraria.estoque.aplicacao.porta.EstoqueTravado;
-import br.fatec.les.livraria.estoque.aplicacao.porta.ReservasDeEstoque;
 import br.fatec.les.livraria.estoque.aplicacao.regra.DisponivelParaReservar;
 import br.fatec.les.livraria.estoque.dominio.calculo.CalcularDisponivel;
 import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
@@ -31,7 +26,7 @@ class ReservarTest {
     private final Map<Long, Integer> estoque = new HashMap<>(Map.of(LIVRO, 6));
     private final ReservasEmMemoria reservas = new ReservasEmMemoria();
     private final Reservar reservar = new Reservar(reservas, new DisponivelParaReservar(
-            livroId -> Optional.ofNullable(estoque.get(livroId)), reservas, new CalcularDisponivel()), () -> AGORA);
+            new EstoqueEmMemoria(estoque), reservas, new CalcularDisponivel()), () -> AGORA);
 
     @Test
     void rnVen001_reservaDentroDoDisponivel() {
@@ -82,51 +77,5 @@ class ReservarTest {
     void rnVen014_prazoPrecisaEstarNoFuturo() {
         assertThatThrownBy(() -> reservar.executar(LIVRO, 1, OrigemReserva.CARRINHO, 1L, AGORA))
                 .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    private static final class ReservasEmMemoria implements ReservasDeEstoque {
-
-        private final List<Reserva> todas = new ArrayList<>();
-        private long proximoId = 1;
-
-        @Override
-        public Optional<Reserva> buscar(Long livroId, OrigemReserva origem, Long origemId) {
-            return todas.stream()
-                    .filter(reserva -> reserva.getLivroId().equals(livroId) && reserva.getOrigem() == origem
-                            && reserva.getOrigemId().equals(origemId))
-                    .findFirst();
-        }
-
-        @Override
-        public List<Reserva> listarPorOrigem(OrigemReserva origem, Long origemId) {
-            return todas.stream()
-                    .filter(reserva -> reserva.getOrigem() == origem && reserva.getOrigemId().equals(origemId))
-                    .toList();
-        }
-
-        @Override
-        public Reserva salvar(Reserva reserva) {
-            if (reserva.getId() != null) {
-                return reserva;
-            }
-            Reserva salva = new Reserva(proximoId++, reserva.getLivroId(), reserva.getOrigem(),
-                    reserva.getOrigemId(), reserva.getQuantidade(), reserva.getExpiraEm());
-            todas.add(salva);
-            return salva;
-        }
-
-        @Override
-        public void remover(Long reservaId) {
-            todas.removeIf(reserva -> reserva.getId().equals(reservaId));
-        }
-
-        @Override
-        public int quantidadeReservadaAtivaExceto(Long livroId, LocalDateTime agora, Long reservaExcluida) {
-            return todas.stream()
-                    .filter(reserva -> reserva.getLivroId().equals(livroId) && reserva.ativaEm(agora)
-                            && !reserva.getId().equals(reservaExcluida))
-                    .mapToInt(Reserva::getQuantidade)
-                    .sum();
-        }
     }
 }

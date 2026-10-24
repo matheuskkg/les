@@ -15,4 +15,10 @@ public interface EstoqueTravado {
      * @return quantidade em mãos, ou vazio quando o livro não tem linha de saldo
      */
     Optional<Integer> quantidadeComLock(Long livroId);
+
+    /**
+     * Grava a nova quantidade em mãos do livro, cuja linha já foi travada por {@link #quantidadeComLock(Long)} na
+     * mesma transação (RF-EST-003).
+     */
+    void gravarQuantidade(Long livroId, int quantidade);
 }

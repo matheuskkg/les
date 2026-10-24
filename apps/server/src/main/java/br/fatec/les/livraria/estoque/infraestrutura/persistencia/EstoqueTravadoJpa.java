@@ -20,4 +20,12 @@ public class EstoqueTravadoJpa implements EstoqueTravado {
     public Optional<Integer> quantidadeComLock(Long livroId) {
         return repositorio.buscarPorLivroIdComLock(livroId).map(EstoqueJpa::getQuantidade);
     }
+
+    @Override
+    @Transactional
+    public void gravarQuantidade(Long livroId, int quantidade) {
+        EstoqueJpa estoque = repositorio.buscarPorLivroIdComLock(livroId)
+                .orElseThrow(() -> new IllegalStateException("Livro sem saldo de estoque: " + livroId));
+        estoque.setQuantidade(quantidade);
+    }
 }
