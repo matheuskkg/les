@@ -1,4 +1,4 @@
-import { entrarComo, expect, test } from './fixtures';
+import { comprarDomCasmurro, entrarComo, expect, test } from './fixtures';
 
 // Um Dom Casmurro (R$ 47,88) para o primeiro endereço da Ana, em SP (frete R$ 12,00), pago com o Visa final 1111.
 const ANA = { login: 'ana.souza@livraria.test', senha: 'Senha@123' };
@@ -7,18 +7,7 @@ test('admin encontra o pedido aprovado pelos filtros, despacha e confirma a entr
   page,
 }) => {
   await entrarComo(page, ANA.login, ANA.senha);
-  await page.goto('/livros/1');
-  await page.getByRole('button', { name: 'Adicionar ao carrinho' }).click();
-  await expect(page.getByText('Adicionado ao carrinho.')).toBeVisible();
-  await page.goto('/carrinho');
-  await page.getByRole('button', { name: 'Ir para pagamento' }).click();
-  await expect(page.getByTestId('restante')).toHaveText('R$ 59,88');
-  await page.getByRole('group', { name: 'Cartões' }).getByLabel(/1111/).check();
-  await page.locator('#cartao-1-cvv').fill('123');
-  await page.getByRole('button', { name: 'Finalizar compra' }).click();
-  const aprovado = page.getByTestId('pedido-aprovado');
-  await expect(aprovado).toContainText(/Pedido nº \d+ realizado/);
-  const numero = /Pedido nº (\d+)/.exec((await aprovado.textContent()) ?? '')?.[1] ?? '';
+  const numero = await comprarDomCasmurro(page, '1111', 1);
 
   await page.getByRole('banner').getByRole('button', { name: 'Sair' }).click();
   await entrarComo(page, 'admin@livraria.test', 'Admin@123');

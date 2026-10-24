@@ -3,10 +3,12 @@ import { useSessao } from '../contextoDeSessao';
 import { Cartoes } from './conta/Cartoes';
 import { Dados } from './conta/Dados';
 import { Enderecos } from './conta/Enderecos';
+import { MeuPedido, MeusPedidos } from './conta/Pedidos';
 import { Senha } from './conta/Senha';
 
 const secoes = [
   { caminho: '/minha-conta', rotulo: 'Resumo' },
+  { caminho: '/minha-conta/pedidos', rotulo: 'Meus pedidos' },
   { caminho: '/minha-conta/dados', rotulo: 'Meus dados' },
   { caminho: '/minha-conta/enderecos', rotulo: 'Endereços' },
   { caminho: '/minha-conta/cartoes', rotulo: 'Cartões' },
@@ -31,8 +33,16 @@ function Resumo() {
   );
 }
 
+const DETALHE_DO_PEDIDO = /^\/minha-conta\/pedidos\/([^/]+)$/;
+
 function Secao({ caminho }: { caminho: string }) {
+  const detalhe = DETALHE_DO_PEDIDO.exec(caminho);
+  if (detalhe?.[1] !== undefined) {
+    return <MeuPedido id={detalhe[1]} />;
+  }
   switch (caminho) {
+    case '/minha-conta/pedidos':
+      return <MeusPedidos />;
     case '/minha-conta/dados':
       return <Dados />;
     case '/minha-conta/enderecos':
@@ -46,9 +56,14 @@ function Secao({ caminho }: { caminho: string }) {
   }
 }
 
+/** A aba de "Meus pedidos" continua ativa no detalhe de um pedido. */
+function ativa(path: string, caminho: string): boolean {
+  return path === caminho || (caminho === '/minha-conta/pedidos' && DETALHE_DO_PEDIDO.test(path));
+}
+
 /**
- * Área do cliente: resumo, dados cadastrais, endereços, cartões e senha (RF-CLI-002, RF-CLI-003, RF-CLI-006,
- * RF-CLI-007, RF-CLI-008).
+ * Área do cliente: resumo, pedidos, dados cadastrais, endereços, cartões e senha (RF-CLI-002, RF-CLI-003,
+ * RF-CLI-005, RF-CLI-006, RF-CLI-007, RF-CLI-008).
  */
 export default function MinhaConta() {
   const { path } = useLocation();
@@ -62,8 +77,8 @@ export default function MinhaConta() {
           <a
             key={secao.caminho}
             href={secao.caminho}
-            class={path === secao.caminho ? 'aba aba--ativa' : 'aba'}
-            aria-current={path === secao.caminho ? 'page' : undefined}
+            class={ativa(path, secao.caminho) ? 'aba aba--ativa' : 'aba'}
+            aria-current={ativa(path, secao.caminho) ? 'page' : undefined}
           >
             {secao.rotulo}
           </a>

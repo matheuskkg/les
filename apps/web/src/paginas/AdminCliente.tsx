@@ -3,6 +3,7 @@ import { useRoute } from 'preact-iso';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../api/cliente';
 import type { components } from '../api/esquema';
 import { Erro } from '../componentes/Erro';
+import { PedidosDoCliente } from '../componentes/PedidosDoCliente';
 import { GENEROS, SITUACOES, formatarCpf, rotuloDe } from '../filtrosDeClientes';
 import { formatarData } from '../formatacao';
 
@@ -24,7 +25,10 @@ function formatarValidade(validade: string): string {
   return partes ? `${partes[2]}/${partes[1]}` : validade;
 }
 
-/** Detalhe do cliente para o administrador: dados, endereços e cartões mascarados (RF-CLI-004). */
+/**
+ * Detalhe do cliente para o administrador: dados, endereços, cartões mascarados (RF-CLI-004) e o histórico de
+ * pedidos (RF-CLI-005).
+ */
 export default function AdminCliente() {
   const { params } = useRoute();
   const id = params.id ?? '';
@@ -115,6 +119,8 @@ export default function AdminCliente() {
               </ul>
             )}
           </div>
+
+          <PedidosDoCliente cpf={visivel.cliente.cpf} />
         </>
       )}
     </section>
