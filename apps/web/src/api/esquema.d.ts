@@ -11,7 +11,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar_5"];
+        get: operations["listar_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -27,7 +27,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["buscar_2"];
+        get: operations["buscar_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -128,7 +128,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar_4"];
+        get: operations["listar_5"];
         put?: never;
         post?: never;
         delete?: never;
@@ -144,7 +144,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["buscar_1"];
+        get: operations["buscar_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -209,7 +209,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar_3"];
+        get: operations["listar_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -241,7 +241,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["buscar"];
+        get: operations["buscar_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -484,7 +484,7 @@ export interface paths {
             cookie?: never;
         };
         /** Lista os cupons de troca disponíveis do cliente */
-        get: operations["listar_2"];
+        get: operations["listar_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -625,6 +625,38 @@ export interface paths {
         put?: never;
         /** Marca uma notificação do cliente como lida */
         post: operations["marcarComoLidaDoCliente"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/pedidos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listar_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/pedidos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["buscar"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1372,7 +1404,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    listar_5: {
+    listar_6: {
         parameters: {
             query?: {
                 nome?: string;
@@ -1409,7 +1441,7 @@ export interface operations {
             };
         };
     };
-    buscar_2: {
+    buscar_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -1545,7 +1577,7 @@ export interface operations {
             };
         };
     };
-    listar_4: {
+    listar_5: {
         parameters: {
             query?: {
                 numero?: number;
@@ -1578,7 +1610,7 @@ export interface operations {
             };
         };
     };
-    buscar_1: {
+    buscar_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1686,7 +1718,7 @@ export interface operations {
             };
         };
     };
-    listar_3: {
+    listar_4: {
         parameters: {
             query?: {
                 titulo?: string;
@@ -1752,7 +1784,7 @@ export interface operations {
             };
         };
     };
-    buscar: {
+    buscar_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -2471,7 +2503,7 @@ export interface operations {
             };
         };
     };
-    listar_2: {
+    listar_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -2809,6 +2841,55 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    listar_2: {
+        parameters: {
+            query?: {
+                /** @description Página, a partir de 0. */
+                pagina?: number;
+                /** @description Itens por página (padrão 20, máximo 100). */
+                tamanho?: number;
+                /** @description Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: realizadoEm, total, id. Padrão: realizadoEm,desc. */
+                ordem?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginaPedidoListadoDto"];
+                };
+            };
+        };
+    };
+    buscar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PedidoDetalheDto"];
+                };
             };
         };
     };

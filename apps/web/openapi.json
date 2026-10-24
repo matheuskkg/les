@@ -10,7 +10,7 @@
   "paths" : {
     "/api/admin/clientes" : {
       "get" : {
-        "operationId" : "listar_5",
+        "operationId" : "listar_6",
         "parameters" : [ {
           "in" : "query",
           "name" : "nome",
@@ -146,7 +146,7 @@
     },
     "/api/admin/clientes/{id}" : {
       "get" : {
-        "operationId" : "buscar_2",
+        "operationId" : "buscar_3",
         "parameters" : [ {
           "in" : "path",
           "name" : "id",
@@ -309,7 +309,7 @@
     },
     "/api/admin/pedidos" : {
       "get" : {
-        "operationId" : "listar_4",
+        "operationId" : "listar_5",
         "parameters" : [ {
           "in" : "query",
           "name" : "numero",
@@ -410,7 +410,7 @@
     },
     "/api/admin/pedidos/{id}" : {
       "get" : {
-        "operationId" : "buscar_1",
+        "operationId" : "buscar_2",
         "parameters" : [ {
           "in" : "path",
           "name" : "id",
@@ -540,7 +540,7 @@
     },
     "/api/livros" : {
       "get" : {
-        "operationId" : "listar_3",
+        "operationId" : "listar_4",
         "parameters" : [ {
           "in" : "query",
           "name" : "titulo",
@@ -737,7 +737,7 @@
     },
     "/api/livros/{id}" : {
       "get" : {
-        "operationId" : "buscar",
+        "operationId" : "buscar_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "id",
@@ -1549,7 +1549,7 @@
     },
     "/api/me/cupons-de-troca" : {
       "get" : {
-        "operationId" : "listar_2",
+        "operationId" : "listar_3",
         "responses" : {
           "200" : {
             "content" : {
@@ -1931,6 +1931,85 @@
         },
         "summary" : "Marca uma notificação do cliente como lida",
         "tags" : [ "notificacoes-do-cliente-controller" ]
+      }
+    },
+    "/api/me/pedidos" : {
+      "get" : {
+        "operationId" : "listar_2",
+        "parameters" : [ {
+          "description" : "Página, a partir de 0.",
+          "in" : "query",
+          "name" : "pagina",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "description" : "Itens por página (padrão 20, máximo 100).",
+          "in" : "query",
+          "name" : "tamanho",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 20,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        }, {
+          "description" : "Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: realizadoEm, total, id. Padrão: realizadoEm,desc.",
+          "explode" : true,
+          "in" : "query",
+          "name" : "ordem",
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaginaPedidoListadoDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "meus-pedidos-controller" ]
+      }
+    },
+    "/api/me/pedidos/{id}" : {
+      "get" : {
+        "operationId" : "buscar",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PedidoDetalheDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "meus-pedidos-controller" ]
       }
     },
     "/api/me/senha" : {
