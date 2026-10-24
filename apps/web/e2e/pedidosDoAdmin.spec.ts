@@ -13,7 +13,8 @@ test('admin encontra o pedido aprovado pelos filtros, despacha e confirma a entr
   await entrarComo(page, 'admin@livraria.test', 'Admin@123');
   await page.goto('/admin/pedidos');
   await expect(page.getByRole('heading', { name: 'Pedidos' })).toBeVisible();
-  await expect(page.getByText('1 pedido encontrado')).toBeVisible();
+  // A listagem abre pelos mais recentes; o histórico do seed (ANA-01) fica nas páginas seguintes.
+  await expect(page.getByRole('row').nth(1)).toContainText(numero);
 
   await page.getByLabel('CPF').fill('111.444.777-35');
   await page.getByRole('button', { name: 'Filtrar' }).click();
