@@ -1,7 +1,7 @@
 import { Router, Route } from 'preact-iso';
 import { Cabecalho } from './componentes/Cabecalho';
 import { Protegida } from './componentes/Protegida';
-import { Admin, Cadastro, Login, MinhaConta, NaoEncontrada, Vitrine } from './paginas/telas';
+import { Admin, Cadastro, Livro, Login, MinhaConta, NaoEncontrada, Vitrine } from './paginas/telas';
 
 function AreaDoCliente() {
   return (
@@ -31,6 +31,7 @@ export function App() {
       <main class="conteudo" id="conteudo">
         <Router>
           <Route path="/" component={Vitrine} />
+          <Route path="/livros/:id" component={Livro} />
           <Route path="/login" component={Login} />
           <Route path="/cadastro" component={Cadastro} />
           <Route path="/minha-conta" component={AreaDoCliente} />

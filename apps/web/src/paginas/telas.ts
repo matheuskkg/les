@@ -5,6 +5,7 @@ import { lazy } from 'preact-iso';
  * de sessão usem a mesma instância (e possam pré-carregar antes de navegar).
  */
 export const Vitrine = lazy(() => import('./Vitrine'));
+export const Livro = lazy(() => import('./Livro'));
 export const Login = lazy(() => import('./Login'));
 export const Cadastro = lazy(() => import('./Cadastro'));
 export const MinhaConta = lazy(() => import('./MinhaConta'));

@@ -60,6 +60,19 @@ export function formatarDinheiro(valor: string): string {
   return `${negativo ? '-' : ''}R$ ${comMilhares},${centavos}`;
 }
 
+/**
+ * Decimal da API (número ou string, como "21.5") com vírgula pt-BR ("21,5").
+ * Usado em medidas e peso, que não têm duas casas fixas como o dinheiro.
+ */
+export function formatarDecimal(valor: number | string): string {
+  if (typeof valor === 'number') {
+    return Number.isFinite(valor) ? String(valor).replace('.', ',') : String(valor);
+  }
+
+  const texto = valor.trim();
+  return texto.replace('.', ',');
+}
+
 /** Data ISO ("2026-10-21") como "21/10/2026", sem passar por Date e sem fuso. */
 export function formatarData(iso: string): string {
   const partes = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso.trim());

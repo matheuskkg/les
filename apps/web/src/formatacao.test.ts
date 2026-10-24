@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { formatarData, formatarDinheiro, textoDoStatus } from './formatacao.ts';
+import {
+  formatarData,
+  formatarDecimal,
+  formatarDinheiro,
+  textoDoStatus,
+} from './formatacao.ts';
 
 test('formatarDinheiro formata milhares e centavos', () => {
   assert.equal(formatarDinheiro('1234.56'), 'R$ 1.234,56');
@@ -34,6 +39,15 @@ test('formatarDinheiro devolve a entrada inalterada quando inválida', () => {
   assert.equal(formatarDinheiro('1e3'), '1e3');
   assert.equal(formatarDinheiro('  '), '  ');
   assert.equal(formatarDinheiro(''), '');
+});
+
+test('formatarDecimal usa vírgula pt-BR em números e strings', () => {
+  assert.equal(formatarDecimal(21), '21');
+  assert.equal(formatarDecimal(21.5), '21,5');
+  assert.equal(formatarDecimal(0.35), '0,35');
+  assert.equal(formatarDecimal('12.50'), '12,50');
+  assert.equal(formatarDecimal(' 1.2 '), '1,2');
+  assert.equal(formatarDecimal(''), '');
 });
 
 test('formatarData converte ISO sem passar por fuso', () => {
