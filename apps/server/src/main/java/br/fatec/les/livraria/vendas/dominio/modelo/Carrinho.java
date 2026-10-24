@@ -128,10 +128,8 @@ public class Carrinho {
     /**
      * Retira todos os itens por vencimento do prazo e os guarda nos itens removidos (RN-VEN-014, RN-VEN-015,
      * RNF-VEN-001). As reservas devem ser liberadas antes, pelo {@code estoque}.
-     *
-     * @return os itens retirados
      */
-    public List<ItemRemovidoCarrinho> expirar(LocalDateTime agora) {
+    public void expirar(LocalDateTime agora) {
         Objects.requireNonNull(agora, "agora");
         List<ItemRemovidoCarrinho> retirados = itens.stream()
                 .map(item -> new ItemRemovidoCarrinho(item.getLivroId(), item.getQuantidade(), agora))
@@ -139,7 +137,6 @@ public class Carrinho {
         registrarRemovidos(retirados);
         itens.clear();
         encerrarExpiracao();
-        return retirados;
     }
 
     /**

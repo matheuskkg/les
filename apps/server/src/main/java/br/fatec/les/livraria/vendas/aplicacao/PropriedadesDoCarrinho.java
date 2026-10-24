@@ -23,8 +23,10 @@ public record PropriedadesDoCarrinho(
         if (prazoBloqueio == null || prazoBloqueio.isZero() || prazoBloqueio.isNegative()) {
             throw new IllegalArgumentException("livraria.carrinho.prazo-bloqueio deve ser positivo.");
         }
-        if (avisoExpiracao == null || avisoExpiracao.isNegative()) {
-            throw new IllegalArgumentException("livraria.carrinho.aviso-expiracao não pode ser negativo.");
+        if (avisoExpiracao == null || avisoExpiracao.isZero() || avisoExpiracao.isNegative()
+                || avisoExpiracao.compareTo(prazoBloqueio) >= 0) {
+            throw new IllegalArgumentException(
+                    "livraria.carrinho.aviso-expiracao deve ser positivo e menor que o prazo do bloqueio.");
         }
     }
 }

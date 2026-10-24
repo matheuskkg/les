@@ -7,13 +7,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.ConsultarUsuarioDoCliente;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.estoque.aplicacao.casodeuso.LiberarReserva;
-import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
 import br.fatec.les.livraria.notificacoes.aplicacao.casodeuso.Notificar;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.TipoNotificacao;
+import br.fatec.les.livraria.vendas.aplicacao.LiberarItensDoCarrinho;
 import br.fatec.les.livraria.vendas.aplicacao.porta.CarrinhoRepositorio;
 import br.fatec.les.livraria.vendas.dominio.modelo.Carrinho;
-import br.fatec.les.livraria.vendas.dominio.modelo.ItemCarrinho;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -32,7 +30,7 @@ public class ExpirarCarrinho {
 
     private final CarrinhoRepositorio carrinhos;
     private final Relogio relogio;
-    private final LiberarReserva liberarReserva;
+    private final LiberarItensDoCarrinho liberarItens;
     private final ConsultarUsuarioDoCliente consultarUsuario;
     private final Notificar notificar;
 
@@ -46,14 +44,10 @@ public class ExpirarCarrinho {
     }
 
     private void expirar(Carrinho carrinho, LocalDateTime agora) {
-        // RN-VEN-015: a linha é única por livro, então liberar a reserva retira todas as unidades do produto.
-        for (ItemCarrinho item : carrinho.getItens()) {
-            liberarReserva.executar(OrigemReserva.CARRINHO, carrinho.getId(), item.getLivroId());
-        }
+        liberarItens.executar(carrinho);
         carrinho.expirar(agora);
         carrinhos.salvar(carrinho);
-        Long usuarioId = consultarUsuario.executar(carrinho.getClienteId());
-        notificar.executar(Notificar.Comando.sobre(usuarioId, TipoNotificacao.CARRINHO_EXPIRADO, MENSAGEM,
-                "carrinho", carrinho.getId()));
+        consultarUsuario.executar(carrinho.getClienteId()).ifPresent(usuarioId -> notificar.executar(Notificar.Comando.sobre(usuarioId, TipoNotificacao.CARRINHO_EXPIRADO, MENSAGEM,
+                "carrinho", carrinho.getId())));
     }
 }

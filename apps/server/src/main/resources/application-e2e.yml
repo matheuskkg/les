@@ -1,0 +1,4 @@
+livraria:
+  expiracao:
+    # O E2E executa a ExpirarReservas pelo POST /api/teste/relogio, com o relógio controlado (DEC-09).
+    agendada: false

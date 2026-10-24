@@ -162,6 +162,16 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!-- Os testes executam a ExpirarReservas com o próprio relógio (DEC-13). -->
+                        <livraria.expiracao.agendada>false</livraria.expiracao.agendada>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

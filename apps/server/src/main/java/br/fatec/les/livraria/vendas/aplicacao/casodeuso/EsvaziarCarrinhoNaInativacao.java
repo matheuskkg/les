@@ -5,11 +5,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.acesso.aplicacao.porta.EfeitoDaInativacao;
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.ConsultarClienteDoUsuario;
-import br.fatec.les.livraria.estoque.aplicacao.casodeuso.LiberarReserva;
-import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
+import br.fatec.les.livraria.vendas.aplicacao.LiberarItensDoCarrinho;
 import br.fatec.les.livraria.vendas.aplicacao.porta.CarrinhoRepositorio;
 import br.fatec.les.livraria.vendas.dominio.modelo.Carrinho;
-import br.fatec.les.livraria.vendas.dominio.modelo.ItemCarrinho;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -22,7 +20,7 @@ public class EsvaziarCarrinhoNaInativacao implements EfeitoDaInativacao {
 
     private final ConsultarClienteDoUsuario consultarCliente;
     private final CarrinhoRepositorio carrinhos;
-    private final LiberarReserva liberarReserva;
+    private final LiberarItensDoCarrinho liberarItens;
 
     @Override
     @Transactional
@@ -33,9 +31,7 @@ public class EsvaziarCarrinhoNaInativacao implements EfeitoDaInativacao {
     }
 
     private void esvaziar(Carrinho carrinho) {
-        for (ItemCarrinho item : carrinho.getItens()) {
-            liberarReserva.executar(OrigemReserva.CARRINHO, carrinho.getId(), item.getLivroId());
-        }
+        liberarItens.executar(carrinho);
         carrinho.esvaziar();
         carrinhos.salvar(carrinho);
     }

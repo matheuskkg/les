@@ -95,12 +95,11 @@ class CarrinhoTest {
         Carrinho carrinho = comLivro(PRAZO);
         carrinho.adicionar(11L, 1);
 
-        List<ItemRemovidoCarrinho> retirados = carrinho.expirar(PRAZO);
+        carrinho.expirar(PRAZO);
 
         assertThat(carrinho.getItens()).isEmpty();
         assertThat(carrinho.getExpiraEm()).isNull();
-        assertThat(carrinho.getRemovidos()).containsExactlyElementsOf(retirados)
-                .containsExactly(new ItemRemovidoCarrinho(10L, 3, PRAZO), new ItemRemovidoCarrinho(11L, 1, PRAZO));
+        assertThat(carrinho.getRemovidos()).containsExactly(new ItemRemovidoCarrinho(10L, 3, PRAZO), new ItemRemovidoCarrinho(11L, 1, PRAZO));
     }
 
     @Test

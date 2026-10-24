@@ -1,10 +1,11 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
-import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -19,12 +20,10 @@ public class ConsultarUsuarioDoCliente {
 
     /**
      * @param clienteId id do cliente
-     * @return id do usuário de login do cliente
-     * @throws ExcecaoDeRecursoNaoEncontrado se o cliente não existir
+     * @return id do usuário de login do cliente, vazio se o cliente não existir
      */
     @Transactional(readOnly = true)
-    public Long executar(Long clienteId) {
-        return clientes.buscarUsuarioIdPorClienteId(clienteId)
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));
+    public Optional<Long> executar(Long clienteId) {
+        return clientes.buscarUsuarioIdPorClienteId(clienteId);
     }
 }

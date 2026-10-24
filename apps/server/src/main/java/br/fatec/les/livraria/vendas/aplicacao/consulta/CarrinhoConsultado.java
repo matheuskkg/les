@@ -29,6 +29,7 @@ public record CarrinhoConsultado(
     public CarrinhoConsultado {
         Objects.requireNonNull(itens, "itens");
         Objects.requireNonNull(subtotal, "subtotal");
+        Objects.requireNonNull(removidos, "removidos");
         itens = List.copyOf(itens);
         removidos = List.copyOf(removidos);
     }

@@ -49,7 +49,7 @@ test.describe('Carrinho', () => {
     await page.getByRole('button', { name: 'Adicionar ao carrinho' }).click();
     await expect(page.getByText('Adicionado ao carrinho.')).toBeVisible();
     await page.goto('/carrinho');
-    await expect(page.locator('.item-da-conta', { hasText: 'Dom Casmurro' })).toBeVisible();
+    await expect(page.locator('.item-da-conta:not(.item-removido)', { hasText: 'Dom Casmurro' })).toBeVisible();
 
     // Prazo de 30 min: a tarefa de expiração roda ao ajustar o relógio, e a notificação recarrega a tela.
     await ajustarRelogio(new Date(Date.now() + 31 * 60_000).toISOString());
@@ -61,6 +61,8 @@ test.describe('Carrinho', () => {
 
     await removido.getByRole('button', { name: 'Adicionar de novo' }).click();
     await expect(page.locator('.item-removido')).toHaveCount(0);
-    await expect(page.locator('.item-da-conta', { hasText: 'Dom Casmurro' })).toContainText('R$ 47,88');
+    await expect(page.locator('.item-da-conta:not(.item-removido)', { hasText: 'Dom Casmurro' })).toContainText(
+      'R$ 47,88',
+    );
   });
 });

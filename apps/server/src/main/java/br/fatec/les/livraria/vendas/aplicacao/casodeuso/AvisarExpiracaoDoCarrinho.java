@@ -46,8 +46,7 @@ public class AvisarExpiracaoDoCarrinho {
     private void avisar(Carrinho carrinho, LocalDateTime agora) {
         carrinho.registrarAviso(agora);
         carrinhos.salvar(carrinho);
-        Long usuarioId = consultarUsuario.executar(carrinho.getClienteId());
-        notificar.executar(Notificar.Comando.sobre(usuarioId, TipoNotificacao.CARRINHO_EXPIRANDO, MENSAGEM,
-                "carrinho", carrinho.getId()));
+        consultarUsuario.executar(carrinho.getClienteId()).ifPresent(usuarioId -> notificar.executar(Notificar.Comando.sobre(usuarioId, TipoNotificacao.CARRINHO_EXPIRANDO, MENSAGEM,
+                "carrinho", carrinho.getId())));
     }
 }

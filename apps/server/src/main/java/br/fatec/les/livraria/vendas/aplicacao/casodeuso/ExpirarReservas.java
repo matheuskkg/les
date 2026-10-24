@@ -14,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Tarefa periódica de expiração (RN-VEN-014, DEC-13): expira os carrinhos vencidos e avisa os que estão perto de
- * vencer. Não é transacional: cada carrinho é tratado na própria transação, e a falha de um não impede os outros.
+ * vencer. Não é transacional e deve ser chamada fora de uma transação, como fazem o agendamento e o
+ * {@code POST /api/teste/relogio}: assim cada carrinho é tratado na própria transação, e a falha de um não desfaz os
+ * outros.
  *
  * <p>O agendamento roda a cada 30 s; o profile {@code e2e} também a executa ao mudar o relógio (DEC-09).</p>
  */
