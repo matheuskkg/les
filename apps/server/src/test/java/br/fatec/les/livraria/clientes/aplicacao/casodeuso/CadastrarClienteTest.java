@@ -3,6 +3,8 @@ package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.CPF;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.EMAIL;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.SENHA;
+import static br.fatec.les.livraria.clientes.ClientesDeTeste.comEnderecos;
+import static br.fatec.les.livraria.clientes.ClientesDeTeste.comSenha;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.contasEmUso;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.padrao;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.relogio;
@@ -22,6 +24,7 @@ import br.fatec.les.livraria.clientes.ClientesDeTeste.FakeCodificadorDeSenha;
 import br.fatec.les.livraria.clientes.ClientesDeTeste.FakeUsuarioRepositorio;
 import br.fatec.les.livraria.clientes.aplicacao.regra.BandeiraRegistrada;
 import br.fatec.les.livraria.clientes.aplicacao.regra.CpfUnico;
+import br.fatec.les.livraria.clientes.aplicacao.regra.DataNascimentoValida;
 import br.fatec.les.livraria.clientes.aplicacao.regra.EmailUnico;
 import br.fatec.les.livraria.clientes.aplicacao.regra.TelefoneUnico;
 import br.fatec.les.livraria.clientes.aplicacao.regra.ValidadeDoCartao;
@@ -33,9 +36,9 @@ import br.fatec.les.livraria.clientes.dominio.regra.CpfValido;
 import br.fatec.les.livraria.clientes.dominio.regra.DadosObrigatoriosCliente;
 import br.fatec.les.livraria.clientes.dominio.regra.EmailValido;
 import br.fatec.les.livraria.clientes.dominio.regra.EnderecoCompleto;
-import br.fatec.les.livraria.clientes.dominio.regra.EnderecoDeCobranca;
-import br.fatec.les.livraria.clientes.dominio.regra.EnderecoDeEntrega;
+import br.fatec.les.livraria.clientes.dominio.regra.EnderecoDoCliente;
 import br.fatec.les.livraria.clientes.dominio.regra.SenhaForte;
+import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCliente;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio;
 import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 
@@ -54,9 +57,10 @@ class CadastrarClienteTest {
     void montar() {
         caso = new CadastrarCliente(
                 new DadosObrigatoriosCliente(),
-                new EnderecoDeCobranca(),
-                new EnderecoDeEntrega(),
+                new DataNascimentoValida(relogio()),
+                new EnderecoDoCliente(),
                 new EnderecoCompleto(),
+                new TamanhosMaximosCliente(),
                 new SenhaForte(),
                 new ConfirmacaoDeSenha(),
                 new CpfValido(),
@@ -66,7 +70,7 @@ class CadastrarClienteTest {
                 new CpfUnico(clientes, contas),
                 new EmailUnico(contas),
                 new TelefoneUnico(contas),
-                new BandeiraRegistrada(bandeiras),
+                new BandeiraRegistrada(),
                 new CriarUsuario(usuarios, senhas),
                 clientes,
                 bandeiras);
@@ -105,7 +109,7 @@ class CadastrarClienteTest {
         ExcecaoDeNegocio erro = catchThrowableOfType(() -> caso.executar(invalido), ExcecaoDeNegocio.class);
 
         assertThat(erro.getViolacoes()).extracting(Violacao::codigo)
-                .contains("RN-CLI-006", "RN-CLI-001", "RN-CLI-002", "RNF-CLI-001");
+                .contains("RN-CLI-006", "RN-CLI-001", "RNF-CLI-001");
         assertThat(erro.getViolacoes()).hasSizeGreaterThan(5);
         assertThat(usuarios.salvos).isEmpty();
         assertThat(clientes.salvos).isEmpty();
@@ -131,5 +135,29 @@ class CadastrarClienteTest {
 
         assertThat(caso.executar(padrao())).isNotNull();
         assertThat(usuarios.salvos).hasSize(1);
+    }
+
+    @Test
+    void rfCli001_semEnderecoGeraUmaUnicaViolacao() {
+        ExcecaoDeNegocio erro = catchThrowableOfType(
+                () -> caso.executar(comEnderecos(List.of())), ExcecaoDeNegocio.class);
+
+        assertThat(erro.getViolacoes())
+                .singleElement()
+                .satisfies(violacao -> {
+                    assertThat(violacao.codigo()).isEqualTo("RN-CLI-001");
+                    assertThat(violacao.mensagem()).contains("RN-CLI-001", "RN-CLI-002");
+                });
+    }
+
+    @Test
+    void rnfCli001_senhaEmBrancoEhReportadaUmaUnicaVez() {
+        ExcecaoDeNegocio erro = catchThrowableOfType(
+                () -> caso.executar(comSenha("   ")), ExcecaoDeNegocio.class);
+
+        assertThat(erro.getViolacoes()).singleElement().satisfies(violacao -> {
+            assertThat(violacao.codigo()).isEqualTo("RN-CLI-006");
+            assertThat(violacao.mensagem()).isEqualTo("Informe a senha do cliente.");
+        });
     }
 }

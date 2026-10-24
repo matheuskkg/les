@@ -2,6 +2,7 @@ package br.fatec.les.livraria.clientes.infraestrutura.persistencia;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -10,11 +11,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
 import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 
 /** Seed do CLI-01 em H2 (RF-CLI-001, RNF-CLI-003, RN-CLI-005, DEC-10, DEC-14, DEC-16). */
 @SpringBootTest
@@ -22,9 +27,22 @@ import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
 class SeedDeClientesTest {
 
     private static final String SENHA = "Senha@123";
+    /** 2026-10-24T12:00 em America/Sao_Paulo, o instante citado no comentário do seed 201_clientes.sql. */
+    private static final LocalDateTime AGORA = LocalDateTime.of(2026, 10, 24, 12, 0);
 
     /** Ids dos usuários dos clientes do seed: 2 Ana, 3 Bruno, 4 Carla, 5 Diego, 6 Elisa (DEC-14). */
     private static final List<Long> USUARIOS_DOS_CLIENTES = List.of(2L, 3L, 4L, 5L, 6L);
+
+    /** Relógio fixo: a situação de Carla e Diego depende do instante, então o teste não pode usar o relógio real. */
+    @TestConfiguration
+    static class RelogioFixo {
+
+        @Bean
+        @Primary
+        Relogio relogioFixo() {
+            return () -> AGORA;
+        }
+    }
 
     @Autowired
     private DataSource dataSource;

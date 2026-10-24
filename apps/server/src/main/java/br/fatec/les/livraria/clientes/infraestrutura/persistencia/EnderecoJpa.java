@@ -17,6 +17,7 @@ import jakarta.persistence.Table;
 import br.fatec.les.livraria.clientes.dominio.modelo.TipoEndereco;
 import br.fatec.les.livraria.clientes.dominio.modelo.TipoLogradouro;
 import br.fatec.les.livraria.clientes.dominio.modelo.Uf;
+import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCliente;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -42,7 +43,7 @@ public class EnderecoJpa {
     @JoinColumn(name = "cliente_id", nullable = false)
     private ClienteJpa cliente;
 
-    @Column(name = "nome_curto", nullable = false, length = 40)
+    @Column(name = "nome_curto", nullable = false, length = TamanhosMaximosCliente.NOME_CURTO)
     private String nomeCurto;
 
     @Enumerated(EnumType.STRING)
@@ -53,19 +54,19 @@ public class EnderecoJpa {
     @Column(name = "tipo_logradouro", nullable = false, length = 20)
     private TipoLogradouro tipoLogradouro;
 
-    @Column(name = "logradouro", nullable = false, length = 120)
+    @Column(name = "logradouro", nullable = false, length = TamanhosMaximosCliente.LOGRADOURO)
     private String logradouro;
 
-    @Column(name = "numero", nullable = false, length = 10)
+    @Column(name = "numero", nullable = false, length = TamanhosMaximosCliente.NUMERO_DO_ENDERECO)
     private String numero;
 
-    @Column(name = "bairro", nullable = false, length = 80)
+    @Column(name = "bairro", nullable = false, length = TamanhosMaximosCliente.BAIRRO)
     private String bairro;
 
-    @Column(name = "cep", nullable = false, length = 8)
+    @Column(name = "cep", nullable = false, length = TamanhosMaximosCliente.CEP)
     private String cep;
 
-    @Column(name = "cidade", nullable = false, length = 80)
+    @Column(name = "cidade", nullable = false, length = TamanhosMaximosCliente.CIDADE)
     private String cidade;
 
     @Enumerated(EnumType.STRING)
@@ -75,6 +76,6 @@ public class EnderecoJpa {
     @Column(name = "pais", nullable = false, length = 40)
     private String pais;
 
-    @Column(name = "observacoes", length = 255)
+    @Column(name = "observacoes", length = TamanhosMaximosCliente.OBSERVACOES)
     private String observacoes;
 }

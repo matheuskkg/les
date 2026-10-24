@@ -52,6 +52,34 @@ public final class ClientesDeTeste {
                 padrao.enderecos(), padrao.cartoes());
     }
 
+    public static NovoCliente comNome(String nome) {
+        NovoCliente padrao = padrao();
+        return new NovoCliente(nome, padrao.genero(), padrao.dataNascimento(), padrao.cpf(),
+                padrao.email(), padrao.tipoTelefone(), padrao.ddd(), padrao.numero(), padrao.senha(),
+                padrao.confirmacaoSenha(), padrao.enderecos(), padrao.cartoes());
+    }
+
+    public static NovoCliente comDataNascimento(LocalDate dataNascimento) {
+        NovoCliente padrao = padrao();
+        return new NovoCliente(padrao.nome(), padrao.genero(), dataNascimento, padrao.cpf(),
+                padrao.email(), padrao.tipoTelefone(), padrao.ddd(), padrao.numero(), padrao.senha(),
+                padrao.confirmacaoSenha(), padrao.enderecos(), padrao.cartoes());
+    }
+
+    public static NovoCliente comEnderecos(List<NovoEndereco> enderecos) {
+        NovoCliente padrao = padrao();
+        return new NovoCliente(padrao.nome(), padrao.genero(), padrao.dataNascimento(), padrao.cpf(),
+                padrao.email(), padrao.tipoTelefone(), padrao.ddd(), padrao.numero(), padrao.senha(),
+                padrao.confirmacaoSenha(), enderecos, padrao.cartoes());
+    }
+
+    public static NovoCliente comCartoes(List<NovoCartao> cartoes) {
+        NovoCliente padrao = padrao();
+        return new NovoCliente(padrao.nome(), padrao.genero(), padrao.dataNascimento(), padrao.cpf(),
+                padrao.email(), padrao.tipoTelefone(), padrao.ddd(), padrao.numero(), padrao.senha(),
+                padrao.confirmacaoSenha(), padrao.enderecos(), cartoes);
+    }
+
     public static NovoEndereco endereco() {
         return new NovoEndereco("Casa", TipoEndereco.CASA, TipoLogradouro.RUA, "Rua das Flores", "123",
                 "Jardim Paulista", "01415000", "São Paulo", Uf.SP, null);

@@ -1,55 +1,52 @@
 package br.fatec.les.livraria.clientes.aplicacao.regra;
 
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.cartao;
+import static br.fatec.les.livraria.clientes.ClientesDeTeste.comCartoes;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.padrao;
-import static br.fatec.les.livraria.clientes.ClientesDeTeste.violacoes;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.clientes.ClientesDeTeste.FakeBandeiraRepositorio;
+import br.fatec.les.livraria.clientes.dominio.modelo.Bandeira;
+import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
+import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
+import br.fatec.les.livraria.compartilhado.dominio.Violacao;
+import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 
 /** RN-CLI-005: todo cartão deve usar uma bandeira registrada no sistema. */
 class BandeiraRegistradaTest {
 
-    private final FakeBandeiraRepositorio bandeiras = new FakeBandeiraRepositorio().comBandeiras(1L);
-    private final BandeiraRegistrada regra = new BandeiraRegistrada(bandeiras);
+    private static final Map<Long, Bandeira> BANDEIRAS = Map.of(1L, new Bandeira(1L, "Visa"));
+
+    private final BandeiraRegistrada regra = new BandeiraRegistrada();
 
     @Test
     void rnCli005_bandeiraRegistradaNaoTemViolacao() {
-        assertThat(violacoes(padrao(), regra)).isEmpty();
+        assertThat(violacoes(padrao())).isEmpty();
     }
 
     @Test
     void rnCli005_bandeiraDesconhecidaViolaARegra() {
-        var desconhecido = new br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao(
-                cartao().numero(), cartao().nomeImpresso(), 99L, cartao().validade());
+        NovoCartao desconhecido = new NovoCartao(cartao().numero(), cartao().nomeImpresso(), 99L,
+                cartao().validade());
 
-        assertThat(violacoes(comCartao(desconhecido), regra))
+        assertThat(violacoes(comCartoes(List.of(desconhecido))))
                 .singleElement()
-                .extracting(violacao -> violacao.codigo())
+                .extracting(Violacao::codigo)
                 .isEqualTo("RN-CLI-005");
     }
 
     @Test
     void rnCli005_semCartoesNaoTemViolacao() {
-        var padrao = padrao();
-        var semCartoes = new br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente(
-                padrao.nome(), padrao.genero(), padrao.dataNascimento(), padrao.cpf(), padrao.email(),
-                padrao.tipoTelefone(), padrao.ddd(), padrao.numero(), padrao.senha(),
-                padrao.confirmacaoSenha(), padrao.enderecos(), List.of());
-
-        assertThat(violacoes(semCartoes, regra)).isEmpty();
+        assertThat(violacoes(comCartoes(List.of()))).isEmpty();
     }
 
-    private static br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente comCartao(
-            br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao cartao) {
-        var padrao = padrao();
-        return new br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente(padrao.nome(),
-                padrao.genero(), padrao.dataNascimento(), padrao.cpf(), padrao.email(),
-                padrao.tipoTelefone(), padrao.ddd(), padrao.numero(), padrao.senha(),
-                padrao.confirmacaoSenha(), padrao.enderecos(), List.of(cartao));
+    private List<Violacao> violacoes(NovoCliente alvo) {
+        Violacoes violacoes = new Violacoes();
+        regra.validar(alvo, violacoes, BANDEIRAS);
+        return violacoes.lista();
     }
 }

@@ -2,6 +2,7 @@ package br.fatec.les.livraria.clientes.infraestrutura.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,10 +12,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import jakarta.servlet.http.Cookie;
 
 /**
@@ -37,6 +44,19 @@ class CadastroDeClienteIntegracaoTest {
     private static final String COOKIE_CSRF = "XSRF-TOKEN";
     private static final String CABECALHO_CSRF = "X-XSRF-TOKEN";
     private static final String SENHA = "Senha@123";
+    /** 2026-10-24T12:00 em America/Sao_Paulo, o instante citado no comentário do seed 201_clientes.sql. */
+    private static final LocalDateTime AGORA = LocalDateTime.of(2026, 10, 24, 12, 0);
+
+    /** Relógio fixo: Carla e Diego do seed têm situações de conta que dependem do instante da consulta (DEC-10). */
+    @TestConfiguration
+    static class RelogioFixo {
+
+        @Bean
+        @Primary
+        Relogio relogioFixo() {
+            return () -> AGORA;
+        }
+    }
 
     @Autowired
     private WebApplicationContext contexto;
@@ -75,7 +95,7 @@ class CadastroDeClienteIntegracaoTest {
                 .content(corpoInvalido()))).andExpect(status().isUnprocessableEntity())
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.detail").value("A operação viola regras de negócio."))
-                .andExpect(jsonPath("$.violacoes[*].codigo", hasItems("RN-CLI-001", "RN-CLI-002", "RN-CLI-005",
+                .andExpect(jsonPath("$.violacoes[*].codigo", hasItems("RN-CLI-001", "RN-CLI-005",
                         "RN-CLI-006", "RNF-CLI-001", "RNF-CLI-002")));
     }
 
@@ -92,6 +112,43 @@ class CadastroDeClienteIntegracaoTest {
     void rfCli001_dadosDeContaEncerradaLiberamCpfEmailETelefone() throws Exception {
         // Diego (usuário 5) foi inativado há mais de 7 dias: a conta está encerrada e libera os dados (DEC-10).
         cadastrar(corpoDeDiego()).andExpect(status().isCreated());
+    }
+
+    @Test
+    void rfCli001_enderecoNuloNaListaResponde422EmVezDeErro500() throws Exception {
+        cadastrar(corpoDeNovoCliente("[null]", cartaoJson()))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.violacoes.length()").value(1))
+                .andExpect(jsonPath("$.violacoes[0].codigo").value("RN-CLI-003"))
+                .andExpect(jsonPath("$.violacoes[0].mensagem")
+                        .value("Endereço 1: informe os dados do endereço."));
+    }
+
+    @Test
+    void rfCli001_cartaoNuloNaListaResponde422EmVezDeErro500() throws Exception {
+        cadastrar(corpoDeNovoCliente(enderecoJson(), "[null]"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.violacoes.length()").value(1))
+                .andExpect(jsonPath("$.violacoes[0].codigo").value("RN-CLI-004"))
+                .andExpect(jsonPath("$.violacoes[0].mensagem").value("Cartão 1: informe os dados do cartão."));
+    }
+
+    @Test
+    void rfCli001_nomeAcimaDoTamanhoDaColunaResponde422() throws Exception {
+        cadastrar(corpoComDados("a".repeat(121), "1991-05-20", "11122233396",
+                "nome.longo@livraria.test", "988880001", "11"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.violacoes[*].mensagem",
+                        hasItem("O nome do cliente deve ter no máximo 120 caracteres.")));
+    }
+
+    @Test
+    void rfCli006_dataDeNascimentoNoFuturoResponde422() throws Exception {
+        cadastrar(corpoComDados("Novo Cliente", "2030-01-01", "11122233396",
+                "futuro@livraria.test", "988880001", "11"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.violacoes[*].mensagem",
+                        hasItem("A data de nascimento não pode estar no futuro.")));
     }
 
     private ResultActions cadastrar(String corpo) throws Exception {
@@ -117,6 +174,10 @@ class CadastroDeClienteIntegracaoTest {
     }
 
     private static String corpoDeNovoCliente() {
+        return corpoDeNovoCliente(enderecoJson(), cartaoJson());
+    }
+
+    private static String corpoDeNovoCliente(String enderecos, String cartoes) {
         return """
                 {
                   "nome": "Novo Cliente",
@@ -127,17 +188,29 @@ class CadastroDeClienteIntegracaoTest {
                   "telefone": { "tipo": "CELULAR", "ddd": "11", "numero": "988880001" },
                   "senha": "%1$s",
                   "confirmacaoSenha": "%1$s",
-                  "enderecos": [
-                    { "nomeCurto": "Casa", "tipoEndereco": "CASA", "tipoLogradouro": "RUA",
-                      "logradouro": "Rua Nova", "numero": "10", "bairro": "Centro",
-                      "cep": "01001000", "cidade": "São Paulo", "uf": "SP", "observacoes": null }
-                  ],
-                  "cartoes": [
-                    { "numero": "4111111111111111", "nomeImpresso": "NOVO CLIENTE",
-                      "bandeiraId": 1, "validade": "2030-12" }
-                  ]
+                  "enderecos": %2$s,
+                  "cartoes": %3$s
                 }
-                """.formatted(SENHA);
+                """.formatted(SENHA, enderecos, cartoes);
+    }
+
+    private static String enderecoJson() {
+        return """
+                [
+                  { "nomeCurto": "Casa", "tipoEndereco": "CASA", "tipoLogradouro": "RUA",
+                    "logradouro": "Rua Nova", "numero": "10", "bairro": "Centro",
+                    "cep": "01001000", "cidade": "São Paulo", "uf": "SP", "observacoes": null }
+                ]
+                """;
+    }
+
+    private static String cartaoJson() {
+        return """
+                [
+                  { "numero": "4111111111111111", "nomeImpresso": "NOVO CLIENTE",
+                    "bandeiraId": 1, "validade": "2030-12" }
+                ]
+                """;
     }
 
     private static String corpoInvalido() {

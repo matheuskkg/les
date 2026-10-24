@@ -18,6 +18,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
+import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCliente;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -48,7 +49,7 @@ public class ClienteJpa {
     @Column(name = "usuario_id", nullable = false, unique = true)
     private Long usuarioId;
 
-    @Column(name = "nome", nullable = false, length = 120)
+    @Column(name = "nome", nullable = false, length = TamanhosMaximosCliente.NOME)
     private String nome;
 
     @Enumerated(EnumType.STRING)
@@ -58,7 +59,7 @@ public class ClienteJpa {
     @Column(name = "data_nascimento", nullable = false)
     private LocalDate dataNascimento;
 
-    @Column(name = "cpf", nullable = false, length = 11)
+    @Column(name = "cpf", nullable = false, length = TamanhosMaximosCliente.CPF)
     private String cpf;
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)

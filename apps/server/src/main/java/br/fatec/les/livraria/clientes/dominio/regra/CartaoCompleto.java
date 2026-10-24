@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
@@ -47,7 +48,7 @@ public class CartaoCompleto implements Regra<NovoCliente> {
         if (numero == null) {
             return false;
         }
-        int digitos = DadosObrigatoriosCliente.somenteDigitos(numero).length();
+        int digitos = Telefone.somenteDigitos(numero).length();
         return digitos >= 13 && digitos <= 19;
     }
 }

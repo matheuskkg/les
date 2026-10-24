@@ -1,6 +1,8 @@
 package br.fatec.les.livraria.clientes.dominio.modelo;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import br.fatec.les.livraria.acesso.dominio.modelo.TipoTelefone;
@@ -25,7 +27,9 @@ public record NovoCliente(
         List<NovoCartao> cartoes) {
 
     public NovoCliente {
-        enderecos = enderecos == null ? List.of() : List.copyOf(enderecos);
-        cartoes = cartoes == null ? List.of() : List.copyOf(cartoes);
+        // Elementos nulos são aceitos aqui para que as regras de endereço e cartão os reportem como violação 422,
+        // em vez de o List.copyOf lançar NullPointerException e virar erro 500.
+        enderecos = enderecos == null ? List.of() : Collections.unmodifiableList(new ArrayList<>(enderecos));
+        cartoes = cartoes == null ? List.of() : Collections.unmodifiableList(new ArrayList<>(cartoes));
     }
 }

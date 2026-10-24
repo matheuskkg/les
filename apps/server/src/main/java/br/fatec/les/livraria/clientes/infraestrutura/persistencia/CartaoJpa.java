@@ -17,6 +17,8 @@ import lombok.Setter;
 
 import org.hibernate.envers.Audited;
 
+import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCliente;
+
 /**
  * Tabela {@code cartao} do MER (RN-CLI-004, RN-CLI-005, DEC-06, DEC-10, DEC-14, DEC-16). Guarda a validade como
  * {@code AAAA-MM} e não guarda o código de segurança. Bandeira e cliente são FKs do próprio módulo.
@@ -46,14 +48,14 @@ public class CartaoJpa {
     @JoinColumn(name = "bandeira_id", nullable = false)
     private BandeiraJpa bandeira;
 
-    @Column(name = "numero", nullable = false, length = 19)
+    @Column(name = "numero", nullable = false, length = TamanhosMaximosCliente.NUMERO_DO_CARTAO)
     private String numero;
 
-    @Column(name = "nome_impresso", nullable = false, length = 60)
+    @Column(name = "nome_impresso", nullable = false, length = TamanhosMaximosCliente.NOME_IMPRESSO)
     private String nomeImpresso;
 
     /** Validade no formato {@code AAAA-MM} (DEC-07, DEC-06). */
-    @Column(name = "validade", nullable = false, length = 7)
+    @Column(name = "validade", nullable = false, length = TamanhosMaximosCliente.VALIDADE_DO_CARTAO)
     private String validade;
 
     @Column(name = "preferencial", nullable = false)

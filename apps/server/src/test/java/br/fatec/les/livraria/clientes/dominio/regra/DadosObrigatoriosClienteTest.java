@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
+import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 
 /** RN-CLI-006: dados obrigatórios do cadastro do cliente. */
 class DadosObrigatoriosClienteTest {
@@ -27,7 +27,7 @@ class DadosObrigatoriosClienteTest {
                 List.of(), List.of());
 
         assertThat(violacoes(vazio, regra))
-                .hasSize(10)
+                .hasSize(9)
                 .allMatch(violacao -> violacao.codigo().equals("RN-CLI-006"));
     }
 
@@ -45,15 +45,15 @@ class DadosObrigatoriosClienteTest {
     }
 
     @Test
-    void rnCli006_semEndereco() {
+    void rnCli006_semEnderecoNaoEhReportadoPorEstaRegra() {
+        // A falta de endereço é reportada uma única vez pela regra EnderecoDoCliente (RN-CLI-001/RN-CLI-002).
         NovoCliente padrao = padrao();
         NovoCliente semEndereco = new NovoCliente(padrao.nome(), padrao.genero(),
                 padrao.dataNascimento(), padrao.cpf(), padrao.email(), padrao.tipoTelefone(),
                 padrao.ddd(), padrao.numero(), padrao.senha(), padrao.confirmacaoSenha(),
                 List.of(), padrao.cartoes());
 
-        assertThat(violacoes(semEndereco, regra))
-                .anyMatch(violacao -> violacao.mensagem().contains("endereço"));
+        assertThat(violacoes(semEndereco, regra)).isEmpty();
     }
 
     @Test

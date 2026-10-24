@@ -53,8 +53,43 @@ class SenhaForteTest {
     }
 
     @Test
-    void rnfCli001_senhaEmBranco() {
-        assertThat(violacoes(comSenha("   "), regra))
-                .anyMatch(violacao -> violacao.mensagem().contains("Informe a senha"));
+    void rnfCli001_senhaEmBrancoNaoEhReportadaPorEstaRegra() {
+        // A senha em branco é reportada uma única vez por DadosObrigatoriosCliente (RN-CLI-006).
+        assertThat(violacoes(comSenha("   "), regra)).isEmpty();
+    }
+
+    @Test
+    void rnfCli001_senhaComEspacoEhRejeitada() {
+        assertThat(violacoes(comSenha("Senha @123"), regra))
+                .singleElement()
+                .satisfies(violacao -> {
+                    assertThat(violacao.codigo()).isEqualTo("RNF-CLI-001");
+                    assertThat(violacao.mensagem()).contains("espaços em branco");
+                });
+    }
+
+    @Test
+    void rnfCli001_senhaComEspacoNoInicioOuNoFimEhRejeitada() {
+        assertThat(violacoes(comSenha(" Senha@123"), regra))
+                .anyMatch(violacao -> violacao.mensagem().contains("espaços em branco"));
+        assertThat(violacoes(comSenha("Senha@123 "), regra))
+                .anyMatch(violacao -> violacao.mensagem().contains("espaços em branco"));
+    }
+
+    @Test
+    void rnfCli001_espacoNaoContaComoCaractereEspecial() {
+        assertThat(violacoes(comSenha("Senha 1234"), regra))
+                .anyMatch(violacao -> violacao.mensagem().contains("espaços em branco"))
+                .anyMatch(violacao -> violacao.mensagem().contains("especial"));
+    }
+
+    @Test
+    void rnfCli001_caractereDeControleEhRejeitado() {
+        assertThat(violacoes(comSenha("Senha@12\u0001"), regra))
+                .singleElement()
+                .satisfies(violacao -> {
+                    assertThat(violacao.codigo()).isEqualTo("RNF-CLI-001");
+                    assertThat(violacao.mensagem()).contains("caracteres de controle");
+                });
     }
 }

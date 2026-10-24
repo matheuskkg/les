@@ -5,8 +5,9 @@
 -- O hash abaixo é BCrypt com custo 12 (RNF-CLI-003) e foi conferido com o CodificadorDeSenhaBCrypt do projeto.
 --
 -- Situação: os prazos são calculados na consulta (DEC-10), então as datas são fixas:
---   - Carla (usuário 4) foi inativada em 2026-10-20T12:00 (America/Sao_Paulo). Com o relógio dos E2E fixado em
---     2026-10-24T15:00:00Z (12:00 em America/Sao_Paulo), ela está INATIVA, com 4 dias (menos de 7);
+--   - Carla (usuário 4) foi inativada em 2026-10-20T12:00 (America/Sao_Paulo). Com o relógio fixado em
+--     2026-10-24T15:00:00Z (12:00 em America/Sao_Paulo), ela está INATIVA, com 4 dias (menos de 7). Os E2E e os
+--     testes de integração do cliente usam esse mesmo instante;
 --   - Diego (usuário 5) foi inativado em 2026-09-01T12:00 (America/Sao_Paulo): bem antes do prazo de 7 dias, então
 --     a conta está ENCERRADA e o CPF, o e-mail e o telefone dele estão livres para um novo cadastro.
 --

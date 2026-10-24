@@ -4,14 +4,16 @@ import java.nio.charset.StandardCharsets;
 
 import org.springframework.stereotype.Component;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
+import br.fatec.les.livraria.compartilhado.dominio.Senha;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 
 /**
- * Senha forte (RNF-CLI-001): pelo menos 8 caracteres, com letra maiúscula, letra minúscula e caractere especial. Também
- * limita a senha ao tamanho máximo aceito pelo BCrypt, em bytes UTF-8 (RNF-CLI-003).
+ * Senha forte (RNF-CLI-001): pelo menos 8 caracteres, com letra maiúscula, letra minúscula e caractere especial.
+ * Espaço em branco e caractere de controle não contam como especial e são rejeitados. Também limita a senha ao
+ * tamanho máximo aceito pelo BCrypt, em bytes UTF-8 (RNF-CLI-003). Uma senha em branco é reportada uma única vez por
+ * {@link DadosObrigatoriosCliente}; esta regra só avalia o conteúdo das senhas preenchidas.
  */
 @Component
 public class SenhaForte implements Regra<NovoCliente> {
@@ -23,7 +25,6 @@ public class SenhaForte implements Regra<NovoCliente> {
     public void validar(NovoCliente alvo, Violacoes violacoes) {
         String senha = alvo.senha();
         if (senha == null || senha.isBlank()) {
-            violacoes.adicionar(CODIGO, "Informe a senha do cliente.");
             return;
         }
         if (senha.length() < TAMANHO_MINIMO) {
@@ -35,12 +36,29 @@ public class SenhaForte implements Regra<NovoCliente> {
         if (senha.chars().noneMatch(Character::isLowerCase)) {
             violacoes.adicionar(CODIGO, "A senha deve ter pelo menos uma letra minúscula.");
         }
-        if (senha.chars().noneMatch(c -> !Character.isLetterOrDigit(c))) {
+        if (senha.chars().anyMatch(SenhaForte::espaco)) {
+            violacoes.adicionar(CODIGO, "A senha não pode conter espaços em branco.");
+        }
+        if (senha.chars().anyMatch(Character::isISOControl)) {
+            violacoes.adicionar(CODIGO, "A senha não pode conter caracteres de controle.");
+        }
+        if (senha.chars().noneMatch(SenhaForte::caractereEspecial)) {
             violacoes.adicionar(CODIGO, "A senha deve ter pelo menos um caractere especial.");
         }
-        if (senha.getBytes(StandardCharsets.UTF_8).length > CodificadorDeSenha.TAMANHO_MAXIMO_EM_BYTES) {
+        if (senha.getBytes(StandardCharsets.UTF_8).length > Senha.TAMANHO_MAXIMO_EM_BYTES) {
             violacoes.adicionar(CODIGO, "A senha deve ter no máximo "
-                    + CodificadorDeSenha.TAMANHO_MAXIMO_EM_BYTES + " bytes.");
+                    + Senha.TAMANHO_MAXIMO_EM_BYTES + " bytes.");
         }
+    }
+
+    /** Espaço comum, tabulação, quebra de linha e afins. */
+    private static boolean espaco(int caractere) {
+        return Character.isWhitespace(caractere) || Character.isSpaceChar(caractere);
+    }
+
+    /** Especial é tudo que não é letra, dígito, espaço em branco nem caractere de controle. */
+    private static boolean caractereEspecial(int caractere) {
+        return !Character.isLetterOrDigit(caractere) && !espaco(caractere)
+                && !Character.isISOControl(caractere);
     }
 }
