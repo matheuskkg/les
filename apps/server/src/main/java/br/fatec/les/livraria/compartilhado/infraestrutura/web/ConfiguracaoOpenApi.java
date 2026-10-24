@@ -2,6 +2,7 @@ package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 
 import java.util.List;
 
+import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,5 +28,10 @@ public class ConfiguracaoOpenApi {
     @Bean
     ModelConverter conversorDeEsquemas() {
         return new ConversorDeEsquemas();
+    }
+
+    @Bean
+    OperationCustomizer parametrosDeListagem() {
+        return new ParametrosDeListagemOpenApi();
     }
 }
