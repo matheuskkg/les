@@ -1,6 +1,7 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -96,12 +97,29 @@ class ListagemNoOpenApiTest {
                 .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters.length()").value(3))
                 .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[*].name",
                         hasItems("pagina", "tamanho", "ordem")))
+                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'pagina')]"
+                        + ".schema.minimum").value(hasItem(0)))
+                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'pagina')]"
+                        + ".schema.default").value(hasItem(0)))
+                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'tamanho')]"
+                        + ".schema.minimum").value(hasItem(1)))
+                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'tamanho')]"
+                        + ".schema.maximum").value(hasItem(100)))
+                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'tamanho')]"
+                        + ".schema.default").value(hasItem(20)))
                 .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]"
-                        + ".schema.type").value("array"))
+                        + ".schema.type").value(hasItem("array")))
                 .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]"
-                        + ".explode").value(true))
+                        + ".description").value(hasItem(containsString("nome, codigo"))))
+                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]"
+                        + ".description").value(hasItem(containsString("Padrão: nome,asc"))))
+                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]"
+                        + ".schema.example").isEmpty())
+                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]"
+                        + ".explode").value(hasItem(true)))
                 .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'paginacao')]")
                         .isEmpty())
+                .andExpect(jsonPath("$.components.schemas.Paginacao").doesNotExist())
                 .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.requestBody").doesNotExist());
     }
 
@@ -110,6 +128,7 @@ class ListagemNoOpenApiTest {
         mvc.perform(get("/api/exemplo/listagem").param("ordem", "senha,asc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.parametro").value("ordem"))
                 .andExpect(jsonPath("$.detail").value(containsString("senha")));
     }
 
@@ -117,17 +136,24 @@ class ListagemNoOpenApiTest {
     void recusaPaginaETamanhoInvalidos() throws Exception {
         mvc.perform(get("/api/exemplo/listagem").param("pagina", "-1"))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.parametro").value("pagina"))
                 .andExpect(jsonPath("$.detail").value("A página não pode ser negativa."));
 
         mvc.perform(get("/api/exemplo/listagem").param("tamanho", "101"))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.parametro").value("tamanho"))
                 .andExpect(jsonPath("$.detail").value("O tamanho da página deve estar entre 1 e 100."));
+
+        mvc.perform(get("/api/exemplo/listagem").param("pagina", String.valueOf(Integer.MAX_VALUE)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.parametro").value("pagina"));
     }
 
     @Test
     void recusaOrdemMalformada() throws Exception {
         mvc.perform(get("/api/exemplo/listagem").param("ordem", "nome"))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.parametro").value("ordem"))
                 .andExpect(jsonPath("$.detail").value("Ordenação inválida: use o formato campo,asc|desc."));
     }
 
@@ -135,6 +161,7 @@ class ListagemNoOpenApiTest {
     void recusaPaginaNaoNumerica() throws Exception {
         mvc.perform(get("/api/exemplo/listagem").param("pagina", "abc"))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.parametro").value("pagina"))
                 .andExpect(jsonPath("$.detail").value("O parâmetro pagina deve ser um número inteiro."));
     }
 }

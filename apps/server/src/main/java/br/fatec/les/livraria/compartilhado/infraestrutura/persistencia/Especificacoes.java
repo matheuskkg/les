@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
 import br.fatec.les.livraria.compartilhado.aplicacao.Intervalo;
+import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
@@ -85,7 +86,7 @@ public final class Especificacoes {
 
     /** Compara só os dígitos de CPF, CEP ou telefone; a coluna guarda o valor sem máscara. */
     public static <T> Specification<T> digitos(String campo, String termo) {
-        String digitos = apenasDigitos(termo);
+        String digitos = apenasDigitos(campo, termo);
         if (digitos == null) {
             return semFiltro();
         }
@@ -94,20 +95,32 @@ public final class Especificacoes {
 
     /**
      * Filtra um relacionamento muitos-para-muitos por {@code exists}, para não duplicar linhas nem quebrar a
-     * contagem da paginação.
+     * contagem da paginação. Vários valores combinam com OU; a coleção vazia ou em branco não filtra.
      */
-    public static <T> Specification<T> existe(String relacao, String campo, Object valor) {
-        Object limpo = valorLimpo(valor);
-        if (limpo == null) {
+    public static <T> Specification<T> existe(String relacao, String campo, Collection<?> valores) {
+        List<Object> limpos = valoresLimpos(valores);
+        if (limpos.isEmpty()) {
             return semFiltro();
         }
         return (raiz, consulta, cb) -> {
             Subquery<Integer> subconsulta = consulta.subquery(Integer.class);
             Root<T> externa = subconsulta.correlate(raiz);
             Join<T, ?> juncao = externa.join(relacao);
-            subconsulta.select(cb.literal(1)).where(cb.equal(juncao.get(campo), limpo));
+            subconsulta.select(cb.literal(1)).where(juncao.get(campo).in(limpos));
             return cb.exists(subconsulta);
         };
+    }
+
+    /**
+     * Filtra um relacionamento muitos-para-muitos por um único valor, por {@code exists}, para não duplicar linhas
+     * nem quebrar a contagem da paginação.
+     */
+    public static <T> Specification<T> existe(String relacao, String campo, Object valor) {
+        Object limpo = valorLimpo(valor);
+        if (limpo == null) {
+            return semFiltro();
+        }
+        return existe(relacao, campo, List.of(limpo));
     }
 
     private static Expression<String> normalizada(CriteriaBuilder cb, Expression<String> expressao) {
@@ -128,7 +141,7 @@ public final class Especificacoes {
         return escapado.toString();
     }
 
-    private static String apenasDigitos(String termo) {
+    private static String apenasDigitos(String campo, String termo) {
         String limpo = textoLimpo(termo);
         if (limpo == null) {
             return null;
@@ -140,7 +153,11 @@ public final class Especificacoes {
                 digitos.append(caractere);
             }
         }
-        return digitos.isEmpty() ? null : digitos.toString();
+        if (digitos.isEmpty()) {
+            throw new ParametroInvalido(campo,
+                    "O parâmetro " + campo + " deve conter ao menos um número.");
+        }
+        return digitos.toString();
     }
 
     private static String textoLimpo(String valor) {

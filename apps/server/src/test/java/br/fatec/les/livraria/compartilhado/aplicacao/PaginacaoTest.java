@@ -45,6 +45,13 @@ class PaginacaoTest {
     }
 
     @Test
+    void recusaPaginaCujoDeslocamentoNaoCabeEmInt() {
+        assertThatThrownBy(() -> new Paginacao(Integer.MAX_VALUE, Paginacao.TAMANHO_MAXIMO, List.of()))
+                .isInstanceOf(ParametroInvalido.class)
+                .satisfies(e -> assertThat(((ParametroInvalido) e).getParametro()).isEqualTo("pagina"));
+    }
+
+    @Test
     void copiaAOrdenacaoParaNaoDependerDaListaDoChamador() {
         List<Ordem> ordem = new ArrayList<>(List.of(Ordem.de("nome,asc")));
         Paginacao paginacao = new Paginacao(0, 20, ordem);

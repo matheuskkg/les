@@ -1,9 +1,11 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 
 import java.sql.SQLException;
-import java.util.Locale;
 
+import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.ConstraintViolationException.ConstraintKind;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -34,7 +36,9 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ParametroInvalido.class)
     public ProblemDetail tratar(ParametroInvalido excecao) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, excecao.getMessage());
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, excecao.getMessage());
+        problema.setProperty("parametro", excecao.getParametro());
+        return problema;
     }
 
     @ExceptionHandler(ExcecaoDeConflito.class)
@@ -66,24 +70,21 @@ public class TratadorDeErros extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Erro inesperado no servidor.");
     }
 
-    /** {@code 23505} é o SQLState de unicidade do PostgreSQL e do H2, inclusive quando embrulhado pelo Hibernate. */
+    /**
+     * Sinais tipados de unicidade: a exceção do Spring, a do Hibernate com {@link ConstraintKind#UNIQUE} ou o
+     * SQLState {@code 23505} (PostgreSQL e H2) em qualquer ponto da cadeia de causas.
+     */
     private static boolean violacaoDeUnicidade(Throwable erro) {
         for (Throwable atual = erro; atual != null; atual = atual.getCause()) {
-            if (atual instanceof SQLException sql && "23505".equals(sql.getSQLState())) {
+            if (atual instanceof DuplicateKeyException) {
                 return true;
             }
-            String mensagem = atual.getMessage();
-            if (mensagem != null) {
-                String normalizada = mensagem.toLowerCase(Locale.ROOT);
-                if (normalizada.contains("23505")
-                        || normalizada.contains("unique index")
-                        || normalizada.contains("unique constraint")
-                        || normalizada.contains("duplicate key")) {
-                    return true;
-                }
+            if (atual instanceof ConstraintViolationException violacao
+                    && violacao.getKind() == ConstraintKind.UNIQUE) {
+                return true;
             }
-            if (atual.getCause() == atual) {
-                break;
+            if (atual instanceof SQLException sql && "23505".equals(sql.getSQLState())) {
+                return true;
             }
         }
         return false;

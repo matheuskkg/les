@@ -16,7 +16,6 @@ class OrdenacaoPermitidaTest {
                 .de(List.of(Ordem.de("nome,asc")), "nome", "email")
                 .com("cadastro", "dataCadastro");
 
-        assertThat(permitida.permite("cadastro")).isTrue();
         assertThat(permitida.propriedade("cadastro")).isEqualTo("dataCadastro");
         assertThat(permitida.propriedade("nome")).isEqualTo("nome");
         assertThat(permitida.padrao()).containsExactly(new Ordem("nome", Ordem.Direcao.ASC));

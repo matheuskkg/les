@@ -23,6 +23,10 @@ public record Paginacao(int pagina, int tamanho, List<Ordem> ordem) {
             throw new ParametroInvalido("tamanho",
                     "O tamanho da página deve estar entre 1 e " + TAMANHO_MAXIMO + ".");
         }
+        if ((long) pagina * tamanho > Integer.MAX_VALUE) {
+            throw new ParametroInvalido("pagina",
+                    "A página informada é grande demais para o tamanho escolhido.");
+        }
         ordem = ordem == null ? List.of() : List.copyOf(ordem);
     }
 

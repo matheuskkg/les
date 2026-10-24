@@ -44,14 +44,19 @@ class ListagemJpaTest {
     @BeforeEach
     void inserirDados() {
         ExemploTagJpa poesia = tags.save(new ExemploTagJpa("poesia"));
-        tags.save(new ExemploTagJpa("romance"));
+        ExemploTagJpa romance = tags.save(new ExemploTagJpa("romance"));
 
         ExemploListagemJpa ana = salvar("Ana Ávila", "A-1", "12345678900", "SP", "10.00",
                 LocalDate.of(2020, 1, 10));
         ana.adicionarTag(poesia);
+        ana.adicionarTag(romance);
         exemplos.saveAndFlush(ana);
 
-        salvar("ana avila", "A-2", "12345678900", "SP", "20.00", LocalDate.of(2021, 2, 10));
+        ExemploListagemJpa anaSemAcento = salvar("ana avila", "A-2", "12345678900", "SP", "20.00",
+                LocalDate.of(2021, 2, 10));
+        anaSemAcento.adicionarTag(romance);
+        exemplos.saveAndFlush(anaSemAcento);
+
         salvar("João Çedilha", "B-1", "98765432100", "RJ", "30.00", LocalDate.of(2022, 3, 10));
         salvar("100% puro", "C-1", "11122233344", "MG", "40.00", LocalDate.of(2023, 4, 10));
         salvar("a_b", "C-2", "55566677788", "MG", "50.00", LocalDate.of(2024, 5, 10));
@@ -155,11 +160,34 @@ class ListagemJpaTest {
     }
 
     @Test
+    void filtraPorRelacionamentoComVariosValoresUsandoOu() {
+        Specification<ExemploListagemJpa> filtro = Especificacoes.existe("tags", "nome",
+                List.of("poesia", "romance"));
+
+        Pagina<ExemploListagemJpa> pagina = ConversorDePaginacao.paraPagina(
+                exemplos.findAll(filtro, ConversorDePaginacao.paraPageable(Paginacao.padrao())));
+
+        assertThat(pagina.totalItens()).isEqualTo(2);
+        assertThat(pagina.itens()).extracting(ExemploListagemJpa::getCodigo)
+                .containsExactlyInAnyOrder("A-1", "A-2");
+    }
+
+    @Test
     void ignoraFiltrosNulosOuEmBranco() {
         assertThat(buscar(Especificacoes.contem("nome", "  "))).hasSize(6);
         assertThat(buscar(Especificacoes.igual("uf", " "))).hasSize(6);
         assertThat(buscar(Especificacoes.em("uf", Arrays.asList(" ", null)))).hasSize(6);
-        assertThat(buscar(Especificacoes.digitos("cpf", "sem números"))).hasSize(6);
+        assertThat(buscar(Especificacoes.existe("tags", "nome", List.of(" ", "")))).hasSize(6);
+        assertThat(buscar(Especificacoes.existe("tags", "nome", (String) null))).hasSize(6);
+        assertThat(buscar(Especificacoes.digitos("cpf", "  "))).hasSize(6);
+    }
+
+    @Test
+    void recusaDigitosQuandoOTermoNaoTemNumero() {
+        assertThatThrownBy(() -> Especificacoes.digitos("cpf", "sem números"))
+                .isInstanceOf(ParametroInvalido.class)
+                .hasMessageContaining("cpf")
+                .satisfies(e -> assertThat(((ParametroInvalido) e).getParametro()).isEqualTo("cpf"));
     }
 
     @Test

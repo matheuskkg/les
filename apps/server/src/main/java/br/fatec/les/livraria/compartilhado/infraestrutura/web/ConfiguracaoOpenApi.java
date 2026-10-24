@@ -3,9 +3,11 @@ package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 import java.util.List;
 
 import org.springdoc.core.customizers.OperationCustomizer;
+import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 import io.swagger.v3.core.converter.ModelConverter;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -17,6 +19,11 @@ import io.swagger.v3.oas.models.servers.Server;
  */
 @Configuration
 public class ConfiguracaoOpenApi {
+
+    static {
+        // A listagem expõe pagina, tamanho e ordem explicitamente; o objeto Paginacao não é um request wrapper.
+        SpringDocUtils.getConfig().addRequestWrapperToIgnore(Paginacao.class);
+    }
 
     @Bean
     OpenAPI especificacao() {

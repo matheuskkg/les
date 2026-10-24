@@ -10,8 +10,11 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
+import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.ConstraintViolationException.ConstraintKind;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -62,6 +65,17 @@ class TratadorDeErrosTest {
                     new SQLIntegrityConstraintViolationException("duplicate key value violates unique constraint", "23505"));
         }
 
+        @GetMapping("/conflito-unico-spring")
+        String conflitarUnicidadeDoSpring() {
+            throw new DuplicateKeyException("já existe");
+        }
+
+        @GetMapping("/conflito-unico-hibernate")
+        String conflitarUnicidadeDoHibernate() {
+            throw new DataIntegrityViolationException("falha", new ConstraintViolationException("já existe",
+                    new SQLException("unique constraint"), ConstraintKind.UNIQUE, "uk_exemplo"));
+        }
+
         @GetMapping("/integridade")
         String falharIntegridade() {
             throw new DataIntegrityViolationException("falha", new SQLException("check constraint", "23514"));
@@ -99,6 +113,7 @@ class TratadorDeErrosTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.parametro").value("tamanho"))
                 .andExpect(jsonPath("$.detail").value("O tamanho da página deve estar entre 1 e 100."));
     }
 
@@ -122,6 +137,22 @@ class TratadorDeErrosTest {
     @Test
     void respondeComStatus409ParaRestricaoDeUnicidade() throws Exception {
         mvc.perform(get("/conflito-unico"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.detail").value("O registro já existe ou conflita com outro cadastro."));
+    }
+
+    @Test
+    void respondeComStatus409ParaDuplicateKeyException() throws Exception {
+        mvc.perform(get("/conflito-unico-spring"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.detail").value("O registro já existe ou conflita com outro cadastro."));
+    }
+
+    @Test
+    void respondeComStatus409ParaUnicidadeDoHibernate() throws Exception {
+        mvc.perform(get("/conflito-unico-hibernate"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.detail").value("O registro já existe ou conflita com outro cadastro."));

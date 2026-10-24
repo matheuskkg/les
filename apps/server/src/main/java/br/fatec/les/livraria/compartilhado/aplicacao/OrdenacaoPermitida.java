@@ -37,10 +37,6 @@ public record OrdenacaoPermitida(Map<String, String> campos, List<Ordem> padrao)
         return new OrdenacaoPermitida(mapa, padrao);
     }
 
-    public boolean permite(String campo) {
-        return campos.containsKey(campo);
-    }
-
     /** Traduz o campo da API para a propriedade do modelo; campo não declarado causa HTTP 400. */
     public String propriedade(String campo) {
         String propriedade = campos.get(campo);
