@@ -8,6 +8,142 @@
     "url" : "/"
   } ],
   "paths" : {
+    "/api/admin/eventos" : {
+      "get" : {
+        "operationId" : "eventosDoAdmin",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "Last-Event-ID",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "text/event-stream" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SseEmitter"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Abre o stream SSE das notificações do administrador",
+        "tags" : [ "eventos-controller" ]
+      }
+    },
+    "/api/admin/notificacoes" : {
+      "get" : {
+        "operationId" : "listarNotificacoesDoAdmin",
+        "parameters" : [ {
+          "description" : "Página, a partir de 0.",
+          "in" : "query",
+          "name" : "pagina",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "description" : "Itens por página (padrão 20, máximo 100).",
+          "in" : "query",
+          "name" : "tamanho",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 20,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        }, {
+          "description" : "Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: id, tipo, criadaEm, lidaEm. Padrão: lidaEm,desc, criadaEm,desc, id,desc.",
+          "explode" : true,
+          "in" : "query",
+          "name" : "ordem",
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaginaNotificacaoDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Lista as notificações do administrador, não lidas primeiro e mais recentes antes",
+        "tags" : [ "notificacoes-do-admin-controller" ]
+      }
+    },
+    "/api/admin/notificacoes/ler-todas" : {
+      "post" : {
+        "operationId" : "marcarTodasComoLidasDoAdmin",
+        "responses" : {
+          "204" : {
+            "description" : "Notificações marcadas como lidas"
+          }
+        },
+        "summary" : "Marca todas as notificações do administrador como lidas",
+        "tags" : [ "notificacoes-do-admin-controller" ]
+      }
+    },
+    "/api/admin/notificacoes/nao-lidas" : {
+      "get" : {
+        "operationId" : "contarNaoLidasDoAdmin",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ContagemDeNaoLidasDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Conta as notificações não lidas do administrador",
+        "tags" : [ "notificacoes-do-admin-controller" ]
+      }
+    },
+    "/api/admin/notificacoes/{id}/ler" : {
+      "post" : {
+        "operationId" : "marcarComoLidaDoAdmin",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Notificação marcada como lida"
+          },
+          "404" : {
+            "description" : "Notificação não encontrada para o administrador"
+          }
+        },
+        "summary" : "Marca uma notificação do administrador como lida",
+        "tags" : [ "notificacoes-do-admin-controller" ]
+      }
+    },
     "/api/clientes" : {
       "post" : {
         "operationId" : "cadastrar",
@@ -281,6 +417,142 @@
         "tags" : [ "livro-controller" ]
       }
     },
+    "/api/me/eventos" : {
+      "get" : {
+        "operationId" : "meusEventos",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "Last-Event-ID",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "text/event-stream" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SseEmitter"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Abre o stream SSE das notificações do cliente",
+        "tags" : [ "eventos-controller" ]
+      }
+    },
+    "/api/me/notificacoes" : {
+      "get" : {
+        "operationId" : "listarNotificacoesDoCliente",
+        "parameters" : [ {
+          "description" : "Página, a partir de 0.",
+          "in" : "query",
+          "name" : "pagina",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "description" : "Itens por página (padrão 20, máximo 100).",
+          "in" : "query",
+          "name" : "tamanho",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 20,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        }, {
+          "description" : "Ordenação no formato campo,asc|desc; pode ser repetido. Campos permitidos: id, tipo, criadaEm, lidaEm. Padrão: lidaEm,desc, criadaEm,desc, id,desc.",
+          "explode" : true,
+          "in" : "query",
+          "name" : "ordem",
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaginaNotificacaoDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Lista as notificações do cliente, não lidas primeiro e mais recentes antes",
+        "tags" : [ "notificacoes-do-cliente-controller" ]
+      }
+    },
+    "/api/me/notificacoes/ler-todas" : {
+      "post" : {
+        "operationId" : "marcarTodasComoLidasDoCliente",
+        "responses" : {
+          "204" : {
+            "description" : "Notificações marcadas como lidas"
+          }
+        },
+        "summary" : "Marca todas as notificações do cliente como lidas",
+        "tags" : [ "notificacoes-do-cliente-controller" ]
+      }
+    },
+    "/api/me/notificacoes/nao-lidas" : {
+      "get" : {
+        "operationId" : "contarNaoLidasDoCliente",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ContagemDeNaoLidasDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Conta as notificações não lidas do cliente",
+        "tags" : [ "notificacoes-do-cliente-controller" ]
+      }
+    },
+    "/api/me/notificacoes/{id}/ler" : {
+      "post" : {
+        "operationId" : "marcarComoLidaDoCliente",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Notificação marcada como lida"
+          },
+          "404" : {
+            "description" : "Notificação não encontrada para o cliente"
+          }
+        },
+        "summary" : "Marca uma notificação do cliente como lida",
+        "tags" : [ "notificacoes-do-cliente-controller" ]
+      }
+    },
     "/api/sessao" : {
       "delete" : {
         "operationId" : "sair",
@@ -289,7 +561,7 @@
             "description" : "Sessão encerrada"
           }
         },
-        "summary" : "Encerra a sessão e apaga o cookie",
+        "summary" : "Encerra a sessão, fecha os canais SSE e apaga o cookie",
         "tags" : [ "sessao-controller" ]
       },
       "get" : {
@@ -458,6 +730,16 @@
         },
         "required" : [ "id" ]
       },
+      "ContagemDeNaoLidasDto" : {
+        "type" : "object",
+        "properties" : {
+          "quantidade" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "quantidade" ]
+      },
       "EnderecoDoCadastro" : {
         "type" : "object",
         "properties" : {
@@ -621,6 +903,38 @@
         },
         "required" : [ "ano", "autores", "categorias", "disponivel", "editora", "id", "titulo" ]
       },
+      "NotificacaoDto" : {
+        "type" : "object",
+        "properties" : {
+          "criadaEm" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "lidaEm" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "mensagem" : {
+            "type" : "string"
+          },
+          "recurso" : {
+            "type" : "string"
+          },
+          "recursoId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "tipo" : {
+            "type" : "string",
+            "enum" : [ "CARRINHO_EXPIRANDO", "CHECKOUT_EXPIRANDO", "CARRINHO_EXPIRADO", "CHECKOUT_EXPIRADO", "PEDIDO_APROVADO", "PEDIDO_REPROVADO", "PEDIDO_DESPACHADO", "PEDIDO_ENTREGUE", "TROCA_AUTORIZADA", "TROCA_RECUSADA", "TROCA_CONCLUIDA", "TROCA_SOLICITADA", "PEDIDO_AGUARDANDO_DESPACHO" ]
+          }
+        },
+        "required" : [ "criadaEm", "id", "mensagem", "tipo" ]
+      },
       "PaginaCategoriaDto" : {
         "type" : "object",
         "properties" : {
@@ -656,6 +970,34 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/LivroListadoDto"
+            }
+          },
+          "pagina" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "tamanho" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItens" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPaginas" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "itens", "pagina", "tamanho", "totalItens", "totalPaginas" ]
+      },
+      "PaginaNotificacaoDto" : {
+        "type" : "object",
+        "properties" : {
+          "itens" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/NotificacaoDto"
             }
           },
           "pagina" : {
@@ -720,6 +1062,15 @@
           }
         },
         "required" : [ "email", "papel", "usuarioId" ]
+      },
+      "SseEmitter" : {
+        "type" : "object",
+        "properties" : {
+          "timeout" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
       },
       "TelefoneDoCadastro" : {
         "type" : "object",

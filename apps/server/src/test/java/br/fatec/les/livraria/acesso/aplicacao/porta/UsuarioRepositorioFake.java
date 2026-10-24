@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.acesso.aplicacao.porta;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,6 +45,11 @@ public class UsuarioRepositorioFake implements UsuarioRepositorio {
 
     @Override
     public boolean existeTelefoneEmUso(String telefone) {
+        throw new UnsupportedOperationException("Fora do escopo do teste.");
+    }
+
+    @Override
+    public boolean existeAlgumaEmUso(Collection<Long> ids) {
         throw new UnsupportedOperationException("Fora do escopo do teste.");
     }
 }
