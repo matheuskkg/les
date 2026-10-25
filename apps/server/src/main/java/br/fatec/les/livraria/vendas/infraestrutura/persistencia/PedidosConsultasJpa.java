@@ -1,6 +1,8 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,7 @@ import br.fatec.les.livraria.vendas.aplicacao.consulta.FiltroPedido;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.PedidoResumo;
 import br.fatec.les.livraria.vendas.aplicacao.porta.PedidosConsultas;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
+import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -33,6 +36,13 @@ public class PedidosConsultasJpa implements PedidosConsultas {
         Page<PedidoJpa> pagina = pedidos.findAll(EspecificacoesDePedido.de(filtro),
                 ConversorDePaginacao.paraPageable(paginacao));
         return ConversorDePaginacao.paraPagina(pagina, PedidosConsultasJpa::paraResumo);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<StatusPedido, Long> contarPorStatus() {
+        return pedidos.contarPorStatus().stream()
+                .collect(Collectors.toMap(QuantidadePorStatus::getStatus, QuantidadePorStatus::getQuantidade));
     }
 
     @Override

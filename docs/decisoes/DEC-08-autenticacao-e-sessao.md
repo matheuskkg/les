@@ -40,8 +40,8 @@ cookie da sessão funciona com `SameSite=Strict`.
 
 | Rota | Efeito |
 |---|---|
-| `POST /api/sessao` | login com `{ email, senha }` (alterado pelo [DEC-10](DEC-10-cliente-enderecos-e-cartoes.md): `{ login, senha }`, por e-mail ou telefone); grava o cookie e devolve `{ usuarioId, email, papel }` |
-| `GET /api/sessao` | usuário logado `{ usuarioId, email, papel }`, ou 401 |
+| `POST /api/sessao` | login com `{ email, senha }` (alterado pelo [DEC-10](DEC-10-cliente-enderecos-e-cartoes.md): `{ login, senha }`, por e-mail ou telefone); grava o cookie e devolve `{ usuarioId, email, papel }` (alterado pelo [DEC-17](DEC-17-organizacao-do-web.md): mais `nome`, o do cliente ou "Administração") |
+| `GET /api/sessao` | usuário logado `{ usuarioId, email, papel }` (alterado pelo [DEC-17](DEC-17-organizacao-do-web.md): mais `nome`), ou 401 |
 | `DELETE /api/sessao` | logout: apaga o cookie (`Max-Age=0`) |
 
 Login inválido responde 401 com a mensagem "E-mail ou senha inválidos." (alterada pelo [DEC-10](DEC-10-cliente-enderecos-e-cartoes.md): "Login ou senha

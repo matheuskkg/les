@@ -15,12 +15,14 @@ import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 import br.fatec.les.livraria.compartilhado.infraestrutura.web.Listagem;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConfirmarEntrega;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ContarPorStatus;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarPedido;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.DespacharPedido;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ListarPedidos;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.ConsultaDePedidos;
 import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
 import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
+import br.fatec.les.livraria.vendas.infraestrutura.web.dto.ContagemPorStatusDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PedidoDetalheDto;
 import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PedidoListadoDto;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +34,7 @@ import lombok.RequiredArgsConstructor;
  * pedido (DEC-12): o CPF de uma conta encerrada pode voltar em outra (DEC-10). O período
  * de {@code realizadoEm} é informado em dias, no fuso da loja, e o último dia entra inteiro. Despacho e confirmação
  * da entrega são ações em sub-rotas {@code POST} que devolvem o pedido alterado; fora do diagrama do DEC-12
- * respondem 409.
+ * respondem 409. A contagem por status alimenta as abas da tela do admin.
  */
 @RestController
 @RequestMapping("/api/admin/pedidos")
@@ -43,6 +45,7 @@ public class PedidoAdminController {
     private final ConsultarPedido consultarPedido;
     private final DespacharPedido despacharPedido;
     private final ConfirmarEntrega confirmarEntrega;
+    private final ContarPorStatus contarPorStatus;
 
     @GetMapping
     public Pagina<PedidoListadoDto> listar(
@@ -58,6 +61,11 @@ public class PedidoAdminController {
         ConsultaDePedidos consulta = new ConsultaDePedidos(numero, clienteId, status, situacao, cliente, cpf, realizadoEmDe,
                 realizadoEmAte);
         return listarPedidos.executar(consulta, paginacao).map(PedidoListadoDto::de);
+    }
+
+    @GetMapping("/contagem")
+    public ContagemPorStatusDto contar() {
+        return ContagemPorStatusDto.de(contarPorStatus.executar());
     }
 
     @GetMapping("/{id}")

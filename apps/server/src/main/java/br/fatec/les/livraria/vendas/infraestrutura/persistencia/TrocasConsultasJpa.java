@@ -41,4 +41,11 @@ public class TrocasConsultasJpa implements TrocasConsultas {
                 troca.getPedido().getId(), troca.getStatus(), troca.getSolicitadaEm(), troca.getPedido().getCliente(),
                 unidades.getOrDefault(troca.getId(), 0L)));
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<StatusTroca, Long> contarPorStatus() {
+        return trocas.contarPorStatus().stream()
+                .collect(Collectors.toMap(QuantidadePorStatus::getStatus, QuantidadePorStatus::getQuantidade));
+    }
 }

@@ -1,0 +1,209 @@
+/* Escolha do endereço da compra (RF-VEN-005). */
+.escolha-de-endereco {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.escolha-de-endereco .categoria-opcao {
+  align-items: flex-start;
+}
+
+.escolha-de-endereco__novo {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+.checkout__valores {
+  display: grid;
+  gap: 0.25rem;
+  margin: 1rem 0 0;
+  text-align: right;
+}
+
+.checkout__valores dt,
+.checkout__valores dd {
+  display: inline;
+  margin: 0;
+}
+
+/* Forma de pagamento da compra (RF-VEN-006, RF-VEN-007). */
+.pagamento-da-compra {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.pagamento-da-compra__campos {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.pagamento-da-compra h2 {
+  margin: 0;
+}
+
+.pagamento-da-compra__promocional {
+  display: grid;
+  gap: 0.5rem;
+}
+
+/* Checkout em quatro passos com o resumo fixo ao lado (RF-VEN-003). */
+.checkout__corpo {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr) 21rem;
+  align-items: start;
+}
+
+.checkout__passos {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.checkout__pagamento {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.indicador-de-passos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: passo;
+}
+
+.indicador-de-passos a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 999px;
+  color: var(--cor-texto-suave);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.indicador-de-passos__item--atual a {
+  border-color: var(--cor-primaria);
+  color: var(--cor-primaria-escura);
+}
+
+.indicador-de-passos__item--concluido a {
+  background: var(--cor-primaria-clara);
+  border-color: transparent;
+  color: var(--cor-primaria-escura);
+}
+
+.passo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  scroll-margin-top: calc(var(--altura-do-cabecalho) + 1rem);
+}
+
+.passo__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.passo__topo h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.passo__numero {
+  display: inline-grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  background: var(--cor-borda);
+  font-weight: 700;
+}
+
+.passo--concluido .passo__numero {
+  background: var(--cor-primaria);
+  color: #fff;
+}
+
+.passo__resumo {
+  margin-left: auto;
+  color: var(--cor-texto-suave);
+  font-size: 0.9rem;
+}
+
+.opcao-de-cartao {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: calc(var(--raio) - 4px);
+}
+
+.opcao-de-cartao--escolhida {
+  border-color: var(--cor-primaria);
+}
+
+.resumo-da-compra {
+  position: sticky;
+  top: calc(var(--altura-do-cabecalho) + 1rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.resumo-da-compra h2 {
+  margin: 0;
+}
+
+.resumo-da-compra .checkout__valores {
+  margin: 0;
+  text-align: left;
+}
+
+.resumo-da-compra .checkout__valores dt,
+.resumo-da-compra .checkout__valores dd {
+  display: block;
+}
+
+.resumo-da-compra__itens .item-da-conta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.resumo-da-compra__pagamento {
+  display: grid;
+  gap: 0.25rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--cor-borda);
+}
+
+@media (max-width: 900px) {
+  .checkout__corpo {
+    grid-template-columns: 1fr;
+  }
+
+  .resumo-da-compra {
+    position: static;
+    order: -1;
+  }
+}

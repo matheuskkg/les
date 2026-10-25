@@ -96,6 +96,7 @@ class SessaoIntegracaoTest {
                 .andExpect(jsonPath("$.usuarioId").value(1))
                 .andExpect(jsonPath("$.email").value(ADMIN))
                 .andExpect(jsonPath("$.papel").value("ADMIN"))
+                .andExpect(jsonPath("$.nome").value("Administração"))
                 .andReturn().getResponse();
 
         String cookie = setCookieDaSessao(resposta);
@@ -124,6 +125,19 @@ class SessaoIntegracaoTest {
         mvc.perform(get("/api/admin/exemplo").cookie(sessao))
                 .andExpect(status().isOk())
                 .andExpect(content().string("admin"));
+    }
+
+    @Test
+    void sessaoDoClienteTrazONomeDoCliente() throws Exception {
+        Cookie sessao = cookieDaSessao(entrar("ana.souza@livraria.test", SENHA_DE_TESTE)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nome").value("Ana Souza"))
+                .andReturn().getResponse());
+
+        mvc.perform(get("/api/sessao").cookie(sessao))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.papel").value("CLIENTE"))
+                .andExpect(jsonPath("$.nome").value("Ana Souza"));
     }
 
     @Test

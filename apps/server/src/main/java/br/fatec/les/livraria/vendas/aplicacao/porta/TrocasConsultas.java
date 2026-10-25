@@ -1,6 +1,7 @@
 package br.fatec.les.livraria.vendas.aplicacao.porta;
 
 import java.util.List;
+import java.util.Map;
 
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
@@ -16,4 +17,7 @@ public interface TrocasConsultas {
      * @return a página de trocas
      */
     Pagina<TrocaResumo> listar(List<StatusTroca> status, Paginacao paginacao);
+
+    /** @return quantidade de trocas de cada status presente; status sem troca ficam de fora */
+    Map<StatusTroca, Long> contarPorStatus();
 }

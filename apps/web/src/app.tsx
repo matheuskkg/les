@@ -1,122 +1,47 @@
+import type { ComponentType } from 'preact';
 import { Router, Route } from 'preact-iso';
-import { Cabecalho } from './componentes/Cabecalho';
-import { Protegida } from './componentes/Protegida';
-import {
-  Admin,
-  AdminAnalise,
-  AdminCliente,
-  AdminClientes,
-  AdminPedido,
-  AdminTrocas,
-  AdminPedidos,
-  Cadastro,
-  Carrinho,
-  Checkout,
-  Livro,
-  Login,
-  MinhaConta,
-  NaoEncontrada,
-  Notificacoes,
-  Vitrine,
-} from './paginas/telas';
+import { Cabecalho, NaoEncontrada } from './layout';
+import { Admin, AdminAnalise, AdminCliente, AdminClientes, AdminPedido, AdminPedidos, AdminTrocas } from './modulos/admin';
+import { AvisoFlutuante } from './ui/AvisoFlutuante';
+import { Carrinho, GavetaDoCarrinho, useCarrinho } from './modulos/carrinho';
+import { Livro, Vitrine } from './modulos/catalogo';
+import { Checkout } from './modulos/checkout';
+import { Cadastro, MinhaConta } from './modulos/conta';
+import { Notificacoes } from './modulos/notificacoes';
+import { Login, Protegida } from './modulos/sessao';
+import type { Papel } from './modulos/sessao';
 
-function AreaDoCliente() {
-  return (
-    <Protegida papel="CLIENTE">
-      <MinhaConta />
-    </Protegida>
-  );
+/** Rota que só abre com sessão do papel exigido; sem sessão, a Protegida leva ao login. */
+function protegida(papel: Papel, Tela: ComponentType) {
+  return function TelaProtegida() {
+    return (
+      <Protegida papel={papel}>
+        <Tela />
+      </Protegida>
+    );
+  };
 }
 
-function AreaDoAdmin() {
-  return (
-    <Protegida papel="ADMIN">
-      <Admin />
-    </Protegida>
-  );
-}
+const doCliente = (Tela: ComponentType) => protegida('CLIENTE', Tela);
+const doAdmin = (Tela: ComponentType) => protegida('ADMIN', Tela);
 
-function NotificacoesDoCliente() {
-  return (
-    <Protegida papel="CLIENTE">
-      <Notificacoes />
-    </Protegida>
-  );
-}
-
-function NotificacoesDoAdmin() {
-  return (
-    <Protegida papel="ADMIN">
-      <Notificacoes />
-    </Protegida>
-  );
-}
-
-function ClientesDoAdmin() {
-  return (
-    <Protegida papel="ADMIN">
-      <AdminClientes />
-    </Protegida>
-  );
-}
-
-function ClienteDoAdmin() {
-  return (
-    <Protegida papel="ADMIN">
-      <AdminCliente />
-    </Protegida>
-  );
-}
-
-function PedidosDoAdmin() {
-  return (
-    <Protegida papel="ADMIN">
-      <AdminPedidos />
-    </Protegida>
-  );
-}
-
-function PedidoDoAdmin() {
-  return (
-    <Protegida papel="ADMIN">
-      <AdminPedido />
-    </Protegida>
-  );
-}
-
-function TrocasDoAdmin() {
-  return (
-    <Protegida papel="ADMIN">
-      <AdminTrocas />
-    </Protegida>
-  );
-}
-
-function AnaliseDoAdmin() {
-  return (
-    <Protegida papel="ADMIN">
-      <AdminAnalise />
-    </Protegida>
-  );
-}
-
-function CarrinhoDoCliente() {
-  return (
-    <Protegida papel="CLIENTE">
-      <Carrinho />
-    </Protegida>
-  );
-}
-
-function CheckoutDoCliente() {
-  return (
-    <Protegida papel="CLIENTE">
-      <Checkout />
-    </Protegida>
-  );
-}
+// Criadas uma vez: um componente novo a cada render remontaria a tela.
+const AreaDoCliente = doCliente(MinhaConta);
+const CarrinhoDoCliente = doCliente(Carrinho);
+const CheckoutDoCliente = doCliente(Checkout);
+const NotificacoesDoCliente = doCliente(Notificacoes);
+const AreaDoAdmin = doAdmin(Admin);
+const NotificacoesDoAdmin = doAdmin(Notificacoes);
+const ClientesDoAdmin = doAdmin(AdminClientes);
+const ClienteDoAdmin = doAdmin(AdminCliente);
+const PedidosDoAdmin = doAdmin(AdminPedidos);
+const PedidoDoAdmin = doAdmin(AdminPedido);
+const TrocasDoAdmin = doAdmin(AdminTrocas);
+const AnaliseDoAdmin = doAdmin(AdminAnalise);
 
 export function App() {
+  const { aviso } = useCarrinho();
+
   return (
     <div class="aplicacao">
       <a class="pular-para-conteudo" href="#conteudo">
@@ -148,6 +73,9 @@ export function App() {
           <Route default component={NaoEncontrada} />
         </Router>
       </main>
+
+      <GavetaDoCarrinho />
+      {aviso && <AvisoFlutuante texto={aviso.texto} link={aviso.link} />}
 
       <footer class="rodape">
         <p>Livraria — livros para todos os gostos.</p>

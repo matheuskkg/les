@@ -171,6 +171,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/pedidos/contagem": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["contar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/pedidos/{id}": {
         parameters: {
             query?: never;
@@ -1050,6 +1066,14 @@ export interface components {
             /** Format: int64 */
             quantidade: number;
         };
+        ContagemPorStatusDto: {
+            pedidos: {
+                [key: string]: number;
+            };
+            trocas: {
+                [key: string]: number;
+            };
+        };
         CupomAbatidoDto: {
             /**
              * Format: decimal
@@ -1568,6 +1592,7 @@ export interface components {
         };
         Sessao: {
             email: string;
+            nome: string;
             /** @enum {string} */
             papel: "CLIENTE" | "ADMIN";
             /** Format: int64 */
@@ -1920,6 +1945,26 @@ export interface operations {
             };
         };
     };
+    contar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ContagemPorStatusDto"];
+                };
+            };
+        };
+    };
     buscar_2: {
         parameters: {
             query?: never;
@@ -2217,6 +2262,7 @@ export interface operations {
                 paginasDe?: number;
                 paginasAte?: number;
                 codigo?: number;
+                q?: string;
                 /** @description Página, a partir de 0. */
                 pagina?: number;
                 /** @description Itens por página (padrão 20, máximo 100). */

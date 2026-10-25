@@ -45,9 +45,10 @@ public class LivroController {
             @RequestParam(required = false) Integer paginasDe,
             @RequestParam(required = false) Integer paginasAte,
             @RequestParam(required = false) Long codigo,
+            @RequestParam(required = false) String q,
             @Listagem(campos = { "titulo", "ano", "editora=editora.nome" }, padrao = "titulo,asc") Paginacao paginacao) {
         FiltroLivro filtro = new FiltroLivro(titulo, autor, categoria, editora, isbn, codigoBarras,
-                anoDe, anoAte, edicao, paginasDe, paginasAte, codigo);
+                anoDe, anoAte, edicao, paginasDe, paginasAte, codigo, q);
         return listarLivros.executar(filtro, paginacao).map(mapeador::paraDto);
     }
 

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.fatec.les.livraria.acesso.aplicacao.CredenciaisInvalidas;
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.Autenticar;
+import br.fatec.les.livraria.acesso.aplicacao.casodeuso.ConsultarNomeDeExibicao;
 import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
 import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
 import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
@@ -53,6 +54,7 @@ public class SessaoController {
     private final CsrfTokenRepository csrf;
     private final EncerrarCanais encerrarCanais;
     private final IdentidadeDoLogout identidadeDoLogout;
+    private final ConsultarNomeDeExibicao consultarNomeDeExibicao;
 
     @PostMapping
     @Operation(summary = "Entra no sistema e grava o cookie de sessão")
@@ -73,7 +75,7 @@ public class SessaoController {
         TokenDeSessao token = emissor.emitir(usuario);
         rotacionarCsrf(requisicao, resposta);
         resposta.addHeader(HttpHeaders.SET_COOKIE, token.cookie().toString());
-        return ResponseEntity.ok().body(Sessao.de(usuario));
+        return ResponseEntity.ok().body(sessao(usuario.getId(), usuario.getEmail(), usuario.getPapel()));
     }
 
     @GetMapping
@@ -90,7 +92,7 @@ public class SessaoController {
         if (autenticacao == null || !(autenticacao.getPrincipal() instanceof PrincipalDaSessao principal)) {
             throw new SessaoAusente();
         }
-        return new Sessao(principal.usuarioId(), principal.email(), papel(autenticacao));
+        return sessao(principal.usuarioId(), principal.email(), papel(autenticacao));
     }
 
     @DeleteMapping
@@ -101,6 +103,10 @@ public class SessaoController {
         rotacionarCsrf(requisicao, resposta);
         resposta.addHeader(HttpHeaders.SET_COOKIE, emissor.cookieExpirado().toString());
         return ResponseEntity.noContent().build();
+    }
+
+    private Sessao sessao(Long usuarioId, String email, Papel papel) {
+        return new Sessao(usuarioId, email, papel, consultarNomeDeExibicao.executar(usuarioId, email, papel));
     }
 
     /**

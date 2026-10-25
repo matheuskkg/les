@@ -97,7 +97,7 @@ class ListarLivrosTest {
     }
 
     private static FiltroLivro filtro() {
-        return new FiltroLivro(null, null, null, null, null, null, null, null, null, null, null, null);
+        return new FiltroLivro(null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     private static ListarLivros listar(CatalogoConsultas catalogo, ConsultarPrecosDeVenda precos,

@@ -74,7 +74,8 @@ sub-rota com `POST`, nomeada pela ação (`POST /api/admin/pedidos/{id}/despacha
 - No "contém", os caracteres `%`, `_` e o de escape vindos do usuário são escapados, para não virarem curinga do
   `LIKE`.
 - Filtros por relação muitos-para-muitos (autor, categoria) usam subconsulta com `exists`, não join: o join
-  duplica linhas e quebra a contagem da paginação.
+  duplica linhas e quebra a contagem da paginação. (ampliado pelo [DEC-17](DEC-17-organizacao-do-web.md): a vitrine aceita
+  também a busca livre `q`, que casa título, autor, editora ou ISBN com OU entre eles.)
 - Situação: a vitrine pública (`/api/livros`) só lista livros ativos. Nas listagens do admin, a situação
   (ativo/inativo) é um filtro como os outros.
 - A porta de consulta recebe um record de filtro simples, por exemplo `FiltroCliente`. O adapter em

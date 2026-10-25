@@ -32,6 +32,9 @@ public interface PedidoJpaRepository extends JpaRepository<PedidoJpa, Long>, Jpa
     List<PedidoDoCliente> buscarDosClientesDesde(@Param("clientes") Collection<Long> clienteIds,
             @Param("status") Collection<StatusPedido> status, @Param("desde") LocalDateTime desde);
 
+    @Query("select p.status as status, count(p) as quantidade from PedidoJpa p group by p.status")
+    List<QuantidadePorStatus<StatusPedido>> contarPorStatus();
+
     interface PedidoDoCliente {
 
         Long getId();

@@ -110,6 +110,35 @@ class LivroControllerTest {
     }
 
     @Test
+    void rfLiv005_buscaLivreCasaTituloAutorEditoraOuIsbn() throws Exception {
+        mvc.perform(get("/api/livros").param("q", "mao esquerda"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalItens").value(1))
+                .andExpect(jsonPath("$.itens[0].id").value(17));
+        mvc.perform(get("/api/livros").param("q", "TOLKIEN"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalItens").value(3))
+                .andExpect(jsonPath("$.itens[*].id", hasItems(5, 6, 7)));
+        mvc.perform(get("/api/livros").param("q", "9788500010057"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalItens").value(1))
+                .andExpect(jsonPath("$.itens[0].id").value(5));
+        mvc.perform(get("/api/livros").param("q", "harpercollins"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.itens[*].id", hasItems(5)));
+    }
+
+    @Test
+    void rfLiv005_buscaLivreCombinaComOsDemaisFiltros() throws Exception {
+        mvc.perform(get("/api/livros").param("q", "tolkien").param("titulo", "hobbit"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalItens").value(1));
+        mvc.perform(get("/api/livros").param("q", "   "))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalItens").value(19));
+    }
+
+    @Test
     void rfLiv005_combinaDuasCategoriasComOu() throws Exception {
         mvc.perform(get("/api/livros").param("categoria", "3", "4"))
                 .andExpect(status().isOk())

@@ -7,7 +7,7 @@ test.describe('Sessão', () => {
     await entrarComo(page, ADMIN.login, ADMIN.senha);
 
     const cabecalho = page.getByRole('banner');
-    await expect(cabecalho.getByText(ADMIN.login)).toBeVisible();
+    await expect(cabecalho.locator('.sessao__nome')).toHaveText('Administração');
     await expect(cabecalho.getByRole('link', { name: 'Administração' })).toBeVisible();
     await expect(cabecalho.getByRole('button', { name: 'Sair' })).toBeVisible();
   });
@@ -20,7 +20,7 @@ test.describe('Sessão', () => {
     const cabecalho = page.getByRole('banner');
     await expect(cabecalho.getByRole('link', { name: 'Entrar', exact: true })).toBeVisible();
     await expect(cabecalho.getByRole('link', { name: 'Criar conta' })).toBeVisible();
-    await expect(cabecalho.getByText(ADMIN.login)).toHaveCount(0);
+    await expect(cabecalho.locator('.sessao__nome')).toHaveCount(0);
   });
 
   test('senha errada mostra mensagem de credenciais inválidas', async ({ page }) => {

@@ -566,6 +566,24 @@
         "tags" : [ "pedido-admin-controller" ]
       }
     },
+    "/api/admin/pedidos/contagem" : {
+      "get" : {
+        "operationId" : "contar",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ContagemPorStatusDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "pedido-admin-controller" ]
+      }
+    },
     "/api/admin/pedidos/{id}" : {
       "get" : {
         "operationId" : "buscar_2",
@@ -1038,6 +1056,13 @@
           "schema" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
           }
         }, {
           "description" : "Página, a partir de 0.",
@@ -3203,6 +3228,26 @@
         },
         "required" : [ "quantidade" ]
       },
+      "ContagemPorStatusDto" : {
+        "type" : "object",
+        "properties" : {
+          "pedidos" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          },
+          "trocas" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          }
+        },
+        "required" : [ "pedidos", "trocas" ]
+      },
       "CupomAbatidoDto" : {
         "type" : "object",
         "properties" : {
@@ -4402,6 +4447,9 @@
           "email" : {
             "type" : "string"
           },
+          "nome" : {
+            "type" : "string"
+          },
           "papel" : {
             "type" : "string",
             "enum" : [ "CLIENTE", "ADMIN" ]
@@ -4411,7 +4459,7 @@
             "format" : "int64"
           }
         },
-        "required" : [ "email", "papel", "usuarioId" ]
+        "required" : [ "email", "nome", "papel", "usuarioId" ]
       },
       "SolicitacaoDeTrocaDto" : {
         "type" : "object",

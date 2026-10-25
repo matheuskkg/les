@@ -16,6 +16,7 @@ test('admin encontra o pedido aprovado pelos filtros, despacha e confirma a entr
   // A listagem abre pelos mais recentes; o histórico do seed (ANA-01) fica nas páginas seguintes.
   await expect(page.getByRole('row').nth(1)).toContainText(numero);
 
+  await page.getByText('Mais filtros').click();
   await page.getByLabel('CPF').fill('111.444.777-35');
   await page.getByRole('button', { name: 'Filtrar' }).click();
   await expect(page).toHaveURL(/cpf=111.444.777-35/);

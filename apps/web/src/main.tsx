@@ -1,9 +1,13 @@
+import './estilos/tokens.css';
+import './estilos/base.css';
+import './estilos/ui.css';
 import { render } from 'preact';
 import { LocationProvider } from 'preact-iso';
 import { App } from './app';
-import { NotificacoesProvider } from './contextoDeNotificacoes';
-import { SessaoProvider } from './contextoDeSessao';
-import './estilos.css';
+import { CarrinhoProvider } from './modulos/carrinho';
+import { Vitrine } from './modulos/catalogo';
+import { NotificacoesProvider } from './modulos/notificacoes';
+import { Login, SessaoProvider } from './modulos/sessao';
 
 const elemento = document.getElementById('app');
 if (!elemento) {
@@ -12,9 +16,11 @@ if (!elemento) {
 
 render(
   <LocationProvider>
-    <SessaoProvider>
+    <SessaoProvider preCarregar={{ login: Login.preload, vitrine: Vitrine.preload }}>
       <NotificacoesProvider>
-        <App />
+        <CarrinhoProvider>
+          <App />
+        </CarrinhoProvider>
       </NotificacoesProvider>
     </SessaoProvider>
   </LocationProvider>,

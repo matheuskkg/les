@@ -10,7 +10,8 @@ import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.Especific
 
 /**
  * Traduz o {@link FiltroLivro} para as {@link Specification} do catálogo (RF-LIV-005, DEC-07). Os campos se
- * combinam com E; autor e categoria usam subconsulta {@code exists}, e a vitrine só enxerga livro ativo.
+ * combinam com E; autor e categoria usam subconsulta {@code exists}, e a vitrine só enxerga livro ativo. A busca
+ * livre ({@code q}) casa título, autor, editora ou ISBN, com OU entre eles.
  */
 final class EspecificacoesDeLivro {
 
@@ -30,6 +31,18 @@ final class EspecificacoesDeLivro {
                 .and(Especificacoes.entre("ano", filtro.anoDe(), filtro.anoAte()))
                 .and(Especificacoes.contem("edicao", filtro.edicao()))
                 .and(Especificacoes.entre("paginas", filtro.paginasDe(), filtro.paginasAte()))
-                .and(Especificacoes.igual("id", filtro.codigo()));
+                .and(Especificacoes.igual("id", filtro.codigo()))
+                .and(buscaLivre(filtro.q()));
+    }
+
+    private static Specification<LivroJpa> buscaLivre(String q) {
+        if (q == null || q.isBlank()) {
+            return Specification.unrestricted();
+        }
+        return Specification.anyOf(
+                Especificacoes.contem("titulo", q),
+                Especificacoes.existeContem("autores", "nome", q),
+                Especificacoes.contem("editora", "nome", q),
+                Especificacoes.contem("isbn", q));
     }
 }

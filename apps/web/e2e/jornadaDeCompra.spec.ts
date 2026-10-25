@@ -17,7 +17,7 @@ test('jornada de compra: reprovada, aprovada com dois cartões e cupom, despacha
   await expect(page.getByText('Em estoque: 20')).toBeVisible();
   await page.getByRole('button', { name: 'Adicionar ao carrinho' }).click();
   await expect(page.getByText('Adicionado ao carrinho.')).toBeVisible();
-  await page.getByRole('banner').getByRole('link', { name: 'Carrinho' }).click();
+  await page.getByRole('banner').getByRole('link', { name: 'Ver carrinho' }).click();
   const quantidade = page.locator('.item-da-conta', { hasText: 'Dom Casmurro' }).getByLabel('Quantidade');
   await quantidade.fill('2');
   await quantidade.press('Enter');

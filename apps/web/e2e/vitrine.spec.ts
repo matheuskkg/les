@@ -13,11 +13,24 @@ test.describe('Vitrine', () => {
     await page.goto('/');
     await expect(page.getByRole('heading', { name: 'Código Limpo' })).toBeVisible();
 
+    await page.getByText('Mais filtros').click();
     await page.getByLabel('Título', { exact: true }).fill('Dom Casmurro');
     await page.getByRole('button', { name: 'Filtrar' }).click();
 
     await expect(page).toHaveURL(/[?&]titulo=Dom/);
     await expect(page.getByText('1 livro encontrado')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Dom Casmurro' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Código Limpo' })).toHaveCount(0);
+  });
+
+  test('busca livre do cabeçalho casa o autor (RF-LIV-005)', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('heading', { name: 'Código Limpo' })).toBeVisible();
+
+    await page.getByRole('searchbox', { name: 'Buscar livros' }).fill('Machado');
+    await page.getByRole('searchbox', { name: 'Buscar livros' }).press('Enter');
+
+    await expect(page).toHaveURL(/[?&]q=Machado/);
     await expect(page.getByRole('heading', { name: 'Dom Casmurro' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Código Limpo' })).toHaveCount(0);
   });

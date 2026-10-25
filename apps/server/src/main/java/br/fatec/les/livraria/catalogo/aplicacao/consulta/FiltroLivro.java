@@ -20,6 +20,7 @@ import java.util.Objects;
  * @param paginasDe    número mínimo de páginas
  * @param paginasAte   número máximo de páginas
  * @param codigo       código do livro, que é o próprio id (RNF-LIV-001, DEC-14)
+ * @param q            busca livre: trecho do título, de um autor, da editora ou do ISBN, combinados com OU
  */
 public record FiltroLivro(
         String titulo,
@@ -33,7 +34,8 @@ public record FiltroLivro(
         String edicao,
         Integer paginasDe,
         Integer paginasAte,
-        Long codigo) {
+        Long codigo,
+        String q) {
 
     public FiltroLivro {
         categoria = categoria == null

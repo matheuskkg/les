@@ -110,6 +110,21 @@ class PedidoAdminControllerTest {
     }
 
     @Test
+    void rfVen009_contaPedidosETrocasPorStatusComTodosOsStatus() throws Exception {
+        long aprovados = jdbc.sql("select count(*) from pedido where status = 'APROVADA'").query(Long.class).single();
+        long reprovados = jdbc.sql("select count(*) from pedido where status = 'REPROVADA'").query(Long.class).single();
+        long emTroca = jdbc.sql("select count(*) from troca where status = 'EM_TROCA'").query(Long.class).single();
+
+        mvc.perform(comoAdmin(get(ROTA + "/contagem")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pedidos.length()").value(5))
+                .andExpect(jsonPath("$.pedidos.APROVADA").value(aprovados))
+                .andExpect(jsonPath("$.pedidos.REPROVADA").value(reprovados))
+                .andExpect(jsonPath("$.trocas.length()").value(4))
+                .andExpect(jsonPath("$.trocas.EM_TROCA").value(emTroca));
+    }
+
+    @Test
     void rfVen009_statusRepetidosCombinamComOu() throws Exception {
         mvc.perform(comoAdmin(em2001(get(ROTA)).param("status", "APROVADA").param("status", "EM_TRANSPORTE")))
                 .andExpect(jsonPath("$.itens[*].id", contains((int) aprovadoDoBruno, (int) aprovadoDaAna)));
@@ -204,6 +219,7 @@ class PedidoAdminControllerTest {
     void dec08_consultaExigePapelAdmin() throws Exception {
         mvc.perform(get(ROTA)).andExpect(status().isUnauthorized());
         mvc.perform(get(ROTA).cookie(cookieDoUsuario(2L))).andExpect(status().isForbidden());
+        mvc.perform(get(ROTA + "/contagem").cookie(cookieDoUsuario(2L))).andExpect(status().isForbidden());
         mvc.perform(get(ROTA + "/" + aprovadoDaAna).cookie(cookieDoUsuario(2L))).andExpect(status().isForbidden());
     }
 

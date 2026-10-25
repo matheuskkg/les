@@ -82,4 +82,7 @@ public interface TrocaJpaRepository extends JpaRepository<TrocaJpa, Long>, JpaSp
 
         Long getQuantidade();
     }
+
+    @Query("select t.status as status, count(t) as quantidade from TrocaJpa t group by t.status")
+    List<QuantidadePorStatus<StatusTroca>> contarPorStatus();
 }

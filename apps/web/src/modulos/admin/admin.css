@@ -1,0 +1,96 @@
+/* Tabelas de consulta do administrador (RF-CLI-004) */
+.resultado__cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.resultado__cabecalho p {
+  margin: 0;
+  color: var(--cor-texto-suave);
+}
+
+/* Análise de vendas (RNF-ANA-001 a RNF-ANA-004) */
+
+.grafico {
+  margin: 0;
+}
+
+.grafico__area {
+  position: relative;
+  width: 100%;
+  min-height: 320px;
+}
+
+.grafico__area .u-over {
+  cursor: crosshair;
+}
+
+.grafico__tooltip {
+  position: absolute;
+  top: 8px;
+  z-index: 2;
+  min-width: 11rem;
+  padding: 0.5rem 0.65rem;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: calc(var(--raio) - 4px);
+  box-shadow: var(--sombra);
+  color: var(--cor-texto);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.grafico__tooltip strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--cor-texto-suave);
+  font-weight: 600;
+}
+
+.grafico__tooltip-linha {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.grafico__tooltip-linha b {
+  font-variant-numeric: tabular-nums;
+}
+
+.grafico__tooltip-linha span:last-child {
+  color: var(--cor-texto-suave);
+}
+
+.grafico__traco {
+  display: inline-block;
+  flex: none;
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+.grafico__legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--cor-texto);
+  font-size: 0.9rem;
+}
+
+.grafico__legenda li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.grafico__legenda .grafico__traco {
+  height: 3px;
+}

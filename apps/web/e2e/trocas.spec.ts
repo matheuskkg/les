@@ -125,6 +125,7 @@ test('admin autoriza a troca, confirma o recebimento e o cliente recebe o cupom 
   await expect(page.getByTestId('status-do-pedido')).toHaveText('ENTREGUE');
 
   await page.goto('/admin/pedidos');
+  await page.getByText('Mais filtros').click();
   await page.getByRole('group', { name: 'Situação da troca' }).getByLabel('TROCA AUTORIZADA').check();
   await page.getByRole('button', { name: 'Filtrar' }).click();
   await expect(page).toHaveURL(/situacao=TROCA_AUTORIZADA/);
