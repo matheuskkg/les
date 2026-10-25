@@ -1,0 +1,240 @@
+/* Widget do assistente (RNF-REC-001, DEC-03): botão flutuante e painel não modal no canto inferior direito. */
+.assistente__botao {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0.6rem 1.1rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--cor-primaria);
+  box-shadow: var(--sombra-elevada);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+
+.assistente__botao:hover {
+  background: var(--cor-primaria-escura);
+}
+
+.assistente__painel {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  width: 380px;
+  height: min(560px, calc(100vh - 2.5rem));
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-elevada);
+}
+
+.assistente__painel:focus {
+  outline: none;
+}
+
+@media (max-width: 640px) {
+  .assistente__painel {
+    inset: 0;
+    width: auto;
+    height: auto;
+    border: none;
+    border-radius: 0;
+  }
+}
+
+.assistente__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.assistente__topo h2 {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assistente__acoes {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.25rem;
+}
+
+.assistente__acoes .botao {
+  padding-inline: 0.5rem;
+  white-space: nowrap;
+}
+
+.assistente__corpo {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem 1rem;
+}
+
+.assistente__convite,
+.assistente__sugestoes {
+  display: grid;
+  align-content: start;
+  gap: 0.6rem;
+}
+
+.assistente__convite .botao {
+  justify-self: start;
+}
+
+.assistente__sugestoes p,
+.assistente__convite p {
+  margin: 0;
+  color: var(--cor-texto-suave);
+}
+
+.assistente__sugestoes .botao {
+  justify-content: flex-start;
+  text-align: left;
+  white-space: normal;
+}
+
+.assistente__mensagens {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.assistente__mensagem {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 88%;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--raio);
+}
+
+.assistente__mensagem--cliente {
+  justify-self: end;
+  background: var(--cor-primaria-clara);
+}
+
+.assistente__mensagem--assistente {
+  justify-self: start;
+  background: var(--cor-superficie-suave);
+}
+
+.assistente__texto {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.assistente__digitando {
+  color: var(--cor-texto-suave);
+  font-style: italic;
+}
+
+.assistente__livros {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.livro-citado {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 0.6rem;
+  padding: 0.5rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+  background: var(--cor-superficie);
+}
+
+.livro-citado__dados {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.livro-citado__titulo {
+  font-weight: 600;
+}
+
+.livro-citado__autores {
+  overflow: hidden;
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.livro-citado__preco {
+  font-weight: 600;
+}
+
+.livro-citado__adicionar {
+  justify-self: start;
+  margin-top: 0.25rem;
+}
+
+.assistente__problema {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0 1rem 0.5rem;
+}
+
+.assistente__envio {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem 0.8rem;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.assistente__envio textarea {
+  width: 100%;
+  min-height: 2.75rem;
+  max-height: 8rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pequeno);
+  background: var(--cor-superficie);
+  font: inherit;
+  resize: vertical;
+}
+
+.assistente__envio textarea:focus-visible {
+  border-color: var(--cor-primaria);
+}
+
+.assistente__acoes-do-envio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.assistente__contador {
+  color: var(--cor-texto-suave);
+  font-size: 0.8rem;
+}
+
+.assistente__contador--excedido {
+  color: var(--cor-erro);
+  font-weight: 600;
+}

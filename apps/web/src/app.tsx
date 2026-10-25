@@ -12,6 +12,7 @@ import {
   AdminTrocas,
   NavegacaoDoAdmin,
 } from './modulos/admin';
+import { Assistente } from './modulos/assistente';
 import { AvisoFlutuante } from './ui/AvisoFlutuante';
 import { Carrinho, GavetaDoCarrinho, useCarrinho } from './modulos/carrinho';
 import { Livro, Vitrine } from './modulos/catalogo';
@@ -140,6 +141,7 @@ export function App() {
       </main>
 
       <GavetaDoCarrinho />
+      <Assistente />
       {aviso && <AvisoFlutuante texto={aviso.texto} link={aviso.link} />}
 
       <footer class="rodape">

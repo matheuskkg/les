@@ -23,6 +23,7 @@ import br.fatec.les.livraria.recomendacao.aplicacao.consulta.MensagemExibida;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ConversasRepositorio;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.RecomendacoesRepositorio;
 import br.fatec.les.livraria.recomendacao.aplicacao.regra.LivroAVenda;
+import br.fatec.les.livraria.recomendacao.dominio.calculo.ReenvioSemResposta;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.ValidarRespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.EnvioDeMensagem;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemAnterior;
@@ -42,7 +43,7 @@ import lombok.RequiredArgsConstructor;
  *   <li>O histórico enviado à IA são as {@value #HISTORICO} últimas mensagens da conversa ativa, lidas do banco antes
  *       de gravar a nova; sem conversa ativa, uma nova é aberta.</li>
  *   <li>A mensagem do cliente é gravada antes da chamada. Se toda a cadeia falhar, ela fica gravada e a API responde
- *       503.</li>
+ *       503; o reenvio do mesmo texto não a grava de novo ({@link ReenvioSemResposta}).</li>
  *   <li>A resposta passa por {@link ValidarRespostaDoAssistente} e é gravada apontando para a chamada que a
  *       gerou.</li>
  * </ol>
@@ -68,6 +69,7 @@ public class EnviarMensagemAoAssistente {
     private final FerramentasDoCatalogo ferramentas;
     private final CadeiaDeProvedores cadeia;
     private final ValidarRespostaDoAssistente validarResposta;
+    private final ReenvioSemResposta reenvioSemResposta;
     private final TamanhoDaMensagem tamanhoDaMensagem;
     private final LimiteDeMensagensPorMinuto limiteDeMensagens;
     private final Relogio relogio;
@@ -91,10 +93,17 @@ public class EnviarMensagemAoAssistente {
                     tamanhoDaMensagem, limiteDeMensagens);
             mensagem = texto.strip();
             conversaId = conversas.conversaAtiva(clienteId).orElseGet(() -> conversas.abrir(clienteId, agora));
-            historico = conversas.ultimas(conversaId, HISTORICO).stream()
+            List<MensagemDaConversa> ultimas = conversas.ultimas(conversaId, HISTORICO + 1);
+            if (reenvioSemResposta.reenvio(ultimas, mensagem)) {
+                // A mensagem já está gravada desde a tentativa que falhou: sai do histórico e não é gravada de novo.
+                ultimas = ultimas.subList(0, ultimas.size() - 1);
+            } else {
+                conversas.salvar(MensagemDaConversa.doCliente(conversaId, mensagem, agora));
+            }
+            historico = ultimas.stream()
+                    .skip(Math.max(0, ultimas.size() - HISTORICO))
                     .map(MensagemDaConversa::comoHistorico)
                     .toList();
-            conversas.salvar(MensagemDaConversa.doCliente(conversaId, mensagem, agora));
         }
 
         PerfilDoCliente perfil = montarPerfil.montar(clienteId, consultarLivrosVendidos.executar(),

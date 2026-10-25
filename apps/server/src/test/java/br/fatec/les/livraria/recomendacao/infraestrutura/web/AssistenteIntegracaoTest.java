@@ -254,7 +254,7 @@ class AssistenteIntegracaoTest {
      */
     @Test
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    void rnfRec001_cadeiaInteiraEmFalhaResponde503ComAMensagemDoClienteGravada() throws Exception {
+    void rnfRec001_cadeiaInteiraEmFalhaResponde503ComAMensagemGravadaEReenvioSemDuplicar() throws Exception {
         JdbcClient jdbc = JdbcClient.create(dataSource);
         jdbc.sql("update provedor_ia set ativo = false").update();
         cadeia.limpar();
@@ -266,6 +266,15 @@ class AssistenteIntegracaoTest {
             assertThat(jdbc.sql("select m.texto from mensagem_conversa m join conversa c on c.id = m.conversa_id "
                     + "where c.cliente_id = :cliente").param("cliente", CLIENTE_DA_ANA).query(String.class).list())
                     .containsExactly("Hobbit");
+
+            // "Tentar de novo" com os provedores de volta: a mensagem não é gravada outra vez.
+            jdbc.sql("update provedor_ia set ativo = true").update();
+            cadeia.limpar();
+            enviar(ANA, "Hobbit").andExpect(status().isOk());
+            mvc.perform(como(ANA, get("/api/me/assistente/conversa")))
+                    .andExpect(jsonPath("$.length()").value(2))
+                    .andExpect(jsonPath("$[0].texto").value("Hobbit"))
+                    .andExpect(jsonPath("$[1].papel").value("ASSISTENTE"));
         } finally {
             jdbc.sql("update provedor_ia set ativo = true").update();
             cadeia.limpar();
@@ -273,6 +282,7 @@ class AssistenteIntegracaoTest {
                     "mensagem_livro", "mensagem_conversa", "conversa")) {
                 jdbc.sql("delete from " + tabela).update();
             }
+            jdbc.sql("delete from chamada_ia").update();
         }
     }
 }
