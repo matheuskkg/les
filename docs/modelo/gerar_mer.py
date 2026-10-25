@@ -29,6 +29,7 @@ PALETA = {
     "estoque": ("#ffe6cc", "#d79b00", "#fff8f0"),
     "vendas": ("#f8cecc", "#b85450", "#fdf3f3"),
     "notificacoes": ("#e1d5e7", "#9673a6", "#f8f4fa"),
+    "recomendacao": ("#b0e3e6", "#0e8088", "#eef9fa"),
     "compartilhado": ("#eeeeee", "#999999", "#fafafa"),
 }
 FONTE = "Helvetica"
@@ -189,6 +190,8 @@ LAYOUT_LOGICO = {
     ],
     "acesso": [[("usuario", 0)]],
     "notificacoes": [[("notificacao", 0)]],
+    "recomendacao": [[("provedor_ia", 0)], [("chamada_ia", 0)], [("mensagem_conversa", 0), ("recomendacao", 250)],
+                     [("mensagem_livro", 0), ("conversa", 120)], [("item_recomendacao", 230)]],
     "compartilhado": [[("revisao", 0), ("seed_execucao", 140)]],
 }
 # Origem (x, y) de cada módulo na página.
@@ -200,6 +203,7 @@ ORIGEM_MODULO = {
     "acesso": (1880, 520),
     "notificacoes": (2240, 520),
     "compartilhado": (2640, 520),
+    "recomendacao": (1880, 1180),
 }
 POS_LEGENDA_LOGICO = (1880, 960, 1300)
 PAD = 24
@@ -369,6 +373,11 @@ ENTIDADES = {
     "Entrada de estoque": (1330, 300, "above"),
     "Saldo de estoque": (1570, 300, "above"),
     "Reserva": (1810, 300, "above"),
+    "Recomendação": (2700, 420, "right"),
+    "Conversa": (3200, 420, "right"),
+    "Mensagem": (3200, 1650, "right"),
+    "Chamada à IA": (2700, 1050, "left"),
+    "Provedor de IA": (2700, 1450, "left"),
 }
 
 # Centro de cada losango; a chave é "nome|entidade A|entidade B" (lados do spec).
@@ -381,7 +390,7 @@ LOSANGOS = {
     "escreve|Autor|Livro": (1980, 340),
     "classifica|Categoria|Livro": (1980, 480),
     "publica|Editora|Livro": (1980, 620),
-    "precifica|Grupo de precificação|Livro": (1980, 760),
+    "precifica|Grupo de precificação|Livro": (2040, 760),
     "recebe|Livro|Entrada de estoque": (1450, 530),
     "fornece|Fornecedor|Entrada de estoque": (1160, 225),
     "tem saldo|Livro|Saldo de estoque": (1610, 530),
@@ -402,9 +411,23 @@ LOSANGOS = {
     "solicita|Pedido|Troca": (1460, 1530),
     "inclui|Troca|Item do pedido": (1700, 1530),
     "gera|Troca|Cupom de troca": (1640, 1960),
+    "recebe|Cliente|Recomendação": (2700, 200),
+    "conversa|Cliente|Conversa": (3200, 200),
+    "compõe|Conversa|Mensagem": (3200, 1000),
+    "recomenda|Recomendação|Livro": (2550, 650),
+    "cita|Mensagem|Livro": (2470, 1650),
+    "gera|Chamada à IA|Recomendação": (2700, 760),
+    "responde|Chamada à IA|Mensagem": (2950, 1350),
+    "atende|Provedor de IA|Chamada à IA": (2700, 1250),
 }
 # Pontos intermediários da linha losango→entidade: {(chave, índice do lado): [(x, y), ...]}.
-DESVIOS: dict[tuple[str, int], list[tuple[float, float]]] = {}
+DESVIOS: dict[tuple[str, int], list[tuple[float, float]]] = {
+    # Cliente → IA pelo corredor acima de tudo; Livro → IA pelo corredor entre publica e precifica.
+    ("recebe|Cliente|Recomendação", 0): [(2700, 90), (610, 90)],
+    ("conversa|Cliente|Conversa", 0): [(3200, 50), (590, 50)],
+    ("recomenda|Recomendação|Livro", 1): [(2100, 690)],
+    ("cita|Mensagem|Livro", 1): [(2470, 712), (2080, 712)],
+}
 # Lado dos atributos de relacionamento (padrão: below).
 LADO_ATR_REL: dict[str, str] = {
     "usa|Pedido|Cupom promocional": "right",

@@ -15,6 +15,7 @@ Escopos:
 |---|---|---|
 | [DEC-01](DEC-01-stack-do-web.md) | Stack do web | Aceita |
 | [DEC-02](DEC-02-framework-e2e.md) | Framework de testes E2E | Aceita |
+| [DEC-03](DEC-03-recomendacao-com-ia-generativa.md) | Recomendação e chatbot com IA generativa | Aceita |
 | [DEC-07](DEC-07-convencoes-da-api-rest.md) | Convenções da API REST | Aceita |
 | [DEC-08](DEC-08-autenticacao-e-sessao.md) | Autenticação, sessão e modelo de usuário | Aceita |
 | [DEC-09](DEC-09-topologia-de-execucao.md) | Topologia de execução de web e server | Aceita |

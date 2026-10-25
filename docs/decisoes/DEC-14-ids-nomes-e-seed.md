@@ -65,7 +65,7 @@ as entidades dele. A faixa do nome define a ordem de execução:
 | `1NN` | administrador e usuários | INF-06 |
 | `2NN` | clientes, com endereços e cartões | CLI-01 |
 | `3NN` | cupons promocionais e cupons de troca | VEN-06 |
-| `4NN` | pedidos históricos e trocas | ANA-01 |
+| `4NN` | pedidos históricos e trocas (alterado pelo [DEC-03](DEC-03-recomendacao-com-ia-generativa.md): a faixa `5NN` traz a cadeia de provedores de IA, no REC-01) | ANA-01 |
 
 ### Pedidos históricos
 

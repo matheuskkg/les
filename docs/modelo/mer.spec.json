@@ -5,7 +5,7 @@
     "Toda PK `id` é bigint gerado por sequence <tabela>_seq com início 10000; 1 a 9999 ficam para o seed (DEC-14).",
     "E-mail, telefone e CPF não têm UK: a unicidade vale só entre contas em uso e é checada pela aplicação (DEC-10).",
     "Colunas json são snapshots imutáveis: o objeto como era no momento da compra, com o id de origem.",
-    "Toda tabela de escrita tem uma <tabela>_aud do Envers (colunas da tabela + rev → revisao.id + revtype) (DEC-14)."
+    "Toda tabela de escrita tem uma <tabela>_aud do Envers (colunas da tabela + rev → revisao.id + revtype) (DEC-14), exceto chamada_ia, log só de inserção (DEC-03)."
   ],
   "modulos": [
     {
@@ -1066,6 +1066,262 @@
       ]
     },
     {
+      "id": "recomendacao",
+      "nome": "recomendacao",
+      "tabelas": [
+        {
+          "nome": "provedor_ia",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "nome",
+              "varchar(20)",
+              "UK"
+            ],
+            [
+              "ordem",
+              "integer",
+              ""
+            ],
+            [
+              "ativo",
+              "boolean",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "chamada_ia",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "provedor_ia_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "modelo",
+              "varchar(100)",
+              ""
+            ],
+            [
+              "operacao",
+              "varchar(20)",
+              ""
+            ],
+            [
+              "iniciada_em",
+              "timestamp",
+              ""
+            ],
+            [
+              "latencia_ms",
+              "integer",
+              ""
+            ],
+            [
+              "tentativa",
+              "integer",
+              ""
+            ],
+            [
+              "resultado",
+              "varchar(20)",
+              ""
+            ],
+            [
+              "status_http",
+              "integer",
+              "null"
+            ],
+            [
+              "erro",
+              "varchar(500)",
+              "null"
+            ],
+            [
+              "tokens_entrada",
+              "integer",
+              "null"
+            ],
+            [
+              "tokens_saida",
+              "integer",
+              "null"
+            ]
+          ]
+        },
+        {
+          "nome": "conversa",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "cliente_id",
+              "bigint",
+              "REF → cliente"
+            ],
+            [
+              "iniciada_em",
+              "timestamp",
+              ""
+            ],
+            [
+              "arquivada_em",
+              "timestamp",
+              "null"
+            ]
+          ]
+        },
+        {
+          "nome": "mensagem_conversa",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "conversa_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "chamada_ia_id",
+              "bigint",
+              "FK UK null"
+            ],
+            [
+              "papel",
+              "varchar(10)",
+              ""
+            ],
+            [
+              "texto",
+              "varchar(4000)",
+              ""
+            ],
+            [
+              "tipo",
+              "varchar(20)",
+              "null"
+            ],
+            [
+              "enviada_em",
+              "timestamp",
+              ""
+            ],
+            [
+              "avaliacao",
+              "varchar(10)",
+              "null"
+            ],
+            [
+              "avaliada_em",
+              "timestamp",
+              "null"
+            ]
+          ]
+        },
+        {
+          "nome": "mensagem_livro",
+          "colunas": [
+            [
+              "mensagem_conversa_id",
+              "bigint",
+              "PK FK"
+            ],
+            [
+              "livro_id",
+              "bigint",
+              "PK REF → livro"
+            ],
+            [
+              "posicao",
+              "integer",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "recomendacao",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "cliente_id",
+              "bigint",
+              "REF → cliente"
+            ],
+            [
+              "chamada_ia_id",
+              "bigint",
+              "FK UK null"
+            ],
+            [
+              "gerada_em",
+              "timestamp",
+              ""
+            ]
+          ]
+        },
+        {
+          "nome": "item_recomendacao",
+          "colunas": [
+            [
+              "id",
+              "bigint",
+              "PK"
+            ],
+            [
+              "recomendacao_id",
+              "bigint",
+              "FK"
+            ],
+            [
+              "livro_id",
+              "bigint",
+              "REF → livro"
+            ],
+            [
+              "posicao",
+              "integer",
+              ""
+            ],
+            [
+              "justificativa",
+              "varchar(300)",
+              "null"
+            ],
+            [
+              "avaliacao",
+              "varchar(10)",
+              "null"
+            ],
+            [
+              "avaliada_em",
+              "timestamp",
+              "null"
+            ]
+          ]
+        }
+      ]
+    },
+    {
       "id": "compartilhado",
       "nome": "compartilhado",
       "tabelas": [
@@ -1246,6 +1502,39 @@
       "para": "item_pedido",
       "card": "N:1",
       "min": "0"
+    },
+    {
+      "de": "chamada_ia.provedor_ia_id",
+      "para": "provedor_ia",
+      "card": "N:1"
+    },
+    {
+      "de": "mensagem_conversa.conversa_id",
+      "para": "conversa",
+      "card": "N:1",
+      "min": "1"
+    },
+    {
+      "de": "mensagem_conversa.chamada_ia_id",
+      "para": "chamada_ia",
+      "card": "1:1",
+      "opcional": true
+    },
+    {
+      "de": "mensagem_livro.mensagem_conversa_id",
+      "para": "mensagem_conversa",
+      "card": "N:1"
+    },
+    {
+      "de": "recomendacao.chamada_ia_id",
+      "para": "chamada_ia",
+      "card": "1:1",
+      "opcional": true
+    },
+    {
+      "de": "item_recomendacao.recomendacao_id",
+      "para": "recomendacao",
+      "card": "N:1"
     }
   ]
 }

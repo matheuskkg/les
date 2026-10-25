@@ -256,6 +256,62 @@
         "criada em",
         "lida em"
       ]
+    },
+    {
+      "nome": "Provedor de IA",
+      "grupo": "recomendacao",
+      "atributos": [
+        "#id",
+        "nome",
+        "ordem",
+        "ativo"
+      ]
+    },
+    {
+      "nome": "Chamada à IA",
+      "grupo": "recomendacao",
+      "atributos": [
+        "#id",
+        "modelo",
+        "operação",
+        "iniciada em",
+        "latência",
+        "tentativa",
+        "resultado",
+        "status HTTP",
+        "erro",
+        "tokens (entrada, saída)"
+      ]
+    },
+    {
+      "nome": "Conversa",
+      "grupo": "recomendacao",
+      "atributos": [
+        "#id",
+        "iniciada em",
+        "arquivada em"
+      ]
+    },
+    {
+      "nome": "Mensagem",
+      "grupo": "recomendacao",
+      "atributos": [
+        "#id",
+        "papel",
+        "texto",
+        "tipo",
+        "enviada em",
+        "avaliação",
+        "avaliada em"
+      ]
+    },
+    {
+      "nome": "Recomendação",
+      "grupo": "recomendacao",
+      "atributos": [
+        "#id",
+        "gerada em"
+      ]
     }
   ],
   "relacionamentos": [
@@ -655,6 +711,119 @@
         [
           "Notificação",
           "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "conversa",
+      "lados": [
+        [
+          "Cliente",
+          "1,1"
+        ],
+        [
+          "Conversa",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "compõe",
+      "lados": [
+        [
+          "Conversa",
+          "1,1"
+        ],
+        [
+          "Mensagem",
+          "1,N"
+        ]
+      ]
+    },
+    {
+      "nome": "cita",
+      "atributos": [
+        "posição"
+      ],
+      "lados": [
+        [
+          "Mensagem",
+          "0,N"
+        ],
+        [
+          "Livro",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "recebe",
+      "lados": [
+        [
+          "Cliente",
+          "1,1"
+        ],
+        [
+          "Recomendação",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "recomenda",
+      "atributos": [
+        "posição",
+        "justificativa",
+        "avaliação",
+        "avaliada em"
+      ],
+      "lados": [
+        [
+          "Recomendação",
+          "0,N"
+        ],
+        [
+          "Livro",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "atende",
+      "lados": [
+        [
+          "Provedor de IA",
+          "1,1"
+        ],
+        [
+          "Chamada à IA",
+          "0,N"
+        ]
+      ]
+    },
+    {
+      "nome": "responde",
+      "lados": [
+        [
+          "Chamada à IA",
+          "0,1"
+        ],
+        [
+          "Mensagem",
+          "0,1"
+        ]
+      ]
+    },
+    {
+      "nome": "gera",
+      "lados": [
+        [
+          "Chamada à IA",
+          "0,1"
+        ],
+        [
+          "Recomendação",
+          "0,1"
         ]
       ]
     }
