@@ -133,7 +133,7 @@ class EnderecosECartoesIntegracaoTest {
 
     @Test
     void rfCli007_novoCartaoEntraNaoPreferencialEPodeVirarOPreferencial() throws Exception {
-        String resposta = escrever(post("/api/me/cartoes"), ANA, cartao(2, "2030-01"))
+        String resposta = escrever(post("/api/me/cartoes"), ANA, cartao("2030-01"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.preferencial").value(false))
                 .andReturn().getResponse().getContentAsString();
@@ -148,16 +148,16 @@ class EnderecosECartoesIntegracaoTest {
 
     @Test
     void dec06_cartaoVencidoNoMesCorrenteResponde422() throws Exception {
-        escrever(post("/api/me/cartoes"), ANA, cartao(2, "2026-09"))
+        escrever(post("/api/me/cartoes"), ANA, cartao("2026-09"))
                 .andExpect(status().isUnprocessableContent());
-        escrever(post("/api/me/cartoes"), ANA, cartao(2, "2026-10"))
+        escrever(post("/api/me/cartoes"), ANA, cartao("2026-10"))
                 .andExpect(status().isCreated());
     }
 
     @Test
     void rnCli004_mesmoCartaoDuasVezesResponde422() throws Exception {
         String visaDaAna = """
-                { "numero": "4111 1111 1111 1111", "nomeImpresso": "ANA SOUZA", "bandeiraId": 1, "validade": "2030-12" }
+                { "numero": "4111 1111 1111 1111", "nomeImpresso": "ANA SOUZA", "validade": "2030-12" }
                 """;
         escrever(post("/api/me/cartoes"), ANA, visaDaAna)
                 .andExpect(status().isUnprocessableContent())
@@ -167,7 +167,7 @@ class EnderecosECartoesIntegracaoTest {
     @Test
     void rfCli007_alterarCartaoSemNumeroMantemONumeroGravado() throws Exception {
         String semNumero = """
-                { "numero": "", "nomeImpresso": "ANA S SOUZA", "bandeiraId": 1, "validade": "2031-06" }
+                { "numero": "", "nomeImpresso": "ANA S SOUZA", "validade": "2031-06" }
                 """;
         escrever(put("/api/me/cartoes/1"), ANA, semNumero)
                 .andExpect(status().isOk())
@@ -177,10 +177,19 @@ class EnderecosECartoesIntegracaoTest {
     }
 
     @Test
-    void rnCli005_bandeiraNaoRegistradaResponde422() throws Exception {
-        escrever(post("/api/me/cartoes"), ANA, cartao(99, "2030-01"))
+    void rnCli005_numeroSemBandeiraResponde422() throws Exception {
+        escrever(post("/api/me/cartoes"), ANA, cartaoComNumero("9999999999999999", "2030-01"))
                 .andExpect(status().isUnprocessableContent())
-                .andExpect(jsonPath("$.violacoes[*].codigo", hasItem("RN-CLI-005")));
+                .andExpect(jsonPath("$.violacoes[*].codigo", hasItem("RN-CLI-005")))
+                .andExpect(jsonPath("$.violacoes[*].mensagem", hasItem("Bandeira do cartão não aceita.")));
+    }
+
+    @Test
+    void rnCli004_numeroComDigitoVerificadorInvalidoResponde422() throws Exception {
+        escrever(post("/api/me/cartoes"), ANA, cartaoComNumero("4111111111111112", "2030-01"))
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.violacoes[*].codigo", hasItem("RN-CLI-004")))
+                .andExpect(jsonPath("$.violacoes[*].mensagem", hasItem("Número do cartão inválido.")));
     }
 
     @Test
@@ -230,9 +239,13 @@ class EnderecosECartoesIntegracaoTest {
                 """.formatted(nomeCurto, numero);
     }
 
-    private static String cartao(int bandeiraId, String validade) {
+    private static String cartao(String validade) {
+        return cartaoComNumero("5555555555554444", validade);
+    }
+
+    private static String cartaoComNumero(String numero, String validade) {
         return """
-                { "numero": "5555555555554444", "nomeImpresso": "ANA SOUZA", "bandeiraId": %d, "validade": "%s" }
-                """.formatted(bandeiraId, validade);
+                { "numero": "%s", "nomeImpresso": "ANA SOUZA", "validade": "%s" }
+                """.formatted(numero, validade);
     }
 }

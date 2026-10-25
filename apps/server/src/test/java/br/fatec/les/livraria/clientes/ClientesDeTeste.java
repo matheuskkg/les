@@ -3,6 +3,7 @@ package br.fatec.les.livraria.clientes;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
 import br.fatec.les.livraria.clientes.aplicacao.porta.BandeiraRepositorio;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
 import br.fatec.les.livraria.clientes.dominio.modelo.Bandeira;
+import br.fatec.les.livraria.clientes.dominio.modelo.Cartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.Endereco;
 import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
@@ -43,6 +45,17 @@ public final class ClientesDeTeste {
     public static final String NUMERO = "988887001";
     public static final YearMonth VALIDADE_FUTURA = YearMonth.of(2999, 12);
     public static final YearMonth VALIDADE_VENCIDA = YearMonth.of(2000, 1);
+
+    /** Bandeiras do seed 200_bandeiras.sql (RN-CLI-005, DEC-18), usadas pelos fakes dos testes. */
+    public static final Bandeira VISA = Bandeira.de(1L, "Visa", "4", "13,16,19");
+    public static final Bandeira MASTERCARD = Bandeira.de(2L, "Mastercard", "51-55,2221-2720", "16");
+    public static final Bandeira ELO = Bandeira.de(3L, "Elo",
+            "401178,401179,431274,438935,451416,457393,457631,457632,504175,506699-506778,509000-509999,"
+                    + "627780,636297,636368,650031-650033,650035-650051,650405-650439,650485-650538,"
+                    + "650541-650598,650700-650718,650720-650727,650901-650978,651652-651679,655000-655019,"
+                    + "655021-655058", "16");
+    public static final Bandeira AMERICAN_EXPRESS = Bandeira.de(4L, "American Express", "34,37", "15");
+    public static final Bandeira HIPERCARD = Bandeira.de(5L, "Hipercard", "606282,3841", "16,19");
 
     private ClientesDeTeste() {
     }
@@ -93,7 +106,11 @@ public final class ClientesDeTeste {
     }
 
     public static NovoCartao cartao() {
-        return new NovoCartao("4111111111111111", "ANA SOUZA", 1L, VALIDADE_FUTURA);
+        return new NovoCartao("4111111111111111", "ANA SOUZA", VALIDADE_FUTURA);
+    }
+
+    public static List<Bandeira> bandeiras() {
+        return List.of(VISA, MASTERCARD, ELO, AMERICAN_EXPRESS, HIPERCARD);
     }
 
     /** Comando da alteração dos dados do cliente (RF-CLI-002, DEC-10), com o usuário 2 (Ana do seed). */
@@ -107,6 +124,12 @@ public final class ClientesDeTeste {
     public static Cliente cliente(Long id, Long usuarioId) {
         return new Cliente(id, usuarioId, "Ana Souza", Genero.FEMININO, LocalDate.of(1990, 3, 14),
                 new Cpf(CPF), List.of(enderecoDominio()), List.of());
+    }
+
+    /** Cliente existente com cartões, usado nos testes de alteração de cartão (RF-CLI-007). */
+    public static Cliente clienteComCartoes(Long id, Long usuarioId, Cartao... cartoes) {
+        return new Cliente(id, usuarioId, "Ana Souza", Genero.FEMININO, LocalDate.of(1990, 3, 14),
+                new Cpf(CPF), List.of(enderecoDominio()), List.of(cartoes));
     }
 
     private static Endereco enderecoDominio() {
@@ -303,18 +326,16 @@ public final class ClientesDeTeste {
 
     public static class FakeBandeiraRepositorio implements BandeiraRepositorio {
 
-        public final java.util.Set<Long> registradas = new java.util.HashSet<>();
+        public final List<Bandeira> registradas = new ArrayList<>();
 
-        public FakeBandeiraRepositorio comBandeiras(Long... ids) {
-            registradas.addAll(java.util.List.of(ids));
+        public FakeBandeiraRepositorio comBandeiras(Bandeira... bandeiras) {
+            registradas.addAll(List.of(bandeiras));
             return this;
         }
 
         @Override
-        public Optional<Bandeira> buscarPorId(Long id) {
-            return registradas.contains(id)
-                    ? Optional.of(new Bandeira(id, "Bandeira " + id))
-                    : Optional.empty();
+        public List<Bandeira> listar() {
+            return List.copyOf(registradas);
         }
     }
 

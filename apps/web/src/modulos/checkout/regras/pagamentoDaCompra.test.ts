@@ -43,7 +43,7 @@ test('RF-VEN-007: o pagamento vai sem o código de segurança', () => {
   const corpo = montarPagamento({ enderecoId: 1 }, 'BEMVINDO10', [2, 1], [
     { escolha: { cartaoId: 1 }, valor: '10,00', cvv: '123' },
     {
-      escolha: { novo: { numero: '5555 5555 5555 4444', nomeImpresso: ' ANA ', bandeiraId: '2', validade: '2030-12' } },
+      escolha: { novo: { numero: '5555 5555 5555 4444', nomeImpresso: ' ANA ', validade: '2030-12' } },
       valor: '39,88',
       cvv: '456',
     },
@@ -54,7 +54,7 @@ test('RF-VEN-007: o pagamento vai sem o código de segurança', () => {
     cuponsDeTroca: [2, 1],
     cartoes: [
       { cartaoId: 1, valor: '10.00' },
-      { novo: { numero: '5555555555554444', nomeImpresso: 'ANA', bandeiraId: 2, validade: '2030-12' }, valor: '39.88' },
+      { novo: { numero: '5555555555554444', nomeImpresso: 'ANA', validade: '2030-12' }, valor: '39.88' },
     ],
   });
   assert.equal(JSON.stringify(corpo).includes('456'), false);

@@ -32,7 +32,6 @@ test.describe('Endereços e cartões da conta', () => {
     await page.getByRole('button', { name: 'Adicionar cartão' }).click();
     await page.locator('#cartao-numero').fill('5555 5555 5555 4444');
     await page.locator('#cartao-nome').fill('ANA SOUZA');
-    await page.locator('#cartao-bandeira').selectOption('2');
     await page.locator('#cartao-validade').fill('2030-01');
     await page.getByRole('button', { name: 'Salvar cartão' }).click();
 

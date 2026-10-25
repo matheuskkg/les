@@ -39,6 +39,7 @@ Escopos:
 | [DEC-15.1](DEC-15.1-arredondamento.md) | Arredondamento | Aceita |
 | [DEC-15.2](DEC-15.2-uso-do-cupom-promocional.md) | Uso do cupom promocional | Aceita |
 | [DEC-15.4](DEC-15.4-acesso-consultas-e-exportacao.md) | Ajustes de acesso, consultas e exportação | Aceita |
+| [DEC-18](DEC-18-bandeira-identificada-pelo-numero.md) | Bandeira do cartão identificada pelo número | Aceita |
 
 ## Modelo
 

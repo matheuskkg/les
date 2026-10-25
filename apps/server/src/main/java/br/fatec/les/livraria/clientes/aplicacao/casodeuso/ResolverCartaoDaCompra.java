@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
@@ -7,13 +8,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.clientes.aplicacao.ClienteDoUsuario;
 import br.fatec.les.livraria.clientes.aplicacao.porta.BandeiraRepositorio;
-import br.fatec.les.livraria.clientes.aplicacao.regra.BandeiraRegistrada;
 import br.fatec.les.livraria.clientes.aplicacao.regra.ValidadeDoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.Bandeira;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.EscolhaDeCartao;
+import br.fatec.les.livraria.clientes.dominio.regra.BandeiraRegistrada;
 import br.fatec.les.livraria.clientes.dominio.regra.CartaoCompleto;
 import br.fatec.les.livraria.clientes.dominio.regra.EscolhaDeCartaoValida;
+import br.fatec.les.livraria.clientes.dominio.regra.NumeroDoCartaoValido;
 import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCartao;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.UsuarioAtual;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
@@ -35,6 +37,7 @@ public class ResolverCartaoDaCompra {
     private final TamanhosMaximosCartao tamanhosMaximos; // RN-CLI-004
     private final ValidadeDoCartao validadeDoCartao; // DEC-06
     private final BandeiraRegistrada bandeiraRegistrada; // RN-CLI-005
+    private final NumeroDoCartaoValido numeroDoCartaoValido; // RN-CLI-004
     private final BandeiraRepositorio bandeiras;
     private final ClienteDoUsuario clienteDoUsuario;
     private final UsuarioAtual usuarioAtual;
@@ -49,11 +52,13 @@ public class ResolverCartaoDaCompra {
     public Cartao executar(EscolhaDeCartao escolha) {
         Violacoes.verificar(escolha, escolhaValida);
         if (escolha.novo() != null) {
+            List<Bandeira> registradas = bandeiras.listar();
             Violacoes violacoes = new Violacoes();
             cartaoCompleto.validar(escolha.novo(), violacoes);
             tamanhosMaximos.validar(escolha.novo(), violacoes);
             validadeDoCartao.validar(escolha.novo(), violacoes);
-            Optional<Bandeira> bandeira = bandeiraRegistrada.validar(escolha.novo(), violacoes, bandeiras);
+            Optional<Bandeira> bandeira = bandeiraRegistrada.identificar(escolha.novo(), violacoes, registradas);
+            numeroDoCartaoValido.validar(escolha.novo(), violacoes, registradas);
             violacoes.lancarSeHouver();
             return Cartao.de(escolha.novo(), bandeira
                     .orElseThrow(() -> new IllegalStateException("Bandeira validada não encontrada.")), null, false);

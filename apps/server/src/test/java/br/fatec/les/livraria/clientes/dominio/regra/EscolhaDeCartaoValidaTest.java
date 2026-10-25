@@ -14,7 +14,7 @@ import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 class EscolhaDeCartaoValidaTest {
 
     private final EscolhaDeCartaoValida regra = new EscolhaDeCartaoValida();
-    private final NovoCartao novo = new NovoCartao("4111111111111111", "ANA", 1L, YearMonth.of(2030, 1));
+    private final NovoCartao novo = new NovoCartao("4111111111111111", "ANA", YearMonth.of(2030, 1));
 
     @Test
     void rfVen006_cartaoCadastradoOuNovoEhAceito() {

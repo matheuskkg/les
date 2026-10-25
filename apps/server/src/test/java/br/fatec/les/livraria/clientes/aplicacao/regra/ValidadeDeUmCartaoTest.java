@@ -33,6 +33,6 @@ class ValidadeDeUmCartaoTest {
 
     private static NovoCartao comValidade(YearMonth validade) {
         NovoCartao padrao = cartao();
-        return new NovoCartao(padrao.numero(), padrao.nomeImpresso(), padrao.bandeiraId(), validade);
+        return new NovoCartao(padrao.numero(), padrao.nomeImpresso(), validade);
     }
 }

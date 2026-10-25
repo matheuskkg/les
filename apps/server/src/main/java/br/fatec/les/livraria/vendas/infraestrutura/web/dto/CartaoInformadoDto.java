@@ -4,10 +4,13 @@ import java.time.YearMonth;
 
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 
-/** Cartão novo informado na compra (RF-VEN-006, RN-CLI-004, DEC-06), sem o código de segurança (DEC-10). */
-public record CartaoInformadoDto(String numero, String nomeImpresso, Long bandeiraId, YearMonth validade) {
+/**
+ * Cartão novo informado na compra (RF-VEN-006, RN-CLI-004, DEC-06, DEC-18), sem o código de segurança (DEC-10) e sem
+ * a bandeira, que é identificada pelo número.
+ */
+public record CartaoInformadoDto(String numero, String nomeImpresso, YearMonth validade) {
 
     public NovoCartao paraNovoCartao() {
-        return new NovoCartao(numero, nomeImpresso, bandeiraId, validade);
+        return new NovoCartao(numero, nomeImpresso, validade);
     }
 }

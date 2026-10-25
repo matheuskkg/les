@@ -14,7 +14,7 @@ import br.fatec.les.livraria.clientes.dominio.regra.RemocaoDoUltimoEndereco;
 /** RF-CLI-006, RF-CLI-007, DEC-10: invariantes de endereços e do cartão preferencial no agregado do cliente. */
 class ClienteCartoesEEnderecosTest {
 
-    private static final Bandeira VISA = new Bandeira(1L, "Visa");
+    private static final Bandeira VISA = Bandeira.de(1L, "Visa", "4", "13,16,19");
 
     @Test
     void rfCli007_primeiroCartaoViraPreferencialEOsDemaisNao() {

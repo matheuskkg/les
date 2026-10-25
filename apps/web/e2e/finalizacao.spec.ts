@@ -33,7 +33,6 @@ test('reprova pela operadora, mantém a compra e aprova com outro cartão (RF-VE
   await cartoes.getByLabel('Outro cartão').check();
   await page.locator('#cartao-novo-numero').fill('4012888888881881');
   await page.locator('#cartao-novo-nome').fill('ELISA PRADO');
-  await page.locator('#cartao-novo-bandeira').selectOption({ label: 'Visa' });
   await page.locator('#cartao-novo-validade').fill('2031-06');
   await expect(page.locator('#cartao-novo-valor')).toHaveValue('65,88');
   await page.locator('#cartao-novo-cvv').fill('321');

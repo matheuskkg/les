@@ -64,7 +64,9 @@
       "grupo": "clientes",
       "atributos": [
         "#id",
-        "nome"
+        "nome",
+        "prefixos",
+        "tamanhos"
       ]
     },
     {

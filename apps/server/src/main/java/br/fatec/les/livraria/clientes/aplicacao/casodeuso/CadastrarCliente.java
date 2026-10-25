@@ -1,11 +1,8 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +14,6 @@ import br.fatec.les.livraria.acesso.dominio.regra.ConfirmacaoDeSenha;
 import br.fatec.les.livraria.acesso.dominio.regra.SenhaForte;
 import br.fatec.les.livraria.clientes.aplicacao.porta.BandeiraRepositorio;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
-import br.fatec.les.livraria.clientes.aplicacao.regra.BandeiraRegistrada;
 import br.fatec.les.livraria.clientes.aplicacao.regra.CpfUnico;
 import br.fatec.les.livraria.clientes.aplicacao.regra.DataNascimentoValida;
 import br.fatec.les.livraria.clientes.aplicacao.regra.EmailUnico;
@@ -30,12 +26,14 @@ import br.fatec.les.livraria.clientes.dominio.modelo.Endereco;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoEndereco;
+import br.fatec.les.livraria.clientes.dominio.regra.BandeiraRegistrada;
 import br.fatec.les.livraria.clientes.dominio.regra.CartoesCompletos;
 import br.fatec.les.livraria.clientes.dominio.regra.CpfValido;
 import br.fatec.les.livraria.clientes.dominio.regra.DadosObrigatoriosCliente;
 import br.fatec.les.livraria.clientes.dominio.regra.EmailValido;
 import br.fatec.les.livraria.clientes.dominio.regra.EnderecoDoCliente;
 import br.fatec.les.livraria.clientes.dominio.regra.EnderecosCompletos;
+import br.fatec.les.livraria.clientes.dominio.regra.NumeroDoCartaoValido;
 import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Cpf;
 import br.fatec.les.livraria.compartilhado.dominio.Email;
@@ -67,6 +65,7 @@ public class CadastrarCliente {
     private final EmailUnico emailUnico; // RF-CLI-001
     private final TelefoneUnico telefoneUnico; // RF-CLI-001
     private final BandeiraRegistrada bandeiraRegistrada; // RN-CLI-005
+    private final NumeroDoCartaoValido numeroDoCartaoValido; // RN-CLI-004
     private final CriarUsuario criarUsuario;
     private final ClienteRepositorio clientes;
     private final BandeiraRepositorio bandeiras;
@@ -77,15 +76,20 @@ public class CadastrarCliente {
      */
     @Transactional
     public Long executar(NovoCliente comando) {
-        // As bandeiras são consultadas uma única vez por id e reaproveitadas na validação e na montagem dos cartões.
-        Map<Long, Bandeira> bandeirasPorId = bandeirasDosCartoes(comando);
-        Regra<NovoCliente> bandeiraRegistradaComAsBandeiras = (alvo, violacoes) ->
-                bandeiraRegistrada.validar(alvo, violacoes, bandeirasPorId);
+        // As bandeiras são consultadas uma única vez e reaproveitadas na validação e na montagem dos cartões.
+        List<Bandeira> bandeirasRegistradas = bandeiras.listar();
+        List<Optional<Bandeira>> bandeirasIdentificadas = new ArrayList<>();
+        Regra<NovoCliente> bandeiraRegistradaComAsBandeiras = (alvo, violacoes) -> {
+            bandeirasIdentificadas.clear();
+            bandeirasIdentificadas.addAll(bandeiraRegistrada.identificar(alvo, violacoes, bandeirasRegistradas));
+        };
+        Regra<NovoCliente> numeroDoCartaoValidoComAsBandeiras = (alvo, violacoes) ->
+                numeroDoCartaoValido.validar(alvo, violacoes, bandeirasRegistradas);
 
         Violacoes.verificar(comando, dadosObrigatorios, dataNascimentoValida, enderecoDoCliente,
                 enderecosCompletos, tamanhosMaximos, senhaForte, confirmacaoDeSenha, cpfValido, emailValido,
                 cartoesCompletos, validadesDosCartoes, cpfUnico, emailUnico, telefoneUnico,
-                bandeiraRegistradaComAsBandeiras);
+                bandeiraRegistradaComAsBandeiras, numeroDoCartaoValidoComAsBandeiras);
 
         Long usuarioId = criarUsuario.executar(new NovoUsuario(
                 new Email(comando.email()).endereco(),
@@ -96,22 +100,8 @@ public class CadastrarCliente {
 
         Cliente cliente = new Cliente(null, usuarioId, comando.nome().strip(), comando.genero(),
                 comando.dataNascimento(), new Cpf(comando.cpf()),
-                enderecos(comando), cartoes(comando, bandeirasPorId));
+                enderecos(comando), cartoes(comando, bandeirasIdentificadas));
         return clientes.salvar(cliente).getId();
-    }
-
-    private Map<Long, Bandeira> bandeirasDosCartoes(NovoCliente comando) {
-        Set<Long> ids = new HashSet<>();
-        for (NovoCartao cartao : comando.cartoes()) {
-            if (cartao != null && cartao.bandeiraId() != null) {
-                ids.add(cartao.bandeiraId());
-            }
-        }
-        Map<Long, Bandeira> bandeirasPorId = new HashMap<>();
-        for (Long id : ids) {
-            bandeiras.buscarPorId(id).ifPresent(bandeira -> bandeirasPorId.put(id, bandeira));
-        }
-        return bandeirasPorId;
     }
 
     private List<Endereco> enderecos(NovoCliente comando) {
@@ -123,17 +113,15 @@ public class CadastrarCliente {
     }
 
     /**
-     * Monta os cartões: o primeiro vira o preferencial (RF-CLI-007, DEC-10). A bandeira já foi validada e carregada
-     * por {@code BandeiraRegistrada}.
+     * Monta os cartões: o primeiro vira o preferencial (RF-CLI-007, DEC-10). A bandeira já foi identificada por
+     * {@code BandeiraRegistrada}, numa lista alinhada à dos cartões.
      */
-    private List<Cartao> cartoes(NovoCliente comando, Map<Long, Bandeira> bandeirasPorId) {
+    private List<Cartao> cartoes(NovoCliente comando, List<Optional<Bandeira>> bandeirasIdentificadas) {
         List<Cartao> cartoes = new ArrayList<>();
         for (int i = 0; i < comando.cartoes().size(); i++) {
             NovoCartao novo = comando.cartoes().get(i);
-            Bandeira bandeira = bandeirasPorId.get(novo.bandeiraId());
-            if (bandeira == null) {
-                throw new IllegalStateException("Bandeira validada não encontrada.");
-            }
+            Bandeira bandeira = bandeirasIdentificadas.get(i)
+                    .orElseThrow(() -> new IllegalStateException("Bandeira validada não encontrada."));
             cartoes.add(Cartao.de(novo, bandeira, null, i == 0));
         }
         return cartoes;

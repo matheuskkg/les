@@ -273,7 +273,7 @@ class FinalizacaoIntegracaoTest {
                     "logradouro": "Rua Nova", "numero": "10", "bairro": "Centro", "cep": "01001000",
                     "cidade": "São Paulo", "uf": "SP" }],
                   "cartoes": [{ "numero": "4111111111111111", "nomeImpresso": "CLIENTE FINALIZACAO",
-                    "bandeiraId": 1, "validade": "2030-12" }]
+                    "validade": "2030-12" }]
                 }
                 """.formatted(cpf, email, n);
         Cookie csrf = mvc.perform(get("/api/sessao")).andReturn().getResponse().getCookie("XSRF-TOKEN");

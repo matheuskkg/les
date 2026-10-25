@@ -103,6 +103,6 @@ public class ClienteController {
         if (cartao == null) {
             return null;
         }
-        return new NovoCartao(cartao.numero(), cartao.nomeImpresso(), cartao.bandeiraId(), cartao.validade());
+        return new NovoCartao(cartao.numero(), cartao.nomeImpresso(), cartao.validade());
     }
 }

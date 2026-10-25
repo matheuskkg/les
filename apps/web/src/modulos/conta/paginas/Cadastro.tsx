@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { useLocation } from 'preact-iso';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../../../api/cliente';
-import { BANDEIRAS } from '../regras/bandeiras';
+import { ajudaDaBandeira } from '../regras/bandeiras';
 import {
   GENEROS,
   TIPOS_DE_ENDERECO,
@@ -29,11 +29,6 @@ import { Erro } from '../../../ui/Erro';
 import { Violacoes } from '../../../ui/Violacoes';
 import { entrar, useSessao } from '../../sessao';
 import { Botao, BotaoLink } from '../../../ui/Botao';
-
-const OPCOES_DE_BANDEIRA = BANDEIRAS.map((bandeira) => ({
-  valor: String(bandeira.id),
-  rotulo: bandeira.nome,
-}));
 
 export default function Cadastro() {
   const { definirUsuario } = useSessao();
@@ -530,6 +525,7 @@ export default function Cadastro() {
                     placeholder="0000 0000 0000 0000"
                     maxLength={23}
                     required
+                    ajuda={ajudaDaBandeira(cartao.numero)}
                     erro={erroDeCartao(indice, 'numero')}
                   />
                 </div>
@@ -542,17 +538,6 @@ export default function Cadastro() {
                   autoComplete="cc-name"
                   required
                   erro={erroDeCartao(indice, 'nomeImpresso')}
-                />
-
-                <CampoDeSelecao
-                  id={`cartao-${indice}-bandeira`}
-                  rotulo="Bandeira"
-                  valor={cartao.bandeiraId}
-                  aoMudar={(valor) => atualizarCartao(indice, { bandeiraId: valor })}
-                  opcoes={OPCOES_DE_BANDEIRA}
-                  placeholder="Selecione…"
-                  required
-                  erro={erroDeCartao(indice, 'bandeiraId')}
                 />
 
                 <CampoDeFormulario

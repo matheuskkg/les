@@ -44,7 +44,7 @@ class ValidadeDoCartaoTest {
             YearMonth validade) {
         var padrao = padrao();
         var novo = new br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao(
-                cartao().numero(), cartao().nomeImpresso(), cartao().bandeiraId(), validade);
+                cartao().numero(), cartao().nomeImpresso(), validade);
         return new br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente(padrao.nome(),
                 padrao.genero(), padrao.dataNascimento(), padrao.cpf(), padrao.email(),
                 padrao.tipoTelefone(), padrao.ddd(), padrao.numero(), padrao.senha(),

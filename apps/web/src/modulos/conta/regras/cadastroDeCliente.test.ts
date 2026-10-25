@@ -45,7 +45,6 @@ function formularioPreenchido(): FormularioDeCadastro {
         ...cartaoVazio(),
         numero: '4111 1111 1111 1111',
         nomeImpresso: '  ANA DA SILVA ',
-        bandeiraId: '1',
         validade: '2027-08',
       },
     ],
@@ -128,7 +127,6 @@ test('montarCadastro converte o formulário no corpo da API', () => {
       {
         numero: '4111111111111111',
         nomeImpresso: 'ANA DA SILVA',
-        bandeiraId: 1,
         validade: '2027-08',
       },
     ],
@@ -200,7 +198,6 @@ test('validarCadastro exige os campos de cada cartão (RN-CLI-004)', () => {
 
   assert.equal(erros['cartoes.0.numero'], 'Informe o número do cartão.');
   assert.equal(erros['cartoes.0.nomeImpresso'], 'Informe o nome impresso no cartão.');
-  assert.equal(erros['cartoes.0.bandeiraId'], 'Informe a bandeira do cartão.');
   assert.equal(erros['cartoes.0.validade'], 'Informe a validade do cartão.');
 });
 

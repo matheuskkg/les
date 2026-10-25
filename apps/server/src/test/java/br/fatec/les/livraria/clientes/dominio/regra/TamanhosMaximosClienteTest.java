@@ -163,6 +163,6 @@ class TamanhosMaximosClienteTest {
 
     private static NovoCartao cartaoComNomeImpresso(String nomeImpresso) {
         NovoCartao base = br.fatec.les.livraria.clientes.ClientesDeTeste.cartao();
-        return new NovoCartao(base.numero(), nomeImpresso, base.bandeiraId(), base.validade());
+        return new NovoCartao(base.numero(), nomeImpresso, base.validade());
     }
 }

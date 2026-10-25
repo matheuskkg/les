@@ -35,9 +35,8 @@ test('jornada de compra: reprovada, aprovada com dois cartões e cupom, despacha
   // Cartão novo terminado em 0000: REPROVADA, e a compra continua aberta (RN-VEN-007, RN-VEN-008).
   const cartoes = page.getByRole('group', { name: 'Cartões' });
   await cartoes.getByLabel('Outro cartão').check();
-  await page.locator('#cartao-novo-numero').fill('6062825624250000');
+  await page.locator('#cartao-novo-numero').fill('6062825624080000');
   await page.locator('#cartao-novo-nome').fill('ANA SOUZA');
-  await page.locator('#cartao-novo-bandeira').selectOption({ label: 'Hipercard' });
   await page.locator('#cartao-novo-validade').fill('2032-12');
   await page.locator('#cartao-novo-cvv').fill('123');
   await page.getByRole('button', { name: 'Finalizar compra' }).click();
@@ -50,7 +49,6 @@ test('jornada de compra: reprovada, aprovada com dois cartões e cupom, despacha
   await expect(page.getByTestId('restante')).toHaveText('R$ 99,76');
 
   await page.locator('#cartao-novo-numero').fill('4012888888881881');
-  await page.locator('#cartao-novo-bandeira').selectOption({ label: 'Visa' });
   await page.locator('#cartao-novo-validade').fill('2031-06');
   await page.locator('#cartao-novo-cvv').fill('321');
   await cartoes.getByLabel(/1111/).check();

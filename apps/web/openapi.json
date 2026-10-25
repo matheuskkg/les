@@ -2899,10 +2899,6 @@
       "CartaoDoCadastro" : {
         "type" : "object",
         "properties" : {
-          "bandeiraId" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
           "nomeImpresso" : {
             "type" : "string"
           },
@@ -2915,7 +2911,7 @@
             "pattern" : "^\\d{4}-\\d{2}$"
           }
         },
-        "required" : [ "bandeiraId", "nomeImpresso", "numero", "validade" ]
+        "required" : [ "nomeImpresso", "numero", "validade" ]
       },
       "CartaoDoClienteDto" : {
         "type" : "object",
@@ -2964,10 +2960,6 @@
       "CartaoInformadoDto" : {
         "type" : "object",
         "properties" : {
-          "bandeiraId" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
           "nomeImpresso" : {
             "type" : "string"
           },
@@ -2980,7 +2972,7 @@
             "pattern" : "^\\d{4}-\\d{2}$"
           }
         },
-        "required" : [ "bandeiraId", "nomeImpresso", "numero", "validade" ]
+        "required" : [ "nomeImpresso", "numero", "validade" ]
       },
       "CartaoNoPedido" : {
         "type" : "object",

@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -10,13 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
 import br.fatec.les.livraria.clientes.aplicacao.ClienteDoUsuario;
 import br.fatec.les.livraria.clientes.aplicacao.porta.BandeiraRepositorio;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
-import br.fatec.les.livraria.clientes.aplicacao.regra.BandeiraRegistrada;
 import br.fatec.les.livraria.clientes.aplicacao.regra.ValidadeDoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.Bandeira;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
+import br.fatec.les.livraria.clientes.dominio.regra.BandeiraRegistrada;
 import br.fatec.les.livraria.clientes.dominio.regra.CartaoCompleto;
+import br.fatec.les.livraria.clientes.dominio.regra.NumeroDoCartaoValido;
 import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCartao;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class AdicionarCartao {
     private final TamanhosMaximosCartao tamanhosMaximos; // RN-CLI-004
     private final ValidadeDoCartao validadeDoCartao; // DEC-06
     private final BandeiraRegistrada bandeiraRegistrada; // RN-CLI-005
+    private final NumeroDoCartaoValido numeroDoCartaoValido; // RN-CLI-004
     private final ClienteDoUsuario clienteDoUsuario;
     private final ClienteRepositorio clientes;
     private final BandeiraRepositorio bandeiras;
@@ -45,11 +48,13 @@ public class AdicionarCartao {
     @Transactional
     public Cartao executar(Long usuarioId, NovoCartao comando) {
         Cliente cliente = clienteDoUsuario.buscarParaAlterar(usuarioId);
+        List<Bandeira> registradas = bandeiras.listar();
         Violacoes violacoes = new Violacoes();
         cartaoCompleto.validar(comando, violacoes);
         tamanhosMaximos.validar(comando, violacoes);
         validadeDoCartao.validar(comando, violacoes);
-        Optional<Bandeira> bandeira = bandeiraRegistrada.validar(comando, violacoes, bandeiras);
+        Optional<Bandeira> bandeira = bandeiraRegistrada.identificar(comando, violacoes, registradas);
+        numeroDoCartaoValido.validar(comando, violacoes, registradas);
         if (comando.numero() != null && cliente.temCartaoComNumero(comando.numero())) {
             violacoes.adicionar("RN-CLI-004", "Este cartão já está cadastrado.");
         }

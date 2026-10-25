@@ -208,7 +208,7 @@ class CadastroDeClienteIntegracaoTest {
         return """
                 [
                   { "numero": "4111111111111111", "nomeImpresso": "NOVO CLIENTE",
-                    "bandeiraId": 1, "validade": "2030-12" }
+                    "validade": "2030-12" }
                 ]
                 """;
     }
@@ -226,7 +226,7 @@ class CadastroDeClienteIntegracaoTest {
                   "confirmacaoSenha": "outra",
                   "enderecos": [],
                   "cartoes": [
-                    { "numero": "123", "nomeImpresso": "", "bandeiraId": 9999, "validade": "2020-01" }
+                    { "numero": "9999999999999999", "nomeImpresso": "", "validade": "2020-01" }
                   ]
                 }
                 """;
@@ -260,8 +260,7 @@ class CadastroDeClienteIntegracaoTest {
                       "cep": "01001000", "cidade": "São Paulo", "uf": "SP", "observacoes": null }
                   ],
                   "cartoes": [
-                    { "numero": "5555555555554444", "nomeImpresso": "%1$s",
-                      "bandeiraId": 2, "validade": "2030-12" }
+                    { "numero": "5555555555554444", "nomeImpresso": "%1$s", "validade": "2030-12" }
                   ]
                 }
                 """.formatted(nome, nascimento, cpf, email, numero, ddd, SENHA);

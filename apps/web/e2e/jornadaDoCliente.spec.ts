@@ -88,7 +88,6 @@ test.describe('Jornada do cliente (E2E-02)', () => {
     await page.getByRole('button', { name: 'Adicionar cartão' }).click();
     await page.locator('#cartao-numero').fill('4111 1111 1111 1111');
     await page.locator('#cartao-nome').fill('FERNANDA LIMA');
-    await page.locator('#cartao-bandeira').selectOption({ label: 'Visa' });
     await page.locator('#cartao-validade').fill('2025-01');
     await page.getByRole('button', { name: 'Salvar cartão' }).click();
     await expect(page.getByText('A validade não pode estar vencida.')).toBeVisible();

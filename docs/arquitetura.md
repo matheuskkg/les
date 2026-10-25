@@ -89,8 +89,8 @@ apps/server/
 
 | Tipo | Onde | Forma | Exemplo |
 |---|---|---|---|
-| Regra/validação pura | `dominio/regra` | implementa `Regra<T>`, não consulta dados | `SenhaForte` (RNF-CLI-001), `ValorMinimoPorCartao` (RN-VEN-004) |
-| Regra que consulta dados | `aplicacao/regra` | implementa `Regra<T>`, recebe portas no construtor | `CpfUnico`, `BandeiraRegistrada` (RN-CLI-005), `EstoqueDisponivelParaCarrinho` (RN-VEN-001) |
+| Regra/validação pura | `dominio/regra` | implementa `Regra<T>`, não consulta dados | `SenhaForte` (RNF-CLI-001), `ValorMinimoPorCartao` (RN-VEN-004), `BandeiraRegistrada` (RN-CLI-005), `NumeroDoCartaoValido` (RN-CLI-004) |
+| Regra que consulta dados | `aplicacao/regra` | implementa `Regra<T>`, recebe portas no construtor | `CpfUnico`, `EstoqueDisponivelParaCarrinho` (RN-VEN-001) |
 | Cálculo de negócio | `dominio/...` | classe com um único método público | `CalcularPrecoVenda` (RF-EST-002, RN-EST-002), `DistribuirPagamento` (RN-VEN-005, RN-VEN-006) |
 | Operação | `aplicacao/casodeuso` | uma classe com `executar(Comando)` | `CadastrarCliente`, `AlterarSenha`, `SolicitarTroca` |
 | Transição de status | `aplicacao/casodeuso` | um caso de uso por transição | `DespacharPedido` (`APROVADA` → `EM TRANSPORTE`, RN-VEN-009) |

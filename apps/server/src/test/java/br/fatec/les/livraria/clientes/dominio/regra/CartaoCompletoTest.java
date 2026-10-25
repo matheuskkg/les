@@ -24,17 +24,16 @@ class CartaoCompletoTest {
 
     @Test
     void rnCli004_cartaoSemCamposObrigatorios() {
-        NovoCartao vazio = new NovoCartao(null, " ", null, null);
+        NovoCartao vazio = new NovoCartao(null, " ", null);
 
         assertThat(violacoes(comCartao(vazio), regra))
-                .hasSize(4)
+                .hasSize(3)
                 .allMatch(violacao -> violacao.codigo().equals("RN-CLI-004"));
     }
 
     @Test
     void rnCli004_numeroComMenosDeTrezeDigitos() {
-        NovoCartao numeroCurto = new NovoCartao("1234", cartao().nomeImpresso(), cartao().bandeiraId(),
-                cartao().validade());
+        NovoCartao numeroCurto = new NovoCartao("1234", cartao().nomeImpresso(), cartao().validade());
 
         assertThat(violacoes(comCartao(numeroCurto), regra))
                 .anyMatch(violacao -> violacao.mensagem().contains("número"));

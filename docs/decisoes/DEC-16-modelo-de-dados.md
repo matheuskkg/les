@@ -82,7 +82,9 @@ O checkout não guarda endereços, cartões nem cupons. Cada finalização os re
 ### Bandeira
 
 A tabela `bandeira` fica no módulo `clientes`, o único que a usa (RN-CLI-005), e `cartao.bandeira_id` é FK. O seed
-dela é do `2NN` ([DEC-14](DEC-14-ids-nomes-e-seed.md)).
+dela é do `2NN` ([DEC-14](DEC-14-ids-nomes-e-seed.md)) (alterado pelo
+[DEC-18](DEC-18-bandeira-identificada-pelo-numero.md): a bandeira é identificada pelo número, e a tabela ganha as
+colunas `prefixos` e `tamanhos`).
 
 ## Alternativas consideradas
 

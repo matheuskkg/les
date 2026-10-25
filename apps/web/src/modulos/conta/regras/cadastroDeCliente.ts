@@ -97,8 +97,6 @@ export interface EnderecoDoFormulario {
 export interface CartaoDoFormulario {
   numero: string;
   nomeImpresso: string;
-  /** Id da bandeira como texto, para o `<select>`; convertido para número no envio. */
-  bandeiraId: string;
   /** "AAAA-MM", como o input do tipo mês entrega. */
   validade: string;
 }
@@ -135,7 +133,7 @@ export function enderecoVazio(): EnderecoDoFormulario {
 }
 
 export function cartaoVazio(): CartaoDoFormulario {
-  return { numero: '', nomeImpresso: '', bandeiraId: '', validade: '' };
+  return { numero: '', nomeImpresso: '', validade: '' };
 }
 
 export function formularioVazio(): FormularioDeCadastro {
@@ -267,7 +265,6 @@ export function montarCartao(cartao: CartaoDoFormulario): CartaoDaApi {
   return {
     numero: somenteDigitos(cartao.numero),
     nomeImpresso: cartao.nomeImpresso.trim(),
-    bandeiraId: Number(cartao.bandeiraId),
     validade: validadeParaApi(cartao.validade),
   };
 }
@@ -338,9 +335,6 @@ function validarCartao(
   }
   if (emBranco(cartao.nomeImpresso)) {
     erros[chave('nomeImpresso')] = 'Informe o nome impresso no cartão.';
-  }
-  if (cartao.bandeiraId === '') {
-    erros[chave('bandeiraId')] = 'Informe a bandeira do cartão.';
   }
   if (cartao.validade === '') {
     erros[chave('validade')] = 'Informe a validade do cartão.';

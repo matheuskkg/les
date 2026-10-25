@@ -225,6 +225,16 @@
               "nome",
               "varchar(40)",
               ""
+            ],
+            [
+              "prefixos",
+              "varchar(500)",
+              ""
+            ],
+            [
+              "tamanhos",
+              "varchar(20)",
+              ""
             ]
           ]
         }

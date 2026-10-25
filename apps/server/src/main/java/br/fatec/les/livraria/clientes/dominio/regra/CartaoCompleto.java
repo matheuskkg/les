@@ -10,9 +10,10 @@ import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 
 /**
- * Composição do cartão de crédito (RN-CLI-004, DEC-06): número, nome impresso, bandeira e validade. O código de
- * segurança não é gravado (DEC-10), então não é exigido no cadastro nem aceito pela API. Valida um cartão; a lista do
- * cadastro é percorrida por {@code CartoesCompletos}.
+ * Composição do cartão de crédito (RN-CLI-004, DEC-06, DEC-18): número, nome impresso e validade. A bandeira é
+ * identificada pelo número e não é informada pelo cliente. O código de segurança não é gravado (DEC-10), então não é
+ * exigido no cadastro nem aceito pela API. Valida um cartão; a lista do cadastro é percorrida por
+ * {@code CartoesCompletos}.
  */
 @Component
 public class CartaoCompleto implements Regra<NovoCartao> {
@@ -30,9 +31,6 @@ public class CartaoCompleto implements Regra<NovoCartao> {
         }
         if (cartao.nomeImpresso() == null || cartao.nomeImpresso().isBlank()) {
             violacoes.adicionar(CODIGO, "Informe o nome impresso no cartão.");
-        }
-        if (cartao.bandeiraId() == null) {
-            violacoes.adicionar(CODIGO, "Informe a bandeira do cartão.");
         }
         if (cartao.validade() == null) {
             violacoes.adicionar(CODIGO, "Informe a validade do cartão.");

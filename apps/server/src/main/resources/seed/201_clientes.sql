@@ -43,4 +43,4 @@ INSERT INTO cartao (id, cliente_id, bandeira_id, numero, nome_impresso, validade
     (2, 2, 2, '5555555555554444', 'BRUNO LIMA', '2029-08', TRUE),
     (3, 3, 3, '6362970000457013', 'CARLA MENDES', '2028-05', TRUE),
     (4, 5, 4, '378282246310005', 'ELISA PRADO', '2020-01', TRUE),
-    (5, 5, 5, '6062825624250000', 'ELISA PRADO', '2032-12', FALSE);
+    (5, 5, 5, '6062825624080000', 'ELISA PRADO', '2032-12', FALSE);

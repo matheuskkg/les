@@ -30,4 +30,12 @@ public class BandeiraJpa {
 
     @Column(name = "nome", nullable = false, length = 40)
     private String nome;
+
+    /** Prefixos ou faixas inclusivas separados por vírgula (RN-CLI-005, DEC-18). */
+    @Column(name = "prefixos", nullable = false, length = 500)
+    private String prefixos;
+
+    /** Comprimentos aceitos separados por vírgula (RN-CLI-004, DEC-18). */
+    @Column(name = "tamanhos", nullable = false, length = 20)
+    private String tamanhos;
 }

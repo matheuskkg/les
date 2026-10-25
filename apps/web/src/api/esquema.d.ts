@@ -934,8 +934,6 @@ export interface components {
             validade: string;
         };
         CartaoDoCadastro: {
-            /** Format: int64 */
-            bandeiraId: number;
             nomeImpresso: string;
             numero: string;
             /** @example 2027-08 */
@@ -959,8 +957,6 @@ export interface components {
             valor: string;
         };
         CartaoInformadoDto: {
-            /** Format: int64 */
-            bandeiraId: number;
             nomeImpresso: string;
             numero: string;
             /** @example 2027-08 */

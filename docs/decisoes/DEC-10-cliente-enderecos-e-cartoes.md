@@ -38,12 +38,14 @@ e os efeitos da inativação (RF-CLI-003).
 
 ### Cartão de crédito
 
-- Campos: número, nome impresso, bandeira e validade ([DEC-06](DEC-06-validade-do-cartao.md)).
+- Campos: número, nome impresso, bandeira e validade ([DEC-06](DEC-06-validade-do-cartao.md)) (alterado pelo
+  [DEC-18](DEC-18-bandeira-identificada-pelo-numero.md): a bandeira é identificada pelo número).
 - **O código de segurança não é gravado.** O checkout pede o CVV de cada cartão usado, inclusive dos salvos, e o
   repassa à operadora fake ([DEC-05.2](DEC-05.2-operadora-de-cartao.md)) sem guardá-lo, nem no pedido. Um cartão novo
   incorporado ao perfil no checkout (RF-VEN-006) também é salvo sem ele.
 - A API devolve o número mascarado (`**** **** **** 1234`), nunca o número completo.
-- Bandeira em tabela do seed (RN-CLI-005).
+- Bandeira em tabela do seed (RN-CLI-005) (alterado pelo [DEC-18](DEC-18-bandeira-identificada-pelo-numero.md): a
+  bandeira é identificada pelo número).
 - Cartão é opcional no cadastro. **Havendo ao menos um, exatamente um é preferencial** (RF-CLI-007):
   - o primeiro cartão cadastrado vira preferencial;
   - marcar outro como preferencial desmarca o anterior;

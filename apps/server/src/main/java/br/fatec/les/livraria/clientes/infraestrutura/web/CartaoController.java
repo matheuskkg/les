@@ -154,7 +154,6 @@ public class CartaoController {
         if (entrada == null) {
             return null;
         }
-        return new NovoCartao(entrada.numero(), entrada.nomeImpresso(), entrada.bandeiraId(),
-                entrada.validade());
+        return new NovoCartao(entrada.numero(), entrada.nomeImpresso(), entrada.validade());
     }
 }

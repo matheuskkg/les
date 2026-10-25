@@ -262,7 +262,7 @@ class PagamentoIntegracaoTest {
 
     private static String cartaoNovo(String validade) {
         return """
-                {"numero":"5555 5555 5555 4444","nomeImpresso":"ANA SOUZA","bandeiraId":2,"validade":"%s"}"""
+                {"numero":"5555 5555 5555 4444","nomeImpresso":"ANA SOUZA","validade":"%s"}"""
                 .formatted(validade);
     }
 

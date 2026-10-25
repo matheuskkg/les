@@ -2,7 +2,11 @@ package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.CPF;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.EMAIL;
+import static br.fatec.les.livraria.clientes.ClientesDeTeste.MASTERCARD;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.SENHA;
+import static br.fatec.les.livraria.clientes.ClientesDeTeste.VISA;
+import static br.fatec.les.livraria.clientes.ClientesDeTeste.cartao;
+import static br.fatec.les.livraria.clientes.ClientesDeTeste.comCartoes;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.comEnderecos;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.comSenha;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.contasEmUso;
@@ -22,17 +26,22 @@ import br.fatec.les.livraria.clientes.ClientesDeTeste.FakeBandeiraRepositorio;
 import br.fatec.les.livraria.clientes.ClientesDeTeste.FakeClienteRepositorio;
 import br.fatec.les.livraria.clientes.ClientesDeTeste.FakeCodificadorDeSenha;
 import br.fatec.les.livraria.clientes.ClientesDeTeste.FakeUsuarioRepositorio;
-import br.fatec.les.livraria.clientes.aplicacao.regra.BandeiraRegistrada;
 import br.fatec.les.livraria.clientes.aplicacao.regra.CpfUnico;
 import br.fatec.les.livraria.clientes.aplicacao.regra.DataNascimentoValida;
 import br.fatec.les.livraria.clientes.aplicacao.regra.EmailUnico;
 import br.fatec.les.livraria.clientes.aplicacao.regra.TelefoneUnico;
 import br.fatec.les.livraria.clientes.aplicacao.regra.ValidadeDoCartao;
+import br.fatec.les.livraria.clientes.dominio.calculo.DigitoVerificadorLuhn;
+import br.fatec.les.livraria.clientes.dominio.calculo.IdentificarBandeira;
+import br.fatec.les.livraria.clientes.dominio.calculo.TamanhoDoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cartao;
+import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
+import br.fatec.les.livraria.clientes.dominio.regra.BandeiraRegistrada;
 import br.fatec.les.livraria.clientes.dominio.regra.CartaoCompleto;
 import br.fatec.les.livraria.clientes.aplicacao.regra.ValidadesDosCartoes;
 import br.fatec.les.livraria.clientes.dominio.regra.CartoesCompletos;
+import br.fatec.les.livraria.clientes.dominio.regra.NumeroDoCartaoValido;
 import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCartao;
 import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosEndereco;
 import br.fatec.les.livraria.clientes.dominio.regra.EnderecosCompletos;
@@ -52,7 +61,8 @@ class CadastrarClienteTest {
 
     private final FakeClienteRepositorio clientes = new FakeClienteRepositorio();
     private final FakeUsuarioRepositorio usuarios = new FakeUsuarioRepositorio();
-    private final FakeBandeiraRepositorio bandeiras = new FakeBandeiraRepositorio().comBandeiras(1L, 2L);
+    private final FakeBandeiraRepositorio bandeiras = new FakeBandeiraRepositorio()
+            .comBandeiras(VISA, MASTERCARD);
     private final FakeCodificadorDeSenha senhas = new FakeCodificadorDeSenha();
     private final ContasEmUso contas = contasEmUso(usuarios);
 
@@ -75,7 +85,9 @@ class CadastrarClienteTest {
                 new CpfUnico(clientes, contas),
                 new EmailUnico(contas),
                 new TelefoneUnico(contas),
-                new BandeiraRegistrada(),
+                new BandeiraRegistrada(new IdentificarBandeira()),
+                new NumeroDoCartaoValido(new IdentificarBandeira(), new TamanhoDoCartao(),
+                        new DigitoVerificadorLuhn()),
                 new CriarUsuario(usuarios, senhas),
                 clientes,
                 bandeiras);
@@ -164,5 +176,29 @@ class CadastrarClienteTest {
             assertThat(violacao.codigo()).isEqualTo("RN-CLI-006");
             assertThat(violacao.mensagem()).isEqualTo("Informe a senha do cliente.");
         });
+    }
+
+    @Test
+    void rnCli004_luhnInvalidoNoCadastroEhNumerado() {
+        NovoCartao luhnInvalido = new NovoCartao("4111111111111112", "ANA SOUZA", cartao().validade());
+
+        ExcecaoDeNegocio erro = catchThrowableOfType(
+                () -> caso.executar(comCartoes(List.of(cartao(), luhnInvalido))), ExcecaoDeNegocio.class);
+
+        assertThat(erro.getViolacoes()).singleElement().satisfies(violacao -> {
+            assertThat(violacao.codigo()).isEqualTo("RN-CLI-004");
+            assertThat(violacao.mensagem()).isEqualTo("Cartão 2: número do cartão inválido.");
+        });
+    }
+
+    @Test
+    void rnCli005_bandeirasIdentificadasFicamAlinhadasAosCartoes() {
+        NovoCartao mastercard = new NovoCartao("5555555555554444", "ANA SOUZA", cartao().validade());
+
+        caso.executar(comCartoes(List.of(cartao(), mastercard)));
+
+        assertThat(clientes.salvos).singleElement().satisfies(cliente ->
+                assertThat(cliente.getCartoes()).extracting(cartao -> cartao.bandeira().nome())
+                        .containsExactly(VISA.nome(), MASTERCARD.nome()));
     }
 }

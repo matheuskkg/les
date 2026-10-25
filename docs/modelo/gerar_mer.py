@@ -175,7 +175,7 @@ OMBRO = 30       # segmento horizontal do entityRelationEdgeStyle
 
 # Por módulo: colunas de tabelas, cada uma com (tabela, y relativo ao topo do módulo).
 LAYOUT_LOGICO = {
-    "clientes": [[("endereco", 0)], [("cliente", 0)], [("cartao", 0)], [("bandeira", 22)]],
+    "clientes": [[("endereco", 0)], [("cliente", 0)], [("cartao", 0), ("bandeira", 200)]],
     "catalogo": [[("editora", 0), ("grupo_precificacao", 110)], [("livro", 0)],
                  [("livro_autor", 0), ("livro_categoria", 110)], [("autor", 0), ("categoria", 110)]],
     "estoque": [[("estoque", 0), ("reserva", 120)], [("entrada_estoque", 0)], [("fornecedor", 44)]],
