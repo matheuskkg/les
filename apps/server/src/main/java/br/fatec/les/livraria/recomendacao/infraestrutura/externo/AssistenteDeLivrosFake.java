@@ -1,14 +1,13 @@
 package br.fatec.les.livraria.recomendacao.infraestrutura.externo;
 
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
+import br.fatec.les.livraria.recomendacao.aplicacao.TextoNormalizado;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.AssistenteDeLivros;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.FerramentasDoAssistente;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.RespostaDoProvedor;
@@ -122,9 +121,7 @@ public class AssistenteDeLivrosFake implements AssistenteDeLivros {
     }
 
     private static boolean foraDoEscopo(String mensagem) {
-        String normalizada = Normalizer.normalize(mensagem, Normalizer.Form.NFD)
-                .replaceAll("\\p{M}", "")
-                .toLowerCase(Locale.ROOT);
+        String normalizada = TextoNormalizado.de(mensagem);
         return normalizada.contains("previsao do tempo") || normalizada.contains("futebol");
     }
 

@@ -147,6 +147,12 @@ class ConsultarLivroTest {
                 java.util.Collection<Long> livroIds) {
             throw new UnsupportedOperationException("Fora do escopo do teste.");
         }
+
+        @Override
+        public List<br.fatec.les.livraria.catalogo.aplicacao.consulta.SinopseDoLivro> buscarSinopses(
+                java.util.Collection<Long> livroIds) {
+            throw new UnsupportedOperationException("Fora do escopo do teste.");
+        }
     }
 
     private static final class SaldoDeEstoqueFake implements SaldoDeEstoque {

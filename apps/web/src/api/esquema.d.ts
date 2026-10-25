@@ -385,6 +385,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/assistente/conversa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mensagens da conversa ativa, da mais antiga à mais recente; vazia sem conversa */
+        get: operations["conversa"];
+        put?: never;
+        post?: never;
+        /** Limpa a conversa: a atual é arquivada e a próxima mensagem abre outra */
+        delete: operations["limpar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/assistente/mensagens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Envia a mensagem ao assistente e devolve a resposta gravada */
+        post: operations["enviar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/assistente/mensagens/{id}/avaliacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Avalia uma resposta do assistente; a última avaliação vale */
+        put: operations["avaliar_1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me/carrinho": {
         parameters: {
             query?: never;
@@ -1407,6 +1459,20 @@ export interface components {
             isbn: string;
             titulo: string;
         };
+        MensagemDto: {
+            /** @enum {string} */
+            avaliacao?: "POSITIVA" | "NEGATIVA";
+            /** Format: date-time */
+            enviadaEm: string;
+            /** Format: int64 */
+            id: number;
+            livros: components["schemas"]["LivroListadoDto"][];
+            /** @enum {string} */
+            papel: "CLIENTE" | "ASSISTENTE";
+            texto: string;
+            /** @enum {string} */
+            tipo?: "RECOMENDACAO" | "BUSCA" | "DUVIDA" | "FORA_DO_ESCOPO";
+        };
         MeusDados: {
             cpf: string;
             /** Format: date */
@@ -1434,6 +1500,9 @@ export interface components {
             recursoId?: number;
             /** @enum {string} */
             tipo: "CARRINHO_EXPIRANDO" | "CHECKOUT_EXPIRANDO" | "CARRINHO_EXPIRADO" | "CHECKOUT_EXPIRADO" | "PEDIDO_APROVADO" | "PEDIDO_REPROVADO" | "PEDIDO_DESPACHADO" | "PEDIDO_ENTREGUE" | "TROCA_AUTORIZADA" | "TROCA_RECUSADA" | "TROCA_CONCLUIDA" | "TROCA_SOLICITADA" | "PEDIDO_AGUARDANDO_DESPACHO";
+        };
+        NovaMensagemDto: {
+            texto: string;
         };
         NovaQuantidade: {
             /** Format: int32 */
@@ -2474,6 +2543,128 @@ export interface operations {
             };
             /** @description Dados violam regras de negócio */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    conversa: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MensagemDto"][];
+                };
+            };
+        };
+    };
+    limpar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    enviar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NovaMensagemDto"];
+            };
+        };
+        responses: {
+            /** @description Resposta do assistente */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MensagemDto"];
+                };
+            };
+            /** @description Mensagem vazia, longa demais ou acima do limite por minuto */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Nenhum provedor de IA atendeu; a mensagem do cliente fica gravada */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    avaliar_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AvaliacaoDto"];
+            };
+        };
+        responses: {
+            /** @description Avaliação gravada */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Avaliação ausente */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Resposta inexistente, de outro cliente, de conversa arquivada ou mensagem do próprio cliente */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

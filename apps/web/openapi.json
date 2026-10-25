@@ -1298,6 +1298,138 @@
         "tags" : [ "me-controller" ]
       }
     },
+    "/api/me/assistente/conversa" : {
+      "delete" : {
+        "operationId" : "limpar",
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Limpa a conversa: a atual é arquivada e a próxima mensagem abre outra",
+        "tags" : [ "assistente-controller" ]
+      },
+      "get" : {
+        "operationId" : "conversa",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/MensagemDto"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Mensagens da conversa ativa, da mais antiga à mais recente; vazia sem conversa",
+        "tags" : [ "assistente-controller" ]
+      }
+    },
+    "/api/me/assistente/mensagens" : {
+      "post" : {
+        "operationId" : "enviar",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NovaMensagemDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MensagemDto"
+                }
+              }
+            },
+            "description" : "Resposta do assistente"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Mensagem vazia, longa demais ou acima do limite por minuto"
+          },
+          "503" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Nenhum provedor de IA atendeu; a mensagem do cliente fica gravada"
+          }
+        },
+        "summary" : "Envia a mensagem ao assistente e devolve a resposta gravada",
+        "tags" : [ "assistente-controller" ]
+      }
+    },
+    "/api/me/assistente/mensagens/{id}/avaliacao" : {
+      "put" : {
+        "operationId" : "avaliar_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AvaliacaoDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Avaliação gravada"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Avaliação ausente"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Resposta inexistente, de outro cliente, de conversa arquivada ou mensagem do próprio cliente"
+          }
+        },
+        "summary" : "Avalia uma resposta do assistente; a última avaliação vale",
+        "tags" : [ "assistente-controller" ]
+      }
+    },
     "/api/me/carrinho" : {
       "get" : {
         "operationId" : "ver_1",
@@ -4025,6 +4157,41 @@
         },
         "required" : [ "autores", "categorias", "edicao", "editora", "id", "isbn", "titulo" ]
       },
+      "MensagemDto" : {
+        "type" : "object",
+        "properties" : {
+          "avaliacao" : {
+            "type" : "string",
+            "enum" : [ "POSITIVA", "NEGATIVA" ]
+          },
+          "enviadaEm" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "livros" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/LivroListadoDto"
+            }
+          },
+          "papel" : {
+            "type" : "string",
+            "enum" : [ "CLIENTE", "ASSISTENTE" ]
+          },
+          "texto" : {
+            "type" : "string"
+          },
+          "tipo" : {
+            "type" : "string",
+            "enum" : [ "RECOMENDACAO", "BUSCA", "DUVIDA", "FORA_DO_ESCOPO" ]
+          }
+        },
+        "required" : [ "enviadaEm", "id", "livros", "papel", "texto" ]
+      },
       "MeusDados" : {
         "type" : "object",
         "properties" : {
@@ -4090,6 +4257,16 @@
           }
         },
         "required" : [ "criadaEm", "id", "mensagem", "tipo" ]
+      },
+      "NovaMensagemDto" : {
+        "type" : "object",
+        "properties" : {
+          "texto" : {
+            "type" : "string",
+            "maxLength" : 500
+          }
+        },
+        "required" : [ "texto" ]
       },
       "NovaQuantidade" : {
         "type" : "object",

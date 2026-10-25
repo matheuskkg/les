@@ -9,6 +9,7 @@ import br.fatec.les.livraria.catalogo.aplicacao.consulta.FiltroLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroDetalhe;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroParaVenda;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.MedidasDoLivro;
+import br.fatec.les.livraria.catalogo.aplicacao.consulta.SinopseDoLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroResumo;
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
@@ -60,4 +61,12 @@ public interface CatalogoConsultas {
      * @return as medidas encontradas, em ordem indeterminada; id inexistente não aparece
      */
     List<MedidasDoLivro> buscarMedidas(Collection<Long> livroIds);
+
+    /**
+     * Sinopse dos livros pelos ids, para a busca do assistente (RNF-REC-001, DEC-03).
+     *
+     * @param livroIds livros a consultar
+     * @return as sinopses encontradas, em ordem indeterminada; id inexistente não aparece
+     */
+    List<SinopseDoLivro> buscarSinopses(Collection<Long> livroIds);
 }

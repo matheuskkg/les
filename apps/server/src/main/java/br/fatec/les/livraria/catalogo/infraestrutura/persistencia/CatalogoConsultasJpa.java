@@ -15,6 +15,7 @@ import br.fatec.les.livraria.catalogo.aplicacao.consulta.FiltroLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroDetalhe;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroParaVenda;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.MedidasDoLivro;
+import br.fatec.les.livraria.catalogo.aplicacao.consulta.SinopseDoLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroResumo;
 import br.fatec.les.livraria.catalogo.aplicacao.porta.CatalogoConsultas;
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
@@ -93,6 +94,16 @@ public class CatalogoConsultasJpa implements CatalogoConsultas {
         return livros.findByIdIn(livroIds).stream()
                 .map(livro -> new MedidasDoLivro(livro.getId(), livro.getPeso(), livro.getAltura(),
                         livro.getLargura(), livro.getProfundidade()))
+                .toList();
+    }
+
+    @Override
+    public List<SinopseDoLivro> buscarSinopses(Collection<Long> livroIds) {
+        if (livroIds.isEmpty()) {
+            return List.of();
+        }
+        return livros.findByIdIn(livroIds).stream()
+                .map(livro -> new SinopseDoLivro(livro.getId(), livro.getSinopse()))
                 .toList();
     }
 
