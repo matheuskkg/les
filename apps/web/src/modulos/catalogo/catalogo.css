@@ -93,11 +93,14 @@
 
 .grade-de-livros > li {
   display: flex;
+  /* Sem isso, autores e editora em uma linha alargariam a coluna em vez de ganhar reticências. */
+  min-width: 0;
 }
 
 .livro {
   display: flex;
   flex: 1;
+  min-width: 0;
   flex-direction: column;
   gap: 0.25rem;
 }
@@ -113,8 +116,16 @@
 }
 
 .livro__titulo {
+  /* Padrão do cartão: título em até duas linhas, sempre ocupando as duas; o restante cabe numa linha cada. */
+  display: -webkit-box;
+  min-height: calc(2 * 1.3em);
   margin: 0;
+  overflow: hidden;
   font-size: 1.05rem;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .livro__titulo a {
@@ -130,7 +141,10 @@
 .livro__autores,
 .livro__meta {
   margin: 0;
+  overflow: hidden;
   color: var(--cor-texto-suave);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .livro__meta {
@@ -156,7 +170,9 @@
 }
 
 .livro__preco {
-  margin: 0.3rem 0 0;
+  /* Preço e estoque no pé do cartão, alinhados entre os livros da mesma linha. */
+  margin: auto 0 0;
+  padding-top: 0.3rem;
   font-size: 1.15rem;
   font-weight: 700;
 }

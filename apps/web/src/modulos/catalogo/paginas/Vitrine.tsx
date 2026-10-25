@@ -40,18 +40,22 @@ const CAMPOS_AVANCADOS: readonly { campo: CampoDeTexto; rotulo: string; placehol
 
 function CartaoDeLivro({ livro }: { livro: LivroListado }) {
   const disponivel = livro.disponivel > 0;
+  const autores = livro.autores.join('; ');
+  const meta = `${livro.editora} · ${livro.ano}`;
 
   return (
     <article class={`livro${disponivel ? '' : ' livro--esgotado'}`}>
       <a class="livro__capa" href={`/livros/${livro.id}`} tabIndex={-1} aria-hidden="true">
         <CapaDeLivro titulo={livro.titulo} autores={livro.autores} categoria={livro.categorias[0]?.nome} />
       </a>
-      <h2 class="livro__titulo">
+      <h2 class="livro__titulo" title={livro.titulo}>
         <a href={`/livros/${livro.id}`}>{livro.titulo}</a>
       </h2>
-      <p class="livro__autores">{livro.autores.join('; ')}</p>
-      <p class="livro__meta">
-        {livro.editora} · {livro.ano}
+      <p class="livro__autores" title={autores}>
+        {autores}
+      </p>
+      <p class="livro__meta" title={meta}>
+        {meta}
       </p>
       <p class="livro__preco">{livro.precoVenda ? formatarDinheiro(livro.precoVenda) : 'Indisponível'}</p>
       <p class="livro__estoque">
