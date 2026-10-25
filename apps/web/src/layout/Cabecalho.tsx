@@ -58,10 +58,23 @@ function BotaoDoCarrinho() {
   );
 }
 
-/** Faixa com a contagem regressiva da reserva enquanto há itens no carrinho (RNF-VEN-001). */
+/**
+ * Faixa com a contagem regressiva da reserva (RNF-VEN-001): a da compra em andamento, que leva de volta ao pagamento
+ * (DEC-12), ou a do carrinho enquanto há itens nele.
+ */
 function FaixaDeReserva() {
   const { path } = useLocation();
   const { carrinho } = useCarrinho();
+  if (carrinho?.checkout && path !== '/carrinho' && path !== '/checkout') {
+    return (
+      <div class="faixa-de-reserva">
+        <div class="faixa-de-reserva__conteudo">
+          <PrazoDaReserva expiraEm={carrinho.checkout.expiraEm} prefixo="Sua compra está reservada por" />
+          <a href="/checkout">Continuar pagamento</a>
+        </div>
+      </div>
+    );
+  }
   if (
     path === '/carrinho' ||
     path === '/checkout' ||

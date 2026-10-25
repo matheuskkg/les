@@ -4,6 +4,7 @@ import { Botao, BotaoLink } from '../../../ui/Botao';
 import { Erro } from '../../../ui/Erro';
 import { Violacoes } from '../../../ui/Violacoes';
 import { useCarrinho } from '../contextoDoCarrinho';
+import { CompraEmAndamento } from './CompraEmAndamento';
 import { LinhaDoCarrinho } from './LinhaDoCarrinho';
 import { PrazoDaReserva } from './PrazoDaReserva';
 
@@ -49,6 +50,8 @@ export function GavetaDoCarrinho() {
           </p>
         )}
 
+        <CompraEmAndamento aoContinuar={fecharGaveta} />
+
         {problema?.violacoes && problema.violacoes.length > 0 ? (
           <Violacoes violacoes={problema.violacoes} />
         ) : (
@@ -70,12 +73,16 @@ export function GavetaDoCarrinho() {
               <span>Subtotal</span>
               <span>{formatarDinheiro(carrinho.subtotal)}</span>
             </p>
-            <Botao
-              disabled={iniciandoPagamento || itens.some((item) => !item.precoUnitario)}
-              onClick={() => void irParaPagamento()}
-            >
-              Ir para pagamento
-            </Botao>
+            {carrinho.checkout ? (
+              <p class="campo__ajuda">Para pagar estes itens, devolva a compra em andamento ao carrinho.</p>
+            ) : (
+              <Botao
+                disabled={iniciandoPagamento || itens.some((item) => !item.precoUnitario)}
+                onClick={() => void irParaPagamento()}
+              >
+                Ir para pagamento
+              </Botao>
+            )}
           </>
         )}
         <BotaoLink variante="secundario" href="/carrinho" onClick={fecharGaveta}>

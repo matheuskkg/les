@@ -3,12 +3,14 @@ import { useLocation } from 'preact-iso';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
 import { CampoDeFormulario } from '../../../ui/CampoDeFormulario';
+import { CampoDeSelecao } from '../../../ui/CampoDeSelecao';
 import { Erro } from '../../../ui/Erro';
 import { OpcoesMarcaveis } from '../../../ui/OpcoesMarcaveis';
 import { GENEROS, ORDENS, SITUACOES, UFS, consultaDoEstado, filtrosVazios, lerEstadoDaConsulta, rotuloDe, urlDaConsulta, type CampoDeTexto, type FiltrosDeClientes } from '../regras/filtrosDeClientes';
 import { formatarCpf, formatarData } from '../../../compartilhado/formatacao';
 import { Botao } from '../../../ui/Botao';
 import { Paginacao } from '../../../ui/Paginacao';
+import { SeletorDeOrdem } from '../../../ui/SeletorDeOrdem';
 
 type PaginaDeClientes = components['schemas']['PaginaClienteListadoDto'];
 
@@ -100,27 +102,18 @@ export default function AdminClientes() {
           valor={filtros.dataNascimentoAte} aoMudar={(valor) => mudarCampo('dataNascimentoAte', valor)} />
         <CampoDeFormulario id="filtro-cidade" rotulo="Cidade" valor={filtros.cidade} name="cidade"
           aoMudar={(valor) => mudarCampo('cidade', valor)} />
-        <div class="campo">
-          <label class="campo__rotulo" for="filtro-uf">UF</label>
-          <select
-            id="filtro-uf"
-            class="campo__entrada"
-            name="uf"
-            value={ufSelecionada}
-            onChange={(evento) => {
-              const valor = evento.currentTarget.value;
-              const uf = UFS.find((item) => item === valor);
-              definirFiltros((atual) => ({ ...atual, uf: uf ? [uf] : [] }));
-            }}
-          >
-            <option value="">Todas</option>
-            {UFS.map((uf) => (
-              <option key={uf} value={uf}>
-                {uf}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CampoDeSelecao
+          id="filtro-uf"
+          rotulo="UF"
+          name="uf"
+          valor={ufSelecionada}
+          placeholder="Todas"
+          opcoes={UFS.map((uf) => ({ valor: uf, rotulo: uf }))}
+          aoMudar={(valor) => {
+            const uf = UFS.find((item) => item === valor);
+            definirFiltros((atual) => ({ ...atual, uf: uf ? [uf] : [] }));
+          }}
+        />
 
         <OpcoesMarcaveis legenda="Gênero" nome="genero" opcoes={GENEROS} marcados={filtros.genero}
           alternar={(valor) => definirFiltros((atual) => ({ ...atual, genero: alternado(atual.genero, valor) }))} />
@@ -156,20 +149,12 @@ export default function AdminClientes() {
         <>
           <div class="resultado__cabecalho">
             <p>{pagina.totalItens === 1 ? '1 cliente encontrado' : `${pagina.totalItens} clientes encontrados`}</p>
-            <label>
-              Ordenar por{' '}
-              <select
-                value={estado.ordem}
-                onChange={(evento) =>
-                  route(urlDaConsulta({ ...estado, ordem: evento.currentTarget.value, pagina: 1 }))}
-              >
-                {ORDENS.map((ordem) => (
-                  <option key={ordem.valor} value={ordem.valor}>
-                    {ordem.rotulo}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <SeletorDeOrdem
+              id="ordem-dos-clientes"
+              valor={estado.ordem}
+              aoMudar={(ordem) => route(urlDaConsulta({ ...estado, ordem, pagina: 1 }))}
+              opcoes={ORDENS}
+            />
           </div>
 
           <div class="tabela-rolavel">

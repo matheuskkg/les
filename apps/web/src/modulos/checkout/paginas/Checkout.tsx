@@ -111,7 +111,7 @@ export default function Checkout() {
   }
 
   const { resumo } = pagamento;
-  const entregaPronta = entrega.frete !== null && entrega.cobranca !== null;
+  const entregaPronta = entrega.frete !== null && !entrega.calculandoFrete && entrega.cobranca !== null;
   const cartoesProntos =
     resumo !== null &&
     (resumo.restante === '0.00' ||
@@ -123,7 +123,11 @@ export default function Checkout() {
   const cuponsUsados = (pagamento.promocional ? 1 : 0) + pagamento.selecionados.length;
   const passos = [
     { titulo: 'Entrega', concluido: entregaPronta },
-    { titulo: 'Cupons', concluido: entregaPronta && resumo !== null && pagamento.problemaDosCupons === null },
+    {
+      titulo: 'Cupons',
+      concluido:
+        entregaPronta && resumo !== null && !pagamento.conferindoCupons && pagamento.problemaDosCupons === null,
+    },
     { titulo: 'Cartões', concluido: cartoesProntos },
     { titulo: 'Revisão', concluido: false },
   ];
@@ -216,7 +220,13 @@ export default function Checkout() {
               </PassoDaCompra>
             </div>
 
-            <ResumoDaCompra checkout={checkout} frete={entrega.frete} semFrete={semFrete} pagamento={resumo} />
+            <ResumoDaCompra
+              checkout={checkout}
+              frete={entrega.frete}
+              semFrete={semFrete}
+              pagamento={resumo}
+              atualizando={entrega.calculandoFrete || pagamento.conferindoCupons}
+            />
           </div>
         </>
       )}

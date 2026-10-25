@@ -18,13 +18,15 @@ import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
  * @param quantidadeDeItens soma das quantidades dos itens
  * @param expiraEm          fim do bloqueio do carrinho, nulo quando não há itens
  * @param removidos         livros retirados por expiração, ainda não readicionados nem dispensados (RNF-VEN-001)
+ * @param checkout          sessão de compra aberta e dentro do prazo, nula quando não há (RF-VEN-003, DEC-12)
  */
 public record CarrinhoConsultado(
         List<ItemComPreco> itens,
         Dinheiro subtotal,
         int quantidadeDeItens,
         @Nullable LocalDateTime expiraEm,
-        List<ItemRemovidoDoCarrinho> removidos) {
+        List<ItemRemovidoDoCarrinho> removidos,
+        @Nullable CheckoutEmAndamento checkout) {
 
     public CarrinhoConsultado {
         Objects.requireNonNull(itens, "itens");

@@ -11,7 +11,7 @@ interface Props {
 
 /** Último passo (RF-VEN-007, RF-VEN-008): confere a divisão entre os cartões e finaliza a compra. */
 export function RevisaoDaCompra({ pagamento, temCobranca }: Props) {
-  const { resumo, enviando, finalizando, conferido, reprovada } = pagamento;
+  const { resumo, conferindoCupons, enviando, finalizando, conferido, reprovada } = pagamento;
   return (
     <>
       <Problema problema={pagamento.problemaDosCartoes} />
@@ -43,13 +43,13 @@ export function RevisaoDaCompra({ pagamento, temCobranca }: Props) {
       <div class="acoes">
         <Botao
           variante="secundario"
-          disabled={resumo === null || enviando || finalizando}
+          disabled={resumo === null || conferindoCupons || enviando || finalizando}
           onClick={pagamento.conferir}
         >
           {enviando ? 'Conferindo…' : 'Conferir pagamento'}
         </Botao>
         <Botao
-          disabled={resumo === null || !temCobranca || enviando || finalizando}
+          disabled={resumo === null || conferindoCupons || !temCobranca || enviando || finalizando}
           onClick={pagamento.finalizar}
         >
           {finalizando ? 'Finalizando…' : 'Finalizar compra'}

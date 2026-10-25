@@ -891,6 +891,7 @@ export interface components {
             telefone: components["schemas"]["TelefoneDoCadastro"];
         };
         CarrinhoDto: {
+            checkout?: components["schemas"]["CheckoutEmAndamentoDto"];
             /** Format: date-time */
             expiraEm?: string;
             itens: components["schemas"]["ItemComPrecoDto"][];
@@ -997,6 +998,12 @@ export interface components {
              * @example 1234.56
              */
             subtotal: string;
+        };
+        CheckoutEmAndamentoDto: {
+            /** Format: date-time */
+            expiraEm: string;
+            /** Format: int32 */
+            quantidadeDeItens: number;
         };
         ClienteCriado: {
             /** Format: int64 */

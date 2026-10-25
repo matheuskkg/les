@@ -10,6 +10,7 @@ import { CapaDeLivro } from '../../../ui/CapaDeLivro';
 import { Erro } from '../../../ui/Erro';
 import { Esqueleto } from '../../../ui/Esqueleto';
 import { Paginacao } from '../../../ui/Paginacao';
+import { SeletorDeOrdem } from '../../../ui/SeletorDeOrdem';
 import {
   ORDENS,
   PAGINA_PADRAO,
@@ -195,20 +196,12 @@ export default function Vitrine() {
                   ? '1 livro encontrado'
                   : `${pagina.totalItens} livros encontrados`}
             </p>
-            <label class="resultado__ordem">
-              Ordenar por{' '}
-              <select
-                class="campo__entrada campo__entrada--compacta"
-                value={estado.ordem}
-                onChange={(evento) => ir({ ...estado, ordem: evento.currentTarget.value, pagina: PAGINA_PADRAO })}
-              >
-                {ORDENS.map((ordem) => (
-                  <option key={ordem.valor} value={ordem.valor}>
-                    {ordem.rotulo}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <SeletorDeOrdem
+              id="ordem-dos-livros"
+              valor={estado.ordem}
+              aoMudar={(ordem) => ir({ ...estado, ordem, pagina: PAGINA_PADRAO })}
+              opcoes={ORDENS}
+            />
           </div>
 
           <Erro problema={livros.problema} />

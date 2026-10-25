@@ -21,6 +21,7 @@ import { formatarCpf, formatarDataHora, formatarDinheiro } from '../../../compar
 import { Botao } from '../../../ui/Botao';
 import { EtiquetaDeStatus } from '../../../ui/EtiquetaDeStatus';
 import { Paginacao } from '../../../ui/Paginacao';
+import { SeletorDeOrdem } from '../../../ui/SeletorDeOrdem';
 import { useCarregamento } from '../../../compartilhado/useCarregamento';
 import { AbasDeStatus } from '../componentes/AbasDeStatus';
 
@@ -212,20 +213,12 @@ export default function AdminPedidos() {
         <>
           <div class="resultado__cabecalho">
             <p>{pagina.totalItens === 1 ? '1 pedido encontrado' : `${pagina.totalItens} pedidos encontrados`}</p>
-            <label>
-              Ordenar por{' '}
-              <select
-                value={estado.ordem}
-                onChange={(evento) =>
-                  route(urlDaConsulta({ ...estado, ordem: evento.currentTarget.value, pagina: 1 }))}
-              >
-                {ORDENS.map((ordem) => (
-                  <option key={ordem.valor} value={ordem.valor}>
-                    {ordem.rotulo}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <SeletorDeOrdem
+              id="ordem-dos-pedidos"
+              valor={estado.ordem}
+              aoMudar={(ordem) => route(urlDaConsulta({ ...estado, ordem, pagina: 1 }))}
+              opcoes={ORDENS}
+            />
           </div>
 
           <div class="tabela-rolavel">

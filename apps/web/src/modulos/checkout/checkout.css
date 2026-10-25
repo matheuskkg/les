@@ -182,6 +182,11 @@
   text-align: left;
 }
 
+.checkout__valores--atualizando dd {
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+
 .resumo-da-compra .checkout__valores dt,
 .resumo-da-compra .checkout__valores dd {
   display: block;
@@ -199,6 +204,12 @@
   gap: 0.25rem;
   padding-top: 0.5rem;
   border-top: 1px solid var(--cor-borda);
+}
+
+/* Sem cupons, o "A pagar" abre o bloco e a borda dele já separa do total: não repete a linha. */
+.resumo-da-compra__pagamento > .linha-de-total--forte:first-child {
+  padding-top: 0;
+  border-top: 0;
 }
 
 @media (max-width: 900px) {

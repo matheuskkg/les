@@ -94,3 +94,10 @@
 .grafico__legenda .grafico__traco {
   height: 3px;
 }
+
+/* Abas das seções acima de cada tela do administrador. */
+.area-do-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}

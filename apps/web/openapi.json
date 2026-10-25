@@ -2799,6 +2799,9 @@
       "CarrinhoDto" : {
         "type" : "object",
         "properties" : {
+          "checkout" : {
+            "$ref" : "#/components/schemas/CheckoutEmAndamentoDto"
+          },
           "expiraEm" : {
             "type" : "string",
             "format" : "date-time"
@@ -3060,6 +3063,20 @@
           }
         },
         "required" : [ "expiraEm", "id", "iniciadoEm", "itens", "quantidadeDeItens", "subtotal" ]
+      },
+      "CheckoutEmAndamentoDto" : {
+        "type" : "object",
+        "properties" : {
+          "expiraEm" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "quantidadeDeItens" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "expiraEm", "quantidadeDeItens" ]
       },
       "ClienteCriado" : {
         "type" : "object",

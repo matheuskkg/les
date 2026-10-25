@@ -67,6 +67,7 @@ export function usePagamentoDaCompra({
   const [promocional, definirPromocional] = useState<string | null>(null);
   const [selecionados, definirSelecionados] = useState<number[]>([]);
   const [resumo, definirResumo] = useState<PagamentoConferido | null>(null);
+  const [conferindoCupons, definirConferindoCupons] = useState(false);
   const [problemaDosCupons, definirProblemaDosCupons] = useState<ProblemaDetalhe | null>(null);
   /** Chaves dos cartões em uso, na ordem em que foram escolhidos: o id do cadastrado ou {@link NOVO}. */
   const [emUso, definirEmUso] = useState<string[]>([]);
@@ -97,17 +98,20 @@ export function usePagamentoDaCompra({
       );
   }, [carregarCartoes]);
 
-  // RN-VEN-006: a distribuição sem cartões mostra o restante e já recusa cupons desnecessários.
+  // RN-VEN-006: a distribuição sem cartões mostra o restante e já recusa cupons desnecessários. O resumo anterior fica
+  // na tela até o novo chegar, mas não serve para conferir nem finalizar.
   useEffect(() => {
     selecao.current += 1;
     definirReprovada(null);
-    definirResumo(null);
     definirConferido(null);
     if (entrega === null) {
+      definirResumo(null);
+      definirConferindoCupons(false);
       definirProblemaDosCupons(null);
       return;
     }
     let ativo = true;
+    definirConferindoCupons(true);
     void (async () => {
       const { data, error, response } = await cliente.POST('/api/me/checkout/pagamento', {
         body: montarPagamento(entrega, promocional, selecionados),
@@ -115,6 +119,7 @@ export function usePagamentoDaCompra({
       if (!ativo) {
         return;
       }
+      definirConferindoCupons(false);
       const problema = data ? null : interpretarProblema(error, response.status);
       if (problema?.status === 404 && problema.detail === SEM_CHECKOUT) {
         aoPerderCheckout();
@@ -124,6 +129,8 @@ export function usePagamentoDaCompra({
       definirResumo(data ?? null);
     })().catch(() => {
       if (ativo) {
+        definirConferindoCupons(false);
+        definirResumo(null);
         definirProblemaDosCupons({ status: 0, detail: 'Não foi possível conferir os cupons. Tente novamente.' });
       }
     });
@@ -221,7 +228,7 @@ export function usePagamentoDaCompra({
   }
 
   async function conferir() {
-    if (entrega === null || resumo === null || enviando || finalizando) {
+    if (entrega === null || resumo === null || conferindoCupons || enviando || finalizando) {
       return;
     }
     const versao = selecao.current;
@@ -251,7 +258,7 @@ export function usePagamentoDaCompra({
   }
 
   async function finalizar() {
-    if (entrega === null || cobranca === null || resumo === null || enviando || finalizando) {
+    if (entrega === null || cobranca === null || resumo === null || conferindoCupons || enviando || finalizando) {
       return;
     }
     const naCompra = cartoesConferidosNaTela(resumo.restante);
@@ -330,6 +337,8 @@ export function usePagamentoDaCompra({
     selecionados,
     alternarCupom,
     resumo,
+    /** Os cupons estão sendo conferidos de novo; até lá, {@link resumo} é o da seleção anterior. */
+    conferindoCupons,
     problemaDosCupons,
     emUso,
     alternarCartao,

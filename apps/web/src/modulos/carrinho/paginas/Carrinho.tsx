@@ -6,6 +6,7 @@ import { Erro } from '../../../ui/Erro';
 import { Esqueleto } from '../../../ui/Esqueleto';
 import { Painel } from '../../../ui/Painel';
 import { Violacoes } from '../../../ui/Violacoes';
+import { CompraEmAndamento } from '../componentes/CompraEmAndamento';
 import { LinhaDoCarrinho } from '../componentes/LinhaDoCarrinho';
 import { PrazoDaReserva } from '../componentes/PrazoDaReserva';
 import { useCarrinho } from '../contextoDoCarrinho';
@@ -96,6 +97,8 @@ export default function Carrinho() {
         <Erro problema={problema} />
       )}
 
+      <CompraEmAndamento />
+
       {carrinho === null ? (
         <Esqueleto rotulo="Carregando o carrinho…" />
       ) : carrinho.itens.length === 0 ? (
@@ -125,12 +128,17 @@ export default function Carrinho() {
               <strong>{formatarDinheiro(carrinho.subtotal)}</strong>
             </p>
             <p class="campo__ajuda">Frete e cupons no pagamento. Incluir um livro renova o prazo da reserva.</p>
-            <Botao
-              disabled={iniciandoPagamento || carrinho.itens.some((item) => !item.precoUnitario)}
-              onClick={() => void irParaPagamento()}
-            >
-              Ir para pagamento
-            </Botao>
+            {carrinho.checkout ? (
+              // DEC-12: um checkout por cliente; estes itens entram na compra quando ela volta ao carrinho.
+              <p class="campo__ajuda">Para pagar estes itens, devolva a compra em andamento ao carrinho.</p>
+            ) : (
+              <Botao
+                disabled={iniciandoPagamento || carrinho.itens.some((item) => !item.precoUnitario)}
+                onClick={() => void irParaPagamento()}
+              >
+                Ir para pagamento
+              </Botao>
+            )}
             <BotaoLink variante="secundario" href="/">
               Continuar comprando
             </BotaoLink>

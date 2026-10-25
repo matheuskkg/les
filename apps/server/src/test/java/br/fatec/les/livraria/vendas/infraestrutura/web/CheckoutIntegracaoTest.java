@@ -92,6 +92,40 @@ class CheckoutIntegracaoTest {
     }
 
     @Test
+    void rfVen003_carrinhoSemCheckoutNaoInformaCompraEmAndamento() throws Exception {
+        mvc.perform(get("/api/me/carrinho").cookie(sessaoDe(ANA)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.checkout").doesNotExist());
+    }
+
+    @Test
+    void rfVen003_carrinhoInformaOCheckoutAbertoParaRetomarACompra() throws Exception {
+        adicionar(ANA, 7, 2).andExpect(status().isOk());
+        escrever(post("/api/me/checkout"), ANA).andExpect(status().isCreated());
+
+        adicionar(ANA, 1, 1)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.itens[*].livroId", contains(1)))
+                .andExpect(jsonPath("$.checkout.expiraEm").value("2026-10-24T16:00:00Z"))
+                .andExpect(jsonPath("$.checkout.quantidadeDeItens").value(2));
+        mvc.perform(get("/api/me/carrinho").cookie(sessaoDe(ANA)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.checkout.expiraEm").value("2026-10-24T16:00:00Z"))
+                .andExpect(jsonPath("$.checkout.quantidadeDeItens").value(2));
+    }
+
+    @Test
+    void rnVen014_checkoutVencidoNaoApareceNoCarrinho() throws Exception {
+        adicionar(ANA, 7, 2).andExpect(status().isOk());
+        escrever(post("/api/me/checkout"), ANA).andExpect(status().isCreated());
+        AGORA.set(INICIO.plusMinutes(61));
+
+        mvc.perform(get("/api/me/carrinho").cookie(sessaoDe(ANA)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.checkout").doesNotExist());
+    }
+
+    @Test
     void rfVen003_irParaPagamentoLevaItensEReservasAoCheckout() throws Exception {
         adicionar(ANA, 7, 2).andExpect(status().isOk());
         adicionar(ANA, 1, 1).andExpect(status().isOk());
@@ -161,7 +195,8 @@ class CheckoutIntegracaoTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.itens[*].livroId", contains(7)))
                 .andExpect(jsonPath("$.itens[0].quantidade").value(3))
-                .andExpect(jsonPath("$.expiraEm").value("2026-10-24T15:40:00Z"));
+                .andExpect(jsonPath("$.expiraEm").value("2026-10-24T15:40:00Z"))
+                .andExpect(jsonPath("$.checkout").doesNotExist());
 
         mvc.perform(get("/api/me/checkout").cookie(sessaoDe(ANA))).andExpect(status().isNotFound());
         assertThat(reservas.listarPorOrigem(OrigemReserva.CHECKOUT, checkoutId)).isEmpty();

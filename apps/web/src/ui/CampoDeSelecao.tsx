@@ -1,3 +1,5 @@
+import { abrirOpcoesPeloRotulo } from './abrirOpcoes';
+
 export interface OpcaoDeSelecao {
   valor: string;
   rotulo: string;
@@ -37,7 +39,7 @@ export function CampoDeSelecao({
 
   return (
     <div class={`campo${erro ? ' campo--com-erro' : ''}`}>
-      <label class="campo__rotulo" for={id}>
+      <label class="campo__rotulo" for={id} onClick={(evento) => abrirOpcoesPeloRotulo(evento, id)}>
         {rotulo}
         {required && (
           <span class="campo__obrigatorio" aria-hidden="true">

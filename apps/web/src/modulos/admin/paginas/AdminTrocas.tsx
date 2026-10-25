@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import { useLocation } from 'preact-iso';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
+import { CampoDeSelecao } from '../../../ui/CampoDeSelecao';
 import { Erro } from '../../../ui/Erro';
 import { useRecargaPorNotificacao } from '../../notificacoes';
 import {
@@ -9,7 +10,6 @@ import {
   consultaDasTrocas,
   lerEstadoDasTrocas,
   urlDasTrocas,
-  type FiltroDeStatus,
 } from '../regras/filtrosDeTrocas';
 import { formatarCpf, formatarDataHora } from '../../../compartilhado/formatacao';
 import { EtiquetaDeStatus } from '../../../ui/EtiquetaDeStatus';
@@ -74,24 +74,18 @@ export default function AdminTrocas() {
       </header>
 
       <div class="cartao">
-        <div class="campo">
-          <label class="campo__rotulo" for="filtro-status-da-troca">
-            Status
-          </label>
-          <select
-            id="filtro-status-da-troca"
-            class="campo__entrada"
-            value={estado.status}
-            onChange={(evento) =>
-              route(urlDasTrocas({ status: evento.currentTarget.value as FiltroDeStatus, pagina: 1 }))}
-          >
-            {OPCOES_DE_STATUS.map((opcao) => (
-              <option key={opcao.valor} value={opcao.valor}>
-                {opcao.rotulo}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CampoDeSelecao
+          id="filtro-status-da-troca"
+          rotulo="Status"
+          valor={estado.status}
+          opcoes={OPCOES_DE_STATUS}
+          aoMudar={(valor) => {
+            const opcao = OPCOES_DE_STATUS.find((item) => item.valor === valor);
+            if (opcao) {
+              route(urlDasTrocas({ status: opcao.valor, pagina: 1 }));
+            }
+          }}
+        />
       </div>
 
       {visivel === null ? (

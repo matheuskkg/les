@@ -41,6 +41,9 @@ interface ContextoDoCarrinho {
   /** Abre o checkout com os itens (RF-VEN-003, DEC-12); com um já aberto (409), volta a ele. */
   irParaPagamento: () => Promise<void>;
   iniciandoPagamento: boolean;
+  /** Encerra o checkout aberto e devolve os itens ao carrinho, somados aos que já estiverem lá (DEC-12). */
+  devolverCompra: () => Promise<void>;
+  devolvendoCompra: boolean;
   aviso: AvisoFlutuante | null;
   avisar: (aviso: AvisoFlutuante) => void;
 }
@@ -81,6 +84,7 @@ export function CarrinhoProvider({ children }: { children: ComponentChildren }) 
   const [problema, definirProblema] = useState<ProblemaDetalhe | null>(null);
   const [gavetaAberta, definirGavetaAberta] = useState(false);
   const [iniciandoPagamento, definirIniciandoPagamento] = useState(false);
+  const [devolvendoCompra, definirDevolvendoCompra] = useState(false);
   const [aviso, definirAviso] = useState<AvisoFlutuante | null>(null);
   const temporizador = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -171,6 +175,15 @@ export function CarrinhoProvider({ children }: { children: ComponentChildren }) 
     }
   }
 
+  async function devolverCompra() {
+    definirDevolvendoCompra(true);
+    try {
+      await aplicar(cliente.POST('/api/me/checkout/voltar'));
+    } finally {
+      definirDevolvendoCompra(false);
+    }
+  }
+
   function alterar(livroId: number, quantidade: number) {
     void aplicar(
       cliente.PUT('/api/me/carrinho/itens/{livroId}', { params: { path: { livroId } }, body: { quantidade } }),
@@ -226,6 +239,8 @@ export function CarrinhoProvider({ children }: { children: ComponentChildren }) 
         entrarParaComprar,
         irParaPagamento: () => irParaPagamento(),
         iniciandoPagamento,
+        devolverCompra,
+        devolvendoCompra,
         aviso,
         avisar,
       }}

@@ -19,6 +19,7 @@ export function useEntregaDaCompra(checkoutId: number | undefined, aoPerderCheck
   const [cobrancaSeparada, definirCobranca] = useState<EscolhaDeEndereco | null>(null);
   const [problema, definirProblema] = useState<ProblemaDetalhe | null>(null);
   const [frete, definirFrete] = useState<FreteDto | null>(null);
+  const [calculandoFrete, definirCalculandoFrete] = useState(false);
 
   const carregarEscolhaInicial = useCallback(() => {
     definirProblema(null);
@@ -43,14 +44,17 @@ export function useEntregaDaCompra(checkoutId: number | undefined, aoPerderCheck
     }
   }, [checkoutId, carregarEscolhaInicial]);
 
-  // RF-VEN-004: o frete depende só do endereço de entrega e dos itens do checkout.
+  // RF-VEN-004: o frete depende só do endereço de entrega e dos itens do checkout. O anterior fica na tela até o novo
+  // chegar, para a troca de endereço não esvaziar o resumo.
   useEffect(() => {
-    definirFrete(null);
     if (checkoutId === undefined || entrega === null) {
+      definirFrete(null);
+      definirCalculandoFrete(false);
       definirProblema(null);
       return;
     }
     let ativo = true;
+    definirCalculandoFrete(true);
     void (async () => {
       const { data, error, response } = await cliente.POST('/api/me/checkout/frete', {
         body: { entrega: escolhaParaApi(entrega) },
@@ -58,7 +62,9 @@ export function useEntregaDaCompra(checkoutId: number | undefined, aoPerderCheck
       if (!ativo) {
         return;
       }
+      definirCalculandoFrete(false);
       if (!data) {
+        definirFrete(null);
         const lido = interpretarProblema(error, response.status);
         if (lido.status === 404 && lido.detail === SEM_CHECKOUT) {
           // O checkout acabou (expirou ou foi encerrado): a tela passa a mostrar que não há compra em andamento.
@@ -72,6 +78,8 @@ export function useEntregaDaCompra(checkoutId: number | undefined, aoPerderCheck
       definirFrete(data);
     })().catch(() => {
       if (ativo) {
+        definirCalculandoFrete(false);
+        definirFrete(null);
         definirProblema({ status: 0, detail: 'Não foi possível calcular o frete. Tente novamente.' });
       }
     });
@@ -127,6 +135,8 @@ export function useEntregaDaCompra(checkoutId: number | undefined, aoPerderCheck
     cobranca: cobrancaIgual ? entrega : cobrancaSeparada,
     problema,
     frete,
+    /** O frete está sendo recalculado; até lá, {@link frete} é o do endereço anterior. */
+    calculandoFrete,
     carregarEscolhaInicial,
     usarNovoNaEntrega: (formulario: EnderecoDoFormulario, salvar: boolean) =>
       usarNovo(formulario, salvar, definirEntrega),

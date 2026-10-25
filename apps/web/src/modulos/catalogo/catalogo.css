@@ -82,19 +82,6 @@
   font-size: 0.95rem;
 }
 
-.resultado__ordem {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.resultado__ordem .campo__entrada {
-  /* A largura acompanha a opção escolhida; a altura compacta vem da variante compartilhada. */
-  width: auto;
-}
-
 .grade-de-livros {
   display: grid;
   gap: 1rem;

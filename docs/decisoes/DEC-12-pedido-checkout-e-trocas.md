@@ -31,7 +31,7 @@ cliente paga.
 - **Início:** em "Ir para pagamento", os itens saem do carrinho e vão para um checkout novo. As reservas passam para
   ele com prazo `livraria.checkout.prazo` (`Duration`, padrão `60m`), contado do início. O carrinho fica vazio e pode
   receber itens novos.
-- **Um checkout aberto por cliente.** Iniciar outro com um já aberto responde 409.
+- **Um checkout aberto por cliente.** Iniciar outro com um já aberto responde 409. (O carrinho informa o checkout aberto, com prazo e quantidade de itens, para o cliente voltar ao pagamento ou devolver a compra ao carrinho; com um aberto, os itens novos do carrinho só entram na compra depois dessa devolução.)
 - **Voltar ao carrinho:** os itens voltam ao carrinho, somados aos que já estiverem lá, e o bloqueio do carrinho
   recomeça ([DEC-05.1](DEC-05.1-bloqueio-do-carrinho.md)). O checkout é encerrado. Para mudar quantidades, o cliente
   volta ao carrinho.

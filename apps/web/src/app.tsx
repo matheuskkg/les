@@ -2,7 +2,16 @@ import type { ComponentType } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Router, Route } from 'preact-iso';
 import { Cabecalho, NaoEncontrada } from './layout';
-import { Admin, AdminAnalise, AdminCliente, AdminClientes, AdminPedido, AdminPedidos, AdminTrocas } from './modulos/admin';
+import {
+  Admin,
+  AdminAnalise,
+  AdminCliente,
+  AdminClientes,
+  AdminPedido,
+  AdminPedidos,
+  AdminTrocas,
+  NavegacaoDoAdmin,
+} from './modulos/admin';
 import { AvisoFlutuante } from './ui/AvisoFlutuante';
 import { Carrinho, GavetaDoCarrinho, useCarrinho } from './modulos/carrinho';
 import { Livro, Vitrine } from './modulos/catalogo';
@@ -90,7 +99,16 @@ function protegida(papel: Papel, Tela: ComponentType) {
 }
 
 const doCliente = (Tela: ComponentType) => protegida('CLIENTE', Tela);
-const doAdmin = (Tela: ComponentType) => protegida('ADMIN', Tela);
+/** Telas do administrador, todas com as abas das seções da administração acima. */
+function doAdmin(Tela: ComponentType) {
+  return protegida('ADMIN', function TelaDoAdmin() {
+    return (
+      <NavegacaoDoAdmin>
+        <Tela />
+      </NavegacaoDoAdmin>
+    );
+  });
+}
 
 // Criadas uma vez: um componente novo a cada render remontaria a tela.
 const AreaDoCliente = doCliente(MinhaConta);

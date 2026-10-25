@@ -9,3 +9,4 @@ export const AdminClientes = lazy(() => import('./paginas/AdminClientes'));
 export const AdminPedido = lazy(() => import('./paginas/AdminPedido'));
 export const AdminPedidos = lazy(() => import('./paginas/AdminPedidos'));
 export const AdminTrocas = lazy(() => import('./paginas/AdminTrocas'));
+export { NavegacaoDoAdmin } from './componentes/NavegacaoDoAdmin';

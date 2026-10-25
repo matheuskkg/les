@@ -664,3 +664,17 @@ select.campo__entrada--compacta:not([multiple]):not([size]) {
   white-space: nowrap;
   text-align: right;
 }
+
+/* "Ordenar por" das listas (SeletorDeOrdem). */
+.resultado__ordem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.resultado__ordem .campo__entrada {
+  /* A largura acompanha a opção escolhida; a altura compacta vem da variante compartilhada. */
+  width: auto;
+}

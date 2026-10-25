@@ -81,7 +81,8 @@ class CarrinhoIntegracaoTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.itens", hasSize(0)))
                 .andExpect(jsonPath("$.subtotal").value("0.00"))
-                .andExpect(jsonPath("$.expiraEm").doesNotExist());
+                .andExpect(jsonPath("$.expiraEm").doesNotExist())
+                .andExpect(jsonPath("$.checkout").doesNotExist());
     }
 
     @Test

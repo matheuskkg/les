@@ -13,10 +13,12 @@ interface Props {
   /** Texto do frete enquanto ele não vem: sem endereço, calculando ou com problema. */
   semFrete: string;
   pagamento: PagamentoConferido | null;
+  /** Frete ou cupons sendo recalculados: os valores mostrados ainda são os anteriores. */
+  atualizando: boolean;
 }
 
 /** Resumo fixo ao lado dos passos: itens, frete, descontos e o que falta pagar com cartão (RF-VEN-003, RF-VEN-004). */
-export function ResumoDaCompra({ checkout, frete, semFrete, pagamento }: Props) {
+export function ResumoDaCompra({ checkout, frete, semFrete, pagamento, atualizando }: Props) {
   return (
     <aside class="cartao resumo-da-compra" aria-label="Resumo da compra">
       <h2>Resumo</h2>
@@ -39,7 +41,7 @@ export function ResumoDaCompra({ checkout, frete, semFrete, pagamento }: Props) 
         ))}
       </ul>
 
-      <dl class="checkout__valores">
+      <dl class={`checkout__valores${atualizando ? ' checkout__valores--atualizando' : ''}`} aria-busy={atualizando}>
         <div class="linha-de-total">
           <dt>
             Subtotal ({checkout.quantidadeDeItens} {checkout.quantidadeDeItens === 1 ? 'item' : 'itens'})
