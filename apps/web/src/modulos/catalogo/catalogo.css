@@ -279,3 +279,42 @@
 .detalhe__campos dd {
   margin: 0.1rem 0 0;
 }
+
+/* "Recomendados para você" (RNF-REC-001): faixa rolável acima da vitrine, com os cartões da grade. */
+.recomendados {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.recomendados h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.recomendados__lista {
+  display: grid;
+  grid-auto-columns: minmax(10.5rem, 12rem);
+  grid-auto-flow: column;
+  gap: 1rem;
+  margin: 0;
+  padding: 0 0 0.5rem;
+  overflow-x: auto;
+  list-style: none;
+  scroll-snap-type: x proximity;
+}
+
+.recomendados__lista > li {
+  display: flex;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.recomendado__justificativa {
+  margin: 0;
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+}
+
+.recomendado .avaliacao {
+  margin-top: auto;
+}

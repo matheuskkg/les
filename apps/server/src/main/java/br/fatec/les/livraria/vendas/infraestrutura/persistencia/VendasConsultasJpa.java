@@ -14,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import br.fatec.les.livraria.clientes.dominio.ranking.CompraDoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.ItemVendido;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.LivroVendido;
 import br.fatec.les.livraria.vendas.aplicacao.porta.VendasConsultas;
+import br.fatec.les.livraria.vendas.dominio.pedido.CategoriaNoPedido;
 import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
 import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
 import br.fatec.les.livraria.vendas.infraestrutura.persistencia.PedidoJpaRepository.PedidoDoCliente;
@@ -48,6 +50,21 @@ public class VendasConsultasJpa implements VendasConsultas {
                 .map(item -> new ItemVendido(item.getRealizadoEm(), item.getLivro().categorias(),
                         Dinheiro.de(item.getPrecoUnitario()), item.getQuantidade(),
                         Math.toIntExact(trocadas.getOrDefault(item.getId(), 0L))))
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<LivroVendido> livrosVendidos() {
+        Map<Long, Long> trocadas = trocas.somarTrocadas(StatusTroca.TROCADO, CONTAM_COMO_VENDA).stream()
+                .collect(Collectors.toMap(QuantidadeTrocada::getItemId, QuantidadeTrocada::getQuantidade));
+        return itens.buscarDosPedidos(CONTAM_COMO_VENDA).stream()
+                .map(item -> new LivroVendido(item.getPedidoId(), item.getClienteId(), item.getLivro().id(),
+                        item.getLivro().titulo(), item.getLivro().autores(),
+                        item.getLivro().categorias().stream().map(CategoriaNoPedido::nome).toList(),
+                        item.getQuantidade() - Math.toIntExact(trocadas.getOrDefault(item.getId(), 0L)),
+                        item.getRealizadoEm()))
+                .filter(livro -> livro.quantidade() > 0)
                 .toList();
     }
 

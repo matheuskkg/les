@@ -45,7 +45,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar_7"];
+        get: operations["listar_8"];
         put?: never;
         post?: never;
         delete?: never;
@@ -162,7 +162,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar_6"];
+        get: operations["listar_7"];
         put?: never;
         post?: never;
         delete?: never;
@@ -242,7 +242,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar_5"];
+        get: operations["listar_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -326,7 +326,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar_4"];
+        get: operations["listar_5"];
         put?: never;
         post?: never;
         delete?: never;
@@ -601,7 +601,7 @@ export interface paths {
             cookie?: never;
         };
         /** Lista os cupons de troca disponíveis do cliente */
-        get: operations["listar_3"];
+        get: operations["listar_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -755,7 +755,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar_2"];
+        get: operations["listar_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -791,6 +791,40 @@ export interface paths {
         put?: never;
         /** Solicita a troca de itens de um pedido entregue do cliente autenticado */
         post: operations["solicitarTroca"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/recomendacoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recomendações personalizadas da vitrine; lista vazia quando não há o que recomendar */
+        get: operations["listar_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/recomendacoes/itens/{id}/avaliacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Avalia um item recomendado; a última avaliação vale */
+        put: operations["avaliar"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -865,6 +899,10 @@ export interface components {
             inicio: string;
             meses: string[];
             series: components["schemas"]["SerieDeVendasDto"][];
+        };
+        AvaliacaoDto: {
+            /** @enum {string} */
+            avaliacao: "POSITIVA" | "NEGATIVA";
         };
         BandeiraDaResposta: {
             /** Format: int64 */
@@ -1290,6 +1328,14 @@ export interface components {
             /** Format: int64 */
             itemPedidoId?: number;
             voltaEstoque?: boolean;
+        };
+        ItemRecomendadoDto: {
+            /** @enum {string} */
+            avaliacao?: "POSITIVA" | "NEGATIVA";
+            /** Format: int64 */
+            id: number;
+            justificativa?: string;
+            livro: components["schemas"]["LivroListadoDto"];
         };
         ItemRemovidoDoCarrinhoDto: {
             autores: string[];
@@ -1740,7 +1786,7 @@ export interface operations {
             };
         };
     };
-    listar_7: {
+    listar_8: {
         parameters: {
             query?: {
                 nome?: string;
@@ -1913,7 +1959,7 @@ export interface operations {
             };
         };
     };
-    listar_6: {
+    listar_7: {
         parameters: {
             query?: {
                 numero?: number;
@@ -2034,7 +2080,7 @@ export interface operations {
             };
         };
     };
-    listar_5: {
+    listar_6: {
         parameters: {
             query?: {
                 status?: ("EM_TROCA" | "TROCA_AUTORIZADA" | "TROCA_RECUSADA" | "TROCADO")[];
@@ -2250,7 +2296,7 @@ export interface operations {
             };
         };
     };
-    listar_4: {
+    listar_5: {
         parameters: {
             query?: {
                 titulo?: string;
@@ -3036,7 +3082,7 @@ export interface operations {
             };
         };
     };
-    listar_3: {
+    listar_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -3377,7 +3423,7 @@ export interface operations {
             };
         };
     };
-    listar_2: {
+    listar_3: {
         parameters: {
             query?: {
                 /** @description Página, a partir de 0. */
@@ -3470,6 +3516,68 @@ export interface operations {
             };
             /** @description Pedido não entregue, prazo vencido ou itens inválidos */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    listar_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ItemRecomendadoDto"][];
+                };
+            };
+        };
+    };
+    avaliar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AvaliacaoDto"];
+            };
+        };
+        responses: {
+            /** @description Avaliação gravada */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Avaliação ausente */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Item inexistente ou de outro cliente */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

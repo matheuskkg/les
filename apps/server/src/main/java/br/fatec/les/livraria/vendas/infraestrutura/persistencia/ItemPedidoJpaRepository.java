@@ -21,6 +21,27 @@ public interface ItemPedidoJpaRepository extends JpaRepository<ItemPedidoJpa, Lo
     List<ItemDoPeriodo> buscarDoPeriodo(@Param("status") Collection<StatusPedido> status,
             @Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fimExclusivo);
 
+    /** Itens de todos os pedidos com um dos status, com o pedido e o cliente, para a recomendação (RNF-REC-001). */
+    @Query("select i.id as id, i.livro as livro, i.quantidade as quantidade, p.id as pedidoId, "
+            + "p.clienteId as clienteId, p.realizadoEm as realizadoEm from ItemPedidoJpa i join i.pedido p "
+            + "where p.status in :status")
+    List<ItemDoCliente> buscarDosPedidos(@Param("status") Collection<StatusPedido> status);
+
+    interface ItemDoCliente {
+
+        Long getId();
+
+        LivroNoPedido getLivro();
+
+        int getQuantidade();
+
+        Long getPedidoId();
+
+        Long getClienteId();
+
+        LocalDateTime getRealizadoEm();
+    }
+
     interface ItemDoPeriodo {
 
         Long getId();

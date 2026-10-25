@@ -8,6 +8,7 @@ import java.util.Map;
 import br.fatec.les.livraria.clientes.dominio.ranking.CompraDoCliente;
 
 import br.fatec.les.livraria.vendas.aplicacao.consulta.ItemVendido;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.LivroVendido;
 
 /** Porta de saída das vendas consideradas na análise (RF-ANA-001, RN-ANA-004) e no ranking (RN-CLI-007), DEC-12. */
 public interface VendasConsultas {
@@ -27,4 +28,10 @@ public interface VendasConsultas {
      *         concluídas do pedido (RN-CLI-007, DEC-04, DEC-12)
      */
     Map<Long, List<CompraDoCliente>> comprasDosClientes(Collection<Long> clienteIds, LocalDateTime desde);
+
+    /**
+     * @return os livros de todos os pedidos cujo status conta como venda, com a quantidade menos a trocada em trocas
+     *         concluídas; itens trocados por inteiro não aparecem (RNF-REC-001, DEC-03)
+     */
+    List<LivroVendido> livrosVendidos();
 }

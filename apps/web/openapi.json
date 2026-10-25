@@ -149,7 +149,7 @@
     },
     "/api/admin/clientes" : {
       "get" : {
-        "operationId" : "listar_7",
+        "operationId" : "listar_8",
         "parameters" : [ {
           "in" : "query",
           "name" : "nome",
@@ -448,7 +448,7 @@
     },
     "/api/admin/pedidos" : {
       "get" : {
-        "operationId" : "listar_6",
+        "operationId" : "listar_7",
         "parameters" : [ {
           "in" : "query",
           "name" : "numero",
@@ -667,7 +667,7 @@
     },
     "/api/admin/trocas" : {
       "get" : {
-        "operationId" : "listar_5",
+        "operationId" : "listar_6",
         "parameters" : [ {
           "in" : "query",
           "name" : "status",
@@ -963,7 +963,7 @@
     },
     "/api/livros" : {
       "get" : {
-        "operationId" : "listar_4",
+        "operationId" : "listar_5",
         "parameters" : [ {
           "in" : "query",
           "name" : "titulo",
@@ -1979,7 +1979,7 @@
     },
     "/api/me/cupons-de-troca" : {
       "get" : {
-        "operationId" : "listar_3",
+        "operationId" : "listar_4",
         "responses" : {
           "200" : {
             "content" : {
@@ -2365,7 +2365,7 @@
     },
     "/api/me/pedidos" : {
       "get" : {
-        "operationId" : "listar_2",
+        "operationId" : "listar_3",
         "parameters" : [ {
           "description" : "Página, a partir de 0.",
           "in" : "query",
@@ -2508,6 +2508,79 @@
         },
         "summary" : "Solicita a troca de itens de um pedido entregue do cliente autenticado",
         "tags" : [ "meus-pedidos-controller" ]
+      }
+    },
+    "/api/me/recomendacoes" : {
+      "get" : {
+        "operationId" : "listar_2",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ItemRecomendadoDto"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Recomendações personalizadas da vitrine; lista vazia quando não há o que recomendar",
+        "tags" : [ "recomendacao-controller" ]
+      }
+    },
+    "/api/me/recomendacoes/itens/{id}/avaliacao" : {
+      "put" : {
+        "operationId" : "avaliar",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AvaliacaoDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Avaliação gravada"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Avaliação ausente"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Item inexistente ou de outro cliente"
+          }
+        },
+        "summary" : "Avalia um item recomendado; a última avaliação vale",
+        "tags" : [ "recomendacao-controller" ]
       }
     },
     "/api/me/senha" : {
@@ -2725,6 +2798,16 @@
           }
         },
         "required" : [ "fim", "inicio", "meses", "series" ]
+      },
+      "AvaliacaoDto" : {
+        "type" : "object",
+        "properties" : {
+          "avaliacao" : {
+            "type" : "string",
+            "enum" : [ "POSITIVA", "NEGATIVA" ]
+          }
+        },
+        "required" : [ "avaliacao" ]
       },
       "BandeiraDaResposta" : {
         "type" : "object",
@@ -3737,6 +3820,26 @@
             "type" : "boolean"
           }
         }
+      },
+      "ItemRecomendadoDto" : {
+        "type" : "object",
+        "properties" : {
+          "avaliacao" : {
+            "type" : "string",
+            "enum" : [ "POSITIVA", "NEGATIVA" ]
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "justificativa" : {
+            "type" : "string"
+          },
+          "livro" : {
+            "$ref" : "#/components/schemas/LivroListadoDto"
+          }
+        },
+        "required" : [ "id", "livro" ]
       },
       "ItemRemovidoDoCarrinhoDto" : {
         "type" : "object",

@@ -11,6 +11,8 @@ import { Erro } from '../../../ui/Erro';
 import { Esqueleto } from '../../../ui/Esqueleto';
 import { Paginacao } from '../../../ui/Paginacao';
 import { SeletorDeOrdem } from '../../../ui/SeletorDeOrdem';
+import { useSessao } from '../../sessao';
+import { Recomendados } from '../componentes/Recomendados';
 import {
   ORDENS,
   PAGINA_PADRAO,
@@ -23,6 +25,7 @@ import {
   type EstadoDaVitrine,
   type FiltrosDeLivros,
 } from '../regras/filtrosDeLivros';
+import { mostrarRecomendados } from '../regras/recomendados';
 
 type Categoria = components['schemas']['CategoriaDto'];
 type LivroListado = components['schemas']['LivroListadoDto'];
@@ -105,6 +108,7 @@ function Categorias({
  */
 export default function Vitrine() {
   const { url, route } = useLocation();
+  const { usuario } = useSessao();
   const busca = url.includes('?') ? url.slice(url.indexOf('?')) : '';
   const estado = useMemo(() => lerEstadoDaVitrine(busca), [busca]);
   const [filtros, definirFiltros] = useState<FiltrosDeLivros>(estado.filtros);
@@ -150,6 +154,10 @@ export default function Vitrine() {
           </Botao>
         )}
       </header>
+
+      {usuario?.papel === 'CLIENTE' && mostrarRecomendados(filtrosEmUso(estado.filtros), estado.pagina) && (
+        <Recomendados />
+      )}
 
       <div class="vitrine__corpo">
         <aside class="vitrine__lateral" aria-label="Filtros">

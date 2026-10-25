@@ -59,6 +59,16 @@ public interface TrocaJpaRepository extends JpaRepository<TrocaJpa, Long>, JpaSp
             @Param("fim") LocalDateTime fimExclusivo);
 
     /**
+     * Quantidade trocada de cada item dos pedidos com um dos status, só nas trocas com o status informado
+     * (RNF-REC-001, DEC-12).
+     */
+    @Query("select i.itemPedido.id as itemId, sum(i.quantidade) as quantidade from ItemTrocaJpa i "
+            + "join i.troca t join t.pedido p where t.status = :statusDaTroca and p.status in :status "
+            + "group by i.itemPedido.id")
+    List<QuantidadeTrocada> somarTrocadas(@Param("statusDaTroca") StatusTroca statusDaTroca,
+            @Param("status") Collection<StatusPedido> status);
+
+    /**
      * Soma dos cupons gerados pelas trocas com o status informado, por pedido dos clientes finalizado desde o
      * instante com um dos status (RN-CLI-007, DEC-12).
      */

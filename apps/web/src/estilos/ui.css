@@ -678,3 +678,35 @@ select.campo__entrada--compacta:not([multiple]):not([size]) {
   /* A largura acompanha a opção escolhida; a altura compacta vem da variante compartilhada. */
   width: auto;
 }
+
+/* BotoesDeAvaliacao: gostei / não gostei (RNF-REC-001). */
+.avaliacao {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.avaliacao__botao {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+  background: var(--cor-superficie);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.avaliacao__botao:hover:not(:disabled) {
+  border-color: var(--cor-borda-forte);
+}
+
+.avaliacao__botao--marcado {
+  border-color: var(--cor-primaria);
+  background: var(--cor-primaria-clara);
+}
+
+.avaliacao__botao:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}

@@ -108,7 +108,8 @@ Uma regra por arquivo, testável sem a IA:
 
 - Cada geração grava uma `recomendacao` do cliente com os itens (`item_recomendacao`: livro, posição e
   justificativa). A vitrine mostra a mais recente.
-- Ela é reaproveitada até a próxima compra do cliente ou por 24 horas. Passado isso, a próxima visita gera outra.
+- Ela é reaproveitada até a próxima compra do cliente ou por 24 horas. Passado isso, a próxima visita gera outra. (A compra é contada pelo número de pedidos do cliente que contam como venda, para um pedido aprovado depois
+  da geração também a invalidar; a gravada sem IA é reaproveitada por 1 hora, para a IA ser tentada de novo logo.)
 - Se toda a cadeia falhar, a recomendação é gravada com os candidatos na ordem da pontuação, sem justificativa e sem
   chamada associada.
 
