@@ -60,8 +60,14 @@ function BotaoDoCarrinho() {
 
 /** Faixa com a contagem regressiva da reserva enquanto há itens no carrinho (RNF-VEN-001). */
 function FaixaDeReserva() {
+  const { path } = useLocation();
   const { carrinho } = useCarrinho();
-  if (!carrinho?.expiraEm || carrinho.itens.length === 0) {
+  if (
+    path === '/carrinho' ||
+    path === '/checkout' ||
+    !carrinho?.expiraEm ||
+    carrinho.itens.length === 0
+  ) {
     return null;
   }
   return (
@@ -89,7 +95,7 @@ export function Cabecalho() {
         {usuario?.papel !== 'ADMIN' && <BuscaGlobal />}
 
         <nav class="navegacao" aria-label="Principal">
-          <a class="navegacao__link" href="/">
+          <a class="navegacao__link navegacao__link--inicio" href="/">
             Vitrine
           </a>
           {usuario?.papel === 'CLIENTE' && (

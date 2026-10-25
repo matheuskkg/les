@@ -117,11 +117,13 @@ p {
 }
 
 .marca {
+  flex: none;
   color: var(--cor-texto);
   font-family: var(--fonte-titulo);
   font-size: 1.45rem;
   font-weight: 700;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .marca:hover {
@@ -133,6 +135,7 @@ p {
   flex: 1 1 18rem;
   align-items: center;
   gap: 0.5rem;
+  min-width: 12rem;
   max-width: 34rem;
   padding: 0.15rem 0.35rem 0.15rem 0.9rem;
   background: var(--cor-fundo);
@@ -170,7 +173,7 @@ p {
 
 .navegacao {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.25rem;
   margin-left: auto;
@@ -187,6 +190,7 @@ p {
   font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .navegacao__link:hover {
@@ -215,8 +219,10 @@ p {
 
 .sessao {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.5rem;
+  flex: none;
 }
 
 .sessao__usuario {
@@ -250,6 +256,7 @@ p {
 .sessao__carregando {
   color: var(--cor-texto-suave);
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 /* Faixa do prazo de reserva do carrinho (RNF-VEN-001), logo abaixo do cabeçalho. */
@@ -395,14 +402,44 @@ p {
   margin-top: 0.35rem;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 900px) {
   .busca-global {
     order: 3;
     flex-basis: 100%;
     max-width: none;
   }
+}
+
+@media (max-width: 640px) {
+  .cabecalho__faixa {
+    gap: 0.35rem 0.5rem;
+    padding: 0.5rem clamp(0.75rem, 4vw, 1rem);
+  }
+
+  /* Marca e sessão na primeira linha; navegação inteira na segunda e busca na terceira. */
+  .navegacao {
+    order: 2;
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+
+  .navegacao__link {
+    padding: 0.4rem 0.55rem;
+    font-size: 0.9rem;
+  }
+
+  .sessao {
+    margin-left: auto;
+  }
 
   .sessao__nome {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Com outro link na navegação, a marca já leva à vitrine e o link secundário sai para tudo caber em 360px. */
+  .navegacao:has(.navegacao__link:not(.navegacao__link--inicio)) .navegacao__link--inicio {
     display: none;
   }
 }

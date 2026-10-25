@@ -26,6 +26,9 @@ test.describe('Sessão', () => {
   test('senha errada mostra mensagem de credenciais inválidas', async ({ page }) => {
     await page.goto('/login');
 
+    await expect(page.getByLabel('E-mail ou telefone')).toHaveAccessibleDescription(
+      'Você pode entrar com o e-mail ou o telefone do cadastro.',
+    );
     await page.getByLabel('E-mail ou telefone').fill(ADMIN.login);
     await page.getByLabel('Senha').fill('senha-errada');
     await page.getByRole('button', { name: 'Entrar' }).click();

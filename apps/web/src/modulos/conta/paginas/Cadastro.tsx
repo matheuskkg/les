@@ -211,6 +211,7 @@ export default function Cadastro() {
                 aoMudar={(valor) => atualizarFormulario({ nome: valor })}
                 name="nome"
                 autoComplete="name"
+                placeholder="Maria Silva"
                 required
                 erro={erros.nome}
               />
@@ -263,6 +264,7 @@ export default function Cadastro() {
               aoMudar={(valor) => atualizarFormulario({ email: valor })}
               name="email"
               autoComplete="email"
+              placeholder="nome@exemplo.com"
               required
               erro={erros.email}
             />
@@ -407,6 +409,7 @@ export default function Cadastro() {
                     valor={endereco.logradouro}
                     aoMudar={(valor) => atualizarEndereco(indice, { logradouro: valor })}
                     autoComplete="street-address"
+                    placeholder="Rua das Flores"
                     required
                     erro={erroDeEndereco(indice, 'logradouro')}
                   />
@@ -417,6 +420,7 @@ export default function Cadastro() {
                   rotulo="Número"
                   valor={endereco.numero}
                   aoMudar={(valor) => atualizarEndereco(indice, { numero: valor })}
+                  placeholder="123"
                   required
                   erro={erroDeEndereco(indice, 'numero')}
                 />
@@ -426,6 +430,7 @@ export default function Cadastro() {
                   rotulo="Bairro"
                   valor={endereco.bairro}
                   aoMudar={(valor) => atualizarEndereco(indice, { bairro: valor })}
+                  placeholder="Centro"
                   required
                   erro={erroDeEndereco(indice, 'bairro')}
                 />
@@ -447,6 +452,7 @@ export default function Cadastro() {
                   valor={endereco.cidade}
                   aoMudar={(valor) => atualizarEndereco(indice, { cidade: valor })}
                   autoComplete="address-level2"
+                  placeholder="São Paulo"
                   required
                   erro={erroDeEndereco(indice, 'cidade')}
                 />
@@ -475,6 +481,7 @@ export default function Cadastro() {
                     rotulo="Observações"
                     valor={endereco.observacoes}
                     aoMudar={(valor) => atualizarEndereco(indice, { observacoes: valor })}
+                    placeholder="Apto 12, portão azul"
                     ajuda="Opcional: complemento, ponto de referência etc."
                     erro={erroDeEndereco(indice, 'observacoes')}
                   />
@@ -531,6 +538,7 @@ export default function Cadastro() {
                   valor={cartao.nomeImpresso}
                   aoMudar={(valor) => atualizarCartao(indice, { nomeImpresso: valor })}
                   autoComplete="cc-name"
+                  placeholder="Como impresso no cartão"
                   required
                   erro={erroDeCartao(indice, 'nomeImpresso')}
                 />

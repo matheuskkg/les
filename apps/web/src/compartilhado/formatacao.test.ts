@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   tomDoStatus,
   formatarCep,
+  formatarCentavos,
   formatarCpf,
   formatarData,
   formatarDecimal,
@@ -42,6 +43,14 @@ test('formatarDinheiro devolve a entrada inalterada quando inválida', () => {
   assert.equal(formatarDinheiro('1e3'), '1e3');
   assert.equal(formatarDinheiro('  '), '  ');
   assert.equal(formatarDinheiro(''), '');
+});
+
+test('formatarCentavos formata centavos inteiros sem ponto flutuante', () => {
+  assert.equal(formatarCentavos(0), 'R$ 0,00');
+  assert.equal(formatarCentavos(5), 'R$ 0,05');
+  assert.equal(formatarCentavos(512), 'R$ 5,12');
+  assert.equal(formatarCentavos(123456), 'R$ 1.234,56');
+  assert.equal(formatarCentavos(-1050), '-R$ 10,50');
 });
 
 test('formatarDecimal usa vírgula pt-BR em números e strings', () => {

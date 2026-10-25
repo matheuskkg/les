@@ -28,21 +28,21 @@ export function CamposDoEndereco({ prefixo, formulario, aoMudar }: Props) {
           aoMudar={(valor) => aoMudar('tipoLogradouro', valor)} />
         <div class="campo--largo">
           <CampoDeFormulario id={`${prefixo}-logradouro`} rotulo="Logradouro" required valor={formulario.logradouro}
-            aoMudar={(valor) => aoMudar('logradouro', valor)} />
+            placeholder="Rua das Flores" aoMudar={(valor) => aoMudar('logradouro', valor)} />
         </div>
         <CampoDeFormulario id={`${prefixo}-numero`} rotulo="Número" required valor={formulario.numero}
-          aoMudar={(valor) => aoMudar('numero', valor)} />
+          placeholder="123" aoMudar={(valor) => aoMudar('numero', valor)} />
         <CampoDeFormulario id={`${prefixo}-bairro`} rotulo="Bairro" required valor={formulario.bairro}
-          aoMudar={(valor) => aoMudar('bairro', valor)} />
+          placeholder="Centro" aoMudar={(valor) => aoMudar('bairro', valor)} />
         <CampoDeFormulario id={`${prefixo}-cep`} rotulo="CEP" required mascara="cep" valor={formulario.cep}
-          aoMudar={(valor) => aoMudar('cep', valor)} />
+          placeholder="00000-000" aoMudar={(valor) => aoMudar('cep', valor)} />
         <CampoDeFormulario id={`${prefixo}-cidade`} rotulo="Cidade" required valor={formulario.cidade}
-          aoMudar={(valor) => aoMudar('cidade', valor)} />
+          placeholder="São Paulo" aoMudar={(valor) => aoMudar('cidade', valor)} />
         <CampoDeSelecao id={`${prefixo}-uf`} rotulo="UF" required valor={formulario.uf} opcoes={UFS}
           placeholder="Selecione" aoMudar={(valor) => aoMudar('uf', valor)} />
         <div class="campo--largo">
           <CampoDeFormulario id={`${prefixo}-observacoes`} rotulo="Observações" valor={formulario.observacoes}
-            aoMudar={(valor) => aoMudar('observacoes', valor)} />
+            placeholder="Apto 12, portão azul" aoMudar={(valor) => aoMudar('observacoes', valor)} />
         </div>
       </div>
       <p class="campo__ajuda">País: Brasil.</p>

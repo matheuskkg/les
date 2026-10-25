@@ -123,7 +123,7 @@ textarea.campo__entrada {
 
 /* Endereços e cartões da conta (RF-CLI-006, RF-CLI-007) */
 
-/* Resumo da conta: último pedido, cupons de troca e atalhos. */
+/* Resumo da conta: último pedido e cupons de troca. */
 .resumo-da-conta {
   display: grid;
   gap: 1rem;
@@ -141,11 +141,4 @@ textarea.campo__entrada {
   align-items: center;
   gap: 0.4rem;
   margin: 0;
-}
-
-.atalhos-da-conta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1.25rem;
-  font-weight: 600;
 }

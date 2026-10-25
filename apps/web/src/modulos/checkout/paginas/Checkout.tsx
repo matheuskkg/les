@@ -15,7 +15,7 @@ import { RevisaoDaCompra } from '../componentes/RevisaoDaCompra';
 import { SelecaoDeEndereco } from '../componentes/SelecaoDeEndereco';
 import { useEntregaDaCompra } from '../hooks/useEntregaDaCompra';
 import { usePagamentoDaCompra, type CompraFinalizada } from '../hooks/usePagamentoDaCompra';
-import { avisoDoValorDoCartao } from '../regras/pagamentoDaCompra';
+import { cartoesAceitos } from '../regras/pagamentoDaCompra';
 
 type CheckoutDto = components['schemas']['CheckoutDto'];
 
@@ -115,11 +115,11 @@ export default function Checkout() {
   const cartoesProntos =
     resumo !== null &&
     (resumo.restante === '0.00' ||
-      (pagamento.emUso.length > 0 &&
-        pagamento.emUso.every((chave) => {
-          const { valor, cvv } = pagamento.digitado(chave);
-          return valor !== '' && cvv !== '' && avisoDoValorDoCartao(valor, resumo.restante) === null;
-        })));
+      cartoesAceitos(
+        resumo.restante,
+        pagamento.comCupom,
+        pagamento.emUso.map((chave) => pagamento.digitado(chave)),
+      ));
   const cuponsUsados = (pagamento.promocional ? 1 : 0) + pagamento.selecionados.length;
   const passos = [
     { titulo: 'Entrega', concluido: entregaPronta },

@@ -161,6 +161,10 @@
   border-color: var(--cor-primaria);
 }
 
+.cartoes__legenda--erro {
+  color: var(--cor-erro);
+}
+
 .resumo-da-compra {
   position: sticky;
   top: calc(var(--altura-do-cabecalho) + 1rem);

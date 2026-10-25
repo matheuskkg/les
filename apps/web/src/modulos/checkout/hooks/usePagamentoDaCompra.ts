@@ -4,6 +4,8 @@ import type { components } from '../../../api/esquema';
 import { cartaoVazio, montarCartao, type CartaoDoFormulario } from '../../conta/regras/cadastroDeCliente';
 import type { EscolhaDeEndereco } from '../regras/escolhaDeEndereco';
 import {
+  excedenteEmCentavos as calcularExcedente,
+  faltaPagarEmCentavos as calcularFaltaPagar,
   montarFinalizacao,
   montarPagamento,
   problemasDosCartoes,
@@ -308,6 +310,15 @@ export function usePagamentoDaCompra({
     definirNovo((atual) => ({ ...atual, [campo]: valor }));
   }
 
+  /** Quanto falta pagar com os cartões em uso, já descontando o que foi digitado (RN-VEN-004). */
+  const valoresEmUso = emUso.map((chave) => digitado(chave).valor);
+  const faltaPagar =
+    resumo === null ? null : calcularFaltaPagar(resumo.restante, valoresEmUso);
+  /** Quanto os cartões passam do restante; independe da ordem de escolha (RN-VEN-004). */
+  const excedente = resumo === null ? 0 : calcularExcedente(resumo.restante, valoresEmUso);
+  /** O servidor libera a exceção do mínimo quando a compra usa algum cupom (RN-VEN-005). */
+  const comCupom = promocional !== null || selecionados.length > 0;
+
   return {
     cartoes,
     cupons,
@@ -324,6 +335,9 @@ export function usePagamentoDaCompra({
     alternarCartao,
     digitado,
     digitar,
+    faltaPagar,
+    excedente,
+    comCupom,
     novo,
     mudarNovo,
     salvarNovo: () => void salvarNovo(),

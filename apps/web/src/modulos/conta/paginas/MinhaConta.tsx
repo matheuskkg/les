@@ -83,7 +83,7 @@ function CuponsDeTroca() {
   );
 }
 
-/** Início da área do cliente: o andamento do último pedido, os cupons para usar e atalhos para as seções. */
+/** Início da área do cliente: o andamento do último pedido e os cupons para usar. */
 function Resumo() {
   const { usuario } = useSessao();
   return (
@@ -91,13 +91,6 @@ function Resumo() {
       <p class="resumo-da-conta__saudacao">Olá, {usuario?.nome}.</p>
       <UltimoPedido />
       <CuponsDeTroca />
-      <nav class="cartao atalhos-da-conta" aria-label="Atalhos da conta">
-        {secoes.slice(2).map((secao) => (
-          <a key={secao.caminho} href={secao.caminho}>
-            {secao.rotulo}
-          </a>
-        ))}
-      </nav>
     </div>
   );
 }

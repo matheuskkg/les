@@ -68,6 +68,15 @@ test.describe('Checkout', () => {
 
     await page.getByRole('group', { name: 'Cartões' }).getByLabel(/1111/).check();
     await expect(page.locator('#cartao-1-valor')).toHaveValue('4,88');
+    const cartoes = page.getByRole('group', { name: 'Cartões' });
+    await expect(cartoes).toContainText('falta pagar R$ 0,00');
+    await page.locator('#cartao-1-valor').fill('2,00');
+    await expect(cartoes).toContainText('falta pagar R$ 2,88');
+    await page.locator('#cartao-1-valor').fill('4,88');
+    await expect(cartoes).toContainText('falta pagar R$ 0,00');
+    await page.locator('#cartao-1-valor').fill('10,00');
+    await expect(cartoes).toContainText('passou R$ 5,12 do total');
+    await page.locator('#cartao-1-valor').fill('4,88');
     await page.getByRole('button', { name: 'Conferir pagamento' }).click();
     await expect(page.getByText('informe o código de segurança', { exact: false })).toBeVisible();
 

@@ -21,7 +21,7 @@ export function ResumoDaCompra({ checkout, frete, semFrete, pagamento }: Props) 
     <aside class="cartao resumo-da-compra" aria-label="Resumo da compra">
       <h2>Resumo</h2>
       <p class="reserva">
-        <PrazoDaReserva expiraEm={checkout.expiraEm} prefixo="Itens reservados por" />
+        <PrazoDaReserva expiraEm={checkout.expiraEm} prefixo="Reserva expira em:" />
       </p>
       <ul class="itens-da-conta resumo-da-compra__itens">
         {checkout.itens.map((item) => (

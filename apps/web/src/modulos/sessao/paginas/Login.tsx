@@ -48,9 +48,6 @@ export default function Login() {
   return (
     <section class="pagina pagina--estreita">
       <h1>Entrar</h1>
-      <p class="pagina__introducao">
-        Use o e-mail ou telefone cadastrado e sua senha para acessar sua conta.
-      </p>
 
       <form
         class="cartao formulario"
@@ -66,8 +63,9 @@ export default function Login() {
           aoMudar={definirLogin}
           name="login"
           autoComplete="username"
-          required
           ajuda="Você pode entrar com o e-mail ou o telefone do cadastro."
+          placeholder="nome@exemplo.com ou (11) 98765-4321"
+          required
         />
         <CampoDeFormulario
           id="senha"
@@ -89,10 +87,6 @@ export default function Login() {
           </Botao>
         </div>
       </form>
-
-      <p class="pagina__rodape">
-        Ainda não tem conta? <a href="/cadastro">Criar conta</a>.
-      </p>
     </section>
   );
 }

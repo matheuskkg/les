@@ -145,7 +145,7 @@ export function Dados() {
         <div class="grade-do-cadastro">
           <div class="campo--largo">
             <CampoDeFormulario id="dados-nome" rotulo="Nome" valor={formulario.nome} required
-              aoMudar={(valor) => mudar('nome', valor)} autoComplete="name" />
+              aoMudar={(valor) => mudar('nome', valor)} autoComplete="name" placeholder="Maria Silva" />
           </div>
           <CampoDeSelecao id="dados-genero" rotulo="Gênero" valor={formulario.genero} opcoes={GENEROS} required
             aoMudar={(valor) => {
@@ -157,9 +157,9 @@ export function Dados() {
           <CampoDeFormulario id="dados-nascimento" rotulo="Data de nascimento" tipo="date" required
             valor={formulario.dataNascimento} aoMudar={(valor) => mudar('dataNascimento', valor)} />
           <CampoDeFormulario id="dados-cpf" rotulo="CPF" valor={formulario.cpf ?? ''} required
-            mascara="cpf" aoMudar={(valor) => mudar('cpf', valor)} />
+            mascara="cpf" placeholder="000.000.000-00" aoMudar={(valor) => mudar('cpf', valor)} />
           <CampoDeFormulario id="dados-email" rotulo="E-mail" tipo="email" valor={formulario.email} required
-            autoComplete="email" aoMudar={(valor) => mudar('email', valor)} />
+            autoComplete="email" placeholder="nome@exemplo.com" aoMudar={(valor) => mudar('email', valor)} />
           <CampoDeSelecao id="dados-telefone-tipo" rotulo="Tipo de telefone" valor={formulario.telefone.tipo}
             opcoes={TIPOS_DE_TELEFONE} required
             aoMudar={(valor) => {
@@ -169,9 +169,9 @@ export function Dados() {
               }
             }} />
           <CampoDeFormulario id="dados-ddd" rotulo="DDD" valor={formulario.telefone.ddd} required
-            mascara="ddd" aoMudar={(valor) => mudarTelefone('ddd', valor)} />
+            mascara="ddd" placeholder="11" aoMudar={(valor) => mudarTelefone('ddd', valor)} />
           <CampoDeFormulario id="dados-numero" rotulo="Número" valor={formulario.telefone.numero} required
-            mascara="telefone" aoMudar={(valor) => mudarTelefone('numero', valor)} />
+            mascara="telefone" placeholder="98765-4321" aoMudar={(valor) => mudarTelefone('numero', valor)} />
         </div>
 
         <div class="acoes">

@@ -14,11 +14,12 @@ export function CamposDoCartao({ prefixo, formulario, aoMudar }: Props) {
   return (
     <div class="grade-do-cadastro">
       <CampoDeFormulario id={`${prefixo}-numero`} rotulo="Número do cartão" required mascara="numeroDoCartao"
-        autoComplete="cc-number" valor={formulario.numero}
+        autoComplete="cc-number" valor={formulario.numero} placeholder="0000 0000 0000 0000"
         ajuda={ajudaDaBandeira(formulario.numero)}
         aoMudar={(valor) => aoMudar('numero', valor)} />
       <CampoDeFormulario id={`${prefixo}-nome`} rotulo="Nome impresso" required autoComplete="cc-name"
-        valor={formulario.nomeImpresso} aoMudar={(valor) => aoMudar('nomeImpresso', valor)} />
+        valor={formulario.nomeImpresso} placeholder="Como impresso no cartão"
+        aoMudar={(valor) => aoMudar('nomeImpresso', valor)} />
       <CampoDeFormulario id={`${prefixo}-validade`} rotulo="Validade" tipo="month" required
         valor={formulario.validade} aoMudar={(valor) => aoMudar('validade', valor)} />
     </div>

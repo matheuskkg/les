@@ -1,12 +1,19 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  AVISO_MINIMO_POR_CARTAO,
+  AVISO_UNICO_CARTAO,
   avisoDoValorDoCartao,
+  cartoesAceitos,
+  centavosDigitados,
   cvvValido,
   emCentavos,
+  excedenteEmCentavos,
+  faltaPagarEmCentavos,
   montarFinalizacao,
   montarPagamento,
   problemasDosCartoes,
+  totalDigitadoEmCentavos,
   valorParaApi,
   valorParaCampo,
 } from './pagamentoDaCompra.ts';
@@ -80,16 +87,86 @@ test('emCentavos converte o decimal da API sem ponto flutuante', () => {
   assert.equal(emCentavos('abc'), null);
 });
 
-test('RN-VEN-004: cartão com menos de R$ 10,00 é apontado no campo', () => {
-  assert.equal(avisoDoValorDoCartao('9,99', '59.88'), 'Mínimo de R$ 10,00 por cartão.');
-  assert.equal(avisoDoValorDoCartao('10,00', '59.88'), null);
-  assert.equal(avisoDoValorDoCartao('', '59.88'), null);
+test('centavosDigitados lê o valor digitado e ignora vazio ou ilegível', () => {
+  assert.equal(centavosDigitados('4,88'), 488);
+  assert.equal(centavosDigitados('R$ 1.234,56'), 123456);
+  assert.equal(centavosDigitados(''), null);
+  assert.equal(centavosDigitados('dez'), null);
 });
 
-test('RN-VEN-004: com menos de R$ 10,00 a pagar, o cartão paga o restante', () => {
-  assert.equal(avisoDoValorDoCartao('4,50', '4.50'), null);
+test('RN-VEN-004: cartão com menos de R$ 10,00 é apontado em qualquer posição', () => {
+  assert.equal(avisoDoValorDoCartao('9,99', '59.88', false, 2), AVISO_MINIMO_POR_CARTAO);
+  assert.equal(avisoDoValorDoCartao('10,00', '59.88', false, 2), null);
+  assert.equal(avisoDoValorDoCartao('', '59.88', false, 2), null);
+
+  // Review: 55,00 + 4,88 para 59,88 sem cupom: o segundo cartão não pode ficar abaixo do mínimo.
+  assert.equal(avisoDoValorDoCartao('55,00', '59.88', false, 2), null);
+  assert.equal(avisoDoValorDoCartao('4,88', '59.88', false, 2), AVISO_MINIMO_POR_CARTAO);
 });
 
-test('o valor de um cartão não passa do que falta pagar', () => {
-  assert.equal(avisoDoValorDoCartao('60,00', '59.88'), 'O valor passa do que falta pagar.');
+test('RN-VEN-004: sem cupom, restante abaixo de R$ 10,00 continua exigindo o mínimo', () => {
+  assert.equal(avisoDoValorDoCartao('4,50', '4.50', false, 1), AVISO_MINIMO_POR_CARTAO);
+});
+
+test('RN-VEN-005: com cupom, restante abaixo de R$ 10,00 só aceita um cartão', () => {
+  // Review: cupom, restante 8,00 e dois cartões de 4,00: a exceção não vale para dois cartões.
+  assert.equal(avisoDoValorDoCartao('4,00', '8.00', true, 2), AVISO_UNICO_CARTAO);
+  assert.equal(avisoDoValorDoCartao('4,00', '8.00', true, 1), null);
+  assert.equal(avisoDoValorDoCartao('8,00', '8.00', true, 1), null);
+});
+
+test('o sobrepagamento é do conjunto, independente da ordem dos cartões', () => {
+  assert.equal(excedenteEmCentavos('59.88', ['55,00', '4,88']), 0);
+  assert.equal(excedenteEmCentavos('59.88', ['4,88', '55,00']), 0);
+  assert.equal(excedenteEmCentavos('59.88', ['55,00', '10,00']), 512);
+  assert.equal(excedenteEmCentavos('59.88', ['10,00', '55,00']), 512);
+  assert.equal(excedenteEmCentavos('59.88', ['60,00']), 12);
+});
+
+test('a etapa Cartões só fica pronta quando o servidor aceitaria os cartões', () => {
+  // Review: 55,00 + 4,88 para 59,88 sem cupom: o segundo cartão viola o mínimo de R$ 10,00.
+  assert.equal(
+    cartoesAceitos('59.88', false, [
+      { valor: '55,00', cvv: '123' },
+      { valor: '4,88', cvv: '123' },
+    ]),
+    false,
+  );
+
+  // Review: cupom, restante 8,00 e dois cartões de 4,00: a exceção só vale para um cartão.
+  assert.equal(
+    cartoesAceitos('8.00', true, [
+      { valor: '4,00', cvv: '123' },
+      { valor: '4,00', cvv: '123' },
+    ]),
+    false,
+  );
+  assert.equal(cartoesAceitos('8.00', true, [{ valor: '8,00', cvv: '123' }]), true);
+
+  assert.equal(cartoesAceitos('59.88', false, [{ valor: '59,88', cvv: '123' }]), true);
+  assert.equal(cartoesAceitos('4.50', false, [{ valor: '4,50', cvv: '123' }]), false);
+  assert.equal(
+    cartoesAceitos('59.88', false, [
+      { valor: '55,00', cvv: '123' },
+      { valor: '10,00', cvv: '123' },
+    ]),
+    false,
+  );
+  assert.equal(cartoesAceitos('59.88', false, [{ valor: '59,88', cvv: '12' }]), false);
+  assert.equal(cartoesAceitos('0.00', false, []), true);
+  assert.equal(cartoesAceitos('0.00', false, [{ valor: '10,00', cvv: '123' }]), false);
+});
+
+test('RN-VEN-004: o que falta pagar considera os valores digitados nos cartões', () => {
+  assert.equal(faltaPagarEmCentavos('59.88', []), 5988);
+  assert.equal(faltaPagarEmCentavos('59.88', ['10,00']), 4988);
+  assert.equal(faltaPagarEmCentavos('59.88', ['10,00', '49,88']), 0);
+  assert.equal(faltaPagarEmCentavos('59.88', ['60,00']), 0);
+  assert.equal(faltaPagarEmCentavos('59.88', ['dez', '', '5,00']), 5488);
+  assert.equal(faltaPagarEmCentavos('4.50', ['4,50']), 0);
+});
+
+test('totalDigitadoEmCentavos soma o que foi digitado e ignora o resto', () => {
+  assert.equal(totalDigitadoEmCentavos(['10,00', '49,88']), 5988);
+  assert.equal(totalDigitadoEmCentavos(['dez', '', '5,00']), 500);
 });

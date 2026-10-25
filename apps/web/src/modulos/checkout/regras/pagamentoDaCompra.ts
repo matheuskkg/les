@@ -48,31 +48,113 @@ export function emCentavos(valor: string): number | null {
   return Number(reais) * 100 + Number(centavos.padEnd(2, '0'));
 }
 
-export const MINIMO_POR_CARTAO_EM_CENTAVOS = 1000;
+/** Valor digitado em reais convertido em centavos inteiros; `null` se vazio ou ilegível. */
+export function centavosDigitados(texto: string): number | null {
+  const api = valorParaApi(texto);
+  return api === null ? null : emCentavos(api);
+}
+
+/** Soma dos valores digitados, em centavos, ignorando campos vazios ou ilegíveis. */
+export function totalDigitadoEmCentavos(valoresDigitados: ReadonlyArray<string>): number {
+  return valoresDigitados.reduce((total, texto) => total + (centavosDigitados(texto) ?? 0), 0);
+}
 
 /**
- * Aviso do campo de valor de um cartão (RN-VEN-004): mínimo de R$ 10,00, a menos que o restante a pagar seja menor
- * que isso, quando um cartão paga o restante inteiro. Campo vazio ou ilegível não gera aviso aqui: quem aponta é
+ * Quanto ainda falta pagar depois dos valores digitados nos cartões (RF-VEN-006, RN-VEN-004), em centavos: parte do
+ * restante calculado com os cupons e desconta o que o cliente já digitou, ignorando campos vazios ou ilegíveis. O
+ * valor nunca fica negativo.
+ */
+export function faltaPagarEmCentavos(
+  restante: string,
+  valoresDigitados: ReadonlyArray<string>,
+): number {
+  const aPagar = emCentavos(restante);
+  if (aPagar === null) {
+    return 0;
+  }
+  return Math.max(aPagar - totalDigitadoEmCentavos(valoresDigitados), 0);
+}
+
+/** Quanto os cartões passam do restante, em centavos; zero quando ainda falta ou fecha exatamente (RN-VEN-004). */
+export function excedenteEmCentavos(
+  restante: string,
+  valoresDigitados: ReadonlyArray<string>,
+): number {
+  const aPagar = emCentavos(restante);
+  if (aPagar === null) {
+    return 0;
+  }
+  return Math.max(totalDigitadoEmCentavos(valoresDigitados) - aPagar, 0);
+}
+
+export const MINIMO_POR_CARTAO_EM_CENTAVOS = 1000;
+
+export const AVISO_MINIMO_POR_CARTAO = 'Mínimo de R$ 10,00 por cartão.';
+export const AVISO_UNICO_CARTAO =
+  'Com cupom e restante abaixo de R$ 10,00, use um único cartão para o restante.';
+
+/**
+ * Aviso do campo de valor de um cartão (RN-VEN-004, RN-VEN-005), o mesmo em qualquer ordem de escolha: cada cartão
+ * exige R$ 10,00, salvo quando há cupom e o restante total é menor que isso, pago com um único cartão. O
+ * sobrepagamento é conferido no conjunto, por {@link excedenteEmCentavos}; campo vazio ou ilegível fica para
  * {@link problemasDosCartoes}.
  */
-export function avisoDoValorDoCartao(valorDigitado: string, restante: string): string | null {
-  const api = valorParaApi(valorDigitado);
-  const valor = api === null ? null : emCentavos(api);
+export function avisoDoValorDoCartao(
+  valorDigitado: string,
+  restante: string,
+  comCupom: boolean,
+  quantidadeDeCartoes: number,
+): string | null {
+  const valor = centavosDigitados(valorDigitado);
   const aPagar = emCentavos(restante);
   if (valor === null || aPagar === null) {
     return null;
   }
-  if (valor > aPagar) {
-    return 'O valor passa do que falta pagar.';
+  if (comCupom && aPagar < MINIMO_POR_CARTAO_EM_CENTAVOS) {
+    return quantidadeDeCartoes > 1 ? AVISO_UNICO_CARTAO : null;
   }
-  if (valor < MINIMO_POR_CARTAO_EM_CENTAVOS && aPagar >= MINIMO_POR_CARTAO_EM_CENTAVOS) {
-    return 'Mínimo de R$ 10,00 por cartão.';
-  }
-  return null;
+  return valor < MINIMO_POR_CARTAO_EM_CENTAVOS ? AVISO_MINIMO_POR_CARTAO : null;
 }
 
 export function cvvValido(cvv: string): boolean {
   return /^\d{3,4}$/.test(cvv.trim());
+}
+
+/** Valor e código de segurança digitados em um cartão, como a tela os entrega à conferência. */
+export interface CartaoDigitado {
+  valor: string;
+  cvv: string;
+}
+
+/**
+ * Se o servidor aceitaria os cartões digitados (RN-VEN-004, RN-VEN-005): todos com valor e código de segurança
+ * válidos, cada um no mínimo de R$ 10,00 (salvo a exceção de um único cartão com cupom e restante menor), somando
+ * exatamente o restante. É a mesma conferência que libera a etapa Cartões.
+ */
+export function cartoesAceitos(
+  restante: string,
+  comCupom: boolean,
+  cartoes: ReadonlyArray<CartaoDigitado>,
+): boolean {
+  const aPagar = emCentavos(restante);
+  if (aPagar === null) {
+    return false;
+  }
+  if (aPagar === 0) {
+    return cartoes.length === 0;
+  }
+  if (cartoes.length === 0) {
+    return false;
+  }
+  if (totalDigitadoEmCentavos(cartoes.map((cartao) => cartao.valor)) !== aPagar) {
+    return false;
+  }
+  return cartoes.every(
+    (cartao) =>
+      centavosDigitados(cartao.valor) !== null &&
+      cvvValido(cartao.cvv) &&
+      avisoDoValorDoCartao(cartao.valor, restante, comCupom, cartoes.length) === null,
+  );
 }
 
 /** Problemas que a tela aponta antes de conferir: valor e código de segurança de cada cartão (RN-VEN-004, DEC-10). */

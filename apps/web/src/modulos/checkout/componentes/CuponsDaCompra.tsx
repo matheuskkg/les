@@ -23,6 +23,7 @@ export function CuponsDaCompra({ pagamento }: { pagamento: PagamentoDaCompra }) 
           rotulo="Cupom promocional"
           valor={codigo}
           aoMudar={definirCodigo}
+          placeholder="BEMVINDO10"
           ajuda="Um cupom promocional por compra."
         />
         <div class="acoes">

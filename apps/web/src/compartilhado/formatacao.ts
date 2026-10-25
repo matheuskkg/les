@@ -60,6 +60,13 @@ export function formatarDinheiro(valor: string): string {
   return `${negativo ? '-' : ''}R$ ${comMilhares},${centavos}`;
 }
 
+/** Centavos inteiros como "R$ 1.234,56", sem passar por ponto flutuante. */
+export function formatarCentavos(centavos: number): string {
+  const absoluto = Math.abs(Math.trunc(centavos));
+  const reais = String(Math.floor(absoluto / 100)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${centavos < 0 ? '-' : ''}R$ ${reais},${String(absoluto % 100).padStart(2, '0')}`;
+}
+
 /**
  * Decimal da API (número ou string, como "21.5") com vírgula pt-BR ("21,5").
  * Usado em medidas e peso, que não têm duas casas fixas como o dinheiro.

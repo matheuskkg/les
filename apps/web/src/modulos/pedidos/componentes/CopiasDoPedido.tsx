@@ -1,5 +1,6 @@
 import type { components } from '../../../api/esquema';
 import { formatarCep, formatarCpf, formatarDinheiro, textoDoStatus } from '../../../compartilhado/formatacao';
+import { textoDaEdicao } from '../regras/edicao';
 
 type PedidoDetalhe = components['schemas']['PedidoDetalheDto'];
 type EnderecoNoPedido = components['schemas']['EnderecoNoPedido'];
@@ -58,22 +59,25 @@ export function CopiasDoPedido({ pedido, linkDoCliente }: { pedido: PedidoDetalh
               </tr>
             </thead>
             <tbody>
-              {pedido.itens.map((item) => (
-                <tr key={item.id}>
-                  <td>
-                    <strong>{item.livro.titulo}</strong>
-                    <br />
-                    {item.livro.autores.join(', ')} — {item.livro.editora}, {item.livro.edicao} edição, ISBN{' '}
-                    {item.livro.isbn}
-                    <br />
-                    {item.livro.categorias.map((categoria) => categoria.nome).join(', ')}
-                  </td>
-                  <td>{formatarDinheiro(item.precoUnitario)}</td>
-                  <td>{item.quantidade}</td>
-                  <td>{formatarDinheiro(item.subtotal)}</td>
-                  <td>{item.statusDaTroca ? textoDoStatus(item.statusDaTroca) : '—'}</td>
-                </tr>
-              ))}
+              {pedido.itens.map((item) => {
+                const edicao = textoDaEdicao(item.livro.edicao);
+                return (
+                  <tr key={item.id}>
+                    <td>
+                      <strong>{item.livro.titulo}</strong>
+                      <br />
+                      {item.livro.autores.join(', ')} — {item.livro.editora}
+                      {edicao && `, ${edicao}`}, ISBN {item.livro.isbn}
+                      <br />
+                      {item.livro.categorias.map((categoria) => categoria.nome).join(', ')}
+                    </td>
+                    <td>{formatarDinheiro(item.precoUnitario)}</td>
+                    <td>{item.quantidade}</td>
+                    <td>{formatarDinheiro(item.subtotal)}</td>
+                    <td>{item.statusDaTroca ? textoDoStatus(item.statusDaTroca) : '—'}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

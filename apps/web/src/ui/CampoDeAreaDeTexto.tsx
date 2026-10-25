@@ -7,6 +7,7 @@ interface Props {
   linhas?: number;
   ajuda?: string;
   erro?: string;
+  placeholder?: string;
 }
 
 /** Área de texto nativa com as mesmas classes, ajuda e erro dos demais campos. */
@@ -19,6 +20,7 @@ export function CampoDeAreaDeTexto({
   linhas = 3,
   ajuda,
   erro,
+  placeholder,
 }: Props) {
   const idDaAjuda = ajuda ? `${id}-ajuda` : undefined;
   const idDoErro = erro ? `${id}-erro` : undefined;
@@ -35,6 +37,7 @@ export function CampoDeAreaDeTexto({
         name={name ?? id}
         rows={linhas}
         value={valor}
+        placeholder={placeholder}
         aria-invalid={erro ? 'true' : undefined}
         aria-describedby={descricao !== '' ? descricao : undefined}
         onInput={(evento) => aoMudar(evento.currentTarget.value)}
