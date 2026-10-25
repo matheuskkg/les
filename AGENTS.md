@@ -19,40 +19,26 @@ Bancos PostgreSQL e H2, escolhidos por profile (`h2` padrão, `postgres`). Sem m
 seed por scripts executados na inicialização. Arquitetura hexagonal por módulo, com uma regra/validação/operação por
 arquivo; leia [`docs/arquitetura.md`](docs/arquitetura.md) antes de implementar no `server`.
 
-Stack do `web`: Preact + Vite + TypeScript, com `preact-iso` (rotas), `uplot` (gráficos) e `openapi-fetch` (cliente
-da API, com tipos gerados do OpenAPI do `server`), CSS puro e formulários nativos. Mantenha as dependências mínimas
-(lista fechada em `docs/decisoes/DEC-01-stack-do-web.md`, ampliada por
-`docs/decisoes/DEC-07-convencoes-da-api-rest.md`). E2E com Playwright usando o Chrome instalado
-(`channel: 'chrome'`), sem baixar navegadores.
+Stack do `web`: Preact + Vite + TypeScript, CSS puro e formulários nativos, com a lista fechada de dependências do
+DEC-01 (ampliada pelo DEC-07); leia [`DEC-17`](docs/decisoes/DEC-17-organizacao-do-web.md) antes de implementar no
+`web`. E2E com Playwright usando o Chrome instalado (`channel: 'chrome'`), sem baixar navegadores.
 
-Comandos do `server` (rodar em `apps/server`):
+Comandos do `server` (rodar em `apps/server`; o profile `postgres` usa o `docker-compose.yml` e as variáveis de
+`application-postgres.yml`):
 
 ```bash
 mvn test                                    # testes (unitários, integração em H2 e ArchUnit)
 mvn spring-boot:run                         # executa com H2 em memória (profile padrão)
-docker compose up -d                        # Postgres local
-mvn spring-boot:run -Dspring-boot.run.profiles=postgres
 ```
 
-Variáveis do profile `postgres`: `DB_PORTA` (padrão `5432`, usada pelo Compose e pela aplicação; exporte, por
-exemplo, `DB_PORTA=5433` se a 5432 estiver ocupada), `DB_USUARIO` e `DB_SENHA` (padrão `livraria`) e `DB_URL`
-(sobrescreve a URL inteira).
+No `web` (`apps/web`), os scripts estão no `package.json`; `npm run e2e` sobe o server (h2,e2e) e o Vite sozinho.
 
-Comandos do `web` (rodar em `apps/web`):
+Ao mudar a API, grave o contrato e regenere os tipos do `web`:
 
 ```bash
-npm install                                 # instala as dependências (lista fechada em DEC-01 e DEC-07)
-npm run dev                                 # Vite em http://localhost:5173, com proxy de /api e /v3 para o server
-npm run build                               # checagem de tipos + build em apps/web/dist
-npm run gerar-api                           # regenera src/api/esquema.d.ts a partir de openapi.json
-npm run typecheck                           # só a checagem de tipos
-npm test                                    # testes unitários com o runner do Node (node --test)
-npm run e2e                                 # Playwright com o Chrome instalado; sobe o server (h2,e2e) e o web sozinho
-npm run e2e:relatorio                       # abre o relatório HTML da última execução
+mvn test -Dtest=ContratoOpenApiTest -Dlivraria.openapi.gravar=true   # em apps/server: atualiza apps/web/openapi.json
+npm run gerar-api                                                      # em apps/web: atualiza src/api/esquema.d.ts
 ```
-
-A CI (`.github/workflows/ci.yml`, GitHub Actions) roda a cada push no `master` e em pull requests: `mvn test` no `server`; tipos da
-API em dia com o `openapi.json`, `typecheck`, `test` e `build` no `web`; e, se os dois passarem, os E2E.
 
 O jar único da demonstração é montado rodando `npm run build` em `apps/web` e depois `mvn package` em
 `apps/server` (o server copia `apps/web/dist` para `static/`, DEC-09).
@@ -78,8 +64,7 @@ Na dúvida se algo está no escopo, pergunte em vez de implementar.
 Não há nada em produção. Consequências:
 
 - Não se preocupe com LGPD/GDPR, anonimização ou retenção de dados.
-- Migrations não precisam de backfill nem de compatibilidade com dados existentes; pode-se editar/reescrever
-  migrations e resetar o banco de desenvolvimento livremente.
+- O schema e o seed podem mudar sem compatibilidade com dados existentes; o banco pode ser resetado livremente.
 - Dados de teste (inclusive cartões fictícios) podem ficar no seed.
 - A operadora de cartão (`RN-VEN-007`) e o cálculo de frete (`RF-VEN-004`) podem ser simulados por um serviço fake
   com regras determinísticas.
@@ -88,9 +73,8 @@ Não há nada em produção. Consequências:
 
 - Idioma: domínio, requisitos e textos da UI em **português**; identificadores de código seguem a convenção da stack
   (preferência por nomes de domínio em português, consistentes com o DRS: `Cliente`, `Pedido`, `CupomTroca`...).
-- Status de pedido exatamente como no DRS: `EM PROCESSAMENTO`, `APROVADA`, `REPROVADA`, `EM TRANSPORTE`, `ENTREGUE`,
-  `EM TROCA`, `TROCA AUTORIZADA`, `TROCADO`. O pedido usa só os cinco primeiros; os de troca, mais `TROCA RECUSADA`,
-  ficam na entidade `Troca` (`docs/decisoes/DEC-12-pedido-checkout-e-trocas.md`).
+- Status de pedido e de troca exatamente como no DRS, divididos entre `Pedido` e `Troca` conforme o
+  [`DEC-12`](docs/decisoes/DEC-12-pedido-checkout-e-trocas.md).
 - Regras de negócio ficam na camada de domínio/serviço, não em controllers nem na UI; cada validação deve ser
   testável isoladamente.
 - Valores monetários com tipo decimal exato (nunca float); formatação `R$ 1.234,56` na UI.
