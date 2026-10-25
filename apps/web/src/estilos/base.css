@@ -143,9 +143,11 @@ p {
   border-radius: 999px;
 }
 
-.busca-global:focus-within {
+.busca-global:has(input:focus-visible),
+.busca-global:has(button:focus-visible) {
   border-color: var(--cor-primaria);
-  outline: 2px solid var(--cor-primaria-clara);
+  outline: 3px solid var(--cor-primaria);
+  outline-offset: 2px;
 }
 
 .busca-global input {
@@ -156,6 +158,7 @@ p {
   border: 0;
   color: inherit;
   font: inherit;
+  /* O anel de foco é desenhado no contêiner quando o campo recebe foco por teclado. */
   outline: none;
 }
 
@@ -169,6 +172,8 @@ p {
   font: inherit;
   font-size: 0.9rem;
   font-weight: 600;
+  /* O anel do contêiner cobre o botão, evitando dois anéis sobrepostos. */
+  outline: none;
 }
 
 .navegacao {

@@ -28,33 +28,6 @@
   gap: 1rem;
 }
 
-.grupo-de-categorias {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.grupo-de-categorias legend {
-  margin-bottom: 0.4rem;
-  padding: 0;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--cor-texto-suave);
-}
-
-.categoria-opcao {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
-  cursor: pointer;
-}
-
 .mais-filtros {
   border-top: 1px solid var(--cor-borda);
   padding-top: 0.75rem;
@@ -118,8 +91,8 @@
 }
 
 .resultado__ordem .campo__entrada {
+  /* A largura acompanha a opção escolhida; a altura compacta vem da variante compartilhada. */
   width: auto;
-  padding: 0.4rem 0.6rem;
 }
 
 .grade-de-livros {

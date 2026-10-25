@@ -198,7 +198,7 @@ export default function Vitrine() {
             <label class="resultado__ordem">
               Ordenar por{' '}
               <select
-                class="campo__entrada"
+                class="campo__entrada campo__entrada--compacta"
                 value={estado.ordem}
                 onChange={(evento) => ir({ ...estado, ordem: evento.currentTarget.value, pagina: PAGINA_PADRAO })}
               >

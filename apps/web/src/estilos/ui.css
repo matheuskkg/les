@@ -69,10 +69,25 @@
   font: inherit;
 }
 
+/* Entrada, seleção simples e campos de data/mês compartilham a mesma altura; a área de texto mantém as linhas. */
+input.campo__entrada,
+select.campo__entrada:not([multiple]):not([size]) {
+  min-height: 2.75rem;
+  line-height: 1.35;
+}
+
+/* Variante compacta para controles em barras de ferramentas, sem alterar a altura padrão dos formulários. */
+input.campo__entrada--compacta,
+select.campo__entrada--compacta:not([multiple]):not([size]) {
+  min-height: 2.375rem;
+  padding: 0.4rem 0.6rem;
+}
+
 .campo__entrada:hover {
   border-color: var(--cor-texto-suave);
 }
 
+/* O anel de foco vem de :focus-visible em base.css; aqui só a borda acompanha a cor de ação. */
 .campo__entrada:focus-visible {
   border-color: var(--cor-primaria);
   outline-offset: 0;
@@ -593,6 +608,34 @@
 
 .prazo--acabando .relogio {
   color: var(--cor-erro);
+}
+
+/* Grupo de opções marcáveis (categorias da vitrine, filtros da análise e escolhas do checkout). */
+.grupo-de-categorias {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.grupo-de-categorias legend {
+  margin-bottom: 0.4rem;
+  padding: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-texto-suave);
+}
+
+.categoria-opcao {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  cursor: pointer;
 }
 
 /* Formulário de filtros das listagens: campos em grade e ações na última linha. */
