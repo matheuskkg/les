@@ -338,6 +338,134 @@
         "tags" : [ "eventos-controller" ]
       }
     },
+    "/api/admin/ia/metricas" : {
+      "get" : {
+        "operationId" : "metricas",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "inicio",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "in" : "query",
+          "name" : "fim",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MetricasDaIaDto"
+                }
+              }
+            },
+            "description" : "Uma linha por provedor e um ponto por dia"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Dia malformado ou ausente"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Período invertido ou maior que 366 dias"
+          }
+        },
+        "summary" : "Métricas por provedor e série diária de chamadas e falhas no período",
+        "tags" : [ "ia-admin-controller" ]
+      }
+    },
+    "/api/admin/ia/provedores" : {
+      "get" : {
+        "operationId" : "provedores",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProvedorIaDto"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Cadeia de provedores na ordem de preferência, com chave configurada e última falha",
+        "tags" : [ "ia-admin-controller" ]
+      },
+      "put" : {
+        "operationId" : "alterar_4",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AlteracaoDaCadeiaDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProvedorIaDto"
+                  }
+                }
+              }
+            },
+            "description" : "Cadeia gravada, já em uso pela próxima chamada"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Lista ou ativação ausente"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Provedor desconhecido, repetido ou faltando"
+          }
+        },
+        "summary" : "Reordena e ativa ou desativa os provedores; a ordem é a posição na lista",
+        "tags" : [ "ia-admin-controller" ]
+      }
+    },
     "/api/admin/notificacoes" : {
       "get" : {
         "operationId" : "listarNotificacoesDoAdmin",
@@ -2860,6 +2988,18 @@
         },
         "required" : [ "livroId", "quantidade" ]
       },
+      "AlteracaoDaCadeiaDto" : {
+        "type" : "object",
+        "properties" : {
+          "provedores" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PosicaoNaCadeiaDto"
+            }
+          }
+        },
+        "required" : [ "provedores" ]
+      },
       "AlteracaoDeDadosCliente" : {
         "type" : "object",
         "properties" : {
@@ -3245,6 +3385,24 @@
           }
         },
         "required" : [ "id", "nome" ]
+      },
+      "ChamadasNoDiaDto" : {
+        "type" : "object",
+        "properties" : {
+          "chamadas" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "dia" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "falhas" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "chamadas", "dia", "falhas" ]
       },
       "CheckoutDto" : {
         "type" : "object",
@@ -3790,6 +3948,20 @@
           }
         }
       },
+      "FalhasPorResultadoDto" : {
+        "type" : "object",
+        "properties" : {
+          "quantidade" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "resultado" : {
+            "type" : "string",
+            "enum" : [ "SUCESSO", "COTA_ESGOTADA", "ERRO_HTTP", "TEMPO_ESGOTADO", "ERRO_DE_REDE", "RESPOSTA_INVALIDA" ]
+          }
+        },
+        "required" : [ "quantidade", "resultado" ]
+      },
       "FinalizacaoDto" : {
         "type" : "object",
         "properties" : {
@@ -4191,6 +4363,102 @@
           }
         },
         "required" : [ "enviadaEm", "id", "livros", "papel", "texto" ]
+      },
+      "MetricasDaIaDto" : {
+        "type" : "object",
+        "properties" : {
+          "fim" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "inicio" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "provedores" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/MetricasDoProvedorDto"
+            }
+          },
+          "recomendacoesSemIa" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "serie" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ChamadasNoDiaDto"
+            }
+          }
+        },
+        "required" : [ "fim", "inicio", "provedores", "recomendacoesSemIa", "serie" ]
+      },
+      "MetricasDoProvedorDto" : {
+        "type" : "object",
+        "properties" : {
+          "atendimentosPorReserva" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "avaliadas" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "chamadas" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "falhasPorResultado" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/FalhasPorResultadoDto"
+            }
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "latenciaMediaMs" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "latenciaP95Ms" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "nome" : {
+            "type" : "string"
+          },
+          "positivas" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "sucessos" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "taxaDeAprovacao" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "taxaDeSucesso" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "tokensEntrada" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "tokensSaida" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "ultimaFalha" : {
+            "$ref" : "#/components/schemas/UltimaFalhaDto"
+          }
+        },
+        "required" : [ "atendimentosPorReserva", "avaliadas", "chamadas", "falhasPorResultado", "id", "nome", "positivas", "sucessos", "tokensEntrada", "tokensSaida" ]
       },
       "MeusDados" : {
         "type" : "object",
@@ -4663,6 +4931,19 @@
         },
         "required" : [ "clienteCpf", "clienteId", "clienteNome", "id", "realizadoEm", "status", "total" ]
       },
+      "PosicaoNaCadeiaDto" : {
+        "type" : "object",
+        "properties" : {
+          "ativo" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "ativo", "id" ]
+      },
       "ProblemDetail" : {
         "type" : "object",
         "properties" : {
@@ -4689,6 +4970,35 @@
             "format" : "uri"
           }
         }
+      },
+      "ProvedorIaDto" : {
+        "type" : "object",
+        "properties" : {
+          "ativo" : {
+            "type" : "boolean"
+          },
+          "chaveConfigurada" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "modelo" : {
+            "type" : "string"
+          },
+          "nome" : {
+            "type" : "string"
+          },
+          "ordem" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "ultimaFalha" : {
+            "$ref" : "#/components/schemas/UltimaFalhaDto"
+          }
+        },
+        "required" : [ "ativo", "chaveConfigurada", "id", "nome", "ordem" ]
       },
       "RecebimentoDeTrocaDto" : {
         "type" : "object",
@@ -4857,6 +5167,24 @@
           }
         },
         "required" : [ "clienteCpf", "clienteId", "clienteNome", "id", "pedidoId", "solicitadaEm", "status", "unidades" ]
+      },
+      "UltimaFalhaDto" : {
+        "type" : "object",
+        "properties" : {
+          "codigoHttp" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "em" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "resultado" : {
+            "type" : "string",
+            "enum" : [ "SUCESSO", "COTA_ESGOTADA", "ERRO_HTTP", "TEMPO_ESGOTADO", "ERRO_DE_REDE", "RESPOSTA_INVALIDA" ]
+          }
+        },
+        "required" : [ "em", "resultado" ]
       }
     }
   }

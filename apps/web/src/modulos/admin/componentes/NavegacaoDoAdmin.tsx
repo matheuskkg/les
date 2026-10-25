@@ -8,6 +8,7 @@ const secoes = [
   { caminho: '/admin/pedidos', rotulo: 'Pedidos' },
   { caminho: '/admin/trocas', rotulo: 'Trocas' },
   { caminho: '/admin/analise', rotulo: 'Análise de vendas' },
+  { caminho: '/admin/assistente', rotulo: 'Assistente' },
 ];
 
 /** A seção ativa inclui as telas de detalhe dela (`/admin/pedidos/12` fica em Pedidos); o resumo só na própria rota. */

@@ -101,3 +101,41 @@
   flex-direction: column;
   gap: 1.25rem;
 }
+
+/* Aba "Assistente": cadeia de provedores e métricas da IA (RNF-REC-001, DEC-03). */
+.cadeia__modelo,
+.metricas__detalhe {
+  display: block;
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.cadeia__ativo {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.metricas__falhas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  white-space: nowrap;
+}
+
+.metricas__dias {
+  margin-top: 1rem;
+}
+
+.metricas__dias summary {
+  cursor: pointer;
+  color: var(--cor-texto-suave);
+}
+
+.metricas__sem-ia {
+  margin: 0;
+}
+
+.grafico__area--chamadas {
+  min-height: 280px;
+}

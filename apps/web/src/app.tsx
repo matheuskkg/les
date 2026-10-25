@@ -5,6 +5,7 @@ import { Cabecalho, NaoEncontrada } from './layout';
 import {
   Admin,
   AdminAnalise,
+  AdminAssistente,
   AdminCliente,
   AdminClientes,
   AdminPedido,
@@ -80,6 +81,7 @@ function Rotas() {
         <Route path="/admin/pedidos/:id" component={PedidoDoAdmin} />
         <Route path="/admin/trocas" component={TrocasDoAdmin} />
         <Route path="/admin/analise" component={AnaliseDoAdmin} />
+        <Route path="/admin/assistente" component={AssistenteDoAdmin} />
         <Route path="/admin" component={AreaDoAdmin} />
         <Route path="/admin/*" component={AreaDoAdmin} />
         <Route default component={NaoEncontrada} />
@@ -124,6 +126,7 @@ const PedidosDoAdmin = doAdmin(AdminPedidos);
 const PedidoDoAdmin = doAdmin(AdminPedido);
 const TrocasDoAdmin = doAdmin(AdminTrocas);
 const AnaliseDoAdmin = doAdmin(AdminAnalise);
+const AssistenteDoAdmin = doAdmin(AdminAssistente);
 
 export function App() {
   const { aviso } = useCarrinho();

@@ -87,6 +87,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/ia/metricas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Métricas por provedor e série diária de chamadas e falhas no período */
+        get: operations["metricas"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/ia/provedores": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cadeia de provedores na ordem de preferência, com chave configurada e última falha */
+        get: operations["provedores"];
+        /** Reordena e ativa ou desativa os provedores; a ordem é a posição na lista */
+        put: operations["alterar_4"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/notificacoes": {
         parameters: {
             query?: never;
@@ -929,6 +964,9 @@ export interface components {
             /** Format: int32 */
             quantidade: number;
         };
+        AlteracaoDaCadeiaDto: {
+            provedores: components["schemas"]["PosicaoNaCadeiaDto"][];
+        };
         AlteracaoDeDadosCliente: {
             cpf?: string;
             /** Format: date */
@@ -1072,6 +1110,14 @@ export interface components {
             /** Format: int64 */
             id: number;
             nome: string;
+        };
+        ChamadasNoDiaDto: {
+            /** Format: int64 */
+            chamadas: number;
+            /** Format: date */
+            dia: string;
+            /** Format: int64 */
+            falhas: number;
         };
         CheckoutDto: {
             /** Format: date-time */
@@ -1300,6 +1346,12 @@ export interface components {
             enderecoId?: number;
             novo?: components["schemas"]["EnderecoInformadoDto"];
         };
+        FalhasPorResultadoDto: {
+            /** Format: int64 */
+            quantidade: number;
+            /** @enum {string} */
+            resultado: "SUCESSO" | "COTA_ESGOTADA" | "ERRO_HTTP" | "TEMPO_ESGOTADO" | "ERRO_DE_REDE" | "RESPOSTA_INVALIDA";
+        };
         FinalizacaoDto: {
             cartoes?: components["schemas"]["CartaoDaFinalizacaoDto"][];
             cobranca: components["schemas"]["EscolhaDeEnderecoDto"];
@@ -1472,6 +1524,45 @@ export interface components {
             texto: string;
             /** @enum {string} */
             tipo?: "RECOMENDACAO" | "BUSCA" | "DUVIDA" | "FORA_DO_ESCOPO";
+        };
+        MetricasDaIaDto: {
+            /** Format: date */
+            fim: string;
+            /** Format: date */
+            inicio: string;
+            provedores: components["schemas"]["MetricasDoProvedorDto"][];
+            /** Format: int64 */
+            recomendacoesSemIa: number;
+            serie: components["schemas"]["ChamadasNoDiaDto"][];
+        };
+        MetricasDoProvedorDto: {
+            /** Format: int64 */
+            atendimentosPorReserva: number;
+            /** Format: int64 */
+            avaliadas: number;
+            /** Format: int64 */
+            chamadas: number;
+            falhasPorResultado: components["schemas"]["FalhasPorResultadoDto"][];
+            /** Format: int64 */
+            id: number;
+            /** Format: int32 */
+            latenciaMediaMs?: number;
+            /** Format: int32 */
+            latenciaP95Ms?: number;
+            nome: string;
+            /** Format: int64 */
+            positivas: number;
+            /** Format: int64 */
+            sucessos: number;
+            /** Format: double */
+            taxaDeAprovacao?: number;
+            /** Format: double */
+            taxaDeSucesso?: number;
+            /** Format: int64 */
+            tokensEntrada: number;
+            /** Format: int64 */
+            tokensSaida: number;
+            ultimaFalha?: components["schemas"]["UltimaFalhaDto"];
         };
         MeusDados: {
             cpf: string;
@@ -1683,6 +1774,11 @@ export interface components {
              */
             total: string;
         };
+        PosicaoNaCadeiaDto: {
+            ativo: boolean;
+            /** Format: int64 */
+            id: number;
+        };
         ProblemDetail: {
             detail?: string;
             /** Format: uri */
@@ -1695,6 +1791,17 @@ export interface components {
             title?: string;
             /** Format: uri */
             type?: string;
+        };
+        ProvedorIaDto: {
+            ativo: boolean;
+            chaveConfigurada: boolean;
+            /** Format: int64 */
+            id: number;
+            modelo?: string;
+            nome: string;
+            /** Format: int32 */
+            ordem: number;
+            ultimaFalha?: components["schemas"]["UltimaFalhaDto"];
         };
         RecebimentoDeTrocaDto: {
             itens?: components["schemas"]["ItemRecebidoDto"][];
@@ -1761,6 +1868,14 @@ export interface components {
             status: "EM_TROCA" | "TROCA_AUTORIZADA" | "TROCA_RECUSADA" | "TROCADO";
             /** Format: int64 */
             unidades: number;
+        };
+        UltimaFalhaDto: {
+            /** Format: int32 */
+            codigoHttp?: number;
+            /** Format: date-time */
+            em: string;
+            /** @enum {string} */
+            resultado: "SUCESSO" | "COTA_ESGOTADA" | "ERRO_HTTP" | "TEMPO_ESGOTADO" | "ERRO_DE_REDE" | "RESPOSTA_INVALIDA";
         };
     };
     responses: never;
@@ -1932,6 +2047,109 @@ export interface operations {
                 };
                 content: {
                     "text/event-stream": components["schemas"]["SseEmitter"];
+                };
+            };
+        };
+    };
+    metricas: {
+        parameters: {
+            query: {
+                inicio: string;
+                fim: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Uma linha por provedor e um ponto por dia */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricasDaIaDto"];
+                };
+            };
+            /** @description Dia malformado ou ausente */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Período invertido ou maior que 366 dias */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    provedores: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProvedorIaDto"][];
+                };
+            };
+        };
+    };
+    alterar_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlteracaoDaCadeiaDto"];
+            };
+        };
+        responses: {
+            /** @description Cadeia gravada, já em uso pela próxima chamada */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProvedorIaDto"][];
+                };
+            };
+            /** @description Lista ou ativação ausente */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Provedor desconhecido, repetido ou faltando */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
         };
