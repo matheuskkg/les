@@ -30,7 +30,9 @@ sem mudar o modelo.
 - A autoconfiguração do modelo de chat fica desligada. O adapter monta um cliente por provedor a partir de
   `livraria.ia.provedores`, assim a aplicação sobe sem nenhuma chave.
 - A conexão de cada provedor é declarada na configuração (`livraria.ia.provedores.<nome>`) com `url-base`, `modelo` e
-  `chave`. A chave e o modelo vêm de variáveis de ambiente:
+  `chave`. A chave e o modelo vêm de variáveis de ambiente (alterado na implementação do REC-01: um
+  `livraria.ia.tempo-limite`, de 20 s por padrão, vale para todos os provedores, e o cliente não repete a chamada,
+  porque a cadeia decide o que fazer na falha):
 
   | Provedor | `url-base` | Chave | Modelo |
   |---|---|---|---|

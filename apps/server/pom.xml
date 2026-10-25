@@ -22,7 +22,30 @@
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
         <archunit.version>1.5.1</archunit.version>
         <springdoc.version>3.1.1</springdoc.version>
+        <spring-ai.version>2.0.2</spring-ai.version>
+        <!-- Mesma versão do swagger-core que o springdoc 3.1.1 usa. -->
+        <swagger-annotations.version>2.2.55</swagger-annotations.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring AI 2.0.x, a linha compatível com o Boot 4.1 (DEC-03). -->
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- O SDK da OpenAI traz uma versão antiga de swagger-annotations-jakarta, que sobrescreveria a do
+                 springdoc e quebraria /v3/api-docs (NoSuchMethodError em Schema.$dynamicRef). -->
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations-jakarta</artifactId>
+                <version>${swagger-annotations.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -54,6 +77,18 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+        <!-- Recomendação e chatbot com IA generativa (RNF-REC-001, DEC-03). O adapter usa o cliente OpenAI. -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
+            <exclusions>
+                <!-- Variante javax das anotações Swagger; o springdoc já traz a jakarta. -->
+                <exclusion>
+                    <groupId>io.swagger.core.v3</groupId>
+                    <artifactId>swagger-annotations</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>

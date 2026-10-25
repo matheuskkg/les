@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.fatec.les.livraria.compartilhado.aplicacao.EstadoEmMemoria;
 import br.fatec.les.livraria.compartilhado.aplicacao.TarefaPorTempo;
 import lombok.RequiredArgsConstructor;
 
@@ -28,12 +29,14 @@ public class ApoioAosTestesController {
     private final LimpezaDoBanco limpeza;
     private final RelogioAjustavel relogio;
     private final List<TarefaPorTempo> tarefas;
+    private final List<EstadoEmMemoria> estados;
 
     @PostMapping("/reset")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void reset() throws IOException {
         relogio.voltarAoSistema();
         limpeza.restaurarSeed();
+        estados.forEach(EstadoEmMemoria::limpar);
     }
 
     @PostMapping("/relogio")

@@ -14,7 +14,7 @@ import jakarta.persistence.Entity;
 /**
  * Toda entidade JPA de escrita precisa de {@code @Audited} (RNF-GER-002, DEC-08, DEC-14): sem isso, uma escrita
  * passaria sem revisão e sem a linha na tabela {@code _aud}. As tabelas técnicas {@code seed_execucao} e
- * {@code revisao} são as únicas exceções.
+ * {@code revisao} e o log só de inserção {@code chamada_ia} (DEC-03) são as exceções.
  */
 @AnalyzeClasses(packages = "br.fatec.les.livraria", importOptions = ImportOption.DoNotIncludeTests.class)
 class EntidadesAuditadasTest {
@@ -24,6 +24,7 @@ class EntidadesAuditadasTest {
             .that().areAnnotatedWith(Entity.class)
             .and().doNotHaveSimpleName("SeedExecucaoJpa")
             .and().doNotHaveSimpleName("RevisaoJpa")
+            .and().doNotHaveSimpleName("ChamadaIaJpa")
             .should().beAnnotatedWith(Audited.class)
             .because("RNF-GER-002 exige registrar toda escrita nas tabelas _aud do Envers");
 }

@@ -22,4 +22,4 @@ Status: ✅ implementado · 🟡 parcial · ❌ pendente.
 
 | ID | Status | Onde no código | Observação |
 |---|---|---|---|
-| RNF-REC-001 | ❌ |  | O DRS pede o modelo "treinado com dados de vendas e feedback"; o fine-tuning de um modelo gratuito não é viável, e a personalização é feita pelo contexto de cada chamada ([DEC-03](../decisoes/DEC-03-recomendacao-com-ia-generativa.md)). |
+| RNF-REC-001 | 🟡 | `recomendacao/aplicacao/casodeuso/CadeiaDeProvedores.java`, `recomendacao/aplicacao/regra/ProvedorEmEsperaPorCota.java`, `recomendacao/infraestrutura/externo/AssistenteDeLivrosOpenAi.java`, `recomendacao/infraestrutura/externo/AssistenteDeLivrosFake.java`, `recomendacao/infraestrutura/persistencia/`, `seed/500_provedores_ia.sql` | O DRS pede o modelo "treinado com dados de vendas e feedback"; o fine-tuning de um modelo gratuito não é viável, e a personalização é feita pelo contexto de cada chamada ([DEC-03](../decisoes/DEC-03-recomendacao-com-ia-generativa.md)). |

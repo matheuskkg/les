@@ -3,6 +3,17 @@ spring:
     name: livraria-server
   profiles:
     default: h2
+  # A aplicação sobe sem chave de IA: toda a autoconfiguração de modelos do Spring AI fica desligada (DEC-03).
+  # O adapter monta o cliente de cada provedor a partir de livraria.ia.provedores.
+  ai:
+    model:
+      chat: none
+      embedding: none
+      image: none
+      audio:
+        speech: none
+        transcription: none
+      moderation: none
   jpa:
     open-in-view: false
     properties:
@@ -31,3 +42,20 @@ livraria:
   seed:
     habilitado: true
     local: classpath:seed/*.sql
+  ia:
+    # Tempo limite de leitura por chamada a um provedor (DEC-03).
+    tempo-limite: 20s
+    # Chave vazia significa provedor sem chave; a cadeia ignora o provedor (DEC-03).
+    provedores:
+      gemini:
+        url-base: https://generativelanguage.googleapis.com/v1beta/openai
+        modelo: ${IA_GEMINI_MODELO:gemini-2.5-flash-lite}
+        chave: ${IA_GEMINI_CHAVE:}
+      groq:
+        url-base: https://api.groq.com/openai/v1
+        modelo: ${IA_GROQ_MODELO:openai/gpt-oss-120b}
+        chave: ${IA_GROQ_CHAVE:}
+      openrouter:
+        url-base: https://openrouter.ai/api/v1
+        modelo: ${IA_OPENROUTER_MODELO:google/gemma-4-31b-it:free}
+        chave: ${IA_OPENROUTER_CHAVE:}
