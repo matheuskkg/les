@@ -34,10 +34,9 @@ export function CartoesDaCompra({ pagamento }: { pagamento: PagamentoDaCompra })
         <CampoDeFormulario
           id={`cartao-${chave}-cvv`}
           rotulo="Código de segurança"
-          inputMode="numeric"
+          mascara="cvv"
           required
           autoComplete="cc-csc"
-          maxLength={4}
           valor={digitado(chave).cvv}
           aoMudar={(valor) => digitar(chave, 'cvv', valor)}
         />

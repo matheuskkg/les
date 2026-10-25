@@ -3,11 +3,10 @@ import test from 'node:test';
 import {
   cartaoVazio,
   enderecoVazio,
-  formatarCep,
-  mascararCpf,
   formatarValidade,
   formularioVazio,
   montarCadastro,
+  montarCartao,
   somenteDigitos,
   validadeParaApi,
   validarCadastro,
@@ -59,23 +58,9 @@ test('somenteDigitos remove máscaras e separadores', () => {
   assert.equal(somenteDigitos('abc'), '');
 });
 
-test('mascararCpf monta a máscara conforme os dígitos chegam', () => {
-  assert.equal(mascararCpf(''), '');
-  assert.equal(mascararCpf('529'), '529');
-  assert.equal(mascararCpf('5299'), '529.9');
-  assert.equal(mascararCpf('529982'), '529.982');
-  assert.equal(mascararCpf('529982247'), '529.982.247');
-  assert.equal(mascararCpf('52998224725'), '529.982.247-25');
-  assert.equal(mascararCpf('529.982.247-25'), '529.982.247-25');
-  assert.equal(mascararCpf('529982247259999'), '529.982.247-25');
-});
-
-test('formatarCep monta a máscara de 8 dígitos', () => {
-  assert.equal(formatarCep(''), '');
-  assert.equal(formatarCep('01001'), '01001');
-  assert.equal(formatarCep('01001000'), '01001-000');
-  assert.equal(formatarCep('01001-000'), '01001-000');
-  assert.equal(formatarCep('0100100099'), '01001-000');
+test('montarCartao envia o número sem espaços, mesmo mascarado', () => {
+  const cartao = montarCartao({ numero: '4111 1111 1111 1111', nomeImpresso: 'ANA', validade: '2027-08' });
+  assert.equal(cartao.numero, '4111111111111111');
 });
 
 test('validadeParaApi normaliza mês e ano (DEC-07)', () => {

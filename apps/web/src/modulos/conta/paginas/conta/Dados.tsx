@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'preact/hooks';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../../../../api/cliente';
 import type { components } from '../../../../api/esquema';
+import { aplicarMascara } from '../../../../compartilhado/mascaras';
 import { CampoDeFormulario } from '../../../../ui/CampoDeFormulario';
 import { CampoDeSelecao } from '../../../../ui/CampoDeSelecao';
 import { Erro } from '../../../../ui/Erro';
 import { Violacoes } from '../../../../ui/Violacoes';
-import { GENEROS, TIPOS_DE_TELEFONE, mascararCpf, somenteDigitos } from '../../regras/cadastroDeCliente';
+import { GENEROS, TIPOS_DE_TELEFONE, somenteDigitos } from '../../regras/cadastroDeCliente';
 import { useSessao } from '../../../sessao';
 import { InativarConta } from './InativarConta';
 import { Botao } from '../../../../ui/Botao';
@@ -19,9 +20,9 @@ function paraFormulario(dados: MeusDados): Alteracao {
     nome: dados.nome,
     genero: dados.genero,
     dataNascimento: dados.dataNascimento,
-    cpf: dados.cpf,
+    cpf: aplicarMascara('cpf', dados.cpf),
     email: dados.email,
-    telefone: { ...dados.telefone },
+    telefone: { ...dados.telefone, numero: aplicarMascara('telefone', dados.telefone.numero) },
   };
 }
 
@@ -155,8 +156,8 @@ export function Dados() {
             }} />
           <CampoDeFormulario id="dados-nascimento" rotulo="Data de nascimento" tipo="date" required
             valor={formulario.dataNascimento} aoMudar={(valor) => mudar('dataNascimento', valor)} />
-          <CampoDeFormulario id="dados-cpf" rotulo="CPF" valor={mascararCpf(formulario.cpf ?? '')} required
-            inputMode="numeric" aoMudar={(valor) => mudar('cpf', valor)} />
+          <CampoDeFormulario id="dados-cpf" rotulo="CPF" valor={formulario.cpf ?? ''} required
+            mascara="cpf" aoMudar={(valor) => mudar('cpf', valor)} />
           <CampoDeFormulario id="dados-email" rotulo="E-mail" tipo="email" valor={formulario.email} required
             autoComplete="email" aoMudar={(valor) => mudar('email', valor)} />
           <CampoDeSelecao id="dados-telefone-tipo" rotulo="Tipo de telefone" valor={formulario.telefone.tipo}
@@ -168,9 +169,9 @@ export function Dados() {
               }
             }} />
           <CampoDeFormulario id="dados-ddd" rotulo="DDD" valor={formulario.telefone.ddd} required
-            inputMode="numeric" maxLength={2} aoMudar={(valor) => mudarTelefone('ddd', valor)} />
+            mascara="ddd" aoMudar={(valor) => mudarTelefone('ddd', valor)} />
           <CampoDeFormulario id="dados-numero" rotulo="Número" valor={formulario.telefone.numero} required
-            inputMode="tel" aoMudar={(valor) => mudarTelefone('numero', valor)} />
+            mascara="telefone" aoMudar={(valor) => mudarTelefone('numero', valor)} />
         </div>
 
         <div class="acoes">

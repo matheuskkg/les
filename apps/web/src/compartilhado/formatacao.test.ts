@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   tomDoStatus,
+  formatarCep,
   formatarCpf,
   formatarData,
   formatarDecimal,
@@ -68,6 +69,13 @@ test('textoDoStatus troca underscores por espaços em maiúsculas', () => {
 test('formatarCpf exibe só CPF de 11 dígitos formatado', () => {
   assert.equal(formatarCpf('52998224725'), '529.982.247-25');
   assert.equal(formatarCpf('123'), '123');
+});
+
+test('formatarCep exibe só CEP de 8 dígitos formatado (RF-CLI-001)', () => {
+  assert.equal(formatarCep('69005040'), '69005-040');
+  assert.equal(formatarCep('69005-040'), '69005-040');
+  assert.equal(formatarCep('6900504'), '6900504');
+  assert.equal(formatarCep('690050400'), '690050400');
 });
 
 test('tomDoStatus aceita o enum ou o texto do DRS', () => {

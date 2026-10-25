@@ -1,5 +1,6 @@
 import type { components } from '../../../api/esquema';
-import { formatarCep, montarEndereco, type EnderecoDoFormulario } from '../../conta/regras/cadastroDeCliente.ts';
+import { formatarCep } from '../../../compartilhado/formatacao.ts';
+import { montarEndereco, type EnderecoDoFormulario } from '../../conta/regras/cadastroDeCliente.ts';
 
 type EscolhaDaApi = components['schemas']['EscolhaDeEnderecoDto'];
 type EnderecoCadastrado = components['schemas']['EnderecoDaResposta'];

@@ -1,6 +1,5 @@
 import type { components } from '../../../api/esquema';
-import { formatarCep } from '../../conta/regras/cadastroDeCliente';
-import { formatarCpf, formatarDinheiro, textoDoStatus } from '../../../compartilhado/formatacao';
+import { formatarCep, formatarCpf, formatarDinheiro, textoDoStatus } from '../../../compartilhado/formatacao';
 
 type PedidoDetalhe = components['schemas']['PedidoDetalheDto'];
 type EnderecoNoPedido = components['schemas']['EnderecoNoPedido'];

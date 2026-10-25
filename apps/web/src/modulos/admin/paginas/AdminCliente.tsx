@@ -5,7 +5,7 @@ import type { components } from '../../../api/esquema';
 import { Erro } from '../../../ui/Erro';
 import { PedidosDoCliente } from '../componentes/PedidosDoCliente';
 import { GENEROS, SITUACOES, rotuloDe } from '../regras/filtrosDeClientes';
-import { formatarCpf, formatarData } from '../../../compartilhado/formatacao';
+import { formatarCep, formatarCpf, formatarData } from '../../../compartilhado/formatacao';
 
 type ClienteDetalhe = components['schemas']['ClienteDetalheDto'];
 
@@ -13,11 +13,6 @@ interface Resultado {
   id: string;
   cliente: ClienteDetalhe | null;
   problema: ProblemaDetalhe | null;
-}
-
-function formatarCep(cep: string): string {
-  const digitos = cep.replace(/\D/g, '');
-  return digitos.length === 8 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : cep;
 }
 
 function formatarValidade(validade: string): string {

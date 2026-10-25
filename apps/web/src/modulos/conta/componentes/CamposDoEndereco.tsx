@@ -2,7 +2,6 @@ import {
   TIPOS_DE_ENDERECO,
   TIPOS_DE_LOGRADOURO,
   UFS,
-  formatarCep,
   type EnderecoDoFormulario,
 } from '../regras/cadastroDeCliente';
 import { CampoDeFormulario } from '../../../ui/CampoDeFormulario';
@@ -35,8 +34,8 @@ export function CamposDoEndereco({ prefixo, formulario, aoMudar }: Props) {
           aoMudar={(valor) => aoMudar('numero', valor)} />
         <CampoDeFormulario id={`${prefixo}-bairro`} rotulo="Bairro" required valor={formulario.bairro}
           aoMudar={(valor) => aoMudar('bairro', valor)} />
-        <CampoDeFormulario id={`${prefixo}-cep`} rotulo="CEP" required inputMode="numeric" valor={formulario.cep}
-          aoMudar={(valor) => aoMudar('cep', formatarCep(valor))} />
+        <CampoDeFormulario id={`${prefixo}-cep`} rotulo="CEP" required mascara="cep" valor={formulario.cep}
+          aoMudar={(valor) => aoMudar('cep', valor)} />
         <CampoDeFormulario id={`${prefixo}-cidade`} rotulo="Cidade" required valor={formulario.cidade}
           aoMudar={(valor) => aoMudar('cidade', valor)} />
         <CampoDeSelecao id={`${prefixo}-uf`} rotulo="UF" required valor={formulario.uf} opcoes={UFS}

@@ -125,6 +125,15 @@ export function formatarCpf(cpf: string): string {
   return `${digitos.slice(0, 3)}.${digitos.slice(3, 6)}.${digitos.slice(6, 9)}-${digitos.slice(9)}`;
 }
 
+/** CEP só com dígitos exibido como 00000-000; outro formato volta como veio. */
+export function formatarCep(cep: string): string {
+  const digitos = cep.replace(/\D/g, '');
+  if (digitos.length !== 8) {
+    return cep;
+  }
+  return `${digitos.slice(0, 5)}-${digitos.slice(5)}`;
+}
+
 export type TomDoStatus = 'neutro' | 'positivo' | 'atencao' | 'critico';
 
 const TONS: Record<string, TomDoStatus> = {

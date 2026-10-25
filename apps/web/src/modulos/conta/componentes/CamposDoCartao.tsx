@@ -13,7 +13,7 @@ interface Props {
 export function CamposDoCartao({ prefixo, formulario, aoMudar }: Props) {
   return (
     <div class="grade-do-cadastro">
-      <CampoDeFormulario id={`${prefixo}-numero`} rotulo="Número do cartão" required inputMode="numeric"
+      <CampoDeFormulario id={`${prefixo}-numero`} rotulo="Número do cartão" required mascara="numeroDoCartao"
         autoComplete="cc-number" valor={formulario.numero}
         ajuda={ajudaDaBandeira(formulario.numero)}
         aoMudar={(valor) => aoMudar('numero', valor)} />

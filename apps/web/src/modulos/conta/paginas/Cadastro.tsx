@@ -10,8 +10,6 @@ import {
   UFS,
   cartaoVazio,
   enderecoVazio,
-  formatarCep,
-  mascararCpf,
   formatarValidade,
   formularioVazio,
   montarCadastro,
@@ -248,11 +246,10 @@ export default function Cadastro() {
               id="cpf"
               rotulo="CPF"
               valor={formulario.cpf}
-              aoMudar={(valor) => atualizarFormulario({ cpf: mascararCpf(valor) })}
+              aoMudar={(valor) => atualizarFormulario({ cpf: valor })}
               name="cpf"
-              inputMode="numeric"
+              mascara="cpf"
               placeholder="000.000.000-00"
-              maxLength={14}
               required
               ajuda="Pode digitar com ou sem pontuação."
               erro={erros.cpf}
@@ -289,9 +286,8 @@ export default function Cadastro() {
               valor={formulario.telefone.ddd}
               aoMudar={(valor) => atualizarTelefone({ ddd: valor })}
               name="telefone.ddd"
-              inputMode="numeric"
+              mascara="ddd"
               placeholder="11"
-              maxLength={2}
               required
               erro={erros.ddd}
             />
@@ -304,6 +300,7 @@ export default function Cadastro() {
               aoMudar={(valor) => atualizarTelefone({ numero: valor })}
               name="telefone.numero"
               autoComplete="tel-national"
+              mascara="telefone"
               placeholder="98765-4321"
               required
               erro={erros['telefone-numero']}
@@ -437,10 +434,9 @@ export default function Cadastro() {
                   id={`endereco-${indice}-cep`}
                   rotulo="CEP"
                   valor={endereco.cep}
-                  aoMudar={(valor) => atualizarEndereco(indice, { cep: formatarCep(valor) })}
-                  inputMode="numeric"
+                  aoMudar={(valor) => atualizarEndereco(indice, { cep: valor })}
+                  mascara="cep"
                   placeholder="00000-000"
-                  maxLength={9}
                   required
                   erro={erroDeEndereco(indice, 'cep')}
                 />
@@ -521,9 +517,8 @@ export default function Cadastro() {
                     rotulo="Número do cartão"
                     valor={cartao.numero}
                     aoMudar={(valor) => atualizarCartao(indice, { numero: valor })}
-                    inputMode="numeric"
+                    mascara="numeroDoCartao"
                     placeholder="0000 0000 0000 0000"
-                    maxLength={23}
                     required
                     ajuda={ajudaDaBandeira(cartao.numero)}
                     erro={erroDeCartao(indice, 'numero')}

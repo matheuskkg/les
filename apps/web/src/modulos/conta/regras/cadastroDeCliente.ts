@@ -156,24 +156,6 @@ export function somenteDigitos(valor: string): string {
   return valor.replace(/\D/g, '');
 }
 
-/** CPF com máscara progressiva; aceita tanto dígitos quanto o valor já mascarado. */
-export function mascararCpf(valor: string): string {
-  const digitos = somenteDigitos(valor).slice(0, 11);
-  const partes = [digitos.slice(0, 3), digitos.slice(3, 6), digitos.slice(6, 9)];
-  let formatado = partes.filter((parte) => parte !== '').join('.');
-  const verificadores = digitos.slice(9, 11);
-  if (verificadores !== '') {
-    formatado += `-${verificadores}`;
-  }
-  return formatado;
-}
-
-/** CEP com máscara progressiva ("00000-000"). */
-export function formatarCep(valor: string): string {
-  const digitos = somenteDigitos(valor).slice(0, 8);
-  return digitos.length > 5 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : digitos;
-}
-
 /**
  * Normaliza a validade do cartão para "AAAA-MM" (DEC-07). Aceita também
  * "MM/AAAA" e "MM/AA"; devolve "" quando não reconhece o formato.

@@ -4,10 +4,11 @@ import type { components } from '../../../../api/esquema';
 import {
   TIPOS_DE_ENDERECO,
   enderecoVazio,
-  formatarCep,
   montarEndereco,
   type EnderecoDoFormulario,
 } from '../../regras/cadastroDeCliente';
+import { aplicarMascara } from '../../../../compartilhado/mascaras';
+import { formatarCep } from '../../../../compartilhado/formatacao';
 import { CamposDoEndereco } from '../../componentes/CamposDoEndereco';
 import { Erro } from '../../../../ui/Erro';
 import { Violacoes } from '../../../../ui/Violacoes';
@@ -29,7 +30,7 @@ function paraFormulario(endereco: Endereco): EnderecoDoFormulario {
     logradouro: endereco.logradouro,
     numero: endereco.numero,
     bairro: endereco.bairro,
-    cep: formatarCep(endereco.cep),
+    cep: aplicarMascara('cep', endereco.cep),
     cidade: endereco.cidade,
     uf: endereco.uf,
     observacoes: endereco.observacoes ?? '',
