@@ -3,6 +3,9 @@ spring:
     name: livraria-server
   profiles:
     default: h2
+  # Chaves dos provedores de IA (IA_*_CHAVE) podem vir de um .env no diretório de execução, fora do git (DEC-03).
+  config:
+    import: optional:file:.env[.properties]
   # A aplicação sobe sem chave de IA: toda a autoconfiguração de modelos do Spring AI fica desligada (DEC-03).
   # O adapter monta o cliente de cada provedor a partir de livraria.ia.provedores.
   ai:

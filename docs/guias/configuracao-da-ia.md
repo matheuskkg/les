@@ -106,7 +106,16 @@ frequência, então confira nas páginas indicadas.
 
 ## Subir o server com as chaves
 
-No terminal, em `apps/server`:
+O jeito mais simples é um arquivo `.env` em `apps/server` (ignorado pelo git), lido pelo `application.yml` via
+`spring.config.import`. Copie o modelo e preencha as chaves:
+
+```bash
+cp .env.example .env   # em apps/server
+mvn spring-boot:run
+```
+
+O `.env` é procurado no diretório de execução; variáveis de ambiente do processo têm precedência sobre ele.
+Alternativamente, no terminal, em `apps/server`:
 
 ```bash
 export IA_GEMINI_CHAVE="sua-chave"
