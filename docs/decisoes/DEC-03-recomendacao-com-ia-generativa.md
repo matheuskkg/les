@@ -99,7 +99,12 @@ Uma regra por arquivo, testável sem a IA:
    (contadas em `mensagem_conversa`).
 2. **Uma única chamada por mensagem:** o prompt de sistema restringe o assunto à livraria e ao catálogo. A resposta
    traz `tipo` (`RECOMENDACAO`, `BUSCA`, `DUVIDA` ou `FORA_DO_ESCOPO`). Com `FORA_DO_ESCOPO`, o server grava como
-   resposta um texto fixo e descarta o texto do modelo.
+   resposta um texto fixo e descarta o texto do modelo. (Alterado depois da rodada de testes do chat: a mensagem pode
+   gerar mais de uma chamada ao mesmo provedor quando há motivo, que são as voltas do loop de tools, até 3, e uma
+   correção de formato, que reenvia ao provedor a resposta inválida com o erro. O total fica dentro de
+   `livraria.ia.provedores.<nome>.max-chamadas`, porque os limites gratuitos variam por provedor. Passar do limite
+   conta como falha do provedor, e a cadeia segue para o próximo. O classificador de assunto separado continua
+   descartado.)
 3. **Depois da chamada:** um livro citado que não existe, está inativo ou sem estoque é removido da resposta. Na
    vitrine, só valem os ids que estavam entre os candidatos.
 4. A IA não executa ações: adicionar ao carrinho é um botão da UI sobre os livros devolvidos.

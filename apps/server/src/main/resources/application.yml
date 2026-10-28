@@ -52,11 +52,11 @@ livraria:
     provedores:
       gemini:
         url-base: https://generativelanguage.googleapis.com/v1beta/openai
-        modelo: ${IA_GEMINI_MODELO:gemini-2.5-flash-lite}
+        modelo: ${IA_GEMINI_MODELO:gemini-3.5-flash-lite}
         chave: ${IA_GEMINI_CHAVE:}
       groq:
         url-base: https://api.groq.com/openai/v1
-        modelo: ${IA_GROQ_MODELO:openai/gpt-oss-120b}
+        modelo: ${IA_GROQ_MODELO:qwen/qwen3.8-27b}
         chave: ${IA_GROQ_CHAVE:}
       openrouter:
         url-base: https://openrouter.ai/api/v1

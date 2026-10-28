@@ -49,8 +49,8 @@ flowchart LR
 | OpenRouter | `IA_OPENROUTER_CHAVE` | `IA_OPENROUTER_MODELO` |
 
 - Defina só as chaves dos provedores que for usar. Um provedor sem chave é pulado.
-- O `application.yml` já traz um modelo gratuito para cada provedor: `gemini-2.5-flash-lite` no Gemini,
-  `openai/gpt-oss-120b` no Groq e `google/gemma-4-31b-it:free` no OpenRouter. A variável de modelo só é necessária
+- O `application.yml` já traz um modelo gratuito para cada provedor: `gemini-3.5-flash-lite` no Gemini,
+  `qwen/qwen3.8-27b` no Groq e `google/gemma-4-31b-it:free` no OpenRouter. A variável de modelo só é necessária
   para trocá-lo.
 - Cada chamada tem tempo limite de 20 segundos (`livraria.ia.tempo-limite`). Passado esse tempo, a chamada falha
   como `TEMPO_ESGOTADO` e a cadeia passa ao próximo provedor.
