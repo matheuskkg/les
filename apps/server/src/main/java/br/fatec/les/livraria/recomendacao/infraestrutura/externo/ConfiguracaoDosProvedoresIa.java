@@ -41,6 +41,10 @@ public class ConfiguracaoDosProvedoresIa {
             @Override
             public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registro) throws BeansException {
                 propriedades.provedores().forEach((nome, provedor) -> {
+                    if (AssistenteDeLivrosFake.NOME.equals(nome)) {
+                        throw new IllegalStateException("livraria.ia.provedores." + nome
+                                + " é reservado ao provedor fake.");
+                    }
                     BeanDefinition definicao = BeanDefinitionBuilder
                             .genericBeanDefinition(AssistenteDeLivrosOpenAi.class)
                             .addConstructorArgValue(nome)
