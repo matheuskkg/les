@@ -162,6 +162,8 @@ Tela do ADMIN junto da configuração dos provedores (`GET /api/admin/ia/metrica
 - falhas por resultado e a última falha;
 - latência média e p95 das chamadas com sucesso;
 - tokens de entrada e saída;
+- chamadas HTTP por mensagem, com a média (uma casa decimal) e o máximo (alterado no REC-07: as duas consideram só
+  as mensagens que fizeram ao menos uma chamada HTTP, excluindo o provedor fake e os registros antigos com zero);
 - atendimentos por reserva (sucessos com tentativa maior que 1) e recomendações sem IA;
 - taxa de aprovação (avaliações positivas sobre as avaliadas).
 

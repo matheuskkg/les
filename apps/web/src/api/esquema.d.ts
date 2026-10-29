@@ -1549,6 +1549,9 @@ export interface components {
             latenciaMediaMs?: number;
             /** Format: int32 */
             latenciaP95Ms?: number;
+            /** Format: int32 */
+            maximoDeChamadasHttp?: number;
+            mediaDeChamadasHttp?: number;
             nome: string;
             /** Format: int64 */
             positivas: number;

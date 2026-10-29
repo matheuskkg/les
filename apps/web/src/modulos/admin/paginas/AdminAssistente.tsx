@@ -11,6 +11,7 @@ import { Violacoes } from '../../../ui/Violacoes';
 import { CadeiaDeProvedoresIa } from '../componentes/CadeiaDeProvedoresIa';
 import { GraficoDeChamadas } from '../componentes/GraficoDeChamadas';
 import {
+  formatarChamadasHttp,
   formatarInteiro,
   formatarLatencia,
   formatarTaxa,
@@ -151,6 +152,7 @@ export default function AdminAssistente() {
                 <tr>
                   <th scope="col">Provedor</th>
                   <th scope="col" class="tabela__numero">Chamadas</th>
+                  <th scope="col" class="tabela__numero">Chamadas HTTP/mensagem</th>
                   <th scope="col" class="tabela__numero">Sucesso</th>
                   <th scope="col">Falhas</th>
                   <th scope="col" class="tabela__numero">Latência média</th>
@@ -167,6 +169,9 @@ export default function AdminAssistente() {
                       <strong>{provedor.nome}</strong>
                     </td>
                     <td class="tabela__numero">{formatarInteiro(provedor.chamadas)}</td>
+                    <td class="tabela__numero">
+                      {formatarChamadasHttp(provedor.mediaDeChamadasHttp, provedor.maximoDeChamadasHttp)}
+                    </td>
                     <td class="tabela__numero">{formatarTaxa(provedor.taxaDeSucesso)}</td>
                     <td>
                       {provedor.falhasPorResultado.length === 0 ? (

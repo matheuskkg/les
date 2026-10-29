@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.recomendacao.infraestrutura.web.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -15,7 +16,8 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.ResultadoDaChamada;
 /**
  * Métricas de funcionamento da IA no período (RNF-REC-001, DEC-03): uma linha por provedor, na ordem da cadeia, as
  * recomendações gravadas sem IA, que não têm provedor, e a série diária do gráfico com todos os dias do período.
- * As taxas vão de 0 a 1 e são omitidas, como as latências, quando não há o que medir.
+ * As taxas vão de 0 a 1 e são omitidas, como as latências e a média e o máximo das chamadas HTTP, quando não há o que
+ * medir.
  */
 public record MetricasDaIaDto(
         LocalDate inicio,
@@ -46,6 +48,8 @@ public record MetricasDaIaDto(
             @Nullable Integer latenciaP95Ms,
             long tokensEntrada,
             long tokensSaida,
+            @Nullable BigDecimal mediaDeChamadasHttp,
+            @Nullable Integer maximoDeChamadasHttp,
             long atendimentosPorReserva,
             long avaliadas,
             long positivas,
@@ -64,6 +68,8 @@ public record MetricasDaIaDto(
                     metricas.latenciaP95Ms(),
                     metricas.tokensEntrada(),
                     metricas.tokensSaida(),
+                    metricas.mediaDeChamadasHttp(),
+                    metricas.maximoDeChamadasHttp(),
                     metricas.atendimentosPorReserva(),
                     metricas.avaliadas(),
                     metricas.positivas(),

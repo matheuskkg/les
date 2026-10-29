@@ -28,8 +28,14 @@ class CalcularMetricasDosProvedoresTest {
 
     private static ChamadaIa chamada(Long provedor, int minuto, int latencia, int tentativa,
             ResultadoDaChamada resultado, Integer codigoHttp, Integer tokensEntrada, Integer tokensSaida) {
+        return chamada(provedor, minuto, latencia, tentativa, resultado, codigoHttp, tokensEntrada, tokensSaida, 0);
+    }
+
+    private static ChamadaIa chamada(Long provedor, int minuto, int latencia, int tentativa,
+            ResultadoDaChamada resultado, Integer codigoHttp, Integer tokensEntrada, Integer tokensSaida,
+            int chamadasHttp) {
         return new ChamadaIa(provedor, "m", OperacaoIa.CONVERSAR, AGORA.plusMinutes(minuto), latencia, tentativa,
-                resultado, codigoHttp, "erro", tokensEntrada, tokensSaida, 0, null);
+                resultado, codigoHttp, "erro", tokensEntrada, tokensSaida, chamadasHttp, null);
     }
 
     @Test
@@ -63,6 +69,8 @@ class CalcularMetricasDosProvedoresTest {
         assertThat(gemini.latenciaP95Ms()).isEqualTo(100);
         assertThat(gemini.tokensEntrada()).isEqualTo(50);
         assertThat(gemini.tokensSaida()).isEqualTo(10);
+        assertThat(gemini.mediaDeChamadasHttp()).isNull();
+        assertThat(gemini.maximoDeChamadasHttp()).isNull();
         assertThat(gemini.atendimentosPorReserva()).isZero();
         assertThat(gemini.taxaDeAprovacao()).isNull();
 
@@ -87,6 +95,30 @@ class CalcularMetricasDosProvedoresTest {
         assertThat(gemini.taxaDeSucesso()).isNull();
         assertThat(gemini.latenciaMediaMs()).isNull();
         assertThat(gemini.latenciaP95Ms()).isNull();
+        assertThat(gemini.mediaDeChamadasHttp()).isNull();
+        assertThat(gemini.maximoDeChamadasHttp()).isNull();
         assertThat(gemini.taxaDeAprovacao()).isNull();
+    }
+
+    @Test
+    void rnfRec001_mediaEMaximoDeChamadasHttpIgnoramAsTentativasSemChamada() {
+        List<ChamadaIa> chamadas = List.of(
+                chamada(1L, 0, 100, 1, ResultadoDaChamada.SUCESSO, null, null, null, 0),
+                chamada(1L, 1, 100, 1, ResultadoDaChamada.SUCESSO, null, null, null, 1),
+                chamada(1L, 2, 100, 1, ResultadoDaChamada.SUCESSO, null, null, null, 2),
+                chamada(1L, 3, 100, 1, ResultadoDaChamada.LIMITE_DE_CHAMADAS, null, null, null, 4),
+                chamada(4L, 4, 10, 1, ResultadoDaChamada.SUCESSO, null, null, null, 0));
+
+        List<MetricasDoProvedor> metricas = calcular.calcular(PROVEDORES, chamadas, List.of());
+
+        MetricasDoProvedor gemini = metricas.get(0);
+        assertThat(gemini.chamadas()).isEqualTo(4);
+        assertThat(gemini.mediaDeChamadasHttp()).isEqualByComparingTo("2.3");
+        assertThat(gemini.mediaDeChamadasHttp().scale()).isEqualTo(1);
+        assertThat(gemini.maximoDeChamadasHttp()).isEqualTo(4);
+
+        MetricasDoProvedor fake = metricas.get(1);
+        assertThat(fake.mediaDeChamadasHttp()).isNull();
+        assertThat(fake.maximoDeChamadasHttp()).isNull();
     }
 }

@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import {
   cadeiaAlterada,
   corpoDaCadeia,
+  formatarChamadasHttp,
   formatarLatencia,
   formatarTaxa,
   lerPeriodoDasMetricas,
@@ -69,4 +70,12 @@ test('RNF-REC-001: taxas em porcentagem pt-BR e latência em ms, com travessão 
   assert.equal(formatarLatencia(undefined), '—');
   assert.equal(rotuloDoDia('2026-10-04'), '04/10');
   assert.equal(rotuloDoResultado('COTA_ESGOTADA'), 'Cota esgotada');
+  assert.equal(rotuloDoResultado('LIMITE_DE_CHAMADAS'), 'Limite de chamadas');
+});
+
+test('RNF-REC-001: chamadas HTTP por mensagem com média pt-BR e máximo, ou travessão sem medida', () => {
+  assert.equal(formatarChamadasHttp(1.8, 4), '1,8 (máx. 4)');
+  assert.equal(formatarChamadasHttp(1, 1), '1,0 (máx. 1)');
+  assert.equal(formatarChamadasHttp(2.35, 4), '2,4 (máx. 4)');
+  assert.equal(formatarChamadasHttp(undefined, undefined), '—');
 });

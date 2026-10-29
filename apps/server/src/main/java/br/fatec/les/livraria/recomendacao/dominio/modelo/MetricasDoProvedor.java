@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.recomendacao.dominio.modelo;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
@@ -19,6 +20,8 @@ import org.jspecify.annotations.Nullable;
  * @param latenciaP95Ms          percentil 95 da latência dos sucessos
  * @param tokensEntrada          soma dos tokens de entrada informados
  * @param tokensSaida            soma dos tokens de saída informados
+ * @param mediaDeChamadasHttp    média de chamadas HTTP por mensagem, só nas tentativas com ao menos uma chamada
+ * @param maximoDeChamadasHttp   maior número de chamadas HTTP de uma mensagem, nas mesmas tentativas
  * @param atendimentosPorReserva sucessos com tentativa maior que 1
  * @param avaliadas              recomendações e respostas avaliadas, geradas por chamadas do período
  * @param positivas              avaliações positivas entre as avaliadas
@@ -36,6 +39,8 @@ public record MetricasDoProvedor(
         @Nullable Integer latenciaP95Ms,
         long tokensEntrada,
         long tokensSaida,
+        @Nullable BigDecimal mediaDeChamadasHttp,
+        @Nullable Integer maximoDeChamadasHttp,
         long atendimentosPorReserva,
         long avaliadas,
         long positivas,

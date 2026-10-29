@@ -4427,6 +4427,13 @@
             "type" : "integer",
             "format" : "int32"
           },
+          "maximoDeChamadasHttp" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "mediaDeChamadasHttp" : {
+            "type" : "number"
+          },
           "nome" : {
             "type" : "string"
           },

@@ -98,6 +98,15 @@ export function formatarLatencia(ms: number | undefined): string {
   return ms === undefined ? '—' : `${formatarInteiro(ms)} ms`;
 }
 
+/** Chamadas HTTP por mensagem com a média e o máximo ("1,8 (máx. 4)"); sem medida, travessão. */
+export function formatarChamadasHttp(media: number | undefined, maximo: number | undefined): string {
+  if (media === undefined) {
+    return '—';
+  }
+  const formatada = media.toFixed(1).replace('.', ',');
+  return maximo === undefined ? formatada : `${formatada} (máx. ${formatarInteiro(maximo)})`;
+}
+
 /** Rótulo do dia no eixo X do gráfico: `24/10`. */
 export function rotuloDoDia(dia: string): string {
   const [, mes, numero] = dia.split('-');
@@ -111,6 +120,7 @@ const ROTULOS_DOS_RESULTADOS: Record<Resultado, string> = {
   TEMPO_ESGOTADO: 'Tempo esgotado',
   ERRO_DE_REDE: 'Erro de rede',
   RESPOSTA_INVALIDA: 'Resposta inválida',
+  LIMITE_DE_CHAMADAS: 'Limite de chamadas',
 };
 
 /** Resultado de uma chamada em português. */
