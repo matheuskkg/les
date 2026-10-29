@@ -13,7 +13,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * aplicação sobe sem nenhuma variável {@code IA_*}.
  *
  * @param tempoLimite tempo limite de leitura por chamada a um provedor, por padrão 20 segundos
- * @param provedores  provedores por nome ({@code gemini}, {@code groq}, {@code openrouter})
+ * @param provedores  provedores por nome ({@code gemini}, {@code groq}, {@code openrouter}, {@code nvidia})
  */
 @ConfigurationProperties("livraria.ia")
 public record PropriedadesIa(

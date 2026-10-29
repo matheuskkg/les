@@ -40,14 +40,15 @@ import br.fatec.les.livraria.recomendacao.aplicacao.casodeuso.CadeiaDeProvedores
 import jakarta.servlet.http.Cookie;
 
 /**
- * Aba "Assistente" do ADMIN sobre o seed (RNF-REC-001, DEC-03): a cadeia tem gemini, groq, openrouter e fake, só o
- * fake com chave nos testes. As chamadas de outros provedores entram por SQL, dentro da transação do teste; a
+ * Aba "Assistente" do ADMIN sobre o seed (RNF-REC-001, DEC-03): a cadeia tem gemini, groq, openrouter, nvidia e fake,
+ * só o fake com chave nos testes. As chamadas de outros provedores entram por SQL, dentro da transação do teste; a
  * recomendação de Bruno (usuário 3, sem compras) é atendida pelo fake.
  */
 @SpringBootTest(properties = {
         "livraria.ia.provedores.gemini.chave=",
         "livraria.ia.provedores.groq.chave=",
-        "livraria.ia.provedores.openrouter.chave="})
+        "livraria.ia.provedores.openrouter.chave=",
+        "livraria.ia.provedores.nvidia.chave="})
 @Transactional
 class IaAdminIntegracaoTest {
 
@@ -133,14 +134,14 @@ class IaAdminIntegracaoTest {
         String corpo = mvc.perform(como(ADMIN, get("/api/admin/ia/provedores")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].nome").value(org.hamcrest.Matchers.contains(
-                        "gemini", "groq", "openrouter", "fake")))
+                        "gemini", "groq", "openrouter", "nvidia", "fake")))
                 .andExpect(jsonPath("$[0].chaveConfigurada").value(false))
                 .andExpect(jsonPath("$[0].modelo").isString())
                 .andExpect(jsonPath("$[0].ultimaFalha.resultado").value("ERRO_HTTP"))
                 .andExpect(jsonPath("$[0].ultimaFalha.codigoHttp").value(500))
                 .andExpect(jsonPath("$[1].ultimaFalha").doesNotExist())
-                .andExpect(jsonPath("$[3].chaveConfigurada").value(true))
-                .andExpect(jsonPath("$[3].ativo").value(true))
+                .andExpect(jsonPath("$[4].chaveConfigurada").value(true))
+                .andExpect(jsonPath("$[4].ativo").value(true))
                 .andReturn().getResponse().getContentAsString();
 
         assertThat(corpo).doesNotContain("googleapis", "groq.com", "openrouter.ai", "chave\"", "url");
@@ -153,12 +154,12 @@ class IaAdminIntegracaoTest {
                 .andExpect(jsonPath("$[0].justificativa").value("Entre os mais vendidos da loja."));
 
         String corpo = alterar("{\"provedores\":[{\"id\":4,\"ativo\":false},{\"id\":3,\"ativo\":true},"
-                + "{\"id\":2,\"ativo\":true},{\"id\":1,\"ativo\":false}]}");
+                + "{\"id\":2,\"ativo\":true},{\"id\":1,\"ativo\":false},{\"id\":5,\"ativo\":true}]}");
 
         assertThat(JsonPath.<List<String>>read(corpo, "$[*].nome")).containsExactly("fake", "openrouter", "groq",
-                "gemini");
-        assertThat(JsonPath.<List<Integer>>read(corpo, "$[*].ordem")).containsExactly(1, 2, 3, 4);
-        assertThat(JsonPath.<List<Boolean>>read(corpo, "$[*].ativo")).containsExactly(false, true, true, false);
+                "gemini", "nvidia");
+        assertThat(JsonPath.<List<Integer>>read(corpo, "$[*].ordem")).containsExactly(1, 2, 3, 4, 5);
+        assertThat(JsonPath.<List<Boolean>>read(corpo, "$[*].ativo")).containsExactly(false, true, true, false, true);
 
         // Sem o fake, nenhum provedor atende: a vitrine é gravada sem IA, sem justificativa.
         mvc.perform(como(ANA, get("/api/me/recomendacoes")))
@@ -178,7 +179,7 @@ class IaAdminIntegracaoTest {
         mvc.perform(como(ADMIN, put("/api/admin/ia/provedores"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"provedores\":[{\"id\":1},{\"id\":2,\"ativo\":true},{\"id\":3,\"ativo\":true},"
-                                + "{\"id\":4,\"ativo\":true}]}"))
+                                + "{\"id\":4,\"ativo\":true},{\"id\":5,\"ativo\":true}]}"))
                 .andExpect(status().isBadRequest());
 
         mvc.perform(como(ADMIN, put("/api/admin/ia/provedores"))
@@ -211,7 +212,7 @@ class IaAdminIntegracaoTest {
                         .param("fim", "2026-10-25")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.inicio").value("2026-10-21"))
-                .andExpect(jsonPath("$.provedores", hasSize(4)))
+                .andExpect(jsonPath("$.provedores", hasSize(5)))
                 .andExpect(jsonPath("$.provedores[0].nome").value("gemini"))
                 .andExpect(jsonPath("$.provedores[0].chamadas").value(2))
                 .andExpect(jsonPath("$.provedores[0].taxaDeSucesso").value(0.0))
@@ -225,14 +226,14 @@ class IaAdminIntegracaoTest {
                 .andExpect(jsonPath("$.provedores[1].taxaDeSucesso").doesNotExist())
                 .andExpect(jsonPath("$.provedores[1].mediaDeChamadasHttp").doesNotExist())
                 .andExpect(jsonPath("$.provedores[1].maximoDeChamadasHttp").doesNotExist())
-                .andExpect(jsonPath("$.provedores[3].nome").value("fake"))
-                .andExpect(jsonPath("$.provedores[3].chamadas").value(1))
-                .andExpect(jsonPath("$.provedores[3].taxaDeSucesso").value(1.0))
-                .andExpect(jsonPath("$.provedores[3].latenciaP95Ms").isNumber())
-                .andExpect(jsonPath("$.provedores[3].mediaDeChamadasHttp").doesNotExist())
-                .andExpect(jsonPath("$.provedores[3].maximoDeChamadasHttp").doesNotExist())
-                .andExpect(jsonPath("$.provedores[3].avaliadas").value(2))
-                .andExpect(jsonPath("$.provedores[3].taxaDeAprovacao").value(0.5))
+                .andExpect(jsonPath("$.provedores[4].nome").value("fake"))
+                .andExpect(jsonPath("$.provedores[4].chamadas").value(1))
+                .andExpect(jsonPath("$.provedores[4].taxaDeSucesso").value(1.0))
+                .andExpect(jsonPath("$.provedores[4].latenciaP95Ms").isNumber())
+                .andExpect(jsonPath("$.provedores[4].mediaDeChamadasHttp").doesNotExist())
+                .andExpect(jsonPath("$.provedores[4].maximoDeChamadasHttp").doesNotExist())
+                .andExpect(jsonPath("$.provedores[4].avaliadas").value(2))
+                .andExpect(jsonPath("$.provedores[4].taxaDeAprovacao").value(0.5))
                 .andExpect(jsonPath("$.recomendacoesSemIa").value(1))
                 .andExpect(jsonPath("$.serie", hasSize(5)))
                 .andExpect(jsonPath("$.serie[0].chamadas").value(0))

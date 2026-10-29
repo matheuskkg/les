@@ -35,7 +35,8 @@ import br.fatec.les.livraria.recomendacao.infraestrutura.persistencia.ChamadaIaJ
 @SpringBootTest(properties = {
         "livraria.ia.provedores.gemini.chave=",
         "livraria.ia.provedores.groq.chave=",
-        "livraria.ia.provedores.openrouter.chave="})
+        "livraria.ia.provedores.openrouter.chave=",
+        "livraria.ia.provedores.nvidia.chave="})
 class CadeiaDeProvedoresIntegracaoTest {
 
     private static final PerfilDoCliente PERFIL = new PerfilDoCliente(List.of(), List.of(), List.of(), List.of());
@@ -78,7 +79,8 @@ class CadeiaDeProvedoresIntegracaoTest {
                         tuple("gemini", 1, true),
                         tuple("groq", 2, true),
                         tuple("openrouter", 3, true),
-                        tuple("fake", 4, true));
+                        tuple("nvidia", 4, true),
+                        tuple("fake", 5, true));
     }
 
     @Test

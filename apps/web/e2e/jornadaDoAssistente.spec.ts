@@ -120,7 +120,7 @@ test.describe('Jornada do assistente', () => {
     await page.goto('/admin/assistente');
 
     const cadeia = page.getByRole('table', { name: 'Cadeia de provedores de IA' });
-    for (let vez = 0; vez < 3; vez++) {
+    for (let vez = 0; vez < 4; vez++) {
       await cadeia.getByRole('button', { name: 'Subir fake' }).click();
     }
     await cadeia.getByRole('checkbox', { name: 'Ativo: gemini' }).uncheck();

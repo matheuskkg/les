@@ -56,7 +56,8 @@ import jakarta.servlet.http.Cookie;
 @SpringBootTest(properties = {
         "livraria.ia.provedores.gemini.chave=",
         "livraria.ia.provedores.groq.chave=",
-        "livraria.ia.provedores.openrouter.chave="})
+        "livraria.ia.provedores.openrouter.chave=",
+        "livraria.ia.provedores.nvidia.chave="})
 @Transactional
 class AssistenteIntegracaoTest {
 

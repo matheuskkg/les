@@ -30,7 +30,9 @@ class ConfiguracaoDosProvedoresIaTest {
             "livraria.ia.provedores.groq.url-base=http://127.0.0.1:1/v1",
             "livraria.ia.provedores.groq.modelo=modelo-groq",
             "livraria.ia.provedores.openrouter.url-base=http://127.0.0.1:1/v1",
-            "livraria.ia.provedores.openrouter.modelo=modelo-openrouter"};
+            "livraria.ia.provedores.openrouter.modelo=modelo-openrouter",
+            "livraria.ia.provedores.nvidia.url-base=http://127.0.0.1:1/v1",
+            "livraria.ia.provedores.nvidia.modelo=modelo-nvidia"};
 
     private final ApplicationContextRunner contexto = new ApplicationContextRunner()
             .withUserConfiguration(ConfiguracaoDosProvedoresIa.class)
@@ -46,13 +48,14 @@ class ConfiguracaoDosProvedoresIaTest {
             Map<String, AssistenteDeLivros> assistentes = gerenciador.getBeansOfType(AssistenteDeLivros.class);
 
             assertThat(assistentes.values()).extracting(AssistenteDeLivros::nome)
-                    .containsExactlyInAnyOrder("gemini", "groq", "openrouter", "fake");
+                    .containsExactlyInAnyOrder("gemini", "groq", "openrouter", "nvidia", "fake");
             assertThat(gerenciador).hasBean("assistente-gemini")
                     .hasBean("assistente-groq")
-                    .hasBean("assistente-openrouter");
+                    .hasBean("assistente-openrouter")
+                    .hasBean("assistente-nvidia");
 
             CadeiaDeProvedores cadeia = gerenciador.getBean(CadeiaDeProvedores.class);
-            assertThat(assistentesNaCadeia(cadeia)).containsKeys("gemini", "groq", "openrouter", "fake");
+            assertThat(assistentesNaCadeia(cadeia)).containsKeys("gemini", "groq", "openrouter", "nvidia", "fake");
         });
     }
 

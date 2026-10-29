@@ -27,12 +27,16 @@ flowchart LR
     Q -- não --> O{openrouter<br/>ativo e com chave?}
     O -- sim --> OC[chama o OpenRouter]
     OC -- ok --> R
-    OC -- falha ou 429 --> F
-    O -- não --> F[fake]
+    OC -- falha ou 429 --> N
+    O -- não --> N{nvidia<br/>ativo e com chave?}
+    N -- sim --> NC[chama o NVIDIA NIM]
+    NC -- ok --> R
+    NC -- falha ou 429 --> F
+    N -- não --> F[fake]
     F --> R
 ```
 
-- **Ordem padrão:** `gemini`, `groq`, `openrouter` e `fake`. O administrador muda a ordem e liga ou desliga
+- **Ordem padrão:** `gemini`, `groq`, `openrouter`, `nvidia` e `fake`. O administrador muda a ordem e liga ou desliga
   provedores na aba **Assistente** do admin, sem reiniciar. A mudança fica gravada no banco.
 - **Cota esgotada:** um provedor que respondeu HTTP 429 fica fora da cadeia pelo tempo indicado no cabeçalho
   `Retry-After` (segundos ou data HTTP) ou no texto da mensagem, como "try again in 7.5s" ou "retry in 1m30s". O
@@ -62,10 +66,12 @@ flowchart LR
 | Gemini | `IA_GEMINI_CHAVE` | `IA_GEMINI_MODELO` |
 | Groq | `IA_GROQ_CHAVE` | `IA_GROQ_MODELO` |
 | OpenRouter | `IA_OPENROUTER_CHAVE` | `IA_OPENROUTER_MODELO` |
+| NVIDIA NIM | `IA_NVIDIA_CHAVE` | `IA_NVIDIA_MODELO` |
 
 - Defina só as chaves dos provedores que for usar. Um provedor sem chave é pulado.
 - O `application.yml` já traz um modelo gratuito para cada provedor: `gemini-3.5-flash-lite` no Gemini,
-  `qwen/qwen3.8-27b` no Groq e `google/gemma-4-31b-it:free` no OpenRouter. A variável de modelo só é necessária
+  `qwen/qwen3.8-27b` no Groq, `google/gemma-4-31b-it:free` no OpenRouter e `nvidia/nemotron-3.5-super-vl-120b-a12b` no
+  NVIDIA NIM. A variável de modelo só é necessária
   para trocá-lo.
 - Cada chamada tem tempo limite de 20 segundos (`livraria.ia.tempo-limite`). Passado esse tempo, a chamada falha
   como `TEMPO_ESGOTADO` e a cadeia passa ao próximo provedor.
@@ -124,7 +130,7 @@ alterar código nem reiniciar o `web`.
 
 ## Obter as chaves
 
-Os três planos são gratuitos e não pedem cartão de crédito. Os limites e a lista de modelos gratuitos mudam com
+Os planos são gratuitos e não pedem cartão de crédito. Os limites e a lista de modelos gratuitos mudam com
 frequência, então confira nas páginas indicadas.
 
 ### Gemini (Google AI Studio)
@@ -167,6 +173,20 @@ frequência, então confira nas páginas indicadas.
   valores atuais estão em [limites](https://openrouter.ai/docs/api-reference/limits).
 - **Atenção:** os modelos gratuitos podem sair do ar sem aviso. Se as chamadas começarem a falhar com
   `ERRO_HTTP` 404, troque `IA_OPENROUTER_MODELO`.
+
+### NVIDIA NIM (build.nvidia.com)
+
+1. Entre em [build.nvidia.com](https://build.nvidia.com/) com uma conta NVIDIA (o cadastro entra no NVIDIA
+   Developer Program).
+2. Abra [API Keys](https://build.nvidia.com/settings/api-keys) e clique em **Generate API Key**. A chave começa com
+   `nvapi-` e só é mostrada uma vez.
+3. Copie a chave para `IA_NVIDIA_CHAVE`.
+
+- **Endpoint:** `https://integrate.api.nvidia.com/v1`, compatível com OpenAI.
+- **Modelos:** a lista está no [catálogo do NVIDIA Build](https://build.nvidia.com/models). Escolha um modelo cuja
+  página indique suporte a tool calling.
+- **Limites:** o plano gratuito é medido em créditos de inferência e tem limite de requisições por minuto. O saldo e
+  os limites aparecem na conta.
 
 ## Subir o server com as chaves
 

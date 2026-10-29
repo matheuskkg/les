@@ -11,3 +11,5 @@ livraria:
         chave: ""
       openrouter:
         chave: ""
+      nvidia:
+        chave: ""

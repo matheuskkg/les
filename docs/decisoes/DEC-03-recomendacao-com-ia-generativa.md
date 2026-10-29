@@ -44,6 +44,10 @@ sem mudar o modelo.
   | `gemini` | `https://generativelanguage.googleapis.com/v1beta/openai` | `IA_GEMINI_CHAVE` | `IA_GEMINI_MODELO` |
   | `groq` | `https://api.groq.com/openai/v1` | `IA_GROQ_CHAVE` | `IA_GROQ_MODELO` |
   | `openrouter` | `https://openrouter.ai/api/v1` | `IA_OPENROUTER_CHAVE` | `IA_OPENROUTER_MODELO` |
+  | `nvidia` | `https://integrate.api.nvidia.com/v1` | `IA_NVIDIA_CHAVE` | `IA_NVIDIA_MODELO` |
+
+  (alterado no REC-10: `nvidia` (NVIDIA NIM) entrou na cadeia depois de passar no teste de fumaça com tools e saída
+  JSON; o Mistral foi descartado porque o plano gratuito não permite criar chave de API)
 
   O modelo é um dos gratuitos do provedor que aceita tool calling e saída estruturada. O `application.yml` traz um
   padrão para cada um, e a variável o troca sem editar arquivos.
@@ -54,7 +58,8 @@ sem mudar o modelo.
 - O provedor `fake` (`AssistenteDeLivrosFake`, determinístico, sem rede) é o último da cadeia. Quando nenhum
   provedor anterior tem chave, como em `mvn test` e nos E2E, a cadeia usa só o `fake`.
 - **Troca em tempo de execução:** a ordem e a ativação ficam na tabela `provedor_ia`, com seed `gemini`, `groq`,
-  `openrouter` e `fake`, nessa ordem e todos ativos. O ADMIN consulta e altera a ordem e a ativação
+  `openrouter` e `fake` (alterado no REC-10: a ordem passa a ser `gemini`, `groq`, `openrouter`, `nvidia` e `fake`),
+  nessa ordem e todos ativos. O ADMIN consulta e altera a ordem e a ativação
   (`GET`/`PUT /api/admin/ia/provedores`). A resposta mostra, por provedor, se ele tem chave e a última falha. A chave
   e a URL ficam só na configuração e nunca são expostas nem alteradas pela API. A cadeia é lida da tabela e guardada
   em memória por 30 segundos; a alteração pelo ADMIN limpa esse cache. Os 5 minutos fora da cadeia depois de um 429

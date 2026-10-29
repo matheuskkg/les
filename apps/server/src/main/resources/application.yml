@@ -69,3 +69,7 @@ livraria:
         max-chamadas: 5
         cabecalhos:
           X-Title: Livraria LES
+      nvidia:
+        url-base: https://integrate.api.nvidia.com/v1
+        modelo: ${IA_NVIDIA_MODELO:nvidia/nemotron-3.5-super-vl-120b-a12b}
+        chave: ${IA_NVIDIA_CHAVE:}

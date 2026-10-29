@@ -4,4 +4,5 @@ INSERT INTO provedor_ia (id, nome, ordem, ativo) VALUES
     (1, 'gemini', 1, true),
     (2, 'groq', 2, true),
     (3, 'openrouter', 3, true),
-    (4, 'fake', 4, true);
+    (5, 'nvidia', 4, true),
+    (4, 'fake', 5, true);
