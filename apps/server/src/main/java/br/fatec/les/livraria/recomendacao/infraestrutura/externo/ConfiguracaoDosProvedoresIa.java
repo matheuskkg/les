@@ -1,38 +1,60 @@
 package br.fatec.les.livraria.recomendacao.infraestrutura.externo;
 
+import java.time.Duration;
+import java.util.Map;
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
-import br.fatec.les.livraria.recomendacao.aplicacao.porta.AssistenteDeLivros;
 import br.fatec.les.livraria.recomendacao.infraestrutura.PropriedadesIa;
 
 /**
- * Um adapter compatível com OpenAI por provedor de {@code livraria.ia.provedores} (RNF-REC-001, DEC-03). Sem chave,
- * o adapter existe mas fica fora da cadeia, e a aplicação sobe sem nenhuma variável {@code IA_*}.
+ * Um adapter compatível com OpenAI por item de {@code livraria.ia.provedores} (RNF-REC-001, DEC-03). O registro é
+ * feito na subida do contexto, antes da injeção da cadeia, para que cada item da configuração vire um bean
+ * {@code assistente-<nome>} e conviva com o {@code fake}. Sem chave, o adapter existe mas fica fora da cadeia, e a
+ * aplicação sobe sem nenhuma variável {@code IA_*}.
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class ConfiguracaoDosProvedoresIa {
 
+    /**
+     * Registra os adapters a partir da configuração, sem {@code @Bean} fixo por provedor. Um provedor novo exige só
+     * a entrada em {@code livraria.ia.provedores} e a linha correspondente no seed de {@code provedor_ia}.
+     */
     @Bean
-    AssistenteDeLivros assistenteGemini(PropriedadesIa propriedades) {
-        return assistente("gemini", propriedades);
-    }
+    static BeanDefinitionRegistryPostProcessor assistentesDeLivros(Environment ambiente) {
+        PropriedadesIa propriedades = Binder.get(ambiente)
+                .bind("livraria.ia", Bindable.of(PropriedadesIa.class))
+                .orElseGet(() -> new PropriedadesIa(Duration.ofSeconds(20), Map.of()));
 
-    @Bean
-    AssistenteDeLivros assistenteGroq(PropriedadesIa propriedades) {
-        return assistente("groq", propriedades);
-    }
+        return new BeanDefinitionRegistryPostProcessor() {
 
-    @Bean
-    AssistenteDeLivros assistenteOpenRouter(PropriedadesIa propriedades) {
-        return assistente("openrouter", propriedades);
-    }
+            @Override
+            public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registro) throws BeansException {
+                propriedades.provedores().forEach((nome, provedor) -> {
+                    BeanDefinition definicao = BeanDefinitionBuilder
+                            .genericBeanDefinition(AssistenteDeLivrosOpenAi.class)
+                            .addConstructorArgValue(nome)
+                            .addConstructorArgValue(provedor)
+                            .addConstructorArgValue(propriedades.tempoLimite())
+                            .getBeanDefinition();
+                    registro.registerBeanDefinition("assistente-" + nome, definicao);
+                });
+            }
 
-    private static AssistenteDeLivros assistente(String nome, PropriedadesIa propriedades) {
-        PropriedadesIa.Provedor provedor = propriedades.provedores().get(nome);
-        if (provedor == null) {
-            throw new IllegalStateException("livraria.ia.provedores." + nome + " não configurado.");
-        }
-        return new AssistenteDeLivrosOpenAi(nome, provedor, propriedades.tempoLimite());
+            @Override
+            public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+                // Os beans já foram registrados em postProcessBeanDefinitionRegistry.
+            }
+        };
     }
 }

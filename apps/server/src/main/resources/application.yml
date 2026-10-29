@@ -49,6 +49,9 @@ livraria:
     # Tempo limite de leitura por chamada a um provedor (DEC-03).
     tempo-limite: 20s
     # Chave vazia significa provedor sem chave; a cadeia ignora o provedor (DEC-03).
+    # Cada item vira um adapter; opções opcionais e seus padrões:
+    #   tool-choice: auto|required (padrão auto), formato: instrucoes|json-schema (padrão instrucoes),
+    #   max-chamadas: inteiro >= 1 (padrão 5), cabecalhos: mapa de cabeçalhos HTTP extras.
     provedores:
       gemini:
         url-base: https://generativelanguage.googleapis.com/v1beta/openai
@@ -62,3 +65,8 @@ livraria:
         url-base: https://openrouter.ai/api/v1
         modelo: ${IA_OPENROUTER_MODELO:google/gemma-4-31b-it:free}
         chave: ${IA_OPENROUTER_CHAVE:}
+        tool-choice: auto
+        formato: instrucoes
+        max-chamadas: 5
+        cabecalhos:
+          X-Title: Livraria LES

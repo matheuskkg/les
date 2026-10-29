@@ -14,6 +14,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.recomendacao.aplicacao.AssistenteIndisponivel;
@@ -153,6 +159,61 @@ class CadeiaDeProvedoresTest {
         cadeia(a, b).recomendar(PERFIL, CANDIDATOS);
 
         assertThat(chamadas.todas().get(0).erro()).hasSize(ChamadaIa.LIMITE_DO_ERRO);
+    }
+
+    @Test
+    void rnfRec001_falhaDoProvedorGeraWarnComDadosDaChamadaSemChaveNemPrompt() {
+        provedores.com(provedor(1L, "a", 1, true), provedor(2L, "b", 2, true));
+        AssistenteFalso a = new AssistenteFalso("a")
+                .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_HTTP, 500, "x".repeat(600)));
+        AssistenteFalso b = new AssistenteFalso("b");
+        ListAppender<ILoggingEvent> log = capturarLogDaCadeia();
+
+        try {
+            cadeia(a, b).recomendar(PERFIL, CANDIDATOS);
+        } finally {
+            loggerDaCadeia().detachAppender(log);
+        }
+
+        assertThat(log.list).anySatisfy(evento -> {
+            assertThat(evento.getLevel()).isEqualTo(Level.WARN);
+            assertThat(evento.getFormattedMessage())
+                    .contains("provedor=a", "modelo=modelo-a", "resultado=ERRO_HTTP", "codigoHttp=500")
+                    .contains("x".repeat(ChamadaIa.LIMITE_DO_ERRO))
+                    .doesNotContain("x".repeat(ChamadaIa.LIMITE_DO_ERRO + 1));
+        });
+    }
+
+    @Test
+    void rnfRec001_excecaoInesperadaTambemGeraWarn() {
+        provedores.com(provedor(1L, "a", 1, true), provedor(2L, "b", 2, true));
+        AssistenteFalso a = new AssistenteFalso("a").falharCom(new IllegalStateException("quebrou"));
+        AssistenteFalso b = new AssistenteFalso("b");
+        ListAppender<ILoggingEvent> log = capturarLogDaCadeia();
+
+        try {
+            cadeia(a, b).recomendar(PERFIL, CANDIDATOS);
+        } finally {
+            loggerDaCadeia().detachAppender(log);
+        }
+
+        assertThat(log.list).anySatisfy(evento -> {
+            assertThat(evento.getLevel()).isEqualTo(Level.WARN);
+            assertThat(evento.getFormattedMessage())
+                    .contains("provedor=a", "modelo=modelo-a", "resultado=ERRO_HTTP", "codigoHttp=null",
+                            "erro=quebrou");
+        });
+    }
+
+    private static ListAppender<ILoggingEvent> capturarLogDaCadeia() {
+        ListAppender<ILoggingEvent> log = new ListAppender<>();
+        log.start();
+        loggerDaCadeia().addAppender(log);
+        return log;
+    }
+
+    private static Logger loggerDaCadeia() {
+        return (Logger) LoggerFactory.getLogger(CadeiaDeProvedores.class);
     }
 
     @Test

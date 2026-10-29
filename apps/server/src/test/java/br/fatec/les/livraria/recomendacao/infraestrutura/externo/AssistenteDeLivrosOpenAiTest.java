@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -61,6 +62,8 @@ class AssistenteDeLivrosOpenAiTest {
     private final AtomicInteger requisicoes = new AtomicInteger();
     private volatile String caminhoRecebido;
     private volatile String autorizacaoRecebida;
+    private volatile String tituloRecebido;
+    private volatile String referenciaRecebida;
 
     private record Resposta(int status, String corpo, long atrasoMs) {
     }
@@ -81,6 +84,8 @@ class AssistenteDeLivrosOpenAiTest {
         requisicoes.incrementAndGet();
         caminhoRecebido = troca.getRequestURI().getPath();
         autorizacaoRecebida = troca.getRequestHeaders().getFirst("Authorization");
+        tituloRecebido = troca.getRequestHeaders().getFirst("X-Title");
+        referenciaRecebida = troca.getRequestHeaders().getFirst("HTTP-Referer");
         corpos.add(new String(troca.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
         Resposta resposta = respostas.poll();
         if (resposta == null) {
@@ -106,12 +111,15 @@ class AssistenteDeLivrosOpenAiTest {
     }
 
     private AssistenteDeLivrosOpenAi assistente(String urlBase, Duration tempoLimite) {
-        return new AssistenteDeLivrosOpenAi("groq", new PropriedadesIa.Provedor(urlBase, "modelo-teste", CHAVE),
-                tempoLimite);
+        return new AssistenteDeLivrosOpenAi("groq", provedor(urlBase, "instrucoes", "auto"), tempoLimite);
     }
 
     private AssistenteDeLivrosOpenAi assistente() {
         return assistente("http://127.0.0.1:" + servidor.getAddress().getPort() + "/v1", Duration.ofSeconds(5));
+    }
+
+    private static PropriedadesIa.Provedor provedor(String urlBase, String formato, String toolChoice) {
+        return new PropriedadesIa.Provedor(urlBase, "modelo-teste", CHAVE, toolChoice, formato, Map.of(), 5);
     }
 
     private static String conclusao(String conteudoJson) {
@@ -245,11 +253,68 @@ class AssistenteDeLivrosOpenAiTest {
     @Test
     void rnfRec001_semChaveFicaForaDaCadeia() {
         AssistenteDeLivrosOpenAi assistente = new AssistenteDeLivrosOpenAi("gemini",
-                new PropriedadesIa.Provedor("http://127.0.0.1:1/v1", "modelo-teste", ""), Duration.ofSeconds(1));
+                new PropriedadesIa.Provedor("http://127.0.0.1:1/v1", "modelo-teste", "", "auto", "instrucoes",
+                        Map.of(), 5),
+                Duration.ofSeconds(1));
 
         assertThat(assistente.temChave()).isFalse();
         assertThat(assistente.nome()).isEqualTo("gemini");
         assertThat(assistente.modelo()).isEqualTo("modelo-teste");
+        assertThat(assistente.maxChamadas()).isEqualTo(5);
+    }
+
+    @Test
+    void rnfRec001_cabecalhosExtrasSaoEnviadosAoProvedor() {
+        respostas.add(new Resposta(200, conclusao("{\"itens\":[]}"), 0));
+        PropriedadesIa.Provedor provedor = new PropriedadesIa.Provedor(
+                "http://127.0.0.1:" + servidor.getAddress().getPort() + "/v1", "modelo-teste", CHAVE, "auto",
+                "instrucoes", Map.of("X-Title", "Livraria LES", "HTTP-Referer", "https://livraria.test"), 5);
+
+        new AssistenteDeLivrosOpenAi("openrouter", provedor, Duration.ofSeconds(5))
+                .recomendar(PERFIL, CANDIDATOS);
+
+        assertThat(tituloRecebido).isEqualTo("Livraria LES");
+        assertThat(referenciaRecebida).isEqualTo("https://livraria.test");
+    }
+
+    @Test
+    void rnfRec001_toolChoiceRequiredApareceNoCorpoQuandoHaFerramentas() {
+        respostas.add(new Resposta(200, chamadaDeFerramenta(), 0));
+        respostas.add(new Resposta(200, conclusao("""
+                {"tipo":"BUSCA","texto":"Encontrei Dom Casmurro.","livrosCitados":[1]}"""), 0));
+        AssistenteDeLivrosOpenAi assistente = new AssistenteDeLivrosOpenAi("groq",
+                provedor("http://127.0.0.1:" + servidor.getAddress().getPort() + "/v1", "instrucoes", "required"),
+                Duration.ofSeconds(5));
+
+        assistente.conversar(PERFIL, List.of(), "Livros do Machado?", new FerramentasFalsas());
+
+        assertThat(corpos.getFirst()).contains("\"tool_choice\":\"required\"");
+    }
+
+    @Test
+    void rnfRec001_formatoJsonSchemaUsaOResponseFormatNativoSemInstrucoesNoPrompt() {
+        respostas.add(new Resposta(200, conclusao("""
+                {"itens":[{"livroId":1,"justificativa":"Um clássico de Machado."}]}"""), 0));
+        AssistenteDeLivrosOpenAi assistente = new AssistenteDeLivrosOpenAi("openrouter",
+                provedor("http://127.0.0.1:" + servidor.getAddress().getPort() + "/v1", "json-schema", "auto"),
+                Duration.ofSeconds(5));
+
+        RespostaDoProvedor<RespostaDeRecomendacao> resposta = assistente.recomendar(PERFIL, CANDIDATOS);
+
+        assertThat(resposta.conteudo().itens()).extracting(item -> item.livroId()).containsExactly(1L);
+        assertThat(corpos.getFirst())
+                .contains("\"response_format\"")
+                .contains("\"type\":\"json_schema\"")
+                .doesNotContain("Your response should be in JSON format")
+                .doesNotContain("Here is the JSON Schema instance");
+    }
+
+    @Test
+    void rnfRec001_maxChamadasInvalidoEhRejeitado() {
+        assertThatThrownBy(() -> new PropriedadesIa.Provedor(
+                "http://127.0.0.1:1/v1", "modelo-teste", CHAVE, "auto", "instrucoes", Map.of(), 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("livraria.ia.provedores.*.max-chamadas deve ser pelo menos 1.");
     }
 
     private static final class FerramentasFalsas implements FerramentasDoAssistente {

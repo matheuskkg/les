@@ -9,13 +9,16 @@ import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.ChatClient.ChatClientRequestSpec;
 import org.springframework.ai.chat.client.ResponseEntity;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
 
 import com.openai.errors.OpenAIIoException;
@@ -62,6 +65,11 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
             pelo gosto do cliente, BUSCA quando atende a uma busca, DUVIDA quando esclarece uma dúvida e \
             FORA_DO_ESCOPO quando o assunto não é da loja.""";
 
+    private static final BeanOutputConverter<SaidaDeRecomendacao> CONVERSOR_DA_RECOMENDACAO =
+            new BeanOutputConverter<>(SaidaDeRecomendacao.class);
+    private static final BeanOutputConverter<SaidaDoAssistente> CONVERSOR_DO_ASSISTENTE =
+            new BeanOutputConverter<>(SaidaDoAssistente.class);
+
     private final String nome;
     private final PropriedadesIa.Provedor provedor;
     private final @Nullable ChatClient cliente;
@@ -76,6 +84,7 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
                         .model(provedor.modelo())
                         .timeout(tempoLimite)
                         .maxRetries(0)
+                        .customHeaders(provedor.cabecalhos())
                         .build())
                 .build()) : null;
     }
@@ -95,14 +104,20 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
         return cliente != null;
     }
 
+    /** Máximo de chamadas HTTP ao provedor por mensagem (DEC-03). */
+    public int maxChamadas() {
+        return provedor.maxChamadas();
+    }
+
     @Override
     public RespostaDoProvedor<RespostaDeRecomendacao> recomendar(
             PerfilDoCliente perfil, List<LivroCandidato> candidatos) {
-        ResponseEntity<ChatResponse, SaidaDeRecomendacao> resposta = chamar(() -> clienteConfigurado().prompt()
-                .system(SISTEMA_DA_RECOMENDACAO)
-                .user("Perfil do cliente:\n" + descrever(perfil) + "\n\nCandidatos:\n" + descrever(candidatos))
-                .call()
-                .responseEntity(SaidaDeRecomendacao.class));
+        ResponseEntity<ChatResponse, SaidaDeRecomendacao> resposta = responder(
+                clienteConfigurado().prompt()
+                        .system(SISTEMA_DA_RECOMENDACAO)
+                        .user("Perfil do cliente:\n" + descrever(perfil) + "\n\nCandidatos:\n"
+                                + descrever(candidatos)),
+                SaidaDeRecomendacao.class, CONVERSOR_DA_RECOMENDACAO, false);
         SaidaDeRecomendacao saida = exigir(resposta.entity());
         List<ItemRecomendado> itens = exigir(saida.itens()).stream()
                 .map(item -> new ItemRecomendado(exigir(item.livroId()), Objects.requireNonNullElse(
@@ -122,19 +137,53 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
                         ? new UserMessage(mensagem.texto())
                         : new AssistantMessage(mensagem.texto()))
                 .toList();
-        ResponseEntity<ChatResponse, SaidaDoAssistente> resposta = chamar(() -> clienteConfigurado().prompt()
-                .system(SISTEMA_DA_CONVERSA + "\n\nPerfil do cliente:\n" + descrever(perfil))
-                .messages(anteriores)
-                .user(mensagemNova)
-                .tools(new FerramentasParaIa(ferramentas))
-                .call()
-                .responseEntity(SaidaDoAssistente.class));
+        ResponseEntity<ChatResponse, SaidaDoAssistente> resposta = responder(
+                clienteConfigurado().prompt()
+                        .system(SISTEMA_DA_CONVERSA + "\n\nPerfil do cliente:\n" + descrever(perfil))
+                        .messages(anteriores)
+                        .user(mensagemNova)
+                        .tools(new FerramentasParaIa(ferramentas)),
+                SaidaDoAssistente.class, CONVERSOR_DO_ASSISTENTE, true);
         SaidaDoAssistente saida = exigir(resposta.entity());
         List<Long> citados = saida.livrosCitados() == null ? List.of() : saida.livrosCitados().stream()
                 .filter(Objects::nonNull)
                 .toList();
         return comTokens(new RespostaDoAssistente(exigir(saida.tipo()), Objects.requireNonNullElse(saida.texto(), ""),
                 citados), resposta.response());
+    }
+
+    /**
+     * Executa a chamada com a saída estruturada no formato do provedor (DEC-03). Com {@code json-schema}, o schema
+     * vai no {@code response_format} nativo e as instruções de formato não são acrescentadas ao prompt.
+     */
+    private <T> ResponseEntity<ChatResponse, T> responder(
+            ChatClientRequestSpec requisicao,
+            Class<T> tipo,
+            BeanOutputConverter<T> conversor,
+            boolean comFerramentas) {
+        OpenAiChatOptions.Builder opcoes = opcoesDaChamada(comFerramentas, conversor);
+        return chamar(() -> {
+            var chamada = requisicao.options(opcoes).call();
+            return provedor.usaJsonSchema()
+                    ? chamada.responseEntity(tipo, especificacao -> especificacao.useProviderStructuredOutput())
+                    : chamada.responseEntity(tipo);
+        });
+    }
+
+    /** Opções que variam por chamada: tool choice quando há tools e o formato nativo da saída estruturada. */
+    private OpenAiChatOptions.Builder opcoesDaChamada(boolean comFerramentas, BeanOutputConverter<?> conversor) {
+        OpenAiChatOptions.Builder opcoes = OpenAiChatOptions.builder();
+        if (comFerramentas && provedor.exigeToolChoice()) {
+            opcoes.toolChoice(PropriedadesIa.Provedor.TOOL_CHOICE_REQUIRED);
+        }
+        if (provedor.usaJsonSchema()) {
+            opcoes.responseFormat(ResponseFormat.builder()
+                    .type(ResponseFormat.Type.JSON_SCHEMA)
+                    .jsonSchema(conversor.getJsonSchema())
+                    .strict(false)
+                    .build());
+        }
+        return opcoes;
     }
 
     private ChatClient clienteConfigurado() {

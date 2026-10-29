@@ -32,7 +32,10 @@ sem mudar o modelo.
 - A conexão de cada provedor é declarada na configuração (`livraria.ia.provedores.<nome>`) com `url-base`, `modelo` e
   `chave`. A chave e o modelo vêm de variáveis de ambiente (alterado na implementação do REC-01: um
   `livraria.ia.tempo-limite`, de 20 s por padrão, vale para todos os provedores, e o cliente não repete a chamada,
-  porque a cadeia decide o que fazer na falha):
+  porque a cadeia decide o que fazer na falha; alterado no REC-06: cada item de `livraria.ia.provedores` vira um
+  adapter próprio, e a conexão aceita as opções opcionais `tool-choice` (`auto` ou `required`), `formato`
+  (`instrucoes` ou `json-schema`), `cabecalhos` (cabeçalhos HTTP extras, como `X-Title` do OpenRouter) e
+  `max-chamadas`, com mínimo 1 e padrão 5):
 
   | Provedor | `url-base` | Chave | Modelo |
   |---|---|---|---|
@@ -133,6 +136,8 @@ Uma regra por arquivo, testável sem a IA:
   `RESPOSTA_INVALIDA`), código HTTP, mensagem de erro (até 500 caracteres) e tokens de entrada e saída, quando o
   provedor informa.
 - O prompt e a resposta crus não são gravados. O conteúdo fica nas mensagens e nos itens recomendados.
+  (Alterado no REC-06: cada falha também gera um `WARN` no log do server, com provedor, modelo, resultado, código
+  HTTP e mensagem truncada, sem a chave nem o prompt/mensagens do cliente.)
 - A resposta do assistente e a recomendação apontam para a chamada que as gerou (`chamada_ia_id`).
 - `chamada_ia` é um log só de inserção e não tem tabela `_aud`. As demais tabelas do módulo são auditadas
   (RNF-GER-002).

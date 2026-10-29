@@ -9,6 +9,8 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import br.fatec.les.livraria.compartilhado.aplicacao.EstadoEmMemoria;
@@ -45,6 +47,8 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.ResultadoDaChamada;
  */
 @Component
 public class CadeiaDeProvedores implements EstadoEmMemoria {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CadeiaDeProvedores.class);
 
     /** Tempo de vida do cache da tabela {@code provedor_ia} (DEC-03). */
     static final Duration VALIDADE_DO_CACHE = Duration.ofSeconds(30);
@@ -130,6 +134,7 @@ public class CadeiaDeProvedores implements EstadoEmMemoria {
             try {
                 resposta = chamada.executar(disponivel.assistente());
             } catch (FalhaNaChamadaDeIa falha) {
+                avisarFalha(disponivel, falha.getResultado(), falha.getCodigoHttp(), falha.getMessage());
                 registrar(disponivel, operacao, inicio, inicioNanos, tentativa, falha.getResultado(),
                         falha.getCodigoHttp(), falha.getMessage(), null, null);
                 if (falha.getResultado() == ResultadoDaChamada.COTA_ESGOTADA) {
@@ -137,6 +142,7 @@ public class CadeiaDeProvedores implements EstadoEmMemoria {
                 }
                 continue;
             } catch (RuntimeException inesperada) {
+                avisarFalha(disponivel, ResultadoDaChamada.ERRO_HTTP, null, mensagem(inesperada));
                 registrar(disponivel, operacao, inicio, inicioNanos, tentativa, ResultadoDaChamada.ERRO_HTTP,
                         null, mensagem(inesperada), null, null);
                 continue;
@@ -205,6 +211,20 @@ public class CadeiaDeProvedores implements EstadoEmMemoria {
     private static int latenciaMs(long inicioNanos) {
         long decorrido = System.nanoTime() - inicioNanos;
         return (int) Math.max(0, decorrido / 1_000_000);
+    }
+
+    /**
+     * Deixa a falha visível no log do server (DEC-03). Só entram provedor, modelo, resultado, código HTTP e a
+     * mensagem truncada; a chave e o prompt/mensagens do cliente nunca são registrados.
+     */
+    private static void avisarFalha(ProvedorDisponivel disponivel, ResultadoDaChamada resultado,
+            Integer codigoHttp, String erro) {
+        String mensagem = erro == null ? "" : erro;
+        if (mensagem.length() > ChamadaIa.LIMITE_DO_ERRO) {
+            mensagem = mensagem.substring(0, ChamadaIa.LIMITE_DO_ERRO);
+        }
+        LOG.warn("Falha no provedor de IA: provedor={}, modelo={}, resultado={}, codigoHttp={}, erro={}",
+                disponivel.assistente().nome(), disponivel.assistente().modelo(), resultado, codigoHttp, mensagem);
     }
 
     private static String mensagem(RuntimeException excecao) {

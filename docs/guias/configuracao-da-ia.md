@@ -58,6 +58,51 @@ flowchart LR
   as respostas falham como `RESPOSTA_INVALIDA` e a cadeia passa ao próximo provedor.
 - As chaves nunca vão para o repositório nem para o banco, e a API não as expõe.
 
+## Opções de cada provedor
+
+Cada item de `livraria.ia.provedores.<nome>` vira um adapter próprio. Além de `url-base`, `modelo` e `chave`, todas
+as opções abaixo são opcionais e têm padrão:
+
+| Opção | Valores | Padrão | Efeito |
+|---|---|---|---|
+| `tool-choice` | `auto`, `required` | `auto` | Com `required`, toda chamada do chat que leva tools obriga o modelo a chamar ao menos uma ferramenta. |
+| `formato` | `instrucoes`, `json-schema` | `instrucoes` | Com `instrucoes`, o Spring AI acrescenta ao prompt as instruções do JSON esperado. Com `json-schema`, o schema da resposta vai no `response_format` nativo da API OpenAI e o prompt fica sem essas instruções. |
+| `cabecalhos` | mapa de textos | vazio | Cabeçalhos HTTP extras enviados em toda chamada, por exemplo `HTTP-Referer` e `X-Title` do OpenRouter. |
+| `max-chamadas` | inteiro ≥ 1 | `5` | Máximo de chamadas HTTP ao provedor por mensagem. |
+
+Exemplo do `application.yml`:
+
+```yaml
+livraria:
+  ia:
+    provedores:
+      openrouter:
+        url-base: https://openrouter.ai/api/v1
+        modelo: ${IA_OPENROUTER_MODELO:google/gemma-4-31b-it:free}
+        chave: ${IA_OPENROUTER_CHAVE:}
+        tool-choice: auto
+        formato: instrucoes
+        max-chamadas: 5
+        cabecalhos:
+          X-Title: Livraria LES
+```
+
+Um valor fora dos aceitos impede a subida com uma mensagem no formato
+`livraria.ia.provedores.*.formato deve ser instrucoes ou json-schema.`; `max-chamadas` menor que 1 é recusado do mesmo
+jeito.
+
+## Adicionar um provedor só por configuração
+
+Não há `@Bean` por provedor. Para acrescentar outro serviço compatível com a API OpenAI:
+
+1. Declare a conexão em `livraria.ia.provedores.<nome>`, com `url-base`, `modelo`, `chave` e, se precisar, as opções
+   acima. A chave pode vir de uma variável de ambiente, como nos provedores que já existem.
+2. Inclua o nome em `seed/500_provedores_ia.sql` (tabela `provedor_ia`) com a ordem e a ativação desejadas.
+
+Na subida, o item vira o bean `assistente-<nome>`, do mesmo tipo dos demais, e a cadeia passa a considerá-lo na ordem
+da tabela. A ordem e a ativação continuam editáveis na aba **Assistente** do admin, sem reiniciar. Não é preciso
+alterar código nem reiniciar o `web`.
+
 ## Obter as chaves
 
 Os três planos são gratuitos e não pedem cartão de crédito. Os limites e a lista de modelos gratuitos mudam com
