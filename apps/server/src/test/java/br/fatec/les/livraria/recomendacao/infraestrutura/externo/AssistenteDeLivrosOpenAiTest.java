@@ -44,7 +44,8 @@ import br.fatec.les.livraria.recomendacao.infraestrutura.PropriedadesIa;
 
 /**
  * Adapter real contra um servidor HTTP local que imita a API OpenAI (RNF-REC-001, DEC-03): caminho e chave enviados,
- * saída estruturada, tool calling e a tradução de cada falha para o resultado de {@code chamada_ia}.
+ * saída estruturada, loop de tools controlado pelo adapter, formatos de resposta, limites de chamadas e a tradução de
+ * cada falha para o resultado de {@code chamada_ia}.
  */
 class AssistenteDeLivrosOpenAiTest {
 
@@ -111,32 +112,85 @@ class AssistenteDeLivrosOpenAiTest {
     }
 
     private AssistenteDeLivrosOpenAi assistente(String urlBase, Duration tempoLimite) {
-        return new AssistenteDeLivrosOpenAi("groq", provedor(urlBase, "instrucoes", "auto"), tempoLimite);
+        return assistente(urlBase, tempoLimite, "instrucoes", "auto", 5);
     }
 
     private AssistenteDeLivrosOpenAi assistente() {
         return assistente("http://127.0.0.1:" + servidor.getAddress().getPort() + "/v1", Duration.ofSeconds(5));
     }
 
+    private AssistenteDeLivrosOpenAi assistente(String formato, String toolChoice, int maxChamadas) {
+        return assistente("http://127.0.0.1:" + servidor.getAddress().getPort() + "/v1", Duration.ofSeconds(5),
+                formato, toolChoice, maxChamadas);
+    }
+
+    private AssistenteDeLivrosOpenAi assistente(String urlBase, Duration tempoLimite, String formato,
+            String toolChoice, int maxChamadas) {
+        return new AssistenteDeLivrosOpenAi("groq", provedor(urlBase, formato, toolChoice, maxChamadas), tempoLimite);
+    }
+
     private static PropriedadesIa.Provedor provedor(String urlBase, String formato, String toolChoice) {
-        return new PropriedadesIa.Provedor(urlBase, "modelo-teste", CHAVE, toolChoice, formato, Map.of(), 5);
+        return provedor(urlBase, formato, toolChoice, 5);
+    }
+
+    private static PropriedadesIa.Provedor provedor(String urlBase, String formato, String toolChoice,
+            int maxChamadas) {
+        return new PropriedadesIa.Provedor(urlBase, "modelo-teste", CHAVE, toolChoice, formato, Map.of(), maxChamadas);
     }
 
     private static String conclusao(String conteudoJson) {
+        return conclusao(conteudoJson, 120, 30);
+    }
+
+    private static String conclusao(String conteudoJson, int tokensEntrada, int tokensSaida) {
         return """
                 {"id":"chatcmpl-1","object":"chat.completion","created":1700000000,"model":"modelo-teste",
                  "choices":[{"index":0,"message":{"role":"assistant","content":%s},"finish_reason":"stop"}],
-                 "usage":{"prompt_tokens":120,"completion_tokens":30,"total_tokens":150}}"""
+                 "usage":{"prompt_tokens":%d,"completion_tokens":%d,"total_tokens":%d}}"""
+                .formatted(textoJson(conteudoJson), tokensEntrada, tokensSaida, tokensEntrada + tokensSaida);
+    }
+
+    private static String conclusaoSemUso(String conteudoJson) {
+        return """
+                {"id":"chatcmpl-1","object":"chat.completion","created":1700000000,"model":"modelo-teste",
+                 "choices":[{"index":0,"message":{"role":"assistant","content":%s},"finish_reason":"stop"}]}"""
                 .formatted(textoJson(conteudoJson));
     }
 
     private static String chamadaDeFerramenta() {
+        return chamadaDeFerramenta("call_1");
+    }
+
+    private static String chamadaDeFerramenta(String id) {
+        return respostaDeFerramentas("chatcmpl-" + id, 80, 10,
+                ferramenta(id, "buscarLivros", "{\"texto\":\"machado\"}"));
+    }
+
+    private static String chamadaDeResposta(String tipo, String texto, String livrosCitadosJson) {
+        return respostaDeFerramentas("chatcmpl-resposta", 120, 30,
+                resposta(tipo, texto, livrosCitadosJson));
+    }
+
+    private static String resposta(String tipo, String texto, String livrosCitadosJson) {
+        return ferramenta("call_r", "responder", "{\"tipo\":\"" + tipo + "\",\"texto\":" + textoJson(texto)
+                + ",\"livrosCitados\":" + livrosCitadosJson + "}");
+    }
+
+    private static String respostaDeFerramentas(String id, int tokensEntrada, int tokensSaida,
+            String... ferramentas) {
         return """
-                {"id":"chatcmpl-0","object":"chat.completion","created":1700000000,"model":"modelo-teste",
-                 "choices":[{"index":0,"message":{"role":"assistant","content":null,"tool_calls":[
-                   {"id":"call_1","type":"function","function":{"name":"buscarLivros",
-                    "arguments":"{\\"texto\\":\\"machado\\"}"}}]},"finish_reason":"tool_calls"}],
-                 "usage":{"prompt_tokens":80,"completion_tokens":10,"total_tokens":90}}""";
+                {"id":"%s","object":"chat.completion","created":1700000000,"model":"modelo-teste",
+                 "choices":[{"index":0,"message":{"role":"assistant","content":null,"tool_calls":[%s]},
+                 "finish_reason":"tool_calls"}],
+                 "usage":{"prompt_tokens":%d,"completion_tokens":%d,"total_tokens":%d}}"""
+                .formatted(id, String.join(",", ferramentas), tokensEntrada, tokensSaida,
+                        tokensEntrada + tokensSaida);
+    }
+
+    private static String ferramenta(String id, String nome, String argumentosJson) {
+        return """
+                {"id":"%s","type":"function","function":{"name":"%s","arguments":%s}}"""
+                .formatted(id, nome, textoJson(argumentosJson));
     }
 
     private static String textoJson(String texto) {
@@ -159,7 +213,27 @@ class AssistenteDeLivrosOpenAiTest {
         assertThat(resposta.conteudo().itens().getFirst().justificativa()).isEqualTo("Naturalismo brasileiro.");
         assertThat(resposta.tokensEntrada()).isEqualTo(120);
         assertThat(resposta.tokensSaida()).isEqualTo(30);
+        assertThat(resposta.chamadasHttp()).isEqualTo(1);
+        assertThat(resposta.voltas()).singleElement().satisfies(volta -> {
+            assertThat(volta.tokensEntrada()).isEqualTo(120);
+            assertThat(volta.tokensSaida()).isEqualTo(30);
+        });
         assertThat(corpos.getFirst()).contains("Dom Casmurro").contains("modelo-teste");
+    }
+
+    @Test
+    void rnfRec001_recomendarCorrigeUmaVezARespostaInvalida() {
+        respostas.add(new Resposta(200, conclusao(textoJson("Claro! Recomendo Dom Casmurro.")), 0));
+        respostas.add(new Resposta(200, conclusao("""
+                {"itens":[{"livroId":1,"justificativa":"Um clássico de Machado."}]}"""), 0));
+
+        RespostaDoProvedor<RespostaDeRecomendacao> resposta = assistente().recomendar(PERFIL, CANDIDATOS);
+
+        assertThat(resposta.conteudo().itens()).extracting(item -> item.livroId()).containsExactly(1L);
+        assertThat(requisicoes).hasValue(2);
+        assertThat(resposta.chamadasHttp()).isEqualTo(2);
+        assertThat(corpos.get(1)).contains("Responda de novo somente com o JSON pedido.")
+                .contains("Claro! Recomendo Dom Casmurro.");
     }
 
     @Test
@@ -179,7 +253,138 @@ class AssistenteDeLivrosOpenAiTest {
         assertThat(resposta.conteudo().tipo()).isEqualTo(TipoDeResposta.BUSCA);
         assertThat(resposta.conteudo().texto()).isEqualTo("Encontrei Dom Casmurro.");
         assertThat(resposta.conteudo().livrosCitados()).containsExactly(1L);
+        assertThat(resposta.tokensEntrada()).isEqualTo(200);
+        assertThat(resposta.tokensSaida()).isEqualTo(40);
+        assertThat(resposta.chamadasHttp()).isEqualTo(2);
         assertThat(corpos.get(1)).contains("Dom Casmurro").contains("call_1");
+    }
+
+    @Test
+    void rnfRec001_conversarComResponderEntregaARespostaSemOutraChamada() {
+        respostas.add(new Resposta(200, chamadaDeResposta("BUSCA", "Encontrei Dom Casmurro.", "[1]"), 0));
+        FerramentasFalsas ferramentas = new FerramentasFalsas();
+
+        RespostaDoProvedor<RespostaDoAssistente> resposta = assistente("ferramenta", "auto", 5)
+                .conversar(PERFIL, List.of(), "Livros do Machado?", ferramentas);
+
+        assertThat(resposta.conteudo().tipo()).isEqualTo(TipoDeResposta.BUSCA);
+        assertThat(resposta.conteudo().texto()).isEqualTo("Encontrei Dom Casmurro.");
+        assertThat(resposta.conteudo().livrosCitados()).containsExactly(1L);
+        assertThat(ferramentas.buscas).isEmpty();
+        assertThat(requisicoes).hasValue(1);
+        assertThat(resposta.chamadasHttp()).isEqualTo(1);
+        assertThat(corpos.getFirst()).contains("\"tool_choice\":\"required\"")
+                .contains("\"responder\"")
+                .doesNotContain("\"response_format\"");
+    }
+
+    @Test
+    void rnfRec001_responderVenceQuandoVemJuntoDeToolDeLeitura() {
+        respostas.add(new Resposta(200, respostaDeFerramentas("chatcmpl-juntas", 80, 10,
+                resposta("DUVIDA", "O frete é grátis acima de R$ 100.", "[]"),
+                ferramenta("call_1", "buscarLivros", "{\"texto\":\"machado\"}")), 0));
+        FerramentasFalsas ferramentas = new FerramentasFalsas();
+
+        RespostaDoProvedor<RespostaDoAssistente> resposta = assistente("ferramenta", "auto", 5)
+                .conversar(PERFIL, List.of(), "Como funciona o frete?", ferramentas);
+
+        assertThat(resposta.conteudo().texto()).isEqualTo("O frete é grátis acima de R$ 100.");
+        assertThat(ferramentas.buscas).isEmpty();
+        assertThat(requisicoes).hasValue(1);
+        assertThat(resposta.chamadasHttp()).isEqualTo(1);
+    }
+
+    @Test
+    void rnfRec001_responderComArgumentosInvalidosRecebeUmaCorrecao() {
+        respostas.add(new Resposta(200, respostaDeFerramentas("chatcmpl-invalida", 80, 10,
+                ferramenta("call_r", "responder",
+                        "{\"tipo\":\"NAO_EXISTE\",\"texto\":\"Oi\",\"livrosCitados\":[]}")), 0));
+        respostas.add(new Resposta(200, chamadaDeResposta("DUVIDA", "Oi! Como posso ajudar?", "[]"), 0));
+
+        RespostaDoProvedor<RespostaDoAssistente> resposta = assistente("ferramenta", "auto", 5)
+                .conversar(PERFIL, List.of(), "Oi", new FerramentasFalsas());
+
+        assertThat(resposta.conteudo().tipo()).isEqualTo(TipoDeResposta.DUVIDA);
+        assertThat(resposta.conteudo().texto()).isEqualTo("Oi! Como posso ajudar?");
+        assertThat(requisicoes).hasValue(2);
+        assertThat(resposta.chamadasHttp()).isEqualTo(2);
+        assertThat(corpos.get(1)).contains("call_r", "Erro:", "responder");
+    }
+
+    @Test
+    void rnfRec001_duasRespostasInvalidasNoChatViramRespostaInvalida() {
+        respostas.add(new Resposta(200, conclusao("{\"texto\":\"Oi\",\"livrosCitados\":[]}"), 0));
+        respostas.add(new Resposta(200, conclusao("{\"texto\":\"Oi\",\"livrosCitados\":[]}"), 0));
+
+        assertThatThrownBy(() -> assistente().conversar(PERFIL, List.of(), "Oi", new FerramentasFalsas()))
+                .isInstanceOfSatisfying(FalhaNaChamadaDeIa.class, falha -> {
+                    assertThat(falha.getResultado()).isEqualTo(ResultadoDaChamada.RESPOSTA_INVALIDA);
+                    assertThat(falha.getChamadasHttp()).isEqualTo(2);
+                });
+        assertThat(requisicoes).hasValue(2);
+    }
+
+    @Test
+    void rnfRec001_quatroVoltasDeToolsViramLimiteDeChamadasSemAQuintaChamada() {
+        for (int volta = 1; volta <= 4; volta++) {
+            respostas.add(new Resposta(200, chamadaDeFerramenta("call_" + volta), 0));
+        }
+        FerramentasFalsas ferramentas = new FerramentasFalsas();
+
+        assertThatThrownBy(() -> assistente().conversar(PERFIL, List.of(), "Livros do Machado?", ferramentas))
+                .isInstanceOfSatisfying(FalhaNaChamadaDeIa.class, falha -> {
+                    assertThat(falha.getResultado()).isEqualTo(ResultadoDaChamada.LIMITE_DE_CHAMADAS);
+                    assertThat(falha.getChamadasHttp()).isEqualTo(4);
+                    assertThat(falha.getTokensEntrada()).isEqualTo(320);
+                    assertThat(falha.getTokensSaida()).isEqualTo(40);
+                });
+        assertThat(requisicoes).hasValue(4);
+        assertThat(ferramentas.buscas).hasSize(3);
+    }
+
+    @Test
+    void rnfRec001_maxChamadasDoisCortaAntesDaTerceiraChamada() {
+        respostas.add(new Resposta(200, chamadaDeFerramenta("call_1"), 0));
+        respostas.add(new Resposta(200, chamadaDeFerramenta("call_2"), 0));
+        FerramentasFalsas ferramentas = new FerramentasFalsas();
+
+        assertThatThrownBy(() -> assistente("instrucoes", "auto", 2)
+                .conversar(PERFIL, List.of(), "Livros do Machado?", ferramentas))
+                .isInstanceOfSatisfying(FalhaNaChamadaDeIa.class, falha -> {
+                    assertThat(falha.getResultado()).isEqualTo(ResultadoDaChamada.LIMITE_DE_CHAMADAS);
+                    assertThat(falha.getChamadasHttp()).isEqualTo(2);
+                });
+        assertThat(requisicoes).hasValue(2);
+    }
+
+    @Test
+    void rnfRec001_falhaDepoisDeUmaVoltaDeToolsCarregaAsVoltasJaFeitas() {
+        respostas.add(new Resposta(200, chamadaDeFerramenta(), 0));
+        respostas.add(new Resposta(429, "{\"error\":{\"message\":\"Rate limit reached\"}}", 0));
+
+        assertThatThrownBy(() -> assistente().conversar(PERFIL, List.of(), "Livros do Machado?",
+                new FerramentasFalsas()))
+                .isInstanceOfSatisfying(FalhaNaChamadaDeIa.class, falha -> {
+                    assertThat(falha.getResultado()).isEqualTo(ResultadoDaChamada.COTA_ESGOTADA);
+                    assertThat(falha.getChamadasHttp()).isEqualTo(2);
+                    assertThat(falha.getTokensEntrada()).isEqualTo(80);
+                    assertThat(falha.getTokensSaida()).isEqualTo(10);
+                    assertThat(falha.getVoltas().get(1).tokensEntrada()).isNull();
+                    assertThat(falha.getVoltas().get(1).tokensSaida()).isNull();
+                });
+        assertThat(requisicoes).hasValue(2);
+    }
+
+    @Test
+    void rnfRec001_ferramentaUsaToolChoiceRequiredEmTodasAsVoltas() {
+        respostas.add(new Resposta(200, chamadaDeFerramenta(), 0));
+        respostas.add(new Resposta(200, chamadaDeResposta("BUSCA", "Encontrei Dom Casmurro.", "[1]"), 0));
+
+        assistente("ferramenta", "auto", 5).conversar(PERFIL, List.of(), "Livros do Machado?",
+                new FerramentasFalsas());
+
+        assertThat(corpos.get(0)).contains("\"tool_choice\":\"required\"");
+        assertThat(corpos.get(1)).contains("\"tool_choice\":\"required\"").contains("call_1");
     }
 
     @Test
@@ -191,6 +396,8 @@ class AssistenteDeLivrosOpenAiTest {
                     assertThat(falha.getResultado()).isEqualTo(ResultadoDaChamada.COTA_ESGOTADA);
                     assertThat(falha.getCodigoHttp()).isEqualTo(429);
                     assertThat(falha.getMessage()).doesNotContain(CHAVE);
+                    assertThat(falha.getChamadasHttp()).isEqualTo(1);
+                    assertThat(falha.getTokensEntrada()).isNull();
                 });
         assertThat(requisicoes).hasValue(1);
     }
@@ -219,16 +426,21 @@ class AssistenteDeLivrosOpenAiTest {
     }
 
     @Test
-    void rnfRec001_conteudoQueNaoEhJsonViraRespostaInvalida() {
+    void rnfRec001_conteudoQueNaoEhJsonViraRespostaInvalidaDepoisDaCorrecao() {
+        respostas.add(new Resposta(200, conclusao("Claro! Recomendo Dom Casmurro."), 0));
         respostas.add(new Resposta(200, conclusao("Claro! Recomendo Dom Casmurro."), 0));
 
         assertThatThrownBy(() -> assistente().recomendar(PERFIL, CANDIDATOS))
-                .isInstanceOfSatisfying(FalhaNaChamadaDeIa.class, falha ->
-                        assertThat(falha.getResultado()).isEqualTo(ResultadoDaChamada.RESPOSTA_INVALIDA));
+                .isInstanceOfSatisfying(FalhaNaChamadaDeIa.class, falha -> {
+                    assertThat(falha.getResultado()).isEqualTo(ResultadoDaChamada.RESPOSTA_INVALIDA);
+                    assertThat(falha.getChamadasHttp()).isEqualTo(2);
+                });
+        assertThat(requisicoes).hasValue(2);
     }
 
     @Test
-    void rnfRec001_tipoDesconhecidoViraRespostaInvalida() {
+    void rnfRec001_tipoDesconhecidoViraRespostaInvalidaDepoisDaCorrecao() {
+        respostas.add(new Resposta(200, conclusao("{\"texto\":\"Oi\",\"livrosCitados\":[]}"), 0));
         respostas.add(new Resposta(200, conclusao("{\"texto\":\"Oi\",\"livrosCitados\":[]}"), 0));
 
         assertThatThrownBy(() -> assistente().conversar(PERFIL, List.of(), "Oi", new FerramentasFalsas()))
@@ -253,7 +465,7 @@ class AssistenteDeLivrosOpenAiTest {
     @Test
     void rnfRec001_semChaveFicaForaDaCadeia() {
         AssistenteDeLivrosOpenAi assistente = new AssistenteDeLivrosOpenAi("gemini",
-                new PropriedadesIa.Provedor("http://127.0.0.1:1/v1", "modelo-teste", "", "auto", "instrucoes",
+                new PropriedadesIa.Provedor("http://127.0.0.1:1/v1", "modelo-teste", "", "auto", "ferramenta",
                         Map.of(), 5),
                 Duration.ofSeconds(1));
 
@@ -278,7 +490,7 @@ class AssistenteDeLivrosOpenAiTest {
     }
 
     @Test
-    void rnfRec001_toolChoiceRequiredApareceNoCorpoQuandoHaFerramentas() {
+    void rnfRec001_toolChoiceRequiredApareceSoNaPrimeiraVoltaDosFormatosDeTexto() {
         respostas.add(new Resposta(200, chamadaDeFerramenta(), 0));
         respostas.add(new Resposta(200, conclusao("""
                 {"tipo":"BUSCA","texto":"Encontrei Dom Casmurro.","livrosCitados":[1]}"""), 0));
@@ -288,7 +500,23 @@ class AssistenteDeLivrosOpenAiTest {
 
         assistente.conversar(PERFIL, List.of(), "Livros do Machado?", new FerramentasFalsas());
 
-        assertThat(corpos.getFirst()).contains("\"tool_choice\":\"required\"");
+        assertThat(corpos.get(0)).contains("\"tool_choice\":\"required\"");
+        assertThat(corpos.get(1)).contains("\"tool_choice\":\"auto\"");
+    }
+
+    @Test
+    void rnfRec001_toolChoiceRequiredNaoSeRepeteNaCorrecaoDosFormatosDeTexto() {
+        respostas.add(new Resposta(200, conclusao("Claro! O frete é grátis acima de R$ 100."), 0));
+        respostas.add(new Resposta(200, conclusao("""
+                {"tipo":"DUVIDA","texto":"O frete é grátis acima de R$ 100.","livrosCitados":[]}"""), 0));
+        AssistenteDeLivrosOpenAi assistente = new AssistenteDeLivrosOpenAi("groq",
+                provedor("http://127.0.0.1:" + servidor.getAddress().getPort() + "/v1", "instrucoes", "required"),
+                Duration.ofSeconds(5));
+
+        assistente.conversar(PERFIL, List.of(), "Como funciona o frete?", new FerramentasFalsas());
+
+        assertThat(corpos.get(0)).contains("\"tool_choice\":\"required\"");
+        assertThat(corpos.get(1)).contains("\"tool_choice\":\"auto\"");
     }
 
     @Test
@@ -310,9 +538,49 @@ class AssistenteDeLivrosOpenAiTest {
     }
 
     @Test
+    void rnfRec001_formatoJsonSchemaNoChatNaoAnunciaAResponder() {
+        respostas.add(new Resposta(200, conclusao("""
+                {"tipo":"DUVIDA","texto":"O frete é grátis acima de R$ 100.","livrosCitados":[]}"""), 0));
+
+        RespostaDoProvedor<RespostaDoAssistente> resposta = assistente("json-schema", "auto", 5)
+                .conversar(PERFIL, List.of(), "Como funciona o frete?", new FerramentasFalsas());
+
+        assertThat(resposta.conteudo().tipo()).isEqualTo(TipoDeResposta.DUVIDA);
+        assertThat(corpos.getFirst()).contains("\"response_format\"").doesNotContain("\"responder\"");
+    }
+
+    @Test
+    void rnfRec001_formatoJsonSchemaNaoAceitaResponderNaoAnunciado() {
+        respostas.add(new Resposta(200, chamadaDeResposta("DUVIDA", "Oi", "[]"), 0));
+        respostas.add(new Resposta(200, conclusao("""
+                {"tipo":"DUVIDA","texto":"Oi! Como posso ajudar?","livrosCitados":[]}"""), 0));
+
+        RespostaDoProvedor<RespostaDoAssistente> resposta = assistente("json-schema", "auto", 5)
+                .conversar(PERFIL, List.of(), "Oi", new FerramentasFalsas());
+
+        assertThat(resposta.conteudo().texto()).isEqualTo("Oi! Como posso ajudar?");
+        assertThat(requisicoes).hasValue(2);
+    }
+
+    @Test
+    void rnfRec001_respostaSemUsoMantemOsTokensNulos() {
+        respostas.add(new Resposta(200, conclusaoSemUso("{\"itens\":[]}"), 0));
+
+        RespostaDoProvedor<RespostaDeRecomendacao> resposta = assistente().recomendar(PERFIL, CANDIDATOS);
+
+        assertThat(resposta.tokensEntrada()).isNull();
+        assertThat(resposta.tokensSaida()).isNull();
+        assertThat(resposta.chamadasHttp()).isEqualTo(1);
+        assertThat(resposta.voltas()).singleElement().satisfies(volta -> {
+            assertThat(volta.tokensEntrada()).isNull();
+            assertThat(volta.tokensSaida()).isNull();
+        });
+    }
+
+    @Test
     void rnfRec001_maxChamadasInvalidoEhRejeitado() {
         assertThatThrownBy(() -> new PropriedadesIa.Provedor(
-                "http://127.0.0.1:1/v1", "modelo-teste", CHAVE, "auto", "instrucoes", Map.of(), 0))
+                "http://127.0.0.1:1/v1", "modelo-teste", CHAVE, "auto", "ferramenta", Map.of(), 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("livraria.ia.provedores.*.max-chamadas deve ser pelo menos 1.");
     }

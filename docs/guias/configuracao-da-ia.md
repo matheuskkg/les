@@ -36,7 +36,8 @@ flowchart LR
   provedores na aba **Assistente** do admin, sem reiniciar. A mudança fica gravada no banco.
 - **Cota esgotada:** um provedor que respondeu HTTP 429 fica fora da cadeia por 5 minutos.
 - **Registro:** toda tentativa, com sucesso ou falha, fica registrada e aparece nas métricas da mesma aba (latência,
-  taxa de sucesso, erros por tipo e tokens).
+  taxa de sucesso, erros por tipo e tokens). Cada linha também guarda quantas chamadas HTTP a mensagem fez
+  (`chamadas_http`) e os tokens de cada volta (`tokens_das_voltas`), além dos tokens somados.
 - **Provedor `fake` desligado:** se todos os provedores ativos falharem, a vitrine mostra as recomendações
   calculadas pelo server, sem justificativa, e o chat avisa que o assistente está indisponível.
 
@@ -65,10 +66,10 @@ as opções abaixo são opcionais e têm padrão:
 
 | Opção | Valores | Padrão | Efeito |
 |---|---|---|---|
-| `tool-choice` | `auto`, `required` | `auto` | Com `required`, toda chamada do chat que leva tools obriga o modelo a chamar ao menos uma ferramenta. |
-| `formato` | `instrucoes`, `json-schema` | `instrucoes` | Com `instrucoes`, o Spring AI acrescenta ao prompt as instruções do JSON esperado. Com `json-schema`, o schema da resposta vai no `response_format` nativo da API OpenAI e o prompt fica sem essas instruções. |
+| `tool-choice` | `auto`, `required` | `auto` | Com `required`, a primeira volta do chat nos formatos `json-schema` e `instrucoes` obriga o modelo a chamar ao menos uma ferramenta; as voltas seguintes ficam em `auto`. No formato `ferramenta`, o `tool_choice` é sempre `required`, porque a resposta final precisa vir da tool `responder`. |
+| `formato` | `ferramenta`, `json-schema`, `instrucoes` | `ferramenta` | Com `ferramenta`, o chat anuncia a tool `responder`, que entrega o tipo, o texto e os livros citados e encerra o loop sem outra chamada. Com `json-schema`, a resposta final é o JSON do texto no `response_format` nativo da API OpenAI, sem a tool `responder` e sem as instruções de formato no prompt. Com `instrucoes`, o JSON esperado vai nas instruções do prompt, também sem a tool `responder`. A recomendação da vitrine usa `json-schema` quando configurado e instruções nos demais formatos. |
 | `cabecalhos` | mapa de textos | vazio | Cabeçalhos HTTP extras enviados em toda chamada, por exemplo `HTTP-Referer` e `X-Title` do OpenRouter. |
-| `max-chamadas` | inteiro ≥ 1 | `5` | Máximo de chamadas HTTP ao provedor por mensagem. |
+| `max-chamadas` | inteiro ≥ 1 | `5` | Máximo de chamadas HTTP ao provedor por mensagem, contando as voltas que executam tools e a correção de formato. Passar do limite grava `LIMITE_DE_CHAMADAS` e a cadeia passa ao próximo provedor. |
 
 Exemplo do `application.yml`:
 
@@ -81,15 +82,19 @@ livraria:
         modelo: ${IA_OPENROUTER_MODELO:google/gemma-4-31b-it:free}
         chave: ${IA_OPENROUTER_CHAVE:}
         tool-choice: auto
-        formato: instrucoes
+        formato: ferramenta
         max-chamadas: 5
         cabecalhos:
           X-Title: Livraria LES
 ```
 
 Um valor fora dos aceitos impede a subida com uma mensagem no formato
-`livraria.ia.provedores.*.formato deve ser instrucoes ou json-schema.`; `max-chamadas` menor que 1 é recusado do mesmo
-jeito.
+`livraria.ia.provedores.*.formato deve ser ferramenta, json-schema ou instrucoes.`; `max-chamadas` menor que 1 é
+recusado do mesmo jeito.
+
+O chat tem até 3 voltas que executam tools de leitura, uma correção de formato e o total de chamadas HTTP dentro de
+`max-chamadas`. Passar de qualquer limite é falha do provedor, com o resultado `LIMITE_DE_CHAMADAS`, e a cadeia segue
+para o próximo.
 
 ## Adicionar um provedor só por configuração
 
@@ -192,6 +197,7 @@ Na IDE, defina as mesmas variáveis em *Environment variables* da configuração
 | `COTA_ESGOTADA` | limite gratuito atingido | aguarde, ou ponha outro provedor na frente da cadeia |
 | `ERRO_HTTP` 404 | modelo inexistente ou retirado | troque a variável `IA_*_MODELO` |
 | `RESPOSTA_INVALIDA` | o modelo não segue o formato JSON ou não aceita ferramentas | escolha um modelo com tool calling e saída estruturada |
+| `LIMITE_DE_CHAMADAS` | o modelo passou de 3 voltas de tools, da correção ou de `max-chamadas` | escolha um modelo que siga as tools, aumente `max-chamadas` ou deixe outro provedor na cadeia |
 | `TEMPO_ESGOTADO` ou `ERRO_DE_REDE` | rede da apresentação instável ou provedor lento | deixe o `fake` ativo no fim da cadeia |
 
 Para a apresentação, é recomendável configurar pelo menos dois provedores e manter o `fake` ativo no fim da

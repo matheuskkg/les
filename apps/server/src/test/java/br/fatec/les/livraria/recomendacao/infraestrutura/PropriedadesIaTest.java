@@ -21,7 +21,8 @@ class PropriedadesIaTest {
 
         assertThat(provedor.toolChoice()).isEqualTo(PropriedadesIa.Provedor.TOOL_CHOICE_AUTO);
         assertThat(provedor.exigeToolChoice()).isFalse();
-        assertThat(provedor.formato()).isEqualTo(PropriedadesIa.Provedor.FORMATO_INSTRUCOES);
+        assertThat(provedor.formato()).isEqualTo(PropriedadesIa.Provedor.FORMATO_FERRAMENTA);
+        assertThat(provedor.usaFerramenta()).isTrue();
         assertThat(provedor.usaJsonSchema()).isFalse();
         assertThat(provedor.cabecalhos()).isEmpty();
         assertThat(provedor.maxChamadas()).isEqualTo(5);
@@ -33,9 +34,24 @@ class PropriedadesIaTest {
                 URL, "modelo", "chave", "REQUIRED", "JSON-SCHEMA", Map.of("X-Title", "Livraria LES"), 3);
 
         assertThat(provedor.exigeToolChoice()).isTrue();
+        assertThat(provedor.usaFerramenta()).isFalse();
         assertThat(provedor.usaJsonSchema()).isTrue();
         assertThat(provedor.cabecalhos()).containsEntry("X-Title", "Livraria LES");
         assertThat(provedor.maxChamadas()).isEqualTo(3);
+    }
+
+    @Test
+    void rnfRec001_formatosDeTextoNaoUsamAFerramentaDeResposta() {
+        PropriedadesIa.Provedor instrucoes = new PropriedadesIa.Provedor(
+                URL, "modelo", "chave", null, "INSTRUCOES", null, 5);
+        PropriedadesIa.Provedor jsonSchema = new PropriedadesIa.Provedor(
+                URL, "modelo", "chave", null, "JSON-SCHEMA", null, 5);
+
+        assertThat(instrucoes.formato()).isEqualTo(PropriedadesIa.Provedor.FORMATO_INSTRUCOES);
+        assertThat(instrucoes.usaFerramenta()).isFalse();
+        assertThat(instrucoes.usaJsonSchema()).isFalse();
+        assertThat(jsonSchema.usaFerramenta()).isFalse();
+        assertThat(jsonSchema.usaJsonSchema()).isTrue();
     }
 
     @Test
@@ -49,7 +65,7 @@ class PropriedadesIaTest {
     void rnfRec001_formatoInvalidoEhRejeitado() {
         assertThatThrownBy(() -> new PropriedadesIa.Provedor(URL, "modelo", "chave", null, "xml", null, 5))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("livraria.ia.provedores.*.formato deve ser instrucoes ou json-schema.");
+                .hasMessage("livraria.ia.provedores.*.formato deve ser ferramenta, json-schema ou instrucoes.");
     }
 
     @Test

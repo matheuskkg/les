@@ -33,8 +33,10 @@ public record PropriedadesIa(
      * @param urlBase     endereço da API no formato OpenAI
      * @param modelo      modelo gratuito que aceita tool calling e saída estruturada
      * @param chave       chave da API; vazia quando o provedor não está configurado
-     * @param toolChoice  {@code auto} (padrão) ou {@code required}, aplicado quando a operação leva tools
-     * @param formato     {@code instrucoes} (padrão) ou {@code json-schema}, o formato da saída estruturada
+     * @param toolChoice  {@code auto} (padrão) ou {@code required}; com {@code required}, a primeira volta do chat
+     *                    exige uma tool nos formatos de texto
+     * @param formato     {@code ferramenta} (padrão), {@code json-schema} ou {@code instrucoes}, o formato da
+     *                    resposta do chat
      * @param cabecalhos  cabeçalhos HTTP extras enviados em toda chamada ao provedor
      * @param maxChamadas máximo de chamadas HTTP ao provedor por mensagem, por padrão 5
      */
@@ -43,12 +45,13 @@ public record PropriedadesIa(
             String modelo,
             String chave,
             @DefaultValue("auto") String toolChoice,
-            @DefaultValue("instrucoes") String formato,
+            @DefaultValue("ferramenta") String formato,
             Map<String, String> cabecalhos,
             @DefaultValue("5") int maxChamadas) {
 
         public static final String TOOL_CHOICE_AUTO = "auto";
         public static final String TOOL_CHOICE_REQUIRED = "required";
+        public static final String FORMATO_FERRAMENTA = "ferramenta";
         public static final String FORMATO_INSTRUCOES = "instrucoes";
         public static final String FORMATO_JSON_SCHEMA = "json-schema";
 
@@ -61,8 +64,8 @@ public record PropriedadesIa(
             }
             toolChoice = opcao(toolChoice, TOOL_CHOICE_AUTO, "tool-choice",
                     TOOL_CHOICE_AUTO, TOOL_CHOICE_REQUIRED);
-            formato = opcao(formato, FORMATO_INSTRUCOES, "formato",
-                    FORMATO_INSTRUCOES, FORMATO_JSON_SCHEMA);
+            formato = opcao(formato, FORMATO_FERRAMENTA, "formato",
+                    FORMATO_FERRAMENTA, FORMATO_JSON_SCHEMA, FORMATO_INSTRUCOES);
             cabecalhos = cabecalhos == null ? Map.of() : Map.copyOf(cabecalhos);
             if (maxChamadas < 1) {
                 throw new IllegalArgumentException("livraria.ia.provedores.*.max-chamadas deve ser pelo menos 1.");
@@ -84,6 +87,11 @@ public record PropriedadesIa(
             return FORMATO_JSON_SCHEMA.equals(formato);
         }
 
+        /** Indica se a resposta final do chat vem pela tool {@code responder} (DEC-03). */
+        public boolean usaFerramenta() {
+            return FORMATO_FERRAMENTA.equals(formato);
+        }
+
         private static String opcao(String valor, String padrao, String nome, String... aceitos) {
             String normalizado = valor == null || valor.isBlank() ? padrao : valor.trim().toLowerCase(Locale.ROOT);
             for (String aceito : aceitos) {
@@ -91,8 +99,10 @@ public record PropriedadesIa(
                     return normalizado;
                 }
             }
-            throw new IllegalArgumentException("livraria.ia.provedores.*." + nome + " deve ser "
-                    + String.join(" ou ", aceitos) + ".");
+            String opcoes = aceitos.length == 1 ? aceitos[0]
+                    : String.join(", ", java.util.Arrays.copyOf(aceitos, aceitos.length - 1))
+                            + " ou " + aceitos[aceitos.length - 1];
+            throw new IllegalArgumentException("livraria.ia.provedores.*." + nome + " deve ser " + opcoes + ".");
         }
     }
 }

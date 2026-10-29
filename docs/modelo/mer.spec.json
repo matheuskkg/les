@@ -1156,6 +1156,16 @@
               "tokens_saida",
               "integer",
               "null"
+            ],
+            [
+              "chamadas_http",
+              "integer",
+              ""
+            ],
+            [
+              "tokens_das_voltas",
+              "varchar(200)",
+              "null"
             ]
           ]
         },

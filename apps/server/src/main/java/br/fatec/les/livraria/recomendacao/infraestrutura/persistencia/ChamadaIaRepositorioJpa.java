@@ -35,6 +35,8 @@ public class ChamadaIaRepositorioJpa implements ChamadasIaRepositorio {
         entidade.setErro(chamada.erro());
         entidade.setTokensEntrada(chamada.tokensEntrada());
         entidade.setTokensSaida(chamada.tokensSaida());
+        entidade.setChamadasHttp(chamada.chamadasHttp());
+        entidade.setTokensDasVoltas(chamada.tokensDasVoltas());
         return repositorio.save(entidade).getId();
     }
 }

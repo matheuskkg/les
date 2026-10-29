@@ -100,5 +100,7 @@ class CadeiaDeProvedoresIntegracaoTest {
         assertThat(chamada.getErro()).isNull();
         assertThat(chamada.getTokensEntrada()).isNull();
         assertThat(chamada.getTokensSaida()).isNull();
+        assertThat(chamada.getChamadasHttp()).isZero();
+        assertThat(chamada.getTokensDasVoltas()).isNull();
     }
 }

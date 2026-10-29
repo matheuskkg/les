@@ -28,7 +28,7 @@ public class MetricasIaRepositorioJpa implements MetricasIaRepositorio {
     private static final String PROJECAO_DA_CHAMADA = "select new "
             + "br.fatec.les.livraria.recomendacao.dominio.modelo.ChamadaIa(c.provedor.id, c.modelo, c.operacao, "
             + "c.iniciadaEm, c.latenciaMs, c.tentativa, c.resultado, c.statusHttp, c.erro, c.tokensEntrada, "
-            + "c.tokensSaida) from ChamadaIaJpa c ";
+            + "c.tokensSaida, c.chamadasHttp, c.tokensDasVoltas) from ChamadaIaJpa c ";
     private static final String PROJECAO_DA_AVALIACAO = "select new "
             + "br.fatec.les.livraria.recomendacao.dominio.modelo.AvaliacaoDeChamada(c.provedor.id, a.avaliacao) ";
 

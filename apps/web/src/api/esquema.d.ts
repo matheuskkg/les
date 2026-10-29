@@ -1350,7 +1350,7 @@ export interface components {
             /** Format: int64 */
             quantidade: number;
             /** @enum {string} */
-            resultado: "SUCESSO" | "COTA_ESGOTADA" | "ERRO_HTTP" | "TEMPO_ESGOTADO" | "ERRO_DE_REDE" | "RESPOSTA_INVALIDA";
+            resultado: "SUCESSO" | "COTA_ESGOTADA" | "ERRO_HTTP" | "TEMPO_ESGOTADO" | "ERRO_DE_REDE" | "RESPOSTA_INVALIDA" | "LIMITE_DE_CHAMADAS";
         };
         FinalizacaoDto: {
             cartoes?: components["schemas"]["CartaoDaFinalizacaoDto"][];
@@ -1875,7 +1875,7 @@ export interface components {
             /** Format: date-time */
             em: string;
             /** @enum {string} */
-            resultado: "SUCESSO" | "COTA_ESGOTADA" | "ERRO_HTTP" | "TEMPO_ESGOTADO" | "ERRO_DE_REDE" | "RESPOSTA_INVALIDA";
+            resultado: "SUCESSO" | "COTA_ESGOTADA" | "ERRO_HTTP" | "TEMPO_ESGOTADO" | "ERRO_DE_REDE" | "RESPOSTA_INVALIDA" | "LIMITE_DE_CHAMADAS";
         };
     };
     responses: never;

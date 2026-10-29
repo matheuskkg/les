@@ -109,8 +109,8 @@ class IaAdminIntegracaoTest {
     private void registrarChamada(long id, long provedor, LocalDateTime em, String resultado, Integer codigoHttp,
             String erro) {
         JdbcClient.create(dataSource).sql("insert into chamada_ia (id, provedor_ia_id, modelo, operacao, "
-                        + "iniciada_em, latencia_ms, tentativa, resultado, status_http, erro) "
-                        + "values (?, ?, 'modelo', 'CONVERSAR', ?, 500, 1, ?, ?, ?)")
+                        + "iniciada_em, latencia_ms, tentativa, resultado, status_http, erro, chamadas_http) "
+                        + "values (?, ?, 'modelo', 'CONVERSAR', ?, 500, 1, ?, ?, ?, 1)")
                 .params(id, provedor, em, resultado, codigoHttp, erro)
                 .update();
     }

@@ -3957,7 +3957,7 @@
           },
           "resultado" : {
             "type" : "string",
-            "enum" : [ "SUCESSO", "COTA_ESGOTADA", "ERRO_HTTP", "TEMPO_ESGOTADO", "ERRO_DE_REDE", "RESPOSTA_INVALIDA" ]
+            "enum" : [ "SUCESSO", "COTA_ESGOTADA", "ERRO_HTTP", "TEMPO_ESGOTADO", "ERRO_DE_REDE", "RESPOSTA_INVALIDA", "LIMITE_DE_CHAMADAS" ]
           }
         },
         "required" : [ "quantidade", "resultado" ]
@@ -5181,7 +5181,7 @@
           },
           "resultado" : {
             "type" : "string",
-            "enum" : [ "SUCESSO", "COTA_ESGOTADA", "ERRO_HTTP", "TEMPO_ESGOTADO", "ERRO_DE_REDE", "RESPOSTA_INVALIDA" ]
+            "enum" : [ "SUCESSO", "COTA_ESGOTADA", "ERRO_HTTP", "TEMPO_ESGOTADO", "ERRO_DE_REDE", "RESPOSTA_INVALIDA", "LIMITE_DE_CHAMADAS" ]
           }
         },
         "required" : [ "em", "resultado" ]

@@ -77,4 +77,12 @@ public class ChamadaIaJpa {
 
     @Column(name = "tokens_saida")
     private Integer tokensSaida;
+
+    /** Chamadas HTTP feitas ao provedor nesta mensagem; o fake grava 0 (DEC-03). */
+    @Column(name = "chamadas_http", nullable = false)
+    private int chamadasHttp;
+
+    /** Tokens de entrada/saída de cada volta, separados por {@code ;}, com {@code -} quando não informados. */
+    @Column(name = "tokens_das_voltas", length = 200)
+    private String tokensDasVoltas;
 }

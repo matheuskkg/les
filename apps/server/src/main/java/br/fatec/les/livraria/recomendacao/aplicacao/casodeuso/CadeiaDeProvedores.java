@@ -24,6 +24,7 @@ import br.fatec.les.livraria.recomendacao.aplicacao.porta.FerramentasDoAssistent
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ProvedoresIaRepositorio;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.RespostaDoProvedor;
 import br.fatec.les.livraria.recomendacao.aplicacao.regra.ProvedorEmEsperaPorCota;
+import br.fatec.les.livraria.recomendacao.dominio.calculo.TokensDasVoltas;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ChamadaIa;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.LivroCandidato;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemAnterior;
@@ -33,6 +34,7 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.ProvedorIa;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDeRecomendacao;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ResultadoDaChamada;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.VoltaDaChamada;
 
 /**
  * Cadeia de provedores de IA generativa da vitrine e do chatbot (RNF-REC-001, DEC-03). A ordem e a ativação vêm de
@@ -136,7 +138,7 @@ public class CadeiaDeProvedores implements EstadoEmMemoria {
             } catch (FalhaNaChamadaDeIa falha) {
                 avisarFalha(disponivel, falha.getResultado(), falha.getCodigoHttp(), falha.getMessage());
                 registrar(disponivel, operacao, inicio, inicioNanos, tentativa, falha.getResultado(),
-                        falha.getCodigoHttp(), falha.getMessage(), null, null);
+                        falha.getCodigoHttp(), falha.getMessage(), falha.getVoltas());
                 if (falha.getResultado() == ResultadoDaChamada.COTA_ESGOTADA) {
                     emEspera.registrarCotaEsgotada(disponivel.assistente().nome());
                 }
@@ -144,12 +146,12 @@ public class CadeiaDeProvedores implements EstadoEmMemoria {
             } catch (RuntimeException inesperada) {
                 avisarFalha(disponivel, ResultadoDaChamada.ERRO_HTTP, null, mensagem(inesperada));
                 registrar(disponivel, operacao, inicio, inicioNanos, tentativa, ResultadoDaChamada.ERRO_HTTP,
-                        null, mensagem(inesperada), null, null);
+                        null, mensagem(inesperada), List.of());
                 continue;
             }
             // O registro do sucesso fica fora do try: uma falha ao gravar o log não pode virar falha do provedor.
             Long chamadaIaId = registrar(disponivel, operacao, inicio, inicioNanos, tentativa,
-                    ResultadoDaChamada.SUCESSO, null, null, resposta.tokensEntrada(), resposta.tokensSaida());
+                    ResultadoDaChamada.SUCESSO, null, null, resposta.voltas());
             return new Atendimento<>(resposta.conteudo(), chamadaIaId, disponivel.assistente().nome());
         }
 
@@ -158,7 +160,8 @@ public class CadeiaDeProvedores implements EstadoEmMemoria {
 
     private Long registrar(ProvedorDisponivel disponivel, OperacaoIa operacao, LocalDateTime inicio,
             long inicioNanos, int tentativa, ResultadoDaChamada resultado, Integer codigoHttp, String erro,
-            Integer tokensEntrada, Integer tokensSaida) {
+            List<VoltaDaChamada> voltas) {
+        TokensDasVoltas.Resumo tokens = TokensDasVoltas.calcular(voltas);
         return chamadas.registrar(new ChamadaIa(
                 disponivel.provedor().id(),
                 disponivel.assistente().modelo(),
@@ -169,8 +172,10 @@ public class CadeiaDeProvedores implements EstadoEmMemoria {
                 resultado,
                 codigoHttp,
                 erro,
-                tokensEntrada,
-                tokensSaida));
+                tokens.entrada(),
+                tokens.saida(),
+                voltas.size(),
+                tokens.descricao()));
     }
 
     /** Provedores ativos, com bean de mesmo nome, com chave e fora da espera de 429, na ordem da tabela. */

@@ -43,6 +43,7 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDeRecomendacao;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ResultadoDaChamada;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.TipoDeResposta;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.VoltaDaChamada;
 import br.fatec.les.livraria.recomendacao.infraestrutura.externo.AssistenteDeLivrosFake;
 
 /**
@@ -83,6 +84,43 @@ class CadeiaDeProvedoresTest {
         assertThat(chamada.erro()).isNull();
         assertThat(chamada.tokensEntrada()).isNull();
         assertThat(chamada.tokensSaida()).isNull();
+        assertThat(chamada.chamadasHttp()).isZero();
+        assertThat(chamada.tokensDasVoltas()).isNull();
+    }
+
+    @Test
+    void rnfRec001_sucessoRegistraChamadasHttpETokensDasVoltas() {
+        provedores.com(provedor(1L, "a", 1, true));
+        AssistenteFalso a = new AssistenteFalso("a").responderCom(RespostaDoProvedor.comVoltas(
+                new RespostaDeRecomendacao(List.of()),
+                List.of(new VoltaDaChamada(80, 10), new VoltaDaChamada(120, 30))));
+
+        cadeia(a).recomendar(PERFIL, CANDIDATOS);
+
+        ChamadaIa chamada = chamadas.todas().getFirst();
+        assertThat(chamada.resultado()).isEqualTo(ResultadoDaChamada.SUCESSO);
+        assertThat(chamada.chamadasHttp()).isEqualTo(2);
+        assertThat(chamada.tokensDasVoltas()).isEqualTo("80/10;120/30");
+        assertThat(chamada.tokensEntrada()).isEqualTo(200);
+        assertThat(chamada.tokensSaida()).isEqualTo(40);
+    }
+
+    @Test
+    void rnfRec001_falhaRegistraAsChamadasHttpETokensDasVoltasJaFeitas() {
+        provedores.com(provedor(1L, "a", 1, true), provedor(2L, "b", 2, true));
+        AssistenteFalso a = new AssistenteFalso("a")
+                .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_HTTP, 500, "indisponível",
+                        List.of(new VoltaDaChamada(80, 10), VoltaDaChamada.semTokens())));
+        AssistenteFalso b = new AssistenteFalso("b");
+
+        cadeia(a, b).recomendar(PERFIL, CANDIDATOS);
+
+        ChamadaIa primeira = chamadas.todas().getFirst();
+        assertThat(primeira.resultado()).isEqualTo(ResultadoDaChamada.ERRO_HTTP);
+        assertThat(primeira.chamadasHttp()).isEqualTo(2);
+        assertThat(primeira.tokensDasVoltas()).isEqualTo("80/10;-/-");
+        assertThat(primeira.tokensEntrada()).isEqualTo(80);
+        assertThat(primeira.tokensSaida()).isEqualTo(10);
     }
 
     @Test
@@ -318,6 +356,8 @@ class CadeiaDeProvedoresTest {
         assertThat(chamada.tentativa()).isEqualTo(1);
         assertThat(chamada.tokensEntrada()).isNull();
         assertThat(chamada.tokensSaida()).isNull();
+        assertThat(chamada.chamadasHttp()).isZero();
+        assertThat(chamada.tokensDasVoltas()).isNull();
     }
 
     @Test
@@ -418,6 +458,11 @@ class CadeiaDeProvedoresTest {
 
         AssistenteFalso falharCom(RuntimeException falha) {
             falhas.add(falha);
+            return this;
+        }
+
+        AssistenteFalso responderCom(RespostaDoProvedor<RespostaDeRecomendacao> resposta) {
+            respostaDeRecomendacao = resposta;
             return this;
         }
 

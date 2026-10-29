@@ -29,7 +29,7 @@ class CalcularMetricasDosProvedoresTest {
     private static ChamadaIa chamada(Long provedor, int minuto, int latencia, int tentativa,
             ResultadoDaChamada resultado, Integer codigoHttp, Integer tokensEntrada, Integer tokensSaida) {
         return new ChamadaIa(provedor, "m", OperacaoIa.CONVERSAR, AGORA.plusMinutes(minuto), latencia, tentativa,
-                resultado, codigoHttp, "erro", tokensEntrada, tokensSaida);
+                resultado, codigoHttp, "erro", tokensEntrada, tokensSaida, 0, null);
     }
 
     @Test

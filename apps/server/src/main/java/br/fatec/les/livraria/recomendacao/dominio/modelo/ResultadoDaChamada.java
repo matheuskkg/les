@@ -10,5 +10,6 @@ public enum ResultadoDaChamada {
     ERRO_HTTP,
     TEMPO_ESGOTADO,
     ERRO_DE_REDE,
-    RESPOSTA_INVALIDA
+    RESPOSTA_INVALIDA,
+    LIMITE_DE_CHAMADAS
 }

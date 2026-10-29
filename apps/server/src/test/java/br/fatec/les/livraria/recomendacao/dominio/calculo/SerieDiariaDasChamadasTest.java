@@ -18,7 +18,8 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.ResultadoDaChamada;
 class SerieDiariaDasChamadasTest {
 
     private static ChamadaIa chamada(Long provedor, LocalDateTime em, ResultadoDaChamada resultado) {
-        return new ChamadaIa(provedor, "m", OperacaoIa.CONVERSAR, em, 10, 1, resultado, null, null, null, null);
+        return new ChamadaIa(provedor, "m", OperacaoIa.CONVERSAR, em, 10, 1, resultado, null, null, null, null, 0,
+                null);
     }
 
     @Test

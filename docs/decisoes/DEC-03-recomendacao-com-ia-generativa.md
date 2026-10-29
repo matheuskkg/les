@@ -35,7 +35,9 @@ sem mudar o modelo.
   porque a cadeia decide o que fazer na falha; alterado no REC-06: cada item de `livraria.ia.provedores` vira um
   adapter próprio, e a conexão aceita as opções opcionais `tool-choice` (`auto` ou `required`), `formato`
   (`instrucoes` ou `json-schema`), `cabecalhos` (cabeçalhos HTTP extras, como `X-Title` do OpenRouter) e
-  `max-chamadas`, com mínimo 1 e padrão 5):
+  `max-chamadas`, com mínimo 1 e padrão 5; alterado no REC-07: o `formato` padrão passa a ser `ferramenta`, com
+  `json-schema` e `instrucoes` como alternativas, e `max-chamadas` limita todas as chamadas HTTP da mensagem, inclusive
+  as voltas de tools e a correção de formato):
 
   | Provedor | `url-base` | Chave | Modelo |
   |---|---|---|---|
@@ -67,7 +69,8 @@ sem mudar o modelo.
 | `conversar` | perfil do cliente, últimas mensagens e mensagem nova | `tipo`, texto da resposta e ids dos livros citados |
 
 As duas respostas são **saída estruturada** (JSON validado pelo Spring AI), nunca texto livre interpretado pelo
-server.
+server. (Alterado no REC-07: no chat com `formato: ferramenta`, a resposta final vem da tool `responder`; nos demais
+formatos, continua sendo o JSON do texto.)
 
 ### Recuperação (RAG estruturado)
 
@@ -83,7 +86,8 @@ Os dados enviados à IA são recuperados pelo server com regras determinísticas
 - **Chat:** a IA recebe o perfil e tem **tools só de leitura**: buscar livros (por texto em título, autor ou sinopse,
   categoria e faixa de preço), ver um livro, ver o próprio histórico (acrescentado depois da rodada de testes do chat:
   e `recomendarParaMim`, com os mesmos candidatos da vitrine). As tools usam os casos de uso do `catalogo`, do `estoque` e do `vendas`. O id do cliente vem sempre do
-  `UsuarioAtual`, nunca de argumento do modelo.
+  `UsuarioAtual`, nunca de argumento do modelo. (Alterado no REC-07: no formato `ferramenta`, o chat também anuncia a
+  tool `responder`, que entrega a resposta final e não é de leitura.)
 
 ### Conversa
 
@@ -108,7 +112,8 @@ Uma regra por arquivo, testável sem a IA:
    correção de formato, que reenvia ao provedor a resposta inválida com o erro. O total fica dentro de
    `livraria.ia.provedores.<nome>.max-chamadas`, porque os limites gratuitos variam por provedor. Passar do limite
    conta como falha do provedor, e a cadeia segue para o próximo. O classificador de assunto separado continua
-   descartado.)
+   descartado; alterado no REC-07: o adapter controla o loop, com até 3 voltas de tools, 1 correção de formato e o
+   total em `max-chamadas`, e o excesso grava o resultado `LIMITE_DE_CHAMADAS`.)
 3. **Depois da chamada:** um livro citado que não existe, está inativo ou sem estoque é removido da resposta. Na
    vitrine, só valem os ids que estavam entre os candidatos.
 4. (Acrescentado depois da rodada de testes do chat) **No chat, a recomendação usa os mesmos candidatos da vitrine:**
@@ -139,7 +144,8 @@ Uma regra por arquivo, testável sem a IA:
   operação (`RECOMENDAR` ou `CONVERSAR`), início, latência em ms, número da tentativa na cadeia (1 = primeiro
   provedor tentado), resultado (`SUCESSO`, `COTA_ESGOTADA`, `ERRO_HTTP`, `TEMPO_ESGOTADO`, `ERRO_DE_REDE` ou
   `RESPOSTA_INVALIDA`), código HTTP, mensagem de erro (até 500 caracteres) e tokens de entrada e saída, quando o
-  provedor informa.
+  provedor informa. (Alterado no REC-07: a linha também guarda `chamadas_http` e `tokens_das_voltas`, e o resultado
+  `LIMITE_DE_CHAMADAS` indica o excesso de voltas ou de chamadas HTTP.)
 - O prompt e a resposta crus não são gravados. O conteúdo fica nas mensagens e nos itens recomendados.
   (Alterado no REC-06: cada falha também gera um `WARN` no log do server, com provedor, modelo, resultado, código
   HTTP e mensagem truncada, sem a chave nem o prompt/mensagens do cliente.)
@@ -210,6 +216,7 @@ Um gráfico (`uplot`) mostra as chamadas e as falhas por dia.
   `item_recomendacao`, e os endpoints de vitrine, chat, avaliação, provedores e métricas.
 - Seed `500_provedores_ia.sql` com a cadeia padrão.
 - Os testes usam o fake. Os adapters reais são testados com um servidor HTTP local que imita a API OpenAI, inclusive
-  429 e resposta inválida.
+  429 e resposta inválida. (Alterado no REC-07: o servidor local também serve sequências de tool calls, `responder`,
+  formatos de resposta e os limites de chamadas.)
 - Para a apresentação, basta definir as variáveis `IA_*_CHAVE` dos provedores desejados, como explica o guia
   [`configuracao-da-ia.md`](../guias/configuracao-da-ia.md).
