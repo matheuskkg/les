@@ -291,6 +291,42 @@ class CadeiaDeProvedoresTest {
     }
 
     @Test
+    void rnfRec001_cotaEsgotadaComEsperaSugeridaVoltaDepoisDoPrazoIndicado() {
+        provedores.com(provedor(1L, "a", 1, true), provedor(2L, "b", 2, true));
+        AssistenteFalso a = new AssistenteFalso("a")
+                .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.COTA_ESGOTADA, 429, "cota esgotada",
+                        List.of(), null, Duration.ofSeconds(30), false));
+        AssistenteFalso b = new AssistenteFalso("b");
+        CadeiaDeProvedores cadeia = cadeia(a, b);
+
+        assertThat(cadeia.recomendar(PERFIL, CANDIDATOS).provedor()).isEqualTo("b");
+
+        relogio.avancar(Duration.ofSeconds(29));
+        assertThat(cadeia.recomendar(PERFIL, CANDIDATOS).provedor()).isEqualTo("b");
+
+        relogio.avancar(Duration.ofSeconds(1));
+        assertThat(cadeia.recomendar(PERFIL, CANDIDATOS).provedor()).isEqualTo("a");
+    }
+
+    @Test
+    void rnfRec001_cotaDiariaMantemOProvedorForaAteAMeiaNoite() {
+        provedores.com(provedor(1L, "a", 1, true), provedor(2L, "b", 2, true));
+        AssistenteFalso a = new AssistenteFalso("a")
+                .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.COTA_ESGOTADA, 429, "cota diária",
+                        List.of(), null, Duration.ofSeconds(30), true));
+        AssistenteFalso b = new AssistenteFalso("b");
+        CadeiaDeProvedores cadeia = cadeia(a, b);
+
+        assertThat(cadeia.recomendar(PERFIL, CANDIDATOS).provedor()).isEqualTo("b");
+
+        relogio.avancar(Duration.ofHours(13).plusMinutes(59).plusSeconds(59));
+        assertThat(cadeia.recomendar(PERFIL, CANDIDATOS).provedor()).isEqualTo("b");
+
+        relogio.avancar(Duration.ofSeconds(1));
+        assertThat(cadeia.recomendar(PERFIL, CANDIDATOS).provedor()).isEqualTo("a");
+    }
+
+    @Test
     void rnfRec001_cacheDeTrintaSegundosSoRecarregaDepoisDoPrazo() {
         provedores.com(provedor(1L, "a", 1, true), provedor(2L, "b", 2, false));
         AssistenteFalso a = new AssistenteFalso("a");
@@ -366,7 +402,7 @@ class CadeiaDeProvedoresTest {
         AssistenteFalso a = new AssistenteFalso("a");
 
         Atendimento<RespostaDoAssistente> atendimento =
-                cadeia(a).conversar(PERFIL, List.of(), "Olá", FERRAMENTAS);
+                cadeia(a).conversar(PERFIL, List.of(), "Olá", FERRAMENTAS, List.of());
 
         assertThat(atendimento.provedor()).isEqualTo("a");
         assertThat(atendimento.resposta().texto()).isEqualTo("resposta de a");
@@ -493,7 +529,8 @@ class CadeiaDeProvedoresTest {
                 PerfilDoCliente perfil,
                 List<MensagemAnterior> historico,
                 String mensagemNova,
-                FerramentasDoAssistente ferramentas) {
+                FerramentasDoAssistente ferramentas,
+                List<ResumoDeLivro> catalogo) {
             falharSeProgramado();
             return respostaDoAssistente;
         }

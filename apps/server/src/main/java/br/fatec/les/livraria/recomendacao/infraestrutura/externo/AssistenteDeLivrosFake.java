@@ -83,7 +83,8 @@ public class AssistenteDeLivrosFake implements AssistenteDeLivros {
             PerfilDoCliente perfil,
             List<MensagemAnterior> historico,
             String mensagemNova,
-            FerramentasDoAssistente ferramentas) {
+            FerramentasDoAssistente ferramentas,
+            List<ResumoDeLivro> catalogo) {
         if (foraDoEscopo(mensagemNova)) {
             return RespostaDoProvedor.semTokens(
                     new RespostaDoAssistente(TipoDeResposta.FORA_DO_ESCOPO, TEXTO_FORA_DO_ESCOPO, List.of()));

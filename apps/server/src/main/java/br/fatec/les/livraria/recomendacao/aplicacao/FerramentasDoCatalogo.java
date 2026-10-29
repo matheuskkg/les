@@ -13,7 +13,6 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import br.fatec.les.livraria.catalogo.aplicacao.casodeuso.ConsultarSinopses;
-import br.fatec.les.livraria.catalogo.aplicacao.consulta.CategoriaDoLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroListado;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.DetalheDoLivro;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.FerramentasDoAssistente;
@@ -162,8 +161,7 @@ public class FerramentasDoCatalogo {
     }
 
     private static ResumoDeLivro resumo(LivroListado livro) {
-        return new ResumoDeLivro(livro.livro().id(), livro.livro().titulo(), livro.livro().autores(),
-                livro.livro().categorias().stream().map(CategoriaDoLivro::nome).toList(), livro.precoVenda());
+        return ResumoDeLivro.de(livro);
     }
 
     private static ResumoDeLivro resumo(LivroCandidato livro) {

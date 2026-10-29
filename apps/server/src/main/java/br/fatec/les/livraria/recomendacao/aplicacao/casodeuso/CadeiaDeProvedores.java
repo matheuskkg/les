@@ -23,6 +23,7 @@ import br.fatec.les.livraria.recomendacao.aplicacao.porta.FalhaNaChamadaDeIa;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.FerramentasDoAssistente;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ProvedoresIaRepositorio;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.RespostaDoProvedor;
+import br.fatec.les.livraria.recomendacao.aplicacao.porta.ResumoDeLivro;
 import br.fatec.les.livraria.recomendacao.aplicacao.regra.ProvedorEmEsperaPorCota;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.TokensDasVoltas;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ChamadaIa;
@@ -43,9 +44,9 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.VoltaDaChamada;
  * falham ou nenhum está disponível, lança {@link AssistenteIndisponivel} para o caso de uso decidir o fallback.
  *
  * <p>A lista de provedores fica em cache por 30 segundos (pelo {@link Relogio}); o REC-05 chama
- * {@link #invalidarCache()} ao alterar a ordem ou a ativação. A espera de 5 minutos depois de um HTTP 429 também é
- * só em memória, via {@link ProvedorEmEsperaPorCota}. O reset dos E2E limpa as duas coisas por
- * {@link EstadoEmMemoria} (DEC-09).</p>
+ * {@link #invalidarCache()} ao alterar a ordem ou a ativação. A espera depois de um HTTP 429 (a indicada pelo
+ * provedor, entre 10 s e 5 min, ou até o dia virar quando a cota é diária) também é só em memória, via
+ * {@link ProvedorEmEsperaPorCota}. O reset dos E2E limpa as duas coisas por {@link EstadoEmMemoria} (DEC-09).</p>
  */
 @Component
 public class CadeiaDeProvedores implements EstadoEmMemoria {
@@ -99,15 +100,17 @@ public class CadeiaDeProvedores implements EstadoEmMemoria {
      * @param historico    últimas mensagens da conversa ativa
      * @param mensagemNova mensagem que o cliente acabou de enviar
      * @param ferramentas  tools só de leitura do catálogo, do estoque e das compras
+     * @param catalogo     livros à venda, no formato compacto do prompt do chat (REC-09)
      * @return resposta do provedor que atendeu, com o id da chamada registrada
      */
     public Atendimento<RespostaDoAssistente> conversar(
             PerfilDoCliente perfil,
             List<MensagemAnterior> historico,
             String mensagemNova,
-            FerramentasDoAssistente ferramentas) {
+            FerramentasDoAssistente ferramentas,
+            List<ResumoDeLivro> catalogo) {
         return atender(OperacaoIa.CONVERSAR,
-                assistente -> assistente.conversar(perfil, historico, mensagemNova, ferramentas));
+                assistente -> assistente.conversar(perfil, historico, mensagemNova, ferramentas, catalogo));
     }
 
     /** Descarta o cache da tabela; o REC-05 chama depois de alterar a ordem ou a ativação (DEC-03). */
@@ -140,7 +143,8 @@ public class CadeiaDeProvedores implements EstadoEmMemoria {
                 registrar(disponivel, operacao, inicio, inicioNanos, tentativa, falha.getResultado(),
                         falha.getCodigoHttp(), falha.getMessage(), falha.getVoltas());
                 if (falha.getResultado() == ResultadoDaChamada.COTA_ESGOTADA) {
-                    emEspera.registrarCotaEsgotada(disponivel.assistente().nome());
+                    emEspera.registrarCotaEsgotada(disponivel.assistente().nome(), falha.getEsperaSugerida(),
+                            falha.isCotaDiaria());
                 }
                 continue;
             } catch (RuntimeException inesperada) {

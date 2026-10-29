@@ -3,6 +3,7 @@ package br.fatec.les.livraria.recomendacao.infraestrutura.externo;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,14 +32,17 @@ import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.support.ToolCallbacks;
 import org.springframework.ai.tool.ToolCallback;
 
+import com.openai.core.http.Headers;
 import com.openai.errors.OpenAIIoException;
 import com.openai.errors.OpenAIServiceException;
-import com.openai.errors.RateLimitException;
 
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.AssistenteDeLivros;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.FalhaNaChamadaDeIa;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.FerramentasDoAssistente;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.RespostaDoProvedor;
+import br.fatec.les.livraria.recomendacao.aplicacao.porta.ResumoDeLivro;
+import br.fatec.les.livraria.recomendacao.dominio.calculo.DetectarCotaDiaria;
+import br.fatec.les.livraria.recomendacao.dominio.calculo.InterpretarEsperaSugerida;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.AvaliacaoDada;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ItemRecomendado;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.LivroCandidato;
@@ -78,12 +82,11 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
             Você é o assistente de uma livraria on-line e responde em português, de forma curta e cordial. \
             Ajude só com assuntos da loja: livros do catálogo, autores, categorias, preços e dúvidas gerais sobre \
             compra, frete, trocas e pedidos. Para qualquer outro assunto, responda com o tipo FORA_DO_ESCOPO. \
-            Use as ferramentas para consultar o catálogo e o histórico do cliente, e cite só livros cujos ids \
-            vieram das ferramentas; nunca invente livros. Quando o cliente pedir sugestões pelo gosto ou pelo \
-            histórico, use a ferramenta recomendarParaMim, que já traz livros que ele ainda não comprou, e responda \
-            com o tipo RECOMENDACAO. O tipo da resposta é RECOMENDACAO quando sugere livros pelo gosto do cliente, \
-            BUSCA quando atende a uma busca, DUVIDA quando esclarece uma dúvida e FORA_DO_ESCOPO quando o assunto \
-            não é da loja.""";
+            O catálogo à venda está no prompt, com id, título, autores, categorias e preço: use-o para buscas por \
+            título, autor, gênero ou faixa de preço. Use verLivro só para a sinopse ou a quantidade em estoque e \
+            recomendarParaMim para sugestões pelo histórico do cliente. Cite só ids do catálogo; nunca invente \
+            livros. O tipo da resposta é RECOMENDACAO quando sugere livros pelo gosto do cliente, BUSCA quando \
+            atende a uma busca, DUVIDA quando esclarece uma dúvida e FORA_DO_ESCOPO quando o assunto não é da loja.""";
 
     static final String INSTRUCAO_DA_FERRAMENTA_DE_RESPOSTA = """
             Sempre entregue a resposta final chamando a ferramenta responder, com o tipo, o texto e os ids dos \
@@ -185,7 +188,8 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
             PerfilDoCliente perfil,
             List<MensagemAnterior> historico,
             String mensagemNova,
-            FerramentasDoAssistente ferramentas) {
+            FerramentasDoAssistente ferramentas,
+            List<ResumoDeLivro> catalogo) {
         OpenAiChatModel modelo = modeloConfigurado();
         List<VoltaDaChamada> voltas = new ArrayList<>();
         int voltasDeTools = 0;
@@ -193,7 +197,7 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
         boolean ferramenta = provedor.usaFerramenta();
         List<ToolCallback> callbacks = callbacks(ferramentas, ferramenta);
 
-        Prompt prompt = promptInicial(perfil, historico, mensagemNova, callbacks, ferramenta, 1);
+        Prompt prompt = promptInicial(perfil, historico, mensagemNova, catalogo, callbacks, ferramenta, 1);
         List<String> nomesDisponiveis = callbacks.stream()
                 .map(callback -> callback.getToolDefinition().name())
                 .toList();
@@ -289,10 +293,11 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
     }
 
     private Prompt promptInicial(PerfilDoCliente perfil, List<MensagemAnterior> historico, String mensagemNova,
-            List<ToolCallback> callbacks, boolean ferramenta, int volta) {
+            List<ResumoDeLivro> catalogo, List<ToolCallback> callbacks, boolean ferramenta, int volta) {
         String sistema = SISTEMA_DA_CONVERSA
                 + (ferramenta ? "\n\n" + INSTRUCAO_DA_FERRAMENTA_DE_RESPOSTA : "")
-                + "\n\nPerfil do cliente:\n" + descrever(perfil);
+                + "\n\nCatálogo à venda:\n" + ContextoCompactoDoChat.catalogo(catalogo)
+                + "\n\nPerfil do cliente:\n" + ContextoCompactoDoChat.perfil(perfil, catalogo);
         if (!ferramenta && !provedor.usaJsonSchema()) {
             sistema += "\n\n" + CONVERSOR_DO_ASSISTENTE.getFormat();
         }
@@ -534,15 +539,18 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
     static FalhaNaChamadaDeIa traduzir(RuntimeException excecao, List<VoltaDaChamada> voltas) {
         List<VoltaDaChamada> feitas = List.copyOf(voltas);
         for (Throwable causa = excecao; causa != null; causa = causa.getCause()) {
-            if (causa instanceof RateLimitException) {
-                return new FalhaNaChamadaDeIa(ResultadoDaChamada.COTA_ESGOTADA, 429, mensagem(causa), feitas,
-                        excecao);
-            }
             if (causa instanceof OpenAIServiceException servico) {
-                ResultadoDaChamada resultado = servico.statusCode() == 429
-                        ? ResultadoDaChamada.COTA_ESGOTADA
-                        : ResultadoDaChamada.ERRO_HTTP;
-                return new FalhaNaChamadaDeIa(resultado, servico.statusCode(), mensagem(causa), feitas, excecao);
+                if (servico.statusCode() == 429) {
+                    String mensagem = mensagem(causa);
+                    Duration espera = InterpretarEsperaSugerida
+                            .deCabecalho(cabecalho(servico.headers(), "Retry-After"), Instant.now())
+                            .or(() -> InterpretarEsperaSugerida.daMensagem(mensagem))
+                            .orElse(null);
+                    return new FalhaNaChamadaDeIa(ResultadoDaChamada.COTA_ESGOTADA, 429, mensagem, feitas,
+                            excecao, espera, DetectarCotaDiaria.ehDiaria(mensagem, espera));
+                }
+                return new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_HTTP, servico.statusCode(), mensagem(causa),
+                        feitas, excecao);
             }
             if (causa instanceof InterruptedIOException) {
                 return new FalhaNaChamadaDeIa(ResultadoDaChamada.TEMPO_ESGOTADO, null, mensagem(causa), feitas,
@@ -557,6 +565,17 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
         }
         return new FalhaNaChamadaDeIa(ResultadoDaChamada.RESPOSTA_INVALIDA, null, mensagem(excecao), feitas,
                 excecao);
+    }
+
+    /** Valor do cabeçalho HTTP, procurado sem diferenciar maiúsculas. */
+    private static @Nullable String cabecalho(Headers cabecalhos, String nome) {
+        for (String atual : cabecalhos.names()) {
+            if (atual.equalsIgnoreCase(nome)) {
+                List<String> valores = cabecalhos.values(atual);
+                return valores.isEmpty() ? null : valores.getFirst();
+            }
+        }
+        return null;
     }
 
     private static String mensagem(Throwable causa) {

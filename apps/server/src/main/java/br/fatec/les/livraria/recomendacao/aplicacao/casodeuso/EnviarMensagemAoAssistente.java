@@ -22,6 +22,7 @@ import br.fatec.les.livraria.recomendacao.aplicacao.consulta.Atendimento;
 import br.fatec.les.livraria.recomendacao.aplicacao.consulta.MensagemExibida;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ConversasRepositorio;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.RecomendacoesRepositorio;
+import br.fatec.les.livraria.recomendacao.aplicacao.porta.ResumoDeLivro;
 import br.fatec.les.livraria.recomendacao.aplicacao.regra.LivroAVenda;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.ReenvioSemResposta;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.RemoverLivrosCompradosDaRecomendacao;
@@ -111,10 +112,15 @@ public class EnviarMensagemAoAssistente {
 
         PerfilDoCliente perfil = montarPerfil.montar(clienteId, consultarLivrosVendidos.executar(),
                 recomendacoes.avaliacoesDoCliente(clienteId));
+        List<LivroListado> ativos = lerCatalogo.ativos();
+        List<ResumoDeLivro> catalogo = ativos.stream()
+                .filter(LivroAVenda::aVenda)
+                .map(ResumoDeLivro::de)
+                .toList();
         Atendimento<RespostaDoAssistente> atendimento = cadeia.conversar(perfil, historico, mensagem,
-                ferramentas.doCliente(clienteId));
+                ferramentas.doCliente(clienteId), catalogo);
 
-        Map<Long, LivroListado> aVenda = lerCatalogo.ativos().stream()
+        Map<Long, LivroListado> aVenda = ativos.stream()
                 .filter(LivroAVenda::aVenda)
                 .collect(Collectors.toMap(livro -> livro.livro().id(), Function.identity()));
         RespostaDoAssistente resposta = validarResposta.validar(atendimento.resposta(), aVenda.keySet());

@@ -34,12 +34,26 @@ flowchart LR
 
 - **Ordem padrão:** `gemini`, `groq`, `openrouter` e `fake`. O administrador muda a ordem e liga ou desliga
   provedores na aba **Assistente** do admin, sem reiniciar. A mudança fica gravada no banco.
-- **Cota esgotada:** um provedor que respondeu HTTP 429 fica fora da cadeia por 5 minutos.
+- **Cota esgotada:** um provedor que respondeu HTTP 429 fica fora da cadeia pelo tempo indicado no cabeçalho
+  `Retry-After` (segundos ou data HTTP) ou no texto da mensagem, como "try again in 7.5s" ou "retry in 1m30s". O
+  prazo fica entre 10 segundos e 5 minutos; sem indicação, são 5 minutos. Se a mensagem aponta cota diária ("per
+  day", "daily", "RPD"), o provedor só volta à meia-noite. O `fake`, no fim da cadeia, atende enquanto isso.
 - **Registro:** toda tentativa, com sucesso ou falha, fica registrada e aparece nas métricas da mesma aba (latência,
   taxa de sucesso, erros por tipo e tokens). Cada linha também guarda quantas chamadas HTTP a mensagem fez
   (`chamadas_http`) e os tokens de cada volta (`tokens_das_voltas`), além dos tokens somados.
 - **Provedor `fake` desligado:** se todos os provedores ativos falharem, a vitrine mostra as recomendações
   calculadas pelo server, sem justificativa, e o chat avisa que o assistente está indisponível.
+
+## O que vai no prompt do chat
+
+- O catálogo à venda vai em uma linha por livro, com o cabeçalho `id|titulo|autores|categorias|preco` e os valores
+  separados por `|`, por exemplo `12|Dom Casmurro|Machado de Assis|Romance|47.88`. Isso reduz os tokens de cada
+  mensagem e evita repetir títulos e categorias.
+- O perfil do cliente no chat leva só os ids dos livros comprados que estão no catálogo, o título dos que não estão,
+  até 5 categorias e autores e os ids das avaliações positivas e negativas. A vitrine continua usando o perfil
+  completo.
+- O modelo vê só as tools `verLivro` (sinopse e estoque) e `recomendarParaMim` (sugestões pelo histórico). Buscar por
+  título, autor, categoria ou preço é feito no próprio catálogo do prompt.
 
 ## Variáveis de ambiente
 
@@ -194,7 +208,7 @@ Na IDE, defina as mesmas variáveis em *Environment variables* da configuração
 |---|---|---|
 | Todas as chamadas no `fake` | nenhuma chave definida no processo do server | confira as variáveis no mesmo terminal ou na configuração da IDE e reinicie |
 | `ERRO_HTTP` 401 ou 403 | chave inválida ou revogada | gere outra chave no painel do provedor |
-| `COTA_ESGOTADA` | limite gratuito atingido | aguarde, ou ponha outro provedor na frente da cadeia |
+| `COTA_ESGOTADA` | limite gratuito atingido | aguarde o prazo indicado pelo provedor (até 5 min, ou até a meia-noite na cota diária), ou ponha outro provedor na frente da cadeia |
 | `ERRO_HTTP` 404 | modelo inexistente ou retirado | troque a variável `IA_*_MODELO` |
 | `RESPOSTA_INVALIDA` | o modelo não segue o formato JSON ou não aceita ferramentas | escolha um modelo com tool calling e saída estruturada |
 | `LIMITE_DE_CHAMADAS` | o modelo passou de 3 voltas de tools, da correção ou de `max-chamadas` | escolha um modelo que siga as tools, aumente `max-chamadas` ou deixe outro provedor na cadeia |

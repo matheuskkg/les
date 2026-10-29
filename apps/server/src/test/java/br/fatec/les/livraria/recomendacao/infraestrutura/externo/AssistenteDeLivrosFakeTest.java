@@ -158,7 +158,7 @@ class AssistenteDeLivrosFakeTest {
 
     private RespostaDoAssistente conversar(String mensagem) {
         RespostaDoProvedor<RespostaDoAssistente> resposta =
-                assistente.conversar(SEM_HISTORICO, List.of(), mensagem, ferramentas);
+                assistente.conversar(SEM_HISTORICO, List.of(), mensagem, ferramentas, List.of());
         assertThat(resposta.tokensEntrada()).isNull();
         assertThat(resposta.tokensSaida()).isNull();
         return resposta.conteudo();

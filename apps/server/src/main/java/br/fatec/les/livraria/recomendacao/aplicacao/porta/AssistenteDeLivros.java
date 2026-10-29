@@ -38,17 +38,19 @@ public interface AssistenteDeLivros {
     RespostaDoProvedor<RespostaDeRecomendacao> recomendar(PerfilDoCliente perfil, List<LivroCandidato> candidatos);
 
     /**
-     * Responde à mensagem nova do cliente usando o perfil, o histórico da conversa e as tools só de leitura
-     * (DEC-03). O id do cliente nunca vem do modelo: as tools o obtêm de {@code UsuarioAtual}.
+     * Responde à mensagem nova do cliente usando o perfil, o histórico da conversa, o catálogo compacto e as tools
+     * só de leitura (DEC-03). O id do cliente nunca vem do modelo: as tools o obtêm de {@code UsuarioAtual}.
      *
      * @param perfil        histórico e preferências do cliente
      * @param historico     últimas mensagens da conversa ativa, lidas do banco
      * @param mensagemNova  mensagem que o cliente acabou de enviar
      * @param ferramentas   tools de consulta ao catálogo, ao estoque e às compras do cliente
+     * @param catalogo      livros à venda, no formato compacto do prompt do chat (REC-09)
      */
     RespostaDoProvedor<RespostaDoAssistente> conversar(
             PerfilDoCliente perfil,
             List<MensagemAnterior> historico,
             String mensagemNova,
-            FerramentasDoAssistente ferramentas);
+            FerramentasDoAssistente ferramentas,
+            List<ResumoDeLivro> catalogo);
 }

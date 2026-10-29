@@ -49,7 +49,8 @@ sem mudar o modelo.
   padrão para cada um, e a variável o troca sem editar arquivos.
 - **Cadeia de provedores:** a chamada vai ao primeiro provedor ativo da cadeia que tenha chave. Se ele falhar (erro de rede,
   HTTP 429 ou 5xx, tempo esgotado ou resposta fora do formato), vai ao próximo. Um provedor que respondeu 429 sai da
-  cadeia por 5 minutos.
+  cadeia por 5 minutos. (Alterado no REC-09: a espera segue o `Retry-After` ou o tempo citado na mensagem, entre 10 s
+  e 5 min, e, na cota diária, vai até a meia-noite; sem indicação, 5 min.)
 - O provedor `fake` (`AssistenteDeLivrosFake`, determinístico, sem rede) é o último da cadeia. Quando nenhum
   provedor anterior tem chave, como em `mvn test` e nos E2E, a cadeia usa só o `fake`.
 - **Troca em tempo de execução:** a ordem e a ativação ficam na tabela `provedor_ia`, com seed `gemini`, `groq`,
@@ -57,7 +58,8 @@ sem mudar o modelo.
   (`GET`/`PUT /api/admin/ia/provedores`). A resposta mostra, por provedor, se ele tem chave e a última falha. A chave
   e a URL ficam só na configuração e nunca são expostas nem alteradas pela API. A cadeia é lida da tabela e guardada
   em memória por 30 segundos; a alteração pelo ADMIN limpa esse cache. Os 5 minutos fora da cadeia depois de um 429
-  também ficam só em memória.
+  também ficam só em memória. (Alterado no REC-09: o prazo variável, inclusive até a meia-noite na cota diária,
+  continua só em memória.)
 
 ### Porta
 
@@ -70,7 +72,8 @@ sem mudar o modelo.
 
 As duas respostas são **saída estruturada** (JSON validado pelo Spring AI), nunca texto livre interpretado pelo
 server. (Alterado no REC-07: no chat com `formato: ferramenta`, a resposta final vem da tool `responder`; nos demais
-formatos, continua sendo o JSON do texto.)
+formatos, continua sendo o JSON do texto. Alterado no REC-09: `conversar` também recebe as ferramentas do cliente e o
+catálogo à venda, que vai compacto ao prompt.)
 
 ### Recuperação (RAG estruturado)
 
@@ -78,7 +81,8 @@ Os dados enviados à IA são recuperados pelo server com regras determinísticas
 
 - **Perfil do cliente:** os livros comprados (compras que contam como venda, como no ranking do
   [DEC-04](DEC-04-ranking-de-cliente.md)), as categorias e os autores mais frequentes e as avaliações dadas aos itens
-  recomendados.
+  recomendados. (Alterado no REC-09: no chat, o perfil leva só os ids dos livros comprados que estão no catálogo, o
+  título dos demais, até 5 categorias e autores e os ids das avaliações; a vitrine continua com a descrição completa.)
 - **Candidatos da vitrine:** livros ativos com estoque disponível ([DEC-15.3](DEC-15.3-saldo-de-estoque.md)), sem os
   já comprados e sem os que tiveram uma recomendação avaliada negativamente. A pontuação soma as categorias e os
   autores em comum com os livros comprados e com os recomendados avaliados positivamente, e a co-compra ("quem
@@ -87,7 +91,9 @@ Os dados enviados à IA são recuperados pelo server com regras determinísticas
   categoria e faixa de preço), ver um livro, ver o próprio histórico (acrescentado depois da rodada de testes do chat:
   e `recomendarParaMim`, com os mesmos candidatos da vitrine). As tools usam os casos de uso do `catalogo`, do `estoque` e do `vendas`. O id do cliente vem sempre do
   `UsuarioAtual`, nunca de argumento do modelo. (Alterado no REC-07: no formato `ferramenta`, o chat também anuncia a
-  tool `responder`, que entrega a resposta final e não é de leitura.)
+  tool `responder`, que entrega a resposta final e não é de leitura. Alterado no REC-09: o chat recebe o catálogo à
+  venda no prompt, uma linha por livro, e anuncia só as tools `verLivro` e `recomendarParaMim`; `buscarLivros` e
+  `verMeuHistorico` deixam de ser tools.)
 
 ### Conversa
 
@@ -219,6 +225,7 @@ Um gráfico (`uplot`) mostra as chamadas e as falhas por dia.
 - Seed `500_provedores_ia.sql` com a cadeia padrão.
 - Os testes usam o fake. Os adapters reais são testados com um servidor HTTP local que imita a API OpenAI, inclusive
   429 e resposta inválida. (Alterado no REC-07: o servidor local também serve sequências de tool calls, `responder`,
-  formatos de resposta e os limites de chamadas.)
+  formatos de resposta e os limites de chamadas. Alterado no REC-09: o 429 do servidor local também devolve
+  `Retry-After` e cobre a espera da cota.)
 - Para a apresentação, basta definir as variáveis `IA_*_CHAVE` dos provedores desejados, como explica o guia
   [`configuracao-da-ia.md`](../guias/configuracao-da-ia.md).
