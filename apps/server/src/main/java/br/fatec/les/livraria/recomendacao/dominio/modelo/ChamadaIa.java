@@ -35,8 +35,18 @@ public record ChamadaIa(
         if (erro != null && erro.length() > LIMITE_DO_ERRO) {
             erro = erro.substring(0, LIMITE_DO_ERRO);
         }
-        if (tokensDasVoltas != null && tokensDasVoltas.length() > LIMITE_DOS_TOKENS_DAS_VOLTAS) {
-            tokensDasVoltas = tokensDasVoltas.substring(0, LIMITE_DOS_TOKENS_DAS_VOLTAS);
+        tokensDasVoltas = truncarTokensDasVoltas(tokensDasVoltas);
+    }
+
+    /**
+     * Corta a descrição em 200 caracteres sem partir uma volta: quando o texto passa do limite, mantém só as voltas
+     * completas até o último {@code ;} que cabe. Se nem uma volta completa cabe, a descrição fica nula.
+     */
+    private static @Nullable String truncarTokensDasVoltas(@Nullable String tokensDasVoltas) {
+        if (tokensDasVoltas == null || tokensDasVoltas.length() <= LIMITE_DOS_TOKENS_DAS_VOLTAS) {
+            return tokensDasVoltas;
         }
+        int corte = tokensDasVoltas.lastIndexOf(';', LIMITE_DOS_TOKENS_DAS_VOLTAS - 1);
+        return corte > 0 ? tokensDasVoltas.substring(0, corte) : null;
     }
 }

@@ -312,6 +312,39 @@ class AssistenteDeLivrosOpenAiTest {
     }
 
     @Test
+    void rnfRec001_ferramentaDesconhecidaRecebeCorrecaoEAceitaResponder() {
+        respostas.add(new Resposta(200, respostaDeFerramentas("chatcmpl-desconhecida", 80, 10,
+                ferramenta("call_x", "ferramentaQueNaoExiste", "{}")), 0));
+        respostas.add(new Resposta(200, chamadaDeResposta("DUVIDA", "Oi! Como posso ajudar?", "[]"), 0));
+        FerramentasFalsas ferramentas = new FerramentasFalsas();
+
+        RespostaDoProvedor<RespostaDoAssistente> resposta = assistente("ferramenta", "auto", 5)
+                .conversar(PERFIL, List.of(), "Oi", ferramentas);
+
+        assertThat(resposta.conteudo().tipo()).isEqualTo(TipoDeResposta.DUVIDA);
+        assertThat(requisicoes).hasValue(2);
+        assertThat(resposta.chamadasHttp()).isEqualTo(2);
+        assertThat(ferramentas.buscas).isEmpty();
+        assertThat(corpos.get(1)).contains("ferramentaQueNaoExiste", "buscarLivros", "responder");
+    }
+
+    @Test
+    void rnfRec001_ferramentaDesconhecidaDuasVezesViraRespostaInvalida() {
+        respostas.add(new Resposta(200, respostaDeFerramentas("chatcmpl-desconhecida-1", 80, 10,
+                ferramenta("call_x", "ferramentaQueNaoExiste", "{}")), 0));
+        respostas.add(new Resposta(200, respostaDeFerramentas("chatcmpl-desconhecida-2", 80, 10,
+                ferramenta("call_y", "outraFerramentaQueNaoExiste", "{}")), 0));
+
+        assertThatThrownBy(() -> assistente("ferramenta", "auto", 5)
+                .conversar(PERFIL, List.of(), "Oi", new FerramentasFalsas()))
+                .isInstanceOfSatisfying(FalhaNaChamadaDeIa.class, falha -> {
+                    assertThat(falha.getResultado()).isEqualTo(ResultadoDaChamada.RESPOSTA_INVALIDA);
+                    assertThat(falha.getChamadasHttp()).isEqualTo(2);
+                });
+        assertThat(requisicoes).hasValue(2);
+    }
+
+    @Test
     void rnfRec001_duasRespostasInvalidasNoChatViramRespostaInvalida() {
         respostas.add(new Resposta(200, conclusao("{\"texto\":\"Oi\",\"livrosCitados\":[]}"), 0));
         respostas.add(new Resposta(200, conclusao("{\"texto\":\"Oi\",\"livrosCitados\":[]}"), 0));
@@ -343,7 +376,7 @@ class AssistenteDeLivrosOpenAiTest {
     }
 
     @Test
-    void rnfRec001_maxChamadasDoisCortaAntesDaTerceiraChamada() {
+    void rnfRec001_maxChamadasDoisNaoExecutaAToolDaSegundaResposta() {
         respostas.add(new Resposta(200, chamadaDeFerramenta("call_1"), 0));
         respostas.add(new Resposta(200, chamadaDeFerramenta("call_2"), 0));
         FerramentasFalsas ferramentas = new FerramentasFalsas();
@@ -355,6 +388,7 @@ class AssistenteDeLivrosOpenAiTest {
                     assertThat(falha.getChamadasHttp()).isEqualTo(2);
                 });
         assertThat(requisicoes).hasValue(2);
+        assertThat(ferramentas.buscas).hasSize(1);
     }
 
     @Test

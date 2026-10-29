@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
@@ -154,22 +156,27 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
                         + descrever(candidatos))),
                 opcoesDaRecomendacao());
 
-        while (true) {
-            ChatResponse resposta = chamarHttp(modelo, prompt, voltas);
-            String texto = conteudo(resposta);
-            try {
-                SaidaDeRecomendacao saida = CONVERSOR_DA_RECOMENDACAO.convert(Objects.requireNonNullElse(texto, ""));
-                return RespostaDoProvedor.comVoltas(new RespostaDeRecomendacao(itens(saida)), voltas);
-            } catch (RuntimeException invalida) {
-                if (!limiteDeCorrecoes.permite(correcoes)) {
-                    throw respostaInvalida("Resposta fora do formato esperado.", invalida, voltas);
+        try {
+            while (true) {
+                ChatResponse resposta = chamarHttp(modelo, prompt, voltas);
+                String texto = conteudo(resposta);
+                try {
+                    SaidaDeRecomendacao saida = CONVERSOR_DA_RECOMENDACAO.convert(
+                            Objects.requireNonNullElse(texto, ""));
+                    return RespostaDoProvedor.comVoltas(new RespostaDeRecomendacao(itens(saida)), voltas);
+                } catch (RuntimeException invalida) {
+                    Correcao correcao = corrigir(prompt, correcoes, "Resposta fora do formato esperado.",
+                            invalida, voltas, atual -> promptDeCorrecao(atual, texto,
+                                    correcaoDeFormato(invalida), opcoesDaRecomendacao()));
+                    prompt = correcao.prompt();
+                    correcoes = correcao.feitas();
                 }
-                if (!limiteDeChamadasHttp.permite(voltas.size(), provedor.maxChamadas())) {
-                    throw limiteDeChamadas(voltas);
-                }
-                correcoes++;
-                prompt = promptDeCorrecao(prompt, texto, correcaoDeFormato(invalida), opcoesDaRecomendacao());
             }
+        } catch (FalhaNaChamadaDeIa falha) {
+            throw falha;
+        } catch (RuntimeException inesperada) {
+            // Qualquer falha inesperada depois de uma chamada HTTP carrega as voltas para o log da cadeia.
+            throw traduzir(inesperada, voltas);
         }
     }
 
@@ -187,84 +194,97 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
         List<ToolCallback> callbacks = callbacks(ferramentas, ferramenta);
 
         Prompt prompt = promptInicial(perfil, historico, mensagemNova, callbacks, ferramenta, 1);
-        while (true) {
-            ChatResponse resposta = chamarHttp(modelo, prompt, voltas);
-            AssistantMessage saida = mensagem(resposta);
-            List<AssistantMessage.ToolCall> chamadas = chamadas(saida);
+        List<String> nomesDisponiveis = callbacks.stream()
+                .map(callback -> callback.getToolDefinition().name())
+                .toList();
+        try {
+            while (true) {
+                ChatResponse resposta = chamarHttp(modelo, prompt, voltas);
+                AssistantMessage saida = mensagem(resposta);
+                List<AssistantMessage.ToolCall> chamadas = chamadas(saida);
 
-            Optional<AssistantMessage.ToolCall> respostaFinal = ferramenta
-                    ? chamadas.stream()
-                            .filter(chamada -> FerramentaDeResposta.NOME.equals(chamada.name()))
-                            .findFirst()
-                    : Optional.empty();
-            if (respostaFinal.isPresent()) {
-                try {
-                    return RespostaDoProvedor.comVoltas(
-                            respostaDoAssistente(CONVERSOR_DO_ASSISTENTE.convert(respostaFinal.get().arguments())),
-                            voltas);
-                } catch (RuntimeException invalida) {
-                    if (!limiteDeCorrecoes.permite(correcoes)) {
-                        throw respostaInvalida("Resposta da ferramenta responder fora do formato esperado.",
-                                invalida, voltas);
+                Optional<AssistantMessage.ToolCall> respostaFinal = ferramenta
+                        ? chamadas.stream()
+                                .filter(chamada -> FerramentaDeResposta.NOME.equals(chamada.name()))
+                                .findFirst()
+                        : Optional.empty();
+                if (respostaFinal.isPresent()) {
+                    try {
+                        return RespostaDoProvedor.comVoltas(
+                                respostaDoAssistente(CONVERSOR_DO_ASSISTENTE.convert(
+                                        respostaFinal.get().arguments())),
+                                voltas);
+                    } catch (RuntimeException invalida) {
+                        Correcao correcao = corrigir(prompt, correcoes,
+                                "Resposta da ferramenta responder fora do formato esperado.", invalida, voltas,
+                                atual -> promptDeCorrecao(atual, saida, correcaoDaFerramenta(invalida), callbacks,
+                                        ferramenta, voltas.size() + 1));
+                        prompt = correcao.prompt();
+                        correcoes = correcao.feitas();
+                        continue;
+                    }
+                }
+
+                List<AssistantMessage.ToolCall> desconhecidas = chamadas.stream()
+                        .filter(chamada -> !nomesDisponiveis.contains(chamada.name()))
+                        .toList();
+                if (!desconhecidas.isEmpty()) {
+                    Correcao correcao = corrigir(prompt, correcoes,
+                            "A resposta chamou uma ferramenta que não existe.", null, voltas,
+                            atual -> promptDeCorrecaoDeFerramentaDesconhecida(atual, saida, desconhecidas,
+                                    nomesDisponiveis, callbacks, ferramenta, voltas.size() + 1));
+                    prompt = correcao.prompt();
+                    correcoes = correcao.feitas();
+                    continue;
+                }
+
+                if (!chamadas.isEmpty()) {
+                    if (!limiteDeVoltasDeTools.permite(voltasDeTools)) {
+                        throw limiteDeChamadas(voltas);
                     }
                     if (!limiteDeChamadasHttp.permite(voltas.size(), provedor.maxChamadas())) {
                         throw limiteDeChamadas(voltas);
                     }
-                    correcoes++;
-                    prompt = promptDeCorrecao(prompt, saida, correcaoDaFerramenta(invalida), callbacks, ferramenta,
-                            voltas.size() + 1);
+                    voltasDeTools++;
+                    ToolExecutionResult resultado;
+                    try {
+                        resultado = gerenciadorDeFerramentas.executeToolCalls(prompt, resposta);
+                    } catch (RuntimeException excecao) {
+                        throw traduzir(excecao, voltas);
+                    }
+                    prompt = new Prompt(resultado.conversationHistory(),
+                            opcoesDaConversa(callbacks, ferramenta, voltas.size() + 1));
                     continue;
                 }
-            }
 
-            List<AssistantMessage.ToolCall> leituras = chamadas.stream()
-                    .filter(chamada -> !FerramentaDeResposta.NOME.equals(chamada.name()))
-                    .toList();
-            if (!leituras.isEmpty()) {
-                if (!limiteDeVoltasDeTools.permite(voltasDeTools)) {
-                    throw limiteDeChamadas(voltas);
+                if (ferramenta) {
+                    Correcao correcao = corrigir(prompt, correcoes,
+                            "A resposta não chamou a ferramenta responder.", null, voltas,
+                            atual -> promptDeCorrecao(atual, saida, correcaoDaFerramenta(null), callbacks,
+                                    ferramenta, voltas.size() + 1));
+                    prompt = correcao.prompt();
+                    correcoes = correcao.feitas();
+                    continue;
                 }
-                voltasDeTools++;
-                ToolExecutionResult resultado;
+
                 try {
-                    resultado = gerenciadorDeFerramentas.executeToolCalls(prompt, resposta);
-                } catch (RuntimeException excecao) {
-                    throw traduzir(excecao, voltas);
+                    return RespostaDoProvedor.comVoltas(
+                            respostaDoAssistente(CONVERSOR_DO_ASSISTENTE.convert(Objects.requireNonNullElse(
+                                    conteudo(resposta), ""))),
+                            voltas);
+                } catch (RuntimeException invalida) {
+                    Correcao correcao = corrigir(prompt, correcoes, "Resposta fora do formato esperado.",
+                            invalida, voltas, atual -> promptDeCorrecao(atual, saida,
+                                    correcaoDeFormato(invalida), callbacks, ferramenta, voltas.size() + 1));
+                    prompt = correcao.prompt();
+                    correcoes = correcao.feitas();
                 }
-                prompt = new Prompt(resultado.conversationHistory(),
-                        opcoesDaConversa(callbacks, ferramenta, voltas.size() + 1));
-                continue;
             }
-
-            if (ferramenta) {
-                if (!limiteDeCorrecoes.permite(correcoes)) {
-                    throw respostaInvalida("A resposta não chamou a ferramenta responder.", null, voltas);
-                }
-                if (!limiteDeChamadasHttp.permite(voltas.size(), provedor.maxChamadas())) {
-                    throw limiteDeChamadas(voltas);
-                }
-                correcoes++;
-                prompt = promptDeCorrecao(prompt, saida, correcaoDaFerramenta(null), callbacks, ferramenta,
-                        voltas.size() + 1);
-                continue;
-            }
-
-            try {
-                return RespostaDoProvedor.comVoltas(
-                        respostaDoAssistente(CONVERSOR_DO_ASSISTENTE.convert(Objects.requireNonNullElse(
-                                conteudo(resposta), ""))),
-                        voltas);
-            } catch (RuntimeException invalida) {
-                if (!limiteDeCorrecoes.permite(correcoes)) {
-                    throw respostaInvalida("Resposta fora do formato esperado.", invalida, voltas);
-                }
-                if (!limiteDeChamadasHttp.permite(voltas.size(), provedor.maxChamadas())) {
-                    throw limiteDeChamadas(voltas);
-                }
-                correcoes++;
-                prompt = promptDeCorrecao(prompt, saida, correcaoDeFormato(invalida), callbacks, ferramenta,
-                        voltas.size() + 1);
-            }
+        } catch (FalhaNaChamadaDeIa falha) {
+            throw falha;
+        } catch (RuntimeException inesperada) {
+            // Qualquer falha inesperada depois de uma chamada HTTP carrega as voltas para o log da cadeia.
+            throw traduzir(inesperada, voltas);
         }
     }
 
@@ -360,6 +380,22 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
         return new VoltaDaChamada(positivoOuNulo(uso.getPromptTokens()), positivoOuNulo(uso.getCompletionTokens()));
     }
 
+    /**
+     * Aplica a única correção de formato permitida e monta o prompt seguinte (RNF-REC-001, DEC-03). O limite de
+     * chamadas HTTP não é repetido aqui: {@link #chamarHttp} recusa a próxima chamada quando o total do provedor
+     * acabou, mantendo o resultado {@code LIMITE_DE_CHAMADAS}.
+     */
+    private Correcao corrigir(Prompt prompt, int correcoes, String mensagem, @Nullable Throwable causa,
+            List<VoltaDaChamada> voltas, UnaryOperator<Prompt> montarPrompt) {
+        if (!limiteDeCorrecoes.permite(correcoes)) {
+            throw respostaInvalida(mensagem, causa, voltas);
+        }
+        return new Correcao(montarPrompt.apply(prompt), correcoes + 1);
+    }
+
+    private record Correcao(Prompt prompt, int feitas) {
+    }
+
     private static Prompt promptDeCorrecao(Prompt prompt, @Nullable String textoAnterior, String correcao,
             OpenAiChatOptions opcoes) {
         List<Message> mensagens = new ArrayList<>(prompt.getInstructions());
@@ -375,6 +411,15 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
      */
     private Prompt promptDeCorrecao(Prompt prompt, @Nullable AssistantMessage saida, String correcao,
             List<ToolCallback> callbacks, boolean ferramenta, int volta) {
+        return promptDeCorrecao(prompt, saida, correcao, callbacks, ferramenta, volta,
+                chamada -> FerramentaDeResposta.NOME.equals(chamada.name())
+                        ? "Erro: " + correcao
+                        : "Não executada: a resposta final veio na ferramenta responder.");
+    }
+
+    private Prompt promptDeCorrecao(Prompt prompt, @Nullable AssistantMessage saida, String correcao,
+            List<ToolCallback> callbacks, boolean ferramenta, int volta,
+            Function<AssistantMessage.ToolCall, String> respostaDeErro) {
         List<Message> mensagens = new ArrayList<>(prompt.getInstructions());
         if (saida == null) {
             mensagens.add(new AssistantMessage(""));
@@ -382,16 +427,33 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
             mensagens.add(saida);
             if (saida.hasToolCalls()) {
                 List<ToolResponse> respostas = saida.getToolCalls().stream()
-                        .map(chamada -> new ToolResponse(chamada.id(), chamada.name(),
-                                FerramentaDeResposta.NOME.equals(chamada.name())
-                                        ? "Erro: " + correcao
-                                        : "Não executada: a resposta final veio na ferramenta responder."))
+                        .map(chamada -> new ToolResponse(chamada.id(), chamada.name(), respostaDeErro.apply(chamada)))
                         .toList();
                 mensagens.add(ToolResponseMessage.builder().responses(respostas).build());
             }
         }
         mensagens.add(new UserMessage(correcao));
         return new Prompt(mensagens, opcoesDaConversa(callbacks, ferramenta, volta));
+    }
+
+    /**
+     * Corrige uma chamada de ferramenta que não está entre as anunciadas ao modelo (DEC-03). A mensagem lista as
+     * ferramentas disponíveis e o histórico responde às chamadas com erro, para a próxima requisição ser válida.
+     */
+    private Prompt promptDeCorrecaoDeFerramentaDesconhecida(Prompt prompt, @Nullable AssistantMessage saida,
+            List<AssistantMessage.ToolCall> desconhecidas, List<String> disponiveis, List<ToolCallback> callbacks,
+            boolean ferramenta, int volta) {
+        String correcao = "A resposta chamou ferramentas que não existem: "
+                + desconhecidas.stream().map(AssistantMessage.ToolCall::name).distinct()
+                        .collect(Collectors.joining(", "))
+                + ". Ferramentas disponíveis: " + String.join(", ", disponiveis)
+                + ". Responda chamando apenas as ferramentas disponíveis"
+                + (ferramenta ? " e entregue a resposta final com a ferramenta responder." : ".");
+        return promptDeCorrecao(prompt, saida, correcao, callbacks, ferramenta, volta,
+                chamada -> desconhecidas.contains(chamada)
+                        ? "Erro: a ferramenta " + chamada.name() + " não existe. Ferramentas disponíveis: "
+                                + String.join(", ", disponiveis) + "."
+                        : "Não executada: a resposta chamou uma ferramenta desconhecida.");
     }
 
     private static String correcaoDeFormato(@Nullable RuntimeException erro) {
