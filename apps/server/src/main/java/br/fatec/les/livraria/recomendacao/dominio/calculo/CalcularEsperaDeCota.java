@@ -8,7 +8,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * Calcula por quanto tempo um provedor que respondeu 429 fica fora da cadeia (RNF-REC-001, DEC-03, REC-09): o tempo
  * sugerido, limitado entre 10 s e 5 min, 5 min quando não há indicação e, na cota diária, até a meia-noite do fuso
- * do relógio da aplicação.
+ * do relógio da aplicação, com pelo menos 10 s.
  */
 public final class CalcularEsperaDeCota {
 
@@ -26,7 +26,8 @@ public final class CalcularEsperaDeCota {
      */
     public static Duration calcular(@Nullable Duration esperaSugerida, boolean cotaDiaria, LocalDateTime agora) {
         if (cotaDiaria) {
-            return Duration.between(agora, agora.toLocalDate().plusDays(1).atStartOfDay());
+            Duration ateOProximoDia = Duration.between(agora, agora.toLocalDate().plusDays(1).atStartOfDay());
+            return ateOProximoDia.compareTo(MINIMA) < 0 ? MINIMA : ateOProximoDia;
         }
         if (esperaSugerida == null) {
             return MAXIMA;

@@ -34,6 +34,15 @@ class ContextoCompactoDoChatTest {
     }
 
     @Test
+    void rnfRec001_separadorEQuebraDeLinhaNoTituloNaoDesalinhamAsColunas() {
+        ResumoDeLivro livro = new ResumoDeLivro(3L, "Contos | Volume 1\nEdição", List.of("Vários"),
+                List.of("Contos"), Dinheiro.de("10.00"));
+
+        assertThat(ContextoCompactoDoChat.catalogo(List.of(livro)))
+                .endsWith("\n3|Contos Volume 1 Edição|Vários|Contos|10.00");
+    }
+
+    @Test
     void rnfRec001_catalogoVazioTemSoOCabecalho() {
         assertThat(ContextoCompactoDoChat.catalogo(List.of())).isEqualTo("id|titulo|autores|categorias|preco\n");
     }

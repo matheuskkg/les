@@ -59,4 +59,11 @@ class CalcularEsperaDeCotaTest {
         assertThat(CalcularEsperaDeCota.calcular(Duration.ofHours(10), true, AGORA))
                 .isEqualTo(Duration.ofHours(14));
     }
+
+    @Test
+    void rnfRec001_cotaDiariaPertoDaMeiaNoiteEsperaPeloMenosDezSegundos() {
+        LocalDateTime quaseMeiaNoite = LocalDateTime.of(2026, 10, 28, 23, 59, 59);
+
+        assertThat(CalcularEsperaDeCota.calcular(null, true, quaseMeiaNoite)).isEqualTo(Duration.ofSeconds(10));
+    }
 }

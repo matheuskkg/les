@@ -38,9 +38,15 @@ class DetectarCotaDiariaTest {
     }
 
     @Test
-    void rnfRec001_esperaLongaComIndicacaoDeDiaEhCotaDiaria() {
-        assertThat(DetectarCotaDiaria.ehDiaria("The limit resets at the end of the day", Duration.ofHours(6)))
-                .isTrue();
+    void rnfRec001_idDeCotaDiariaDoGeminiEhCotaDiaria() {
+        assertThat(DetectarCotaDiaria.ehDiaria(
+                "quotaId: GenerateRequestsPerDayPerProjectPerModel-FreeTier. Please retry in 41.9s", null)).isTrue();
+    }
+
+    @Test
+    void rnfRec001_palavrasComDiaNoMeioNaoSaoCotaDiaria() {
+        assertThat(DetectarCotaDiaria.ehDiaria("Try again in 10m or upgrade today, immediately", Duration.ofMinutes(10)))
+                .isFalse();
     }
 
     @Test

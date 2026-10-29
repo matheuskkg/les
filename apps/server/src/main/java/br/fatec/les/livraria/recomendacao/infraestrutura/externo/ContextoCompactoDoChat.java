@@ -25,8 +25,9 @@ final class ContextoCompactoDoChat {
     /** Catálogo compacto: cabeçalho e uma linha {@code id|titulo|autores|categorias|preco} por livro à venda. */
     static String catalogo(List<ResumoDeLivro> livros) {
         return CABECALHO_DO_CATALOGO + "\n" + livros.stream()
-                .map(livro -> livro.id() + "|" + livro.titulo() + "|" + String.join(", ", livro.autores()) + "|"
-                        + String.join(", ", livro.categorias()) + "|" + livro.preco().valor().toPlainString())
+                .map(livro -> livro.id() + "|" + campo(livro.titulo()) + "|" + campo(String.join(", ", livro.autores()))
+                        + "|" + campo(String.join(", ", livro.categorias())) + "|"
+                        + livro.preco().valor().toPlainString())
                 .collect(Collectors.joining("\n"));
     }
 
@@ -47,6 +48,11 @@ final class ContextoCompactoDoChat {
         texto.append("- Autores frequentes: ").append(lista(perfil.autoresFrequentes())).append('\n');
         texto.append("- Avaliações de recomendações: ").append(avaliacoes(perfil.avaliacoes()));
         return texto.toString();
+    }
+
+    /** Tira do campo o separador e as quebras de linha, para não desalinhar as colunas que o modelo lê. */
+    private static String campo(String valor) {
+        return valor.replaceAll("[|\\s]+", " ").strip();
     }
 
     private static String descrever(LivroComprado livro, Set<Long> idsDoCatalogo) {
