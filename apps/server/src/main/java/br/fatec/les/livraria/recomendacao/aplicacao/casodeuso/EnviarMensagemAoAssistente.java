@@ -27,6 +27,7 @@ import br.fatec.les.livraria.recomendacao.dominio.calculo.ReenvioSemResposta;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.RemoverLivrosCompradosDaRecomendacao;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.ValidarRespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.EnvioDeMensagem;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.LivroComprado;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemAnterior;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.PerfilDoCliente;
@@ -34,7 +35,6 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.regra.LimiteDeMensagensPorMinuto;
 import br.fatec.les.livraria.recomendacao.dominio.regra.TamanhoDaMensagem;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarLivrosVendidos;
-import br.fatec.les.livraria.vendas.aplicacao.consulta.LivroVendido;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -109,8 +109,7 @@ public class EnviarMensagemAoAssistente {
                     .toList();
         }
 
-        List<LivroVendido> vendidos = consultarLivrosVendidos.executar();
-        PerfilDoCliente perfil = montarPerfil.montar(clienteId, vendidos,
+        PerfilDoCliente perfil = montarPerfil.montar(clienteId, consultarLivrosVendidos.executar(),
                 recomendacoes.avaliacoesDoCliente(clienteId));
         Atendimento<RespostaDoAssistente> atendimento = cadeia.conversar(perfil, historico, mensagem,
                 ferramentas.doCliente(clienteId));
@@ -119,10 +118,9 @@ public class EnviarMensagemAoAssistente {
                 .filter(LivroAVenda::aVenda)
                 .collect(Collectors.toMap(livro -> livro.livro().id(), Function.identity()));
         RespostaDoAssistente resposta = validarResposta.validar(atendimento.resposta(), aVenda.keySet());
-        resposta = removerComprados.remover(resposta, vendidos.stream()
-                .filter(vendido -> vendido.clienteId().equals(clienteId))
-                .map(LivroVendido::livroId)
-                .collect(Collectors.toSet()));
+        resposta = removerComprados.remover(resposta, perfil.livrosComprados().stream()
+                .map(LivroComprado::id)
+                .toList());
         MensagemDaConversa gravada = conversas.salvar(MensagemDaConversa.doAssistente(conversaId, resposta,
                 atendimento.chamadaIaId(), relogio.agora()));
         return new MensagemExibida(gravada, resposta.livrosCitados().stream().map(aVenda::get).toList());

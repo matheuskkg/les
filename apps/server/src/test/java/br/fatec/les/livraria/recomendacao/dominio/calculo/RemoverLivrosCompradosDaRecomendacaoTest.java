@@ -59,13 +59,13 @@ class RemoverLivrosCompradosDaRecomendacaoTest {
     }
 
     @Test
-    void rnfRec001_semLivrosRestantesUsaOTextoPadrao() {
+    void rnfRec001_semLivrosRestantesTrocaOTextoQueApresentavaOsComprados() {
         RespostaDoAssistente resposta = remover.remover(
-                new RespostaDoAssistente(TipoDeResposta.RECOMENDACAO,
-                        ValidarRespostaDoAssistente.TEXTO_SO_COM_LIVROS, List.of(1L, 3L)),
+                new RespostaDoAssistente(TipoDeResposta.RECOMENDACAO, "Recomendo estes dois livros.",
+                        List.of(1L, 3L)),
                 COMPRADOS);
 
         assertThat(resposta.livrosCitados()).isEmpty();
-        assertThat(resposta.texto()).isEqualTo(ValidarRespostaDoAssistente.TEXTO_SEM_RESPOSTA);
+        assertThat(resposta.texto()).isEqualTo(RemoverLivrosCompradosDaRecomendacao.TEXTO_SO_COMPRADOS);
     }
 }
