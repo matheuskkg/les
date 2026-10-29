@@ -45,6 +45,8 @@ import br.fatec.les.livraria.recomendacao.aplicacao.porta.ConversasRepositorio;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.ValidarRespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.PapelDaMensagem;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarLivrosVendidos;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.LivroVendido;
 import jakarta.servlet.http.Cookie;
 
 /**
@@ -92,6 +94,9 @@ class AssistenteIntegracaoTest {
     @Autowired
     private ConversasRepositorio conversas;
 
+    @Autowired
+    private ConsultarLivrosVendidos livrosVendidos;
+
     private MockMvc mvc;
 
     @BeforeEach
@@ -130,6 +135,24 @@ class AssistenteIntegracaoTest {
                 .content("{\"avaliacao\":\"" + avaliacao + "\"}"));
     }
 
+    /** Copia linhas de uma tabela trocando as colunas informadas por expressões SQL (pares coluna, expressão). */
+    private void copiar(String tabela, String filtro, String... trocas) {
+        JdbcClient jdbc = JdbcClient.create(dataSource);
+        List<String> colunas = jdbc.sql("select column_name from information_schema.columns "
+                + "where table_schema = 'public' and table_name = :tabela order by ordinal_position")
+                .param("tabela", tabela).query(String.class).list();
+        java.util.Map<String, String> expressoes = new java.util.HashMap<>();
+        for (int i = 0; i < trocas.length; i += 2) {
+            expressoes.put(trocas[i], trocas[i + 1]);
+        }
+        String destino = colunas.stream().map(coluna -> "\"" + coluna + "\"")
+                .collect(java.util.stream.Collectors.joining(", "));
+        String origem = colunas.stream().map(coluna -> expressoes.getOrDefault(coluna, "\"" + coluna + "\""))
+                .collect(java.util.stream.Collectors.joining(", "));
+        jdbc.sql("insert into \"" + tabela + "\" (" + destino + ") select " + origem + " from \"" + tabela
+                + "\" where " + filtro).update();
+    }
+
     @Test
     void rnfRec001_buscaPelaSinopseCitaOLivroComOFormatoDaVitrine() throws Exception {
         enviar(ANA, "Bilbo")
@@ -156,6 +179,27 @@ class AssistenteIntegracaoTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.livros.length()").value(1))
                 .andExpect(jsonPath("$.livros[0].id").value(O_HOBBIT));
+    }
+
+    @Test
+    void rnfRec001_recomendacaoNaoCitaLivrosQueOClienteJaComprou() throws Exception {
+        // Ana não comprou no seed; o pedido 2, de outro cliente, entra como compra dela nesta transação.
+        copiar("pedido", "id = 2", "id", "900000", "cliente_id", "1");
+        copiar("item_pedido", "pedido_id = 2", "id", "id + 900000", "pedido_id", "900000");
+        List<Integer> comprados = livrosVendidos.executar().stream()
+                .filter(vendido -> vendido.clienteId().equals(CLIENTE_DA_ANA))
+                .map(LivroVendido::livroId)
+                .map(Long::intValue)
+                .distinct()
+                .toList();
+
+        String corpo = enviar(ANA, "Com base no que eu já comprei, me recomenda um livro")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tipo").value("RECOMENDACAO"))
+                .andReturn().getResponse().getContentAsString();
+
+        List<Integer> citados = JsonPath.read(corpo, "$.livros[*].id");
+        assertThat(citados).isNotEmpty().doesNotContainAnyElementsOf(comprados);
     }
 
     @Test

@@ -18,9 +18,13 @@ import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroListado;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.DetalheDoLivro;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.FerramentasDoAssistente;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.LivroDoHistorico;
+import br.fatec.les.livraria.recomendacao.aplicacao.porta.RecomendacoesRepositorio;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ResumoDeLivro;
 import br.fatec.les.livraria.recomendacao.aplicacao.regra.LivroAVenda;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.LivroCandidato;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.PerfilDoCliente;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarLivrosVendidos;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.LivroVendido;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -43,6 +47,9 @@ public class FerramentasDoCatalogo {
     private final LerCatalogo lerCatalogo;
     private final ConsultarSinopses consultarSinopses;
     private final ConsultarLivrosVendidos consultarLivrosVendidos;
+    private final MontarPerfilDoCliente montarPerfil;
+    private final RecuperarCandidatos recuperarCandidatos;
+    private final RecomendacoesRepositorio recomendacoes;
 
     /** Tools do cliente informado, que vem da sessão. */
     public FerramentasDoAssistente doCliente(Long clienteId) {
@@ -52,21 +59,39 @@ public class FerramentasDoCatalogo {
     private final class Ferramentas implements FerramentasDoAssistente {
 
         private final Long clienteId;
+        private @Nullable List<LivroListado> ativos;
         private @Nullable Map<Long, LivroListado> aVenda;
+        private @Nullable List<LivroVendido> vendidos;
 
         private Ferramentas(Long clienteId) {
             this.clienteId = clienteId;
         }
 
-        /** Os livros à venda, lidos uma vez por mensagem, mesmo que o modelo chame várias tools. */
+        /** O catálogo ativo, lido uma vez por mensagem, mesmo que o modelo chame várias tools. */
+        private List<LivroListado> ativos() {
+            if (ativos == null) {
+                ativos = lerCatalogo.ativos();
+            }
+            return ativos;
+        }
+
+        /** Os livros à venda, derivados do catálogo já lido nesta mensagem. */
         private Map<Long, LivroListado> aVenda() {
             if (aVenda == null) {
-                aVenda = lerCatalogo.ativos().stream()
+                aVenda = ativos().stream()
                         .filter(LivroAVenda::aVenda)
                         .collect(Collectors.toMap(livro -> livro.livro().id(), Function.identity(),
                                 (primeiro, segundo) -> primeiro, LinkedHashMap::new));
             }
             return aVenda;
+        }
+
+        /** Os livros vendidos de todos os clientes, lidos uma vez por mensagem. */
+        private List<LivroVendido> vendidos() {
+            if (vendidos == null) {
+                vendidos = consultarLivrosVendidos.executar();
+            }
+            return vendidos;
         }
 
         @Override
@@ -100,10 +125,20 @@ public class FerramentasDoCatalogo {
 
         @Override
         public List<LivroDoHistorico> verMeuHistorico() {
-            return consultarLivrosVendidos.executar().stream()
+            return vendidos().stream()
                     .filter(vendido -> vendido.clienteId().equals(clienteId))
                     .map(vendido -> new LivroDoHistorico(vendido.livroId(), vendido.titulo()))
                     .distinct()
+                    .toList();
+        }
+
+        @Override
+        public List<ResumoDeLivro> recomendarParaMim() {
+            List<LivroVendido> vendidos = vendidos();
+            PerfilDoCliente perfil = montarPerfil.montar(clienteId, vendidos,
+                    recomendacoes.avaliacoesDoCliente(clienteId));
+            return recuperarCandidatos.recuperar(clienteId, perfil, vendidos, ativos()).stream()
+                    .map(FerramentasDoCatalogo::resumo)
                     .toList();
         }
     }
@@ -129,5 +164,9 @@ public class FerramentasDoCatalogo {
     private static ResumoDeLivro resumo(LivroListado livro) {
         return new ResumoDeLivro(livro.livro().id(), livro.livro().titulo(), livro.livro().autores(),
                 livro.livro().categorias().stream().map(CategoriaDoLivro::nome).toList(), livro.precoVenda());
+    }
+
+    private static ResumoDeLivro resumo(LivroCandidato livro) {
+        return new ResumoDeLivro(livro.id(), livro.titulo(), livro.autores(), livro.categorias(), livro.preco());
     }
 }

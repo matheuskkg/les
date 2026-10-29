@@ -338,5 +338,10 @@ class AssistenteDeLivrosOpenAiTest {
         public List<LivroDoHistorico> verMeuHistorico() {
             return List.of();
         }
+
+        @Override
+        public List<ResumoDeLivro> recomendarParaMim() {
+            return List.of();
+        }
     }
 }

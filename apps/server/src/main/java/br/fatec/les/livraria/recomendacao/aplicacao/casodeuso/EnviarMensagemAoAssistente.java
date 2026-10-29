@@ -24,6 +24,7 @@ import br.fatec.les.livraria.recomendacao.aplicacao.porta.ConversasRepositorio;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.RecomendacoesRepositorio;
 import br.fatec.les.livraria.recomendacao.aplicacao.regra.LivroAVenda;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.ReenvioSemResposta;
+import br.fatec.les.livraria.recomendacao.dominio.calculo.RemoverLivrosCompradosDaRecomendacao;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.ValidarRespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.EnvioDeMensagem;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemAnterior;
@@ -33,6 +34,7 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.regra.LimiteDeMensagensPorMinuto;
 import br.fatec.les.livraria.recomendacao.dominio.regra.TamanhoDaMensagem;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarLivrosVendidos;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.LivroVendido;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -44,8 +46,8 @@ import lombok.RequiredArgsConstructor;
  *       de gravar a nova; sem conversa ativa, uma nova é aberta.</li>
  *   <li>A mensagem do cliente é gravada antes da chamada. Se toda a cadeia falhar, ela fica gravada e a API responde
  *       503; o reenvio do mesmo texto não a grava de novo ({@link ReenvioSemResposta}).</li>
- *   <li>A resposta passa por {@link ValidarRespostaDoAssistente} e é gravada apontando para a chamada que a
- *       gerou.</li>
+ *   <li>A resposta passa por {@link ValidarRespostaDoAssistente} e, quando é uma recomendação, por
+ *       {@link RemoverLivrosCompradosDaRecomendacao}; depois é gravada apontando para a chamada que a gerou.</li>
  * </ol>
  *
  * <p>A checagem do limite, a abertura da conversa e a gravação da mensagem do cliente ficam sob uma trava por
@@ -69,6 +71,7 @@ public class EnviarMensagemAoAssistente {
     private final FerramentasDoCatalogo ferramentas;
     private final CadeiaDeProvedores cadeia;
     private final ValidarRespostaDoAssistente validarResposta;
+    private final RemoverLivrosCompradosDaRecomendacao removerComprados;
     private final ReenvioSemResposta reenvioSemResposta;
     private final TamanhoDaMensagem tamanhoDaMensagem;
     private final LimiteDeMensagensPorMinuto limiteDeMensagens;
@@ -106,7 +109,8 @@ public class EnviarMensagemAoAssistente {
                     .toList();
         }
 
-        PerfilDoCliente perfil = montarPerfil.montar(clienteId, consultarLivrosVendidos.executar(),
+        List<LivroVendido> vendidos = consultarLivrosVendidos.executar();
+        PerfilDoCliente perfil = montarPerfil.montar(clienteId, vendidos,
                 recomendacoes.avaliacoesDoCliente(clienteId));
         Atendimento<RespostaDoAssistente> atendimento = cadeia.conversar(perfil, historico, mensagem,
                 ferramentas.doCliente(clienteId));
@@ -115,6 +119,10 @@ public class EnviarMensagemAoAssistente {
                 .filter(LivroAVenda::aVenda)
                 .collect(Collectors.toMap(livro -> livro.livro().id(), Function.identity()));
         RespostaDoAssistente resposta = validarResposta.validar(atendimento.resposta(), aVenda.keySet());
+        resposta = removerComprados.remover(resposta, vendidos.stream()
+                .filter(vendido -> vendido.clienteId().equals(clienteId))
+                .map(LivroVendido::livroId)
+                .collect(Collectors.toSet()));
         MensagemDaConversa gravada = conversas.salvar(MensagemDaConversa.doAssistente(conversaId, resposta,
                 atendimento.chamadaIaId(), relogio.agora()));
         return new MensagemExibida(gravada, resposta.livrosCitados().stream().map(aVenda::get).toList());

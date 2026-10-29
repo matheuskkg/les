@@ -81,8 +81,9 @@ Os dados enviados à IA são recuperados pelo server com regras determinísticas
   autores em comum com os livros comprados e com os recomendados avaliados positivamente, e a co-compra ("quem
   comprou X também comprou Y"). Os 8 de maior pontuação vão à IA. Sem histórico, os mais vendidos.
 - **Chat:** a IA recebe o perfil e tem **tools só de leitura**: buscar livros (por texto em título, autor ou sinopse,
-  categoria e faixa de preço), ver um livro e ver o próprio histórico. As tools usam os casos de uso do `catalogo`,
-  do `estoque` e do `vendas`. O id do cliente vem sempre do `UsuarioAtual`, nunca de argumento do modelo.
+  categoria e faixa de preço), ver um livro, ver o próprio histórico e `recomendarParaMim` (com os mesmos candidatos
+  da vitrine). As tools usam os casos de uso do `catalogo`, do `estoque` e do `vendas`. O id do cliente vem sempre do
+  `UsuarioAtual`, nunca de argumento do modelo.
 
 ### Conversa
 
@@ -110,7 +111,11 @@ Uma regra por arquivo, testável sem a IA:
    descartado.)
 3. **Depois da chamada:** um livro citado que não existe, está inativo ou sem estoque é removido da resposta. Na
    vitrine, só valem os ids que estavam entre os candidatos.
-4. A IA não executa ações: adicionar ao carrinho é um botão da UI sobre os livros devolvidos.
+4. (Acrescentado depois da rodada de testes do chat) **No chat, a recomendação usa os mesmos candidatos da vitrine:**
+   a tool `recomendarParaMim` recupera e pontua os livros como a vitrine. Com o tipo `RECOMENDACAO`, os livros que o
+   cliente já comprou são removidos da resposta; `BUSCA` e `DUVIDA` os mantêm, porque o cliente pode perguntar de um
+   livro que já tem.
+5. A IA não executa ações: adicionar ao carrinho é um botão da UI sobre os livros devolvidos.
 
 ### Recomendação da vitrine
 

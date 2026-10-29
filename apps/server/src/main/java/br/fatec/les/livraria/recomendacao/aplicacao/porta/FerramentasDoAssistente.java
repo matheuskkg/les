@@ -29,4 +29,11 @@ public interface FerramentasDoAssistente {
 
     /** Livros que o cliente autenticado já comprou, para o assistente conhecer o histórico. */
     List<LivroDoHistorico> verMeuHistorico();
+
+    /**
+     * Livros recomendados ao cliente autenticado pelo histórico, com a mesma recuperação e pontuação da vitrine
+     * (RNF-REC-001, DEC-03). Já vêm sem os comprados e sem os avaliados negativamente; sem histórico, os mais
+     * vendidos.
+     */
+    List<ResumoDeLivro> recomendarParaMim();
 }

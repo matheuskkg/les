@@ -47,6 +47,13 @@ class FerramentasParaIa {
         return ferramentas.verMeuHistorico();
     }
 
+    @Tool(description = "Lista livros recomendados para o cliente pelo histórico, já sem os livros que ele comprou.")
+    List<LivroParaIa> recomendarParaMim() {
+        return ferramentas.recomendarParaMim().stream()
+                .map(LivroParaIa::de)
+                .toList();
+    }
+
     /** Livro como o modelo o recebe, com o preço como número. */
     record LivroParaIa(Long id, String titulo, List<String> autores, List<String> categorias, BigDecimal preco) {
 

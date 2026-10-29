@@ -122,6 +122,19 @@ class AssistenteDeLivrosFakeTest {
     }
 
     @Test
+    void rnfRec001_pedidoDeRecomendacaoUsaOsCandidatosDoPerfil() {
+        ferramentas.comRecomendados(livro(7L, "O Cortiço"), livro(8L, "Capitães da Areia"));
+
+        RespostaDoAssistente resposta = conversar("Com base no que eu já comprei, me recomenda um livro");
+
+        assertThat(resposta.tipo()).isEqualTo(TipoDeResposta.RECOMENDACAO);
+        assertThat(resposta.texto()).isEqualTo(AssistenteDeLivrosFake.TEXTO_DE_RECOMENDACAO);
+        assertThat(resposta.livrosCitados()).containsExactly(7L, 8L);
+        assertThat(ferramentas.pedidosDeRecomendacao()).isEqualTo(1);
+        assertThat(ferramentas.buscas()).isEmpty();
+    }
+
+    @Test
     void rnfRec001_recomendarMantemAOrdemRecebidaComJustificativaDoPerfil() {
         List<LivroCandidato> candidatos = List.of(candidato(3L, "Quincas Borba"), candidato(1L, "Dom Casmurro"));
 
@@ -166,14 +179,25 @@ class AssistenteDeLivrosFakeTest {
 
         private final Map<String, List<ResumoDeLivro>> resultados = new HashMap<>();
         private final List<String> buscas = new ArrayList<>();
+        private List<ResumoDeLivro> recomendados = List.of();
+        private int pedidosDeRecomendacao;
 
         FerramentasFalsas comResultado(String texto, ResumoDeLivro... livros) {
             resultados.put(texto, List.of(livros));
             return this;
         }
 
+        FerramentasFalsas comRecomendados(ResumoDeLivro... livros) {
+            recomendados = List.of(livros);
+            return this;
+        }
+
         List<String> buscas() {
             return buscas;
+        }
+
+        int pedidosDeRecomendacao() {
+            return pedidosDeRecomendacao;
         }
 
         @Override
@@ -191,6 +215,12 @@ class AssistenteDeLivrosFakeTest {
         @Override
         public List<LivroDoHistorico> verMeuHistorico() {
             return List.of();
+        }
+
+        @Override
+        public List<ResumoDeLivro> recomendarParaMim() {
+            pedidosDeRecomendacao++;
+            return recomendados;
         }
     }
 }
