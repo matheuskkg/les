@@ -135,6 +135,8 @@ test.describe('Jornada do assistente', () => {
     const fake = page.getByRole('table', { name: 'Métricas por provedor' }).getByRole('row')
       .filter({ hasText: /^fake/ });
     await expect(fake.getByRole('cell').nth(1)).toHaveText('2');
-    await expect(fake.getByRole('cell').nth(2)).toHaveText('100%');
+    // O fake não faz chamadas HTTP, então a coluna de chamadas por mensagem fica vazia.
+    await expect(fake.getByRole('cell').nth(2)).toHaveText('—');
+    await expect(fake.getByRole('cell').nth(3)).toHaveText('100%');
   });
 });
