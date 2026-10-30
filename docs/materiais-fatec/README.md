@@ -10,3 +10,5 @@ na pasta `imagens/` ao lado dele.
 | [`dvp/`](dvp/) | [Guia de Elaboração do DVP](dvp/guia-elaboracao-dvp.md) | `Guia_Elaboracao_DVP.docx` |
 | | [Documento de Visão de Projeto (exemplo ImoX)](dvp/dvp.md) | `DVP.docx` |
 | [`casos-de-uso/`](casos-de-uso/) | [Especificação de Caso de Uso](casos-de-uso/uc-fatec.md) | `UC_FATEC.doc` |
+
+Os artefatos produzidos a partir destes modelos ficam em [`../entregas/`](../entregas/).
