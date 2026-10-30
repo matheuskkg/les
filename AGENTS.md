@@ -79,6 +79,8 @@ Não há nada em produção. Consequências:
   testável isoladamente.
 - Valores monetários com tipo decimal exato (nunca float); formatação `R$ 1.234,56` na UI.
 - Senhas com hash forte (bcrypt/argon2) — `RNF-CLI-003`.
+- Documentos formais (entregas em `docs/entregas/`, que viram .docx): escreva e revise com a skill
+  [`humanizar-texto`](.claude/skills/humanizar-texto/SKILL.md); ao delegar a escrita, repasse as regras dela no prompt.
 - Referencie o ID do requisito em testes e, quando útil, em comentários (`// RN-VEN-004`).
 
 ## Rastreabilidade
