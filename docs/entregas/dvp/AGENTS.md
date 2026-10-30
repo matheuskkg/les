@@ -28,5 +28,21 @@ Documento de Visão de Projeto (DVP) do e-commerce de livros, entregável da dis
   como cópia.
 - Visão de alto nível: o DVP resume e referencia o DRS e os DECs, sem transcrevê-los. Cite IDs (`RF-VEN-001`,
   `DEC-12`) quando útil.
+- O documento final é entregue em **.docx**: não há links nem caminhos para arquivos do repositório (`docs/...`,
+  `apps/...`, `AGENTS.md`, nomes de arquivo `.java`/`.tsx`/`.md`). Cite os documentos pelo nome e ID (ex.: "DRS v0.6,
+  grupo Vendas", "DEC-12 – Pedido, checkout e trocas"); a lista deles fica em 1.2 Referências. Nomes de classes,
+  pacotes e módulos podem aparecer como conceitos do sistema, sem caminho. Imagens só de `imagens/`.
 - Seja fiel ao sistema implementado e ao escopo do MVP (o que está fora do MVP aparece como fora do escopo).
 - Português, sem placeholders ("a definir", "pendente"); se faltar informação, pergunte ao usuário.
+
+## Diagramas
+
+- UML 2.5, desenhado à mão em XML no draw.io: um único `imagens/dvp.drawio`, uma página por diagrama, com o PNG
+  exportado ao lado (`imagens/<pagina>.png`). Rótulos em português; classes, pacotes e módulos com os nomes do código.
+- Por seção: componentes (7), casos de uso agrupados em casos-mãe, com os atores Visitante, Cliente, Administrador,
+  Tempo (agendador) e os sistemas externos simulados/IA (8), pacotes de um módulo exemplar (`vendas`), classes
+  principais, estados de `Pedido`/`Troca` e sequência de "Finalizar compra" (9), implantação (10).
+- Visão de Dados (12): reaproveita os PNGs gerados em `docs/modelo/` (`gerar_mer.py`), sem redesenhar o MER.
+- As camadas Apresentação/Negócio/Persistência do template são mapeadas para a arquitetura hexagonal, e o texto
+  diz isso explicitamente: `infraestrutura/web` + `apps/web` (apresentação), `dominio` + `aplicacao` (negócio),
+  `infraestrutura/persistencia` (persistência).
