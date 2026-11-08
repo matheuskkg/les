@@ -83,6 +83,20 @@ Não há nada em produção. Consequências:
   [`humanizar-texto`](.claude/skills/humanizar-texto/SKILL.md); ao delegar a escrita, repasse as regras dela no prompt.
 - Referencie o ID do requisito em testes e, quando útil, em comentários (`// RN-VEN-004`).
 
+## Testes E2E
+
+Os E2E existem **somente para a apresentação** ao professor, não como suíte de regressão.
+
+- Todo roteiro fica em `apps/web/e2e/apresentacao<Fluxo>.spec.ts`; `fixtures.ts` é o apoio compartilhado.
+- Há só um comando: `npm run e2e` roda todos os roteiros; `npm run e2e -- e2e/apresentacaoAnalise.spec.ts` roda um
+  fluxo específico.
+- Não crie um script `e2e:*` por fluxo no `package.json`.
+- Fora do CI, o Chrome abre visível e cada ação espera 500 ms (`ESPERA_ENTRE_ACOES_MS`); no CI roda headless e sem
+  atraso.
+- Contra o jar empacotado: `npm run e2e -- -c playwright.apresentacao.config.ts`.
+- O relatório é aberto com `npx playwright show-report`.
+- Antes de criar ou alterar um roteiro, siga a skill [`e2e-testes`](.claude/skills/e2e-testes/SKILL.md).
+
 ## Rastreabilidade
 
 Cada arquivo em `docs/requisitos/` tem uma **matriz de rastreabilidade**. Ao implementar (total ou parcialmente) um

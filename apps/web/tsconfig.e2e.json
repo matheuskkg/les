@@ -3,5 +3,5 @@
   "compilerOptions": {
     "types": []
   },
-  "include": ["playwright.config.ts", "e2e"]
+  "include": ["playwright.config.ts", "playwright.apresentacao.config.ts", "e2e"]
 }

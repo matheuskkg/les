@@ -46,3 +46,7 @@ cd apps/server && mvn test      # back-end
 cd apps/web && npm test         # front-end
 cd apps/web && npm run e2e      # E2E com Playwright (usa o Chrome instalado)
 ```
+
+Os E2E são roteiros de apresentação e abrem o Chrome automaticamente. Use `npm run e2e` para todos ou
+`npm run e2e -- e2e/apresentacaoAnalise.spec.ts` para um fluxo; os detalhes estão no
+[guia](docs/guias/como-executar-e-apresentar.md#5-testes).
