@@ -168,7 +168,7 @@ test('7. cliente não abre a análise, que é exclusiva do administrador (RF-ANA
   await expect(page.getByRole('img', { name: /Gráfico de linhas/ })).toHaveCount(0);
 });
 
-test('8. consulta da análise responde em até 1 segundo (RNF-GER-001, RNF0011)', async ({ page }) => {
+test('8. consulta da análise responde em até 1 segundo (RNF-GER-001)', async ({ page }) => {
   await abrirAnalise(page);
   await informarPeriodo(page, '2025-02', '2025-02');
   await escolherCategorias(page, ['Romance']);
