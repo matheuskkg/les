@@ -11,7 +11,7 @@ _Nenhum neste grupo._
 | ID | Nome | Descrição |
 |---|---|---|
 | RNF-GER-001 | Tempo de resposta para consultas | Toda consulta de usuário deve ter resposta em no máximo 1 segundo. |
-| RNF-GER-002 | ✅ | `apps/server/src/main/java/br/fatec/les/livraria/compartilhado/infraestrutura/auditoria/RevisaoJpa.java`, `apps/server/src/main/java/br/fatec/les/livraria/compartilhado/infraestrutura/auditoria/RevisaoListener.java` |
+| RNF-GER-002 | Log de transação | Para toda operação de escrita (inserção ou alteração) deve ser registrado data, hora, usuário responsável, além de manter os dados alterados. |
 
 ## Regras de negócio
 
