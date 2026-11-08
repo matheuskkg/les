@@ -16,6 +16,9 @@ E-commerce de livros desenvolvido para a disciplina de Laboratório de Engenhari
 
 ## Como executar
 
+O passo a passo completo, incluindo o pacote de apresentação para Windows com JRE e Node portáteis, está em
+[`docs/guias/como-executar-e-apresentar.md`](docs/guias/como-executar-e-apresentar.md).
+
 Back-end (H2 em memória, porta 8080):
 
 ```bash
