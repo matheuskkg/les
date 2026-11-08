@@ -98,7 +98,7 @@ Restrições de qualidade, tecnologia e ambiente do projeto:
 | Valores monetários | Tipo decimal exato (BigDecimal em value object Dinheiro, escala 2 e arredondamento HALF_UP apenas ao fim do cálculo; nunca o tipo double) (DEC-15.1). |
 | Tempo de resposta | Consultas de usuário em no máximo 1 segundo, com paginação e índices declarados (RNF-GER-001). |
 | Log de transação | Auditoria de dados alterados com Envers (entidades anotadas com @Audited), com revisão que inclui o usuário e a data/hora (RNF-GER-002). |
-| Navegador e plataforma | Aplicação web executada no Chrome; ambiente local de desenvolvimento (Linux, Java 21, Node/Vite, Docker Compose para o PostgreSQL). |
+| Navegador e plataforma | Aplicação web executada em navegador moderno (os testes E2E usam o Chrome, DEC-02); ambiente local de desenvolvimento (Linux, Java 21, Node/Vite, Docker Compose para o PostgreSQL). |
 
 #### 4.3.3. Regras de Negócio
 
@@ -124,7 +124,7 @@ TROCADO
 (RN-VEN-016). O pedido é gravado EM PROCESSAMENTO e a validação do pagamento e as notificações são processadas em
 seguida (DEC-13).
 
-O preço de venda resulta do maior custo entre as entradas multiplicado pela margem do grupo de precificação
+O preço de venda resulta do maior custo entre as entradas acrescido da margem do grupo de precificação, isto é, maior custo × (1 + margem)
 (RF-EST-002, RN-EST-002); a baixa acontece apenas nas compras aprovadas (RN-EST-006), o saldo disponível desconta
 as reservas (DEC-15.3) e os itens de troca reentram no estoque quando marcados como volta ao estoque (RF-EST-004).
 

@@ -1,0 +1,877 @@
+<mxfile host="drawio"><diagram id="componentes" name="componentes">
+    <mxGraphModel dx="1600" dy="1000" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1060" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c-actor" value="Visitante, Cliente ou Administrador" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="50" y="420" width="60" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="c-nav" value="«componente»&lt;br&gt;&lt;b&gt;Navegador web&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="210" y="330" width="280" height="380" as="geometry" />
+        </mxCell>
+        <mxCell id="c-app" value="«componente»&lt;br&gt;&lt;b&gt;Aplicação Web (Preact)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;vitrine, carrinho, checkout,&lt;br&gt;pedidos e trocas, conta, admin&lt;br&gt;e assistente de IA&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="460" width="220" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="c-server" value="«componente»&lt;br&gt;&lt;b&gt;Server Spring Boot (livraria-server.jar)&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontSize=13;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="640" y="140" width="600" height="710" as="geometry" />
+        </mxCell>
+        <mxCell id="c-acesso" value="&lt;b&gt;acesso&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;API de sessão: login, token JWT&lt;br&gt;em cookie e CSRF&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="670" y="250" width="260" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="c-clientes" value="&lt;b&gt;clientes&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;API de clientes, endereços&lt;br&gt;e cartões&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="966" y="250" width="260" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="c-catalogo" value="&lt;b&gt;catalogo&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;API de livros (vitrine, busca&lt;br&gt;e detalhe)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="670" y="390" width="260" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="c-recomendacao" value="&lt;b&gt;recomendacao&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;API de assistente (chat)&lt;br&gt;e recomendações&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="966" y="390" width="260" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="c-vendas" value="&lt;b&gt;vendas&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;API de carrinho, checkout,&lt;br&gt;pedidos, trocas e cupons&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="670" y="530" width="260" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="c-notificacoes" value="&lt;b&gt;notificacoes&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;API de notificações por SSE&lt;br&gt;para cliente e administrador&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="966" y="530" width="260" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="c-estoque" value="&lt;b&gt;estoque&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;saldo, reserva e baixa,&lt;br&gt;por portas públicas e casos de uso&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="670" y="670" width="260" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="c-analise" value="&lt;b&gt;analise&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;API de análise de vendas (gráfico)&lt;br&gt;e exportação em CSV&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="966" y="670" width="260" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="c-compartilhado" value="&lt;b&gt;compartilhado&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;infraestrutura transversal: seguranca, auditoria Envers, seed, tempo e web&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="670" y="800" width="556" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c-ia" value="&lt;b&gt;Provedores de IA generativa&lt;/b&gt;&lt;br&gt;Gemini, Groq, OpenRouter&lt;br&gt;e NVIDIA NIM (adapter fake&lt;br&gt;é o último da cadeia)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="240" width="280" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="c-operadora" value="&lt;b&gt;Operadora de cartão&lt;/b&gt;&lt;br&gt;simulada por adapter fake&lt;br&gt;com regras determinísticas" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="520" width="280" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="c-frete" value="&lt;b&gt;Serviço de frete&lt;/b&gt;&lt;br&gt;simulado por adapter fake&lt;br&gt;com regras determinísticas" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="660" width="280" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="c-banco" value="&lt;b&gt;Banco de dados&lt;/b&gt;&lt;br&gt;H2 em memória ou PostgreSQL" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+          <mxGeometry x="790" y="900" width="280" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="e-usu" style="html=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.42;entryDx=0;entryDy=0;endArrow=block;" edge="1" parent="1" source="c-actor" target="c-nav">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-api" value="API REST /api&lt;br&gt;cookie de sessão e CSRF" style="html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=1;exitY=0.62;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=block;fontSize=11;" edge="1" parent="1" source="c-nav" target="c-server">
+          <mxGeometry x="0.5" relative="1" as="geometry">
+            <mxPoint as="offset" y="-12" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-ia" value="AssistenteDeLivros (HTTPS)" style="html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=1;exitY=0.14;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=block;fontSize=11;" edge="1" parent="1" source="c-server" target="c-ia">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-op" value="OperadoraDeCartao" style="html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=1;exitY=0.57;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=block;fontSize=11;" edge="1" parent="1" source="c-server" target="c-operadora">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-frete" value="CalculadoraFrete" style="html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=1;exitY=0.74;exitDx=0;exitDy=0;entryX=0;entryY=0.6;entryDx=0;entryDy=0;endArrow=block;fontSize=11;" edge="1" parent="1" source="c-server" target="c-frete">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-banco" value="JPA/Hibernate com Envers (tabelas _aud)" style="html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=block;fontSize=11;" edge="1" parent="1" source="c-server" target="c-banco">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="modulo-hexagonal" name="modulo-hexagonal"><mxGraphModel dx="1400" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0"><root><mxCell id="0" /><mxCell id="1" parent="0" /><mxCell id="m-outro" value="«outro módulo»&lt;br&gt;&lt;b&gt;Outro módulo&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;só casos de uso e portas públicas&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1"><mxGeometry x="400" y="20" width="460" height="60" as="geometry" /></mxCell><mxCell id="ctr-web" value="&lt;b&gt;infraestrutura.web&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;adapter de entrada (de cada módulo)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="130" width="300" height="330" as="geometry" /></mxCell><mxCell id="ctr-app" value="&lt;b&gt;aplicacao&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;casos de uso e portas de saída&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1"><mxGeometry x="400" y="130" width="460" height="400" as="geometry" /></mxCell><mxCell id="ctr-dom" value="&lt;b&gt;dominio&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;" vertex="1" parent="1"><mxGeometry x="920" y="130" width="440" height="400" as="geometry" /></mxCell><mxCell id="ctr-pers" value="&lt;b&gt;infraestrutura.persistencia&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1"><mxGeometry x="400" y="600" width="220" height="260" as="geometry" /></mxCell><mxCell id="ctr-ext" value="&lt;b&gt;infraestrutura (adapters externos)&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1"><mxGeometry x="640" y="600" width="220" height="130" as="geometry" /></mxCell><mxCell id="ctrl" value="«adaptador de entrada»&lt;br&gt;&lt;b&gt;ControllerRest&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;@RestController, recebe a requisição HTTP&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-web"><mxGeometry x="20" y="50" width="260" height="110" as="geometry" /></mxCell><mxCell id="dto" value="&lt;b&gt;DTO e mapper&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;DTO de entrada e de saída,&lt;br&gt;mapper para o comando e a resposta&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-web"><mxGeometry x="20" y="190" width="260" height="100" as="geometry" /></mxCell><mxCell id="caso" value="«porta de entrada»&lt;br&gt;&lt;b&gt;CasoDeUso&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;executar(comando)&lt;br&gt;recebe regras e portas pelo construtor&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-app"><mxGeometry x="30" y="50" width="400" height="100" as="geometry" /></mxCell><mxCell id="regraApp" value="«regra de aplicação»&lt;br&gt;&lt;b&gt;RegraDeAplicacao&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;implementa Regra e consulta dados pelas portas&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-app"><mxGeometry x="30" y="190" width="400" height="80" as="geometry" /></mxCell><mxCell id="portaRep" value="«interface»&lt;br&gt;&lt;b&gt;PortaRepositorio&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-app"><mxGeometry x="30" y="290" width="190" height="80" as="geometry" /></mxCell><mxCell id="portaExt" value="«interface»&lt;br&gt;&lt;b&gt;PortaServicoExterno&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-app"><mxGeometry x="240" y="290" width="190" height="80" as="geometry" /></mxCell><mxCell id="modelo" value="&lt;b&gt;Modelo de domínio&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;entidades e agregados que protegem&lt;br&gt;os próprios invariantes&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-dom"><mxGeometry x="30" y="40" width="380" height="70" as="geometry" /></mxCell><mxCell id="vo" value="«value object»&lt;br&gt;&lt;b&gt;ValueObject&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-dom"><mxGeometry x="30" y="130" width="180" height="60" as="geometry" /></mxCell><mxCell id="calc" value="«cálculo»&lt;br&gt;&lt;b&gt;CalculoDeNegocio&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;um método público&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-dom"><mxGeometry x="230" y="130" width="180" height="60" as="geometry" /></mxCell><mxCell id="regra" value="«interface»&lt;br&gt;&lt;b&gt;Regra&amp;lt;T&amp;gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;validar(alvo, violacoes): acumula, não lança&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-dom"><mxGeometry x="30" y="220" width="380" height="60" as="geometry" /></mxCell><mxCell id="regraPura" value="«regra pura»&lt;br&gt;&lt;b&gt;RegraPura&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;não consulta dados&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-dom"><mxGeometry x="30" y="320" width="380" height="50" as="geometry" /></mxCell><mxCell id="adPers" value="«adaptador de saída»&lt;br&gt;&lt;b&gt;AdapterRepositorio&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;usa SpringDataRepositorio&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-pers"><mxGeometry x="20" y="40" width="180" height="60" as="geometry" /></mxCell><mxCell id="map" value="«mapper»&lt;br&gt;&lt;b&gt;MapperDeEntidade&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;domínio e entidade JPA&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-pers"><mxGeometry x="20" y="130" width="180" height="50" as="geometry" /></mxCell><mxCell id="ent" value="«entidade JPA»&lt;br&gt;&lt;b&gt;EntidadeJpa&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;*Jpa, com @Audited&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-pers"><mxGeometry x="20" y="200" width="180" height="50" as="geometry" /></mxCell><mxCell id="adExt" value="«adaptador de saída»&lt;br&gt;&lt;b&gt;AdapterServicoExterno&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;operadora e frete simulados,&lt;br&gt;provedores de IA&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;fontSize=12;" vertex="1" parent="ctr-ext"><mxGeometry x="20" y="40" width="180" height="60" as="geometry" /></mxCell><mxCell id="legenda" value="&lt;b&gt;Legenda&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Seta tracejada com seta aberta: dependência de uso (a origem usa o destino). Infraestrutura depende de aplicacao, aplicacao depende de dominio, e dominio não depende de nenhuma camada.&lt;br&gt;Seta tracejada com triângulo vazio: realização de interface (o adapter realiza a porta).&lt;br&gt;Seta contínua: chamada entre objetos.&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=10;" vertex="1" parent="1"><mxGeometry x="40" y="600" width="340" height="150" as="geometry" /></mxCell><mxCell id="e-chama" value="chama" style="html=1;endArrow=open;endSize=8;fontSize=10;" edge="1" source="m-outro" target="caso" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="e-executar" value="executar(comando)" style="html=1;endArrow=open;endSize=8;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="ctrl" target="caso" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="e-dep-web-app" style="html=1;dashed=1;endArrow=open;endSize=10;strokeWidth=1.5;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="440" as="sourcePoint" /><mxPoint x="400" y="440" as="targetPoint" /></mxGeometry></mxCell><mxCell id="e-dep-app-dom" style="html=1;dashed=1;endArrow=open;endSize=10;strokeWidth=1.5;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="860" y="440" as="sourcePoint" /><mxPoint x="920" y="440" as="targetPoint" /></mxGeometry></mxCell><mxCell id="e-real-rep" style="html=1;dashed=1;endArrow=block;endFill=0;strokeWidth=1.5;" edge="1" source="adPers" target="portaRep" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="e-real-ext" style="html=1;dashed=1;endArrow=block;endFill=0;strokeWidth=1.5;" edge="1" source="adExt" target="portaExt" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="e-real-regra" style="html=1;dashed=1;endArrow=block;endFill=0;strokeWidth=1.5;" edge="1" source="regraPura" target="regra" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="e-uso-map" style="html=1;endArrow=open;endSize=8;fontSize=10;" edge="1" source="adPers" target="map" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="e-uso-ent" style="html=1;endArrow=open;endSize=8;fontSize=10;" edge="1" source="map" target="ent" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell></root></mxGraphModel></diagram><diagram id="casos-de-uso" name="casos-de-uso">
+    <mxGraphModel dx="1400" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="fronteira" value="Livraria" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=center;fontSize=20;fontStyle=1;fillColor=none;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="320" y="30" width="780" height="850" as="geometry" />
+        </mxCell>
+
+        <mxCell id="aa1" value="Visitante" style="shape=umlActor;verticalLabelPosition=top;verticalAlign=bottom;html=1;outlineConnect=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="90" width="50" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="aa2" value="Cliente" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="225" width="50" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="aa3" value="Administrador" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="615" width="50" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="aa4" value="Tempo (agendador)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="765" width="50" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="se1" value="Provedor de IA generativa" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="165" width="50" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="se2" value="Serviço de frete (simulado)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1195" y="275" width="60" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="se3" value="Operadora de cartão (simulada)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1195" y="405" width="60" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="u1" value="Consultar livros" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="340" y="100" width="210" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u2" value="Gerenciar carrinho" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="340" y="300" width="210" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u3" value="Obter recomendação" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="340" y="175" width="210" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u4" value="Finalizar compra" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="620" y="235" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u5" value="Calcular frete" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="880" y="285" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u6" value="Aplicar cupons" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="880" y="350" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u7" value="Validar pagamento" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="880" y="415" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u8" value="Acompanhar pedido" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="340" y="510" width="210" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u9" value="Manter cadastro de cliente" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="340" y="370" width="210" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u10" value="Manter endereços e cartões" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="340" y="440" width="210" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u11" value="Consultar clientes" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="880" y="495" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u12" value="Solicitar troca" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="340" y="580" width="210" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u13" value="Gerenciar pedidos e trocas" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="880" y="590" width="190" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="u14" value="Expirar carrinho" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="620" y="775" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u15" value="Analisar vendas" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="880" y="780" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u16" value="Gerar cupom de troca" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="620" y="595" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="u17" value="Reentrar itens no estoque" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="885" y="690" width="180" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="as1" style="html=1;endArrow=none;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="aa1" target="u1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="as2" style="html=1;endArrow=none;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="aa2" target="u2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="as3" style="html=1;endArrow=none;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="aa2" target="u3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="as4" style="html=1;endArrow=none;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="aa2" target="u4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="as5" style="html=1;endArrow=none;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="aa2" target="u8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="as6" style="html=1;endArrow=none;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="aa2" target="u9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="as7" style="html=1;endArrow=none;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="aa2" target="u10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="as8" style="html=1;endArrow=none;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="aa2" target="u12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="as9" style="html=1;endArrow=none;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="aa4" target="u14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="as10" style="html=1;endArrow=none;strokeWidth=1.5;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="aa3" target="u11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="as11" style="html=1;endArrow=none;strokeWidth=1.5;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="aa3" target="u13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="as12" style="html=1;endArrow=none;strokeWidth=1.5;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="aa3" target="u15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="gen1" value="" style="html=1;endArrow=block;endFill=0;endSize=14;strokeWidth=1.5;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" edge="1" parent="1" source="aa2" target="aa1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="di1" value="«include»" style="html=1;dashed=1;endArrow=open;endFill=0;strokeWidth=1.5;fontSize=11;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="u4" target="u5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="di2" value="«include»" style="html=1;dashed=1;endArrow=open;endFill=0;strokeWidth=1.5;fontSize=11;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="u4" target="u6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="di3" value="«include»" style="html=1;dashed=1;endArrow=open;endFill=0;strokeWidth=1.5;fontSize=11;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="u4" target="u7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ci1" value="«include»" style="html=1;dashed=1;endArrow=open;endFill=0;strokeWidth=1.5;fontSize=11;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="u13" target="u16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ci2" value="«extend»" style="html=1;dashed=1;endArrow=open;endFill=0;strokeWidth=1.5;fontSize=11;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" edge="1" parent="1" source="u17" target="u13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ex1" style="html=1;endArrow=none;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="u5" target="se2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ex2" style="html=1;endArrow=none;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="u7" target="se3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ex3" style="html=1;endArrow=none;strokeWidth=1.5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="u3" target="se1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+<diagram id="camadas" name="camadas">
+    <mxGraphModel dx="1000" dy="700" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="760" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+<mxCell id="camadas-v1" value="&lt;b&gt;Apresentação&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;" vertex="1" parent="1"><mxGeometry x="40" y="40" width="700" height="170" as="geometry" /></mxCell>
+<mxCell id="camadas-v2" value="&lt;b&gt;Negócio&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1"><mxGeometry x="40" y="250" width="700" height="170" as="geometry" /></mxCell>
+<mxCell id="camadas-v3" value="&lt;b&gt;Persistência&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;" vertex="1" parent="1"><mxGeometry x="40" y="460" width="700" height="170" as="geometry" /></mxCell>
+<mxCell id="camadas-v4" value="&lt;b&gt;Aplicação web (front-end)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;SPA em Preact, TypeScript e Vite,&lt;br&gt;formulários nativos, tipos gerados do OpenAPI&lt;br&gt;Preact, Vite, CSS puro&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;" vertex="1" parent="1"><mxGeometry x="70" y="85" width="290" height="100" as="geometry" /></mxCell>
+<mxCell id="camadas-v5" value="&lt;b&gt;infraestrutura.web&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(de cada módulo)&lt;br&gt;controllers REST, DTOs e tratador de erros&lt;br&gt;Spring Web sobre Spring Boot, JSON&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;" vertex="1" parent="1"><mxGeometry x="410" y="85" width="310" height="100" as="geometry" /></mxCell>
+<mxCell id="camadas-v6" value="&lt;b&gt;dominio&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;modelos, regras puras,&lt;br&gt;value objects e cálculos&lt;br&gt;Java 21, sem JPA nem web;&lt;br&gt;Spring só para registrar regras&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;" vertex="1" parent="1"><mxGeometry x="70" y="290" width="250" height="100" as="geometry" /></mxCell>
+<mxCell id="camadas-v7" value="&lt;b&gt;aplicacao&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;casos de uso e portas de saída&lt;br&gt;Java 21, Spring para injeção,&lt;br&gt;transação e propriedades&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;" vertex="1" parent="1"><mxGeometry x="410" y="290" width="310" height="100" as="geometry" /></mxCell>
+<mxCell id="camadas-v8" value="&lt;b&gt;adapters de serviços externos&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;infraestrutura.operadora e&lt;br&gt;infraestrutura.frete (vendas, simulados);&lt;br&gt;infraestrutura.externo&lt;br&gt;(recomendacao, IA generativa)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;dashed=0;" vertex="1" parent="1"><mxGeometry x="780" y="280" width="200" height="120" as="geometry" /></mxCell>
+<mxCell id="camadas-v9" value="&lt;b&gt;infraestrutura.persistencia&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(de cada módulo) entidades JPA, repositórios Spring Data&lt;br&gt;e adapters que realizam as portas de aplicacao&lt;br&gt;Spring Data JPA, Hibernate e Hibernate Envers&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;" vertex="1" parent="1"><mxGeometry x="70" y="500" width="650" height="100" as="geometry" /></mxCell>
+<mxCell id="camadas-v10" value="&lt;b&gt;Banco de dados&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;H2 ou PostgreSQL, conforme o profile&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#ffffff;fontSize=12;" vertex="1" parent="1"><mxGeometry x="410" y="650" width="310" height="60" as="geometry" /></mxCell>
+<mxCell id="p1-dep1" value="" style="html=1;dashed=1;endArrow=open;endSize=10;strokeWidth=1.5;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="540" y="185" as="sourcePoint" /><mxPoint x="540" y="290" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="p1-dep2" value="" style="html=1;dashed=1;endArrow=open;endSize=10;strokeWidth=1.5;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="410" y="340" as="sourcePoint" /><mxPoint x="320" y="340" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="p1-dep3" value="" style="html=1;dashed=1;endArrow=open;endSize=10;strokeWidth=1.5;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="780" y="340" as="sourcePoint" /><mxPoint x="720" y="340" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="p1-dep4" value="" style="html=1;dashed=1;endArrow=open;endSize=10;strokeWidth=1.5;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="600" y="500" as="sourcePoint" /><mxPoint x="600" y="390" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="p1-jdbc" value="JDBC" style="html=1;endArrow=none;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="570" y="600" as="sourcePoint" /><mxPoint x="570" y="650" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="camadas-v11" value="&lt;font style=&quot;font-size:10px&quot;&gt;Seta tracejada: dependência de uso (a origem usa o destino). Infraestrutura depende de aplicacao, aplicacao depende de dominio, e dominio não depende de nenhuma camada.&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=top;whiteSpace=wrap;" vertex="1" parent="1"><mxGeometry x="40" y="650" width="340" height="60" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="pacotes-vendas" name="pacotes-vendas">
+    <mxGraphModel dx="1000" dy="700" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+<mxCell id="pacotes-vendas-v1" value="&lt;b&gt;vendas::infraestrutura&lt;/b&gt;" style="shape=folder;fontStyle=0;tabWidth=190;tabHeight=26;tabPosition=left;html=1;whiteSpace=wrap;verticalAlign=top;align=left;spacingLeft=8;spacingTop=0;fillColor=#ffffff;strokeColor=#666666;fontSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="60" width="260" height="300" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v2" value="web" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="60" y="105" width="220" height="34" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v3" value="persistencia" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="60" y="150" width="220" height="34" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v4" value="frete" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="60" y="195" width="220" height="34" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v5" value="operadora" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="60" y="240" width="220" height="34" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v6" value="agendamento" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="60" y="285" width="220" height="34" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v7" value="&lt;b&gt;vendas::aplicacao&lt;/b&gt;" style="shape=folder;fontStyle=0;tabWidth=190;tabHeight=26;tabPosition=left;html=1;whiteSpace=wrap;verticalAlign=top;align=left;spacingLeft=8;spacingTop=0;fillColor=#ffffff;strokeColor=#666666;fontSize=12;" vertex="1" parent="1"><mxGeometry x="360" y="60" width="260" height="300" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v8" value="casodeuso" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="380" y="105" width="220" height="40" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v9" value="consulta" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="380" y="160" width="220" height="40" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v10" value="porta" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="380" y="215" width="220" height="40" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v11" value="regra" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="380" y="270" width="220" height="40" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v12" value="&lt;b&gt;vendas::dominio&lt;/b&gt;" style="shape=folder;fontStyle=0;tabWidth=190;tabHeight=26;tabPosition=left;html=1;whiteSpace=wrap;verticalAlign=top;align=left;spacingLeft=8;spacingTop=0;fillColor=#ffffff;strokeColor=#666666;fontSize=12;" vertex="1" parent="1"><mxGeometry x="680" y="60" width="280" height="330" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v13" value="modelo" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="700" y="105" width="240" height="34" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v14" value="pedido" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="700" y="150" width="240" height="34" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v15" value="troca" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="700" y="195" width="240" height="34" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v16" value="pagamento" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="700" y="240" width="240" height="34" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v17" value="regra" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="700" y="285" width="240" height="34" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v18" value="frete" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="700" y="330" width="240" height="34" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v19" value="&lt;b&gt;compartilhado&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;dominio: Dinheiro e contrato Regra&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="680" y="470" width="280" height="70" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v20" value="&lt;b&gt;estoque&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;módulo&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1"><mxGeometry x="40" y="600" width="140" height="50" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v21" value="&lt;b&gt;clientes&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;módulo&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1"><mxGeometry x="200" y="600" width="140" height="50" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v22" value="&lt;b&gt;catalogo&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;módulo&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1"><mxGeometry x="360" y="600" width="140" height="50" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v23" value="&lt;b&gt;notificacoes&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;módulo&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1"><mxGeometry x="520" y="600" width="140" height="50" as="geometry" /></mxCell>
+<mxCell id="p2-a-inf" value="«import»" style="html=1;dashed=1;endArrow=open;endSize=10;strokeWidth=1.5;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="300" y="160" as="sourcePoint" /><mxPoint x="360" y="160" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="p2-a-dom" value="«import»" style="html=1;dashed=1;endArrow=open;endSize=10;strokeWidth=1.5;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="620" y="160" as="sourcePoint" /><mxPoint x="680" y="160" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="p2-inf-dom" value="«import»" style="html=1;dashed=1;endArrow=open;endSize=10;strokeWidth=1.5;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="170" y="60" as="sourcePoint" /><mxPoint x="820" y="60" as="targetPoint" /><Array as="points"><mxPoint x="170" y="30" /><mxPoint x="820" y="30" /></Array></mxGeometry></mxCell>
+<mxCell id="p2-dom-comp" value="«import»" style="html=1;dashed=1;endArrow=open;endSize=10;strokeWidth=1.5;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="390" as="sourcePoint" /><mxPoint x="820" y="470" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="p2-use-estoque" value="" style="html=1;dashed=1;endArrow=open;endSize=10;strokeWidth=1.5;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="490" y="360" as="sourcePoint" /><mxPoint x="110" y="600" as="targetPoint" /><Array as="points"><mxPoint x="490" y="450" /><mxPoint x="110" y="450" /></Array></mxGeometry></mxCell>
+<mxCell id="p2-use-clientes" value="" style="html=1;dashed=1;endArrow=open;endSize=10;strokeWidth=1.5;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="490" y="360" as="sourcePoint" /><mxPoint x="270" y="600" as="targetPoint" /><Array as="points"><mxPoint x="490" y="450" /><mxPoint x="270" y="450" /></Array></mxGeometry></mxCell>
+<mxCell id="p2-use-catalogo" value="" style="html=1;dashed=1;endArrow=open;endSize=10;strokeWidth=1.5;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="490" y="360" as="sourcePoint" /><mxPoint x="430" y="600" as="targetPoint" /><Array as="points"><mxPoint x="490" y="450" /><mxPoint x="430" y="450" /></Array></mxGeometry></mxCell>
+<mxCell id="p2-use-notificacoes" value="" style="html=1;dashed=1;endArrow=open;endSize=10;strokeWidth=1.5;fontSize=10;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="490" y="360" as="sourcePoint" /><mxPoint x="590" y="600" as="targetPoint" /><Array as="points"><mxPoint x="490" y="450" /><mxPoint x="590" y="450" /></Array></mxGeometry></mxCell>
+<mxCell id="pacotes-vendas-v24" value="«use»" style="text;html=1;align=left;fontSize=10;" vertex="1" parent="1"><mxGeometry x="500" y="422" width="90" height="20" as="geometry" /></mxCell>
+<mxCell id="pacotes-vendas-v25" value="&lt;font style=&quot;font-size:10px&quot;&gt;Setas tracejadas: dependências entre pacotes. «import» indica uso entre camadas e pacotes do próprio projeto; «use» indica o uso dos módulos estoque, clientes, catálogo e notificações.&lt;/font&gt;" style="text;html=1;align=left;fontSize=10;" vertex="1" parent="1"><mxGeometry x="40" y="665" width="900" height="24" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="classes-vendas" name="classes-vendas">
+    <mxGraphModel dx="1000" dy="700" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1040" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+<mxCell id="cls-Carrinho" value="&lt;b&gt;Carrinho&lt;/b&gt;&lt;hr&gt;- clienteId: Long&lt;br&gt;- expiraEm: LocalDateTime&lt;hr&gt;+ adicionar(livroId, quantidade)&lt;br&gt;+ remover(livroId)&lt;br&gt;+ expirar(agora)" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fontSize=12;spacingLeft=6;spacingTop=2;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="40" y="40" width="260" height="139" as="geometry" /></mxCell>
+<mxCell id="cls-ItemCarrinho" value="&lt;b&gt;ItemCarrinho&lt;/b&gt;&lt;hr&gt;- livroId: Long&lt;br&gt;- quantidade: int&lt;hr&gt;+ alterarQuantidade(quantidade)" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fontSize=12;spacingLeft=6;spacingTop=2;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="40" y="300" width="260" height="105" as="geometry" /></mxCell>
+<mxCell id="cls-Checkout" value="&lt;b&gt;Checkout&lt;/b&gt;&lt;hr&gt;- clienteId: Long&lt;br&gt;- situacao: SituacaoCheckout&lt;br&gt;- expiraEm: LocalDateTime&lt;hr&gt;+ concluir()&lt;br&gt;+ expirar()" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fontSize=12;spacingLeft=6;spacingTop=2;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="380" y="40" width="260" height="139" as="geometry" /></mxCell>
+<mxCell id="cls-Pedido" value="&lt;b&gt;Pedido&lt;/b&gt;&lt;hr&gt;- id: Long&lt;br&gt;- status: StatusPedido&lt;br&gt;- realizadoEm: LocalDateTime&lt;br&gt;- total: Dinheiro&lt;hr&gt;+ aprovar()&lt;br&gt;+ despachar()&lt;br&gt;+ confirmarEntrega(agora)" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fontSize=12;spacingLeft=6;spacingTop=2;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="380" y="300" width="260" height="173" as="geometry" /></mxCell>
+<mxCell id="cls-PagamentoCartao" value="&lt;b&gt;PagamentoCartao&lt;/b&gt;&lt;hr&gt;- cartao: CartaoNoPedido&lt;br&gt;- valor: Dinheiro" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fontSize=12;spacingLeft=6;spacingTop=2;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="380" y="580" width="260" height="78" as="geometry" /></mxCell>
+<mxCell id="cls-StatusPedido" value="«enumeration»&lt;br&gt;&lt;b&gt;StatusPedido&lt;/b&gt;&lt;hr&gt;EM PROCESSAMENTO&lt;br&gt;APROVADA&lt;br&gt;REPROVADA&lt;br&gt;EM TRANSPORTE&lt;br&gt;ENTREGUE" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fontSize=12;spacingLeft=6;spacingTop=2;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="720" y="40" width="260" height="145" as="geometry" /></mxCell>
+<mxCell id="cls-ItemPedido" value="&lt;b&gt;ItemPedido&lt;/b&gt;&lt;hr&gt;- livro: LivroNoPedido&lt;br&gt;- precoUnitario: Dinheiro&lt;br&gt;- quantidade: int&lt;hr&gt;+ subtotal(): Dinheiro" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fontSize=12;spacingLeft=6;spacingTop=2;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="720" y="300" width="260" height="122" as="geometry" /></mxCell>
+<mxCell id="cls-CupomPromocional" value="&lt;b&gt;CupomPromocional&lt;/b&gt;&lt;hr&gt;- codigo: String&lt;br&gt;- tipo: TipoCupomPromocional&lt;br&gt;- valor: BigDecimal&lt;br&gt;- validade: LocalDate&lt;hr&gt;+ desconto(subtotal, frete): Dinheiro" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fontSize=12;spacingLeft=6;spacingTop=2;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="720" y="580" width="260" height="139" as="geometry" /></mxCell>
+<mxCell id="cls-Troca" value="&lt;b&gt;Troca&lt;/b&gt;&lt;hr&gt;- id: Long&lt;br&gt;- status: StatusTroca&lt;br&gt;- solicitadaEm: LocalDateTime&lt;br&gt;- valorCupom: Dinheiro&lt;hr&gt;+ autorizar()&lt;br&gt;+ recusar(motivo)&lt;br&gt;+ confirmarRecebimento(voltaEstoque, valor, cupomGerado)" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fontSize=12;spacingLeft=6;spacingTop=2;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="40" y="580" width="260" height="173" as="geometry" /></mxCell>
+<mxCell id="cls-StatusTroca" value="«enumeration»&lt;br&gt;&lt;b&gt;StatusTroca&lt;/b&gt;&lt;hr&gt;EM TROCA&lt;br&gt;TROCA AUTORIZADA&lt;br&gt;TROCA RECUSADA&lt;br&gt;TROCADO" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fontSize=12;spacingLeft=6;spacingTop=2;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="40" y="880" width="260" height="128" as="geometry" /></mxCell>
+<mxCell id="cls-CupomTroca" value="&lt;b&gt;CupomTroca&lt;/b&gt;&lt;hr&gt;- codigo: String&lt;br&gt;- valor: Dinheiro&lt;br&gt;- validade: LocalDate&lt;hr&gt;+ disponivelEm(hoje): boolean" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fontSize=12;spacingLeft=6;spacingTop=2;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1"><mxGeometry x="380" y="880" width="260" height="122" as="geometry" /></mxCell>
+<mxCell id="p3-comp-carrinho" value="" style="endArrow=diamondThin;endFill=1;endSize=14;html=1;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cls-ItemCarrinho" target="cls-Carrinho"><mxGeometry relative="1" as="geometry"><mxPoint x="170" y="300" as="sourcePoint" /><mxPoint x="170" y="179" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="classes-vendas-r1" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;labelBackgroundColor=#ffffff;" vertex="1" connectable="0" parent="p3-comp-carrinho"><mxGeometry x="-0.82" y="0" relative="1" as="geometry"><mxPoint x="14" y="-12" as="offset" /></mxGeometry></mxCell>
+<mxCell id="classes-vendas-r2" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;labelBackgroundColor=#ffffff;" vertex="1" connectable="0" parent="p3-comp-carrinho"><mxGeometry x="0.82" y="0" relative="1" as="geometry"><mxPoint x="14" y="-12" as="offset" /></mxGeometry></mxCell>
+<mxCell id="p3-comp-pedido-item" value="" style="endArrow=diamondThin;endFill=1;endSize=14;html=1;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cls-ItemPedido" target="cls-Pedido"><mxGeometry relative="1" as="geometry"><mxPoint x="720" y="380" as="sourcePoint" /><mxPoint x="640" y="380" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="classes-vendas-r3" value="1..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;labelBackgroundColor=#ffffff;" vertex="1" connectable="0" parent="p3-comp-pedido-item"><mxGeometry x="-0.5" y="0" relative="1" as="geometry"><mxPoint x="0" y="-12" as="offset" /></mxGeometry></mxCell>
+<mxCell id="classes-vendas-r4" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;labelBackgroundColor=#ffffff;" vertex="1" connectable="0" parent="p3-comp-pedido-item"><mxGeometry x="0.5" y="0" relative="1" as="geometry"><mxPoint x="0" y="-12" as="offset" /></mxGeometry></mxCell>
+<mxCell id="p3-comp-pedido-pag" value="" style="endArrow=diamondThin;endFill=1;endSize=14;html=1;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cls-PagamentoCartao" target="cls-Pedido"><mxGeometry relative="1" as="geometry"><mxPoint x="510" y="580" as="sourcePoint" /><mxPoint x="510" y="473" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="classes-vendas-r5" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;labelBackgroundColor=#ffffff;" vertex="1" connectable="0" parent="p3-comp-pedido-pag"><mxGeometry x="-0.82" y="0" relative="1" as="geometry"><mxPoint x="14" y="-12" as="offset" /></mxGeometry></mxCell>
+<mxCell id="classes-vendas-r6" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;labelBackgroundColor=#ffffff;" vertex="1" connectable="0" parent="p3-comp-pedido-pag"><mxGeometry x="0.82" y="0" relative="1" as="geometry"><mxPoint x="14" y="-12" as="offset" /></mxGeometry></mxCell>
+<mxCell id="p3-checkout-pedido" value="" style="endArrow=none;html=1;fontSize=11;endSize=8;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cls-Checkout" target="cls-Pedido"><mxGeometry relative="1" as="geometry"><mxPoint x="510" y="179" as="sourcePoint" /><mxPoint x="510" y="300" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="classes-vendas-r7" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;labelBackgroundColor=#ffffff;" vertex="1" connectable="0" parent="p3-checkout-pedido"><mxGeometry x="-0.82" y="0" relative="1" as="geometry"><mxPoint x="14" y="-12" as="offset" /></mxGeometry></mxCell>
+<mxCell id="classes-vendas-r8" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;labelBackgroundColor=#ffffff;" vertex="1" connectable="0" parent="p3-checkout-pedido"><mxGeometry x="0.82" y="0" relative="1" as="geometry"><mxPoint x="14" y="-12" as="offset" /></mxGeometry></mxCell>
+<mxCell id="p3-troca-pedido" value="" style="endArrow=none;html=1;fontSize=11;endSize=8;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cls-Troca" target="cls-Pedido"><mxGeometry relative="1" as="geometry"><mxPoint x="300" y="600" as="sourcePoint" /><mxPoint x="380" y="400" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="classes-vendas-r9" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;labelBackgroundColor=#ffffff;" vertex="1" connectable="0" parent="p3-troca-pedido"><mxGeometry x="-0.82" y="0" relative="1" as="geometry"><mxPoint x="14" y="-12" as="offset" /></mxGeometry></mxCell>
+<mxCell id="classes-vendas-r10" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;labelBackgroundColor=#ffffff;" vertex="1" connectable="0" parent="p3-troca-pedido"><mxGeometry x="0.82" y="0" relative="1" as="geometry"><mxPoint x="14" y="-12" as="offset" /></mxGeometry></mxCell>
+<mxCell id="p3-troca-cupom" value="gera" style="endArrow=none;html=1;fontSize=11;endSize=8;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cls-Troca" target="cls-CupomTroca"><mxGeometry relative="1" as="geometry"><mxPoint x="300" y="700" as="sourcePoint" /><mxPoint x="380" y="900" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="classes-vendas-r11" value="0..1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;labelBackgroundColor=#ffffff;" vertex="1" connectable="0" parent="p3-troca-cupom"><mxGeometry x="-0.82" y="0" relative="1" as="geometry"><mxPoint x="14" y="-12" as="offset" /></mxGeometry></mxCell>
+<mxCell id="classes-vendas-r12" value="0..1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;labelBackgroundColor=#ffffff;" vertex="1" connectable="0" parent="p3-troca-cupom"><mxGeometry x="0.82" y="0" relative="1" as="geometry"><mxPoint x="14" y="-12" as="offset" /></mxGeometry></mxCell>
+<mxCell id="p3-pedido-cupom" value="usa" style="endArrow=none;html=1;fontSize=11;endSize=8;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cls-Pedido" target="cls-CupomPromocional"><mxGeometry relative="1" as="geometry"><mxPoint x="640" y="440" as="sourcePoint" /><mxPoint x="720" y="580" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="classes-vendas-r13" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;labelBackgroundColor=#ffffff;" vertex="1" connectable="0" parent="p3-pedido-cupom"><mxGeometry x="-0.82" y="0" relative="1" as="geometry"><mxPoint x="14" y="-12" as="offset" /></mxGeometry></mxCell>
+<mxCell id="classes-vendas-r14" value="0..1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;labelBackgroundColor=#ffffff;" vertex="1" connectable="0" parent="p3-pedido-cupom"><mxGeometry x="0.82" y="0" relative="1" as="geometry"><mxPoint x="14" y="-12" as="offset" /></mxGeometry></mxCell>
+<mxCell id="p3-pedido-status" value="status" style="endArrow=none;html=1;fontSize=11;endSize=8;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cls-Pedido" target="cls-StatusPedido"><mxGeometry relative="1" as="geometry"><mxPoint x="640" y="300" as="sourcePoint" /><mxPoint x="720" y="185" as="targetPoint" /></mxGeometry></mxCell>
+<mxCell id="p3-troca-status" value="status" style="endArrow=none;html=1;fontSize=11;endSize=8;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="cls-Troca" target="cls-StatusTroca"><mxGeometry relative="1" as="geometry"><mxPoint x="170" y="753" as="sourcePoint" /><mxPoint x="170" y="880" as="targetPoint" /></mxGeometry></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+<diagram id="estados-pedido" name="estados-pedido">
+    <mxGraphModel dx="1600" dy="1000" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="980" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ep-ini" value="" style="ellipse;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="70" y="196" width="28" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-emp" value="EM PROCESSAMENTO" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;verticalAlign=top;fontSize=12;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="200" y="180" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-apr" value="APROVADA" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;verticalAlign=top;fontSize=12;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="600" y="180" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-tpt" value="EM TRANSPORTE" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;verticalAlign=top;fontSize=12;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="970" y="180" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-ent" value="ENTREGUE" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;verticalAlign=top;fontSize=12;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="180" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-rep" value="REPROVADA" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;verticalAlign=top;fontSize=12;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="700" y="500" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-fim1a" value="" style="ellipse;html=1;fillColor=none;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="1565" y="196" width="28" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-fim1b" value="" style="ellipse;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="1573" y="204" width="12" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-fim2a" value="" style="ellipse;html=1;fillColor=none;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="940" y="516" width="28" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-fim2b" value="" style="ellipse;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="948" y="524" width="12" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-t0" value="finalizar compra&#10;(cliente):&#10;RegistrarPedido" style="html=1;endArrow=block;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep-ini" target="ep-emp">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="-30" y="-55" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="ep-t1" value="operadora aprova&#10;todos os cartões&#10;(AprovarPedido)" style="html=1;endArrow=block;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep-emp" target="ep-apr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-t2" value="despachar&#10;(Administrador)" style="html=1;endArrow=block;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep-apr" target="ep-tpt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-t3" value="confirmar entrega&#10;(Administrador)" style="html=1;endArrow=block;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep-tpt" target="ep-ent">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-t4" value="" style="html=1;endArrow=block;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep-ent" target="ep-fim1a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-t5" value="operadora recusa&#10;algum cartão:&#10;ReprovarPedido" style="html=1;endArrow=block;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;exitX=0.2;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep-emp" target="ep-rep">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="246" y="530" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="ep-t6" value="vence o prazo do checkout:&#10;ExpirarReservas,&#10;agendador (Tempo)" style="html=1;endArrow=block;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;exitX=0.95;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep-emp" target="ep-rep">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="418" y="470" /><mxPoint x="790" y="470" /></Array><mxPoint x="0" y="-35" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="ep-t7" value="" style="html=1;endArrow=block;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep-rep" target="ep-fim2a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-n-emp" value="entrada: criação com cópias dos itens, do cliente, dos endereços, dos cartões e dos cupons; cupons consumidos" style="text;html=1;whiteSpace=wrap;verticalAlign=middle;align=left;rounded=1;arcSize=40;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;spacingLeft=8;spacingRight=8;" vertex="1" parent="1">
+          <mxGeometry x="20" y="300" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-n-apr" value="entrada: baixa do estoque consumindo as reservas, cupom de troco, checkout concluído; notificações ao cliente e aos administradores, entregues depois do commit" style="text;html=1;whiteSpace=wrap;verticalAlign=middle;align=left;rounded=1;arcSize=40;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;spacingLeft=8;spacingRight=8;" vertex="1" parent="1">
+          <mxGeometry x="500" y="300" width="370" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-n-ent" value="entrada: grava a data da entrega e abre o prazo de troca; notificação ao cliente" style="text;html=1;whiteSpace=wrap;verticalAlign=middle;align=left;rounded=1;arcSize=40;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;spacingLeft=8;spacingRight=8;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="300" width="290" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-n-rep" value="entrada: cupons devolvidos, uso do promocional removido; notificação ao cliente com o motivo; o checkout continua aberto para nova tentativa" style="text;html=1;whiteSpace=wrap;verticalAlign=middle;align=left;rounded=1;arcSize=40;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;spacingLeft=8;spacingRight=8;" vertex="1" parent="1">
+          <mxGeometry x="500" y="610" width="370" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-l1" value="entrada" style="html=1;endArrow=none;dashed=1;rounded=0;fontSize=10;fontColor=#666666;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.15;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep-n-emp" target="ep-emp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-l2" value="entrada" style="html=1;endArrow=none;dashed=1;rounded=0;fontSize=10;fontColor=#666666;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep-n-apr" target="ep-apr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-l3" value="entrada" style="html=1;endArrow=none;dashed=1;rounded=0;fontSize=10;fontColor=#666666;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep-n-ent" target="ep-ent">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ep-l4" value="entrada" style="html=1;endArrow=none;dashed=1;rounded=0;fontSize=10;fontColor=#666666;exitX=0.7;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep-n-rep" target="ep-rep">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="40" y="0" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="ep-lg" value="Toda transição fora da máquina é recusada pela entidade Pedido: resposta 409 (DEC-12)." style="text;html=1;whiteSpace=wrap;verticalAlign=middle;align=left;fontSize=11;fontStyle=2" vertex="1" parent="1">
+          <mxGeometry x="120" y="720" width="760" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="estados-troca" name="estados-troca">
+    <mxGraphModel dx="1600" dy="1000" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="980" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="et-ini" value="" style="ellipse;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="90" y="196" width="28" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="et-etro" value="EM TROCA" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;verticalAlign=top;fontSize=12;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="250" y="180" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="et-aut" value="TROCA AUTORIZADA" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;verticalAlign=top;fontSize=12;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="650" y="180" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="et-tro" value="TROCADO" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;verticalAlign=top;fontSize=12;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="180" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="et-rec" value="TROCA RECUSADA" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;verticalAlign=top;fontSize=12;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="620" y="470" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="et-fim1a" value="" style="ellipse;html=1;fillColor=none;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="196" width="28" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="et-fim1b" value="" style="ellipse;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="1298" y="204" width="12" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="et-fim2a" value="" style="ellipse;html=1;fillColor=none;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="930" y="486" width="28" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="et-fim2b" value="" style="ellipse;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="938" y="494" width="12" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="et-t0" value="solicitar (cliente):&#10;SolicitarTroca" style="html=1;endArrow=block;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="et-ini" target="et-etro">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="0" y="-40" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="et-t1" value="autorizar (Administrador)" style="html=1;endArrow=block;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="et-etro" target="et-aut">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="et-t2" value="confirmar recebimento&#10;(Administrador)" style="html=1;endArrow=block;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="et-aut" target="et-tro">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="et-t3" value="" style="html=1;endArrow=block;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="et-tro" target="et-fim1a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="et-t4" value="recusar com motivo&#10;(Administrador)" style="html=1;endArrow=block;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;exitX=0.85;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="et-etro" target="et-rec">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="75" y="-10" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="et-t5" value="" style="html=1;endArrow=block;edgeStyle=orthogonalEdgeStyle;rounded=0;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="et-rec" target="et-fim2a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="et-n-etro" value="entrada: só de pedido ENTREGUE, dentro do prazo (DentroDoPrazoDeTroca) e com a quantidade disponível (QuantidadeDisponivelParaTroca); notifica os administradores (TROCA_SOLICITADA)" style="text;html=1;whiteSpace=wrap;verticalAlign=middle;align=left;rounded=1;arcSize=40;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;spacingLeft=8;spacingRight=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="300" width="300" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="et-n-rec" value="entrada: motivo obrigatório (MotivoDaRecusaInformado, MotivoDaRecusaNoLimite), que vai na notificação ao cliente (DEC-12)" style="text;html=1;whiteSpace=wrap;verticalAlign=middle;align=left;rounded=1;arcSize=40;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;spacingLeft=8;spacingRight=8;" vertex="1" parent="1">
+          <mxGeometry x="600" y="570" width="370" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="et-n-tro" value="entrada: decide item por item a reentrada no estoque (RF-EST-004), gera o cupom de troca no valor dos itens, inclusive para os itens que não voltam (RF-VEN-014, RF-VEN-015), e notifica a conclusão" style="text;html=1;whiteSpace=wrap;verticalAlign=middle;align=left;rounded=1;arcSize=40;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;spacingLeft=8;spacingRight=8;" vertex="1" parent="1">
+          <mxGeometry x="950" y="300" width="380" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="et-l1" value="entrada" style="html=1;endArrow=none;dashed=1;rounded=0;fontSize=10;fontColor=#666666;exitX=0.8;exitY=0;exitDx=0;exitDy=0;entryX=0.2;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="et-n-etro" target="et-etro">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="et-l2" value="entrada" style="html=1;endArrow=none;dashed=1;rounded=0;fontSize=10;fontColor=#666666;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="et-n-tro" target="et-tro">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="et-l3" value="entrada" style="html=1;endArrow=none;dashed=1;rounded=0;fontSize=10;fontColor=#666666;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="et-n-rec" target="et-rec">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="et-lg" value="Toda transição fora da máquina é recusada pela entidade Troca: resposta 409 (DEC-12)." style="text;html=1;whiteSpace=wrap;verticalAlign=middle;align=left;fontSize=11;fontStyle=2" vertex="1" parent="1">
+          <mxGeometry x="110" y="720" width="700" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="sequencia-finalizar-compra" name="sequencia-finalizar-compra">
+    <mxGraphModel dx="2600" dy="1400" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2740" pageHeight="1860" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="sq-a" value="Cliente" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="45" y="30" width="60" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-la" value="" style="html=1;endArrow=none;dashed=1;rounded=0;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="75" y="116" as="sourcePoint" />
+            <mxPoint x="75" y="1790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-b" value="&lt;b&gt;Aplicação web (Preact)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;tela de checkout&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="160" y="40" width="220" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-lb" value="" style="html=1;endArrow=none;dashed=1;rounded=0;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="270" y="110" as="sourcePoint" />
+            <mxPoint x="270" y="1790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-c" value="&lt;b&gt;CheckoutController&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;vendas, infraestrutura.web&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="430" y="40" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-lc" value="" style="html=1;endArrow=none;dashed=1;rounded=0;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="520" y="110" as="sourcePoint" />
+            <mxPoint x="520" y="1790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-d" value="&lt;b&gt;FinalizarCompra&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;vendas, aplicacao&lt;br&gt;(não transacional)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="700" y="40" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-ld" value="" style="html=1;endArrow=none;dashed=1;rounded=0;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="780" y="110" as="sourcePoint" />
+            <mxPoint x="780" y="1790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-e" value="&lt;b&gt;RegistrarPedido,&lt;br&gt;AprovarPedido&lt;br&gt;ou ReprovarPedido&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;vendas, aplicacao&lt;br&gt;(casos de uso transacionais)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="900" y="30" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-le" value="" style="html=1;endArrow=none;dashed=1;rounded=0;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1050" y="110" as="sourcePoint" />
+            <mxPoint x="1050" y="1790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-f" value="&lt;b&gt;Regras e conferências&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;CodigosDeSeguranca, ItensAindaReservados,&lt;br&gt;CopiarItensDoCheckout, CopiarClienteDoPedido,&lt;br&gt;CalculadoraFrete, ConferirCupons, ConferirCartoes&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="30" width="280" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-lf" value="" style="html=1;endArrow=none;dashed=1;rounded=0;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1370" y="110" as="sourcePoint" />
+            <mxPoint x="1370" y="1790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-g" value="&lt;b&gt;estoque&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;ConsultarReservasAtivas,&lt;br&gt;BaixarEstoque&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="40" width="220" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-lg" value="" style="html=1;endArrow=none;dashed=1;rounded=0;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1650" y="110" as="sourcePoint" />
+            <mxPoint x="1650" y="1790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-h" value="&lt;b&gt;Repositórios&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;CheckoutRepositorio, PedidoRepositorio&lt;br&gt;e CuponsPromocionais, CuponsDeTroca&lt;br&gt;(infraestrutura.persistencia)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1800" y="30" width="260" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-lh" value="" style="html=1;endArrow=none;dashed=1;rounded=0;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1930" y="110" as="sourcePoint" />
+            <mxPoint x="1930" y="1790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-i" value="&lt;b&gt;OperadoraDeCartao&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;porta;&lt;br&gt;adapter OperadoraDeCartaoSimulada&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="2100" y="40" width="240" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-li" value="" style="html=1;endArrow=none;dashed=1;rounded=0;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2220" y="110" as="sourcePoint" />
+            <mxPoint x="2220" y="1790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-j" value="&lt;b&gt;notificacoes&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Notificar, NotificarAdministradores;&lt;br&gt;entrega por SSE depois do commit (CanaisSse)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="2380" y="40" width="280" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-lj" value="" style="html=1;endArrow=none;dashed=1;rounded=0;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2520" y="110" as="sourcePoint" />
+            <mxPoint x="2520" y="1790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-ac1" value="" style="rounded=0;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="514" y="240" width="12" height="1230" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-ad1" value="" style="rounded=0;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="774" y="300" width="12" height="1160" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-ae1" value="" style="rounded=0;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="1044" y="395" width="12" height="340" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-ae2" value="" style="rounded=0;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="1044" y="995" width="12" height="410" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-ai1" value="" style="rounded=0;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="2214" y="805" width="12" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-aj1" value="" style="rounded=0;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="2514" y="1195" width="12" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-aj2" value="" style="rounded=0;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="2514" y="1385" width="12" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-t1" value="Finalizar compra" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="75" y="180" as="sourcePoint" />
+            <mxPoint x="270" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t2" value="POST /api/me/checkout/finalizar" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="270" y="245" as="sourcePoint" />
+            <mxPoint x="514" y="245" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t3" value="delega ao caso de uso" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="526" y="300" as="sourcePoint" />
+            <mxPoint x="774" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-box1" value="&lt;b&gt;Transação 1, RegistrarPedido&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;commit no fim, com o pedido EM PROCESSAMENTO;&lt;br&gt;a auditoria registra a criação (RNF-GER-002)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=130;fillColor=none;strokeColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="760" y="340" width="1840" height="380" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-t4" value="RegistrarPedido.&#10;executar()" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="30" y="14" as="offset" />
+            <mxPoint x="786" y="400" as="sourcePoint" />
+            <mxPoint x="1044" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t5" value="buscarAbertoPorClienteParaAlterar: checkout aberto com lock" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="435" as="sourcePoint" />
+            <mxPoint x="1930" y="435" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t6" value="checkout encontrado" style="html=1;endArrow=open;dashed=1;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1930" y="470" as="sourcePoint" />
+            <mxPoint x="1056" y="470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t7" value="verifica se há pedido EM PROCESSAMENTO do checkout (409 se houver)" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="505" as="sourcePoint" />
+            <mxPoint x="1930" y="505" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t8" value="ConsultarReservasAtivas (origem CHECKOUT)" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="540" as="sourcePoint" />
+            <mxPoint x="1650" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t9" value="CodigosDeSeguranca e&#10;ItensAindaReservados&#10;(RN-CLI-004, RN-VEN-002)" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="575" as="sourcePoint" />
+            <mxPoint x="1370" y="575" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t10" value="frete, cupons e cartões conferidos;&#10;cópias do item e do cliente" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="610" as="sourcePoint" />
+            <mxPoint x="1370" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t11" value="salva o pedido EM PROCESSAMENTO com as cópias e consome os cupons" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="650" as="sourcePoint" />
+            <mxPoint x="1930" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t12" value="pedido registrado" style="html=1;endArrow=open;dashed=1;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1930" y="690" as="sourcePoint" />
+            <mxPoint x="1056" y="690" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-loop" value="&lt;b&gt;loop&lt;/b&gt;&amp;nbsp;[para cada cartão da compra, fora de transação]" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fillColor=none;strokeColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="740" y="760" width="1620" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-t13" value="operadora.cobrar(cobranca, data)" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="786" y="810" as="sourcePoint" />
+            <mxPoint x="2226" y="810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t14" value="RespostaDaOperadora: aprovada ou motivo da recusa" style="html=1;endArrow=open;dashed=1;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2214" y="855" as="sourcePoint" />
+            <mxPoint x="786" y="855" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-alt" value="&lt;b&gt;alt&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fillColor=none;strokeColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="740" y="940" width="1860" height="560" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-guard1" value="[todos os cartões aprovados]" style="text;html=1;verticalAlign=middle;align=left;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="900" y="945" width="500" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-t15" value="AprovarPedido.executar (transação 2)" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="786" y="1000" as="sourcePoint" />
+            <mxPoint x="1044" y="1000" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t16" value="trava o checkout e o pedido (lock pessimista)" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="1035" as="sourcePoint" />
+            <mxPoint x="1930" y="1035" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t17" value="Pedido.aprovar(): status APROVADA" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="1062" as="sourcePoint" />
+            <mxPoint x="1056" y="1088" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1180" y="1062" />
+              <mxPoint x="1180" y="1088" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t18" value="salva APROVADA" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="1112" as="sourcePoint" />
+            <mxPoint x="1930" y="1112" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t19" value="BaixarEstoque consumindo as reservas (RF-EST-003)" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="1142" as="sourcePoint" />
+            <mxPoint x="1650" y="1142" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t20" value="gera o cupom de troco e conclui o checkout" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="1172" as="sourcePoint" />
+            <mxPoint x="1930" y="1172" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t21" value="Notificar (PEDIDO_APROVADO)&#10;e NotificarAdministradores (PEDIDO_AGUARDANDO_DESPACHO)" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="1208" as="sourcePoint" />
+            <mxPoint x="2514" y="1208" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-div" value="" style="html=1;endArrow=none;dashed=1;rounded=0;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="740" y="1248" as="sourcePoint" />
+            <mxPoint x="2600" y="1248" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-guard2" value="[algum cartão recusado]" style="text;html=1;verticalAlign=middle;align=left;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="900" y="1252" width="500" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-t22" value="ReprovarPedido.executar (transação 2)" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="786" y="1295" as="sourcePoint" />
+            <mxPoint x="1044" y="1295" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t23" value="Pedido.reprovar(): status REPROVADA" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="1322" as="sourcePoint" />
+            <mxPoint x="1056" y="1348" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1180" y="1322" />
+              <mxPoint x="1180" y="1348" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t24" value="salva REPROVADA, devolve os cupons e mantém o checkout aberto" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="1375" as="sourcePoint" />
+            <mxPoint x="1930" y="1375" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t25" value="Notificar (PEDIDO_REPROVADO, com o motivo)" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1056" y="1405" as="sourcePoint" />
+            <mxPoint x="2514" y="1405" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t26" value="CompraFinalizada&#10;(pedido e motivo das recusas)" style="html=1;endArrow=open;dashed=1;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="774" y="1435" as="sourcePoint" />
+            <mxPoint x="526" y="1435" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t27" value="201 Created:&#10;CompraFinalizadaDto&#10;(APROVADA ou REPROVADA)" style="html=1;endArrow=open;dashed=1;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="514" y="1465" as="sourcePoint" />
+            <mxPoint x="270" y="1465" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-t28" value="mostra o resultado ao cliente" style="html=1;endArrow=block;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="270" y="1500" as="sourcePoint" />
+            <mxPoint x="75" y="1500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sq-opt" value="&lt;b&gt;opt&lt;/b&gt;&amp;nbsp;[a transação 2 falha por erro técnico]" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingLeft=10;fillColor=none;strokeColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="740" y="1545" width="1860" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-tnote" value="a requisição responde 500 e o pedido permanece EM PROCESSAMENTO; no vencimento do checkout, o agendador (Tempo) dispara ExpirarReservas, e ExpirarCheckout chama ReprovarPedido (transação nova): REPROVADA, cupons devolvidos e cliente notificado" style="text;html=1;whiteSpace=wrap;verticalAlign=middle;align=left;rounded=1;arcSize=40;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;spacingLeft=8;spacingRight=8;" vertex="1" parent="1">
+          <mxGeometry x="790" y="1583" width="1760" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="sq-t29" value="SSE: evento notificacao depois do commit (CanaisSse)" style="html=1;endArrow=open;dashed=1;rounded=0;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2514" y="1720" as="sourcePoint" />
+            <mxPoint x="270" y="1720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+<diagram id="implantacao" name="implantacao">
+    <mxGraphModel dx="1500" dy="950" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1520" pageHeight="920" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="d-computador" value="«dispositivo»&lt;br&gt;&lt;b&gt;Computador local&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="80" y="330" width="360" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="d-chrome" value="&lt;b&gt;Navegador web&lt;/b&gt;&lt;br&gt;Chrome, Firefox, Edge...&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Visitante, Cliente ou Administrador&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="115" y="410" width="290" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="d-servidor" value="«dispositivo»&lt;br&gt;&lt;b&gt;Servidor local&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="620" y="180" width="470" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="d-jvm" value="«ambiente de execução»&lt;br&gt;&lt;b&gt;JVM Java 21&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="650" y="260" width="410" height="390" as="geometry" />
+        </mxCell>
+        <mxCell id="d-jar" value="«artefato»&lt;br&gt;&lt;b&gt;livraria-server.jar&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;incorpora a aplicação web (build estático)&lt;br&gt;e os módulos do back-end,&lt;br&gt;atendidos na porta 8080&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="690" y="340" width="330" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="d-h2" value="&lt;b&gt;Banco H2 em memória&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;profile h2 (padrão)&lt;br&gt;schema do ORM e dados pelo seed&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+          <mxGeometry x="690" y="525" width="330" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="d-postgres" value="&lt;b&gt;Contêiner Docker (Docker Compose)&lt;/b&gt;&lt;br&gt;PostgreSQL, porta 5432&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;profile postgres, com volume persistente&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="730" width="470" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="d-ia" value="&lt;b&gt;Provedores de IA generativa&lt;/b&gt;&lt;br&gt;Gemini, Groq, OpenRouter&lt;br&gt;e NVIDIA NIM (adapter fake é o último da cadeia)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="300" width="280" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="de-http" value="HTTP, porta 8080 (de navegador e API na mesma origem)" style="html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.42;entryDx=0;entryDy=0;endArrow=block;fontSize=11;" edge="1" parent="1" source="d-computador" target="d-servidor">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="de-h2" value="JDBC, profile h2" style="html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=open;fontSize=11;" edge="1" parent="1" source="d-jar" target="d-h2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="de-pg" value="JDBC, profile postgres" style="html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;endArrow=open;fontSize=11;" edge="1" parent="1" source="d-servidor" target="d-postgres">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="de-ia" value="HTTPS pela internet&lt;br&gt;(chaves IA_*)" style="html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=1;exitY=0.4;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=block;fontSize=11;" edge="1" parent="1" source="d-servidor" target="d-ia">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

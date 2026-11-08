@@ -23,6 +23,10 @@ Documento de Visão de Projeto (DVP) do e-commerce de livros, entregável da dis
 
 ## Regras de conteúdo
 
+- **Autocontido:** quem lê só o DVP, sem acesso ao código e sem contexto prévio do projeto, precisa entender o
+  sistema. Explique cada decisão (o que foi decidido e por quê) e cada limitação no próprio texto; o ID do DEC ou do
+  requisito é só referência complementar, nunca substitui a explicação. Nomes de classes, métodos, rotas e códigos
+  HTTP só quando ajudam a ler um diagrama, e sempre com o papel explicado em português.
 - **Nunca copie os exemplos do template** (ImoX, biblioteca, SISCAD, Houter/Premium, Struts/Hibernate/Oracle etc.).
   Todo texto, diagrama e decisão deve refletir o projeto real; reescrever frases do exemplo trocando nomes conta
   como cópia.
@@ -39,7 +43,7 @@ Documento de Visão de Projeto (DVP) do e-commerce de livros, entregável da dis
 
 - UML 2.5, desenhado à mão em XML no draw.io: um único `imagens/dvp.drawio`, uma página por diagrama, com o PNG
   exportado ao lado (`imagens/<pagina>.png`). Rótulos em português; classes, pacotes e módulos com os nomes do código.
-- Por seção: componentes (7), casos de uso agrupados em casos-mãe, com os atores Visitante, Cliente, Administrador,
+- Por seção: componentes e organização genérica de um módulo hexagonal (7), casos de uso agrupados em casos-mãe, com os atores Visitante, Cliente, Administrador,
   Tempo (agendador) e os sistemas externos simulados/IA (8), pacotes de um módulo exemplar (`vendas`), classes
   principais, estados de `Pedido`/`Troca` e sequência de "Finalizar compra" (9), implantação (10).
 - Visão de Dados (12): reaproveita os PNGs gerados em `docs/modelo/` (`gerar_mer.py`), sem redesenhar o MER.
