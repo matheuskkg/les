@@ -78,7 +78,7 @@ jobs:
       # O Chrome já vem na imagem do runner (DEC-02); só o server é compilado antes, para o Playwright subi-lo rápido.
       - run: mvn -B -ntp -q -DskipTests compile
         working-directory: apps/server
-      - run: npm run e2e
+      - run: npx playwright test
         env:
           CI: 'true'
       - uses: actions/upload-artifact@v4

@@ -25,7 +25,13 @@ export default defineConfig({
     channel: 'chrome',
     // Fora do CI, o professor acompanha o Chrome; no CI não há tela.
     headless: Boolean(process.env.CI),
-    launchOptions: { slowMo: process.env.CI ? 0 : ESPERA_ENTRE_ACOES_MS },
+    // Fora do CI, o Chrome abre maximizado na resolução da tela, para o alvo do teste aparecer inteiro.
+    // No CI, o viewport de desktop mantém o layout previsível e o teste headless.
+    viewport: process.env.CI ? { width: 1280, height: 720 } : null,
+    launchOptions: {
+      args: process.env.CI ? [] : ['--start-maximized'],
+      slowMo: process.env.CI ? 0 : ESPERA_ENTRE_ACOES_MS,
+    },
     video: 'retain-on-failure',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
@@ -40,7 +46,8 @@ export default defineConfig({
     {
       command: 'mvn -q spring-boot:run -Dspring-boot.run.profiles=h2,e2e,dev',
       cwd: '../server',
-      url: 'http://localhost:8080/v3/api-docs',
+      // Espera um livro do seed: o /v3/api-docs responde antes de o ApplicationRunner terminar de inserir os dados.
+      url: 'http://localhost:8080/api/livros/1',
       timeout: 180_000,
       reuseExistingServer: !process.env.CI,
     },

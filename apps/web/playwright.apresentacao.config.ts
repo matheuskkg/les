@@ -22,9 +22,11 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:8080',
     channel: 'chrome',
-    // Apresentação contra o jar: Chrome visível e meio segundo entre as ações, para o professor acompanhar.
+    // Apresentação contra o jar: Chrome visível e maximizado, com meio segundo entre as ações para o professor
+    // acompanhar o alvo de cada validação.
     headless: false,
-    launchOptions: { slowMo: ESPERA_ENTRE_ACOES_MS },
+    viewport: null,
+    launchOptions: { args: ['--start-maximized'], slowMo: ESPERA_ENTRE_ACOES_MS },
     // Sem vídeo: a gravação exige o ffmpeg que o Playwright baixa junto dos navegadores, e o pacote portátil
     // depende só do Chrome instalado na máquina.
     video: 'off',

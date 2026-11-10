@@ -7,8 +7,9 @@ description: Escreve e revisa roteiros E2E de apresentação do projeto do ponto
 
 Neste projeto, E2E não é suíte de regressão: todo spec é um roteiro de apresentação para o professor. Os E2E existem
 para provar que uma pessoa consegue realizar o fluxo na aplicação. O professor vê o Chrome, não o código. Um teste
-que passa por causa de um `data-testid` escondido, de um botão desabilitado ou de uma chamada de API direta não
-demonstra o sistema; ele demonstra a implementação. O objetivo aqui é fazer o teste contar a mesma
+que passa por causa de um `data-testid` escondido, de um botão desabilitado ou de uma chamada de API direta no lugar
+da tela não demonstra o sistema; ele demonstra a implementação. A API pode preparar o que não é o cenário (login,
+usuário novo), mas o que o roteiro quer provar precisa acontecer na tela. O objetivo é fazer o teste contar a mesma
 história que o usuário viveria, em qualquer módulo: vitrine, carrinho, checkout, pedidos, trocas, conta, análise,
 assistente ou outro.
 
@@ -21,9 +22,10 @@ assistente ou outro.
 
 ## Princípios
 
-1. **Comece pelo usuário.** O teste deve começar no login ou em uma tela que o usuário abriria, e terminar em algo
-   que ele vê: uma mensagem, uma linha da tabela, um status, um valor em reais, um gráfico. Use as abas, os campos e
-   os botões como o usuário usa.
+1. **Comece pelo usuário, na tela do cenário.** O teste começa na tela do fluxo que está sendo demonstrado, já
+   autenticado quando o login não é o assunto, e termina em algo que o usuário vê: uma mensagem, uma linha da tabela,
+   um status, um valor em reais, um gráfico. Use as abas, os campos e os botões como o usuário usa. O login pela tela
+   fica reservado ao cenário que quer demonstrá-lo.
 2. **Não teste o que só o programador vê.** Classe CSS, `data-testid`, estado interno do componente, quantidade de
    requisições e parâmetro de URL são meios, não fins. Um `aria-label` ou papel acessível é aceitável porque também
    é o que uma pessoa com leitor de tela usa.
@@ -32,7 +34,9 @@ assistente ou outro.
    esperar, espere pelo resultado visível, não pelo atributo.
 4. **O setup fica no `fixtures.ts`.** O reset do banco e o relógio controlado são apoio de teste, não parte do
    roteiro. O `beforeEach` automático já chama `POST /api/teste/reset`; use `ajustarRelogio` quando o cenário
-   depender de uma data. Não chame a API de negócio direto para "preparar" o que o usuário deveria fazer.
+   depender de uma data. Se o login não é o cenário, comece com `entrarNaApi`. Dados de apoio que não são o assunto
+   (um usuário, um endereço, um cartão) podem ser criados via API com `apiDaPagina` e `tokenCsrf`, sem validar em
+   tela. Não crie pela API o resultado que a tela deve demonstrar.
 5. **Um teste, um cenário demonstrável.** O nome deve dizer o que o usuário faz e o requisito envolvido, por exemplo
    "administrador compara duas categorias no mesmo período (RF-ANA-001)". Evite nomes como "testa o componente".
 6. **Os dados esperados vêm do seed.** Confira o valor no SQL ou no comentário do gerador. Não copie o valor da
@@ -46,54 +50,87 @@ assistente ou outro.
    resposta da consulta seguinte. Um `expect(...).toBeVisible({ timeout: 1000 })` pode passar por sorte do polling;
    prefira medir o intervalo entre o clique e a resposta que a tela usa. O `TempoDeRespostaTest` cobre o back-end.
 9. **Teste independente.** Cada teste começa do seed e não depende da ordem dos outros. Não reaproveite número de
-   pedido, saldo de estoque ou sessão de um teste anterior sem criar o dado pelo fluxo.
+   pedido, saldo de estoque ou sessão de um teste anterior sem criar o dado no próprio teste, pela tela ou pela API.
 10. **Acessibilidade ajuda o teste e o usuário.** Prefira `getByRole`, `getByLabel` e texto visível. Se não houver
     rótulo, o primeiro conserto é na tela, não no seletor.
+11. **Mostre o alvo.** Role até o elemento antes de validar conteúdo que pode estar fora da tela, com `rolarAte` do
+    `fixtures.ts`. O professor precisa ver o que está sendo conferido, não só o resultado no relatório. As ações
+    (`click`, `fill`, `check`) já rolam sozinhas; o cuidado é com as asserções.
+12. **Apresente uma cena, não o mínimo.** O cliente olha para a tela, não para a asserção. Escolha dados, filtros e
+    estados que deixem o resultado visualmente representativo: uma tabela com várias linhas, uma lista com itens e
+    status variados, uma busca com resultados suficientes, um gráfico com evolução (vários meses, não um ponto
+    isolado). Evite o menor dado que só faz o teste passar e deixa a tela vazia ou trivial. Confira no seed os valores
+    do recorte escolhido.
 
 ## Estrutura de um spec
 
 ```ts
 import type { Page } from '@playwright/test';
-import { entrarComo, expect, test } from './fixtures';
+import { entrarNaApi, expect, rolarAte, test } from './fixtures';
 
 async function abrirAnalise(page: Page): Promise<void> {
-  await entrarComo(page, 'admin@livraria.test', 'Admin@123');
-  await page.getByRole('link', { name: 'Administração' }).click();
-  await page.getByRole('link', { name: 'Análise de vendas' }).click();
+  // O login não é o cenário: entra pela API e começa direto na tela da análise.
+  await entrarNaApi(page, 'admin@livraria.test', 'Admin@123');
+  await page.goto('/admin/analise');
   await expect(page.getByRole('heading', { name: 'Análise de vendas' })).toBeVisible();
 }
 
 test('administrador consulta uma categoria no período (RF-ANA-001)', async ({ page }) => {
   await abrirAnalise(page);
-  await page.getByLabel('Mês inicial').fill('2025-03');
-  await page.getByLabel('Mês final').fill('2025-03');
+  // Período de 12 meses: o gráfico mostra a linha temporal, não um ponto isolado.
+  await page.getByLabel('Mês inicial').fill('2025-01');
+  await page.getByLabel('Mês final').fill('2025-12');
   await page.getByLabel('Romance', { exact: true }).check();
   await page.getByRole('button', { name: 'Atualizar' }).click();
 
-  await expect(page.getByRole('row', { name: /^03\/2025/ }).getByRole('cell')).toHaveText(['R$ 95,76']);
+  const linha = page.getByRole('row', { name: /^03\/2025/ });
+  await rolarAte(linha);
+  await expect(linha.getByRole('cell')).toHaveText(['R$ 95,76']);
 });
 ```
 
 Esse exemplo é da análise. Para outro fluxo, troque os passos de navegação e as asserções pelo que o usuário vê no
-módulo, mas mantenha a estrutura: login, ação, resultado visível.
+módulo, mas mantenha a estrutura: tela do cenário, ação do usuário, resultado visível.
+
+### Preparando dados pela API
+
+Se o cenário precisa de um dado que ele não demonstra (um cliente novo, por exemplo), crie pela API, sem passar pela
+tela. `apiDaPagina` compartilha os cookies do navegador e `tokenCsrf` devolve o token exigido nas escritas:
+
+```ts
+const csrf = await tokenCsrf(page);
+const resposta = await apiDaPagina(page).post('/api/clientes', {
+  headers: { 'X-XSRF-TOKEN': csrf },
+  data: { /* corpo do cadastro */ },
+});
+expect(resposta.status()).toBe(201);
+```
+
+Depois do login, o token CSRF é rotacionado: chame `tokenCsrf` de novo antes da próxima escrita.
 
 ## Roteiros de apresentação
 
 Todo E2E do projeto é um roteiro de apresentação. O padrão de nomes é `apresentacao<Fluxo>.spec.ts` (por exemplo,
 `apresentacaoAnalise.spec.ts`) e `fixtures.ts` para o apoio compartilhado.
 
-- `npm run e2e` roda todos os roteiros `apresentacao*.spec.ts`.
-- `npm run e2e -- e2e/apresentacaoAnalise.spec.ts` roda só um fluxo.
-- O `playwright.config.ts` executa só `apresentacao*.spec.ts`, abre o Chrome visível e espera meio segundo entre as
-  ações; no CI roda headless e sem atraso.
+- `npm run e2e` abre o Playwright UI Mode com todos os roteiros `apresentacao*.spec.ts`. Na interface, escolha o
+  cenário, acompanhe o Chrome, repita a execução e volte passo a passo (time travel).
+- `npm run e2e -- e2e/apresentacaoAnalise.spec.ts` abre a interface filtrada para um fluxo.
+- `npx playwright test` executa sem interface, para automação ou CI.
+- O `playwright.config.ts` executa só `apresentacao*.spec.ts`, abre o Chrome maximizado na resolução da tela quando um
+  cenário roda e espera meio segundo entre as ações; no CI roda headless, com viewport 1280x720 e sem atraso.
 - O pacote portátil copia a pasta `e2e` inteira, mas o `playwright.apresentacao.config.ts` executa só os arquivos
   `apresentacao*.spec.ts` contra o jar na porta 8080.
 - O roteiro deve importar só `@playwright/test`, `./fixtures` e helpers dentro de `e2e/`; importar código da
   aplicação quebra o pacote portátil, que não leva o `src` do web.
+- Se o login ou o cadastro não é o cenário, comece já autenticado com `entrarNaApi` e vá direto à tela do fluxo.
+- Escolha dados e filtros que deem ao cliente uma cena representativa: tabela com várias linhas, lista com status
+  variados, gráfico com evolução (6 a 12 meses ou o histórico completo do seed). O mínimo que só passa na asserção
+  costuma deixar a tela vazia.
 - Não crie um script por fluxo no `package.json`; use `npm run e2e -- e2e/apresentacao<Fluxo>.spec.ts`.
 
 Ao criar um roteiro novo, reaproveite o `fixtures.ts`, dê nomes numerados aos cenários e cite o requisito no título.
-Os testes devem ser legíveis no relatório, porque é isso que o professor acompanha.
+Os testes devem ser legíveis na interface do Playwright UI, porque é isso que o professor acompanha.
 
 ## Como rodar
 
@@ -104,6 +141,9 @@ npm run e2e
 npm run e2e -- e2e/apresentacaoAnalise.spec.ts
 npm run e2e -- e2e/apresentacaoAnalise.spec.ts -g "6\."
 ```
+
+No Playwright UI, clique em **Run all** para rodar todos os cenários ou no botão de executar ao lado de cada um. Use
+o botão de repetir para rodar de novo e a linha do tempo de cada passo para voltar ao estado anterior.
 
 Contra o jar empacotado, com o server em `h2,e2e`:
 
@@ -116,9 +156,13 @@ nada e espera a aplicação em `http://localhost:8080`.
 
 ## Antes de dar como pronto
 
-- [ ] O teste começa em uma tela ou ação que o usuário faria.
+- [ ] O teste começa na tela do cenário (já autenticado, quando o login não é o assunto).
 - [ ] As asserções são sobre texto, valores, status ou elementos que o usuário vê.
+- [ ] O alvo de cada validação de conteúdo foi rolado para a tela (ou já aparece sem rolar).
+- [ ] O cenário mostra uma cena representativa para o cliente (dados/filtros/estados suficientes para a tela fazer
+      sentido), não só o mínimo que passa na asserção.
 - [ ] Não há asserção sobre `disabled`, classe CSS, `data-testid` ou chamada de API isolada.
+- [ ] Dados de apoio que não são o assunto foram criados via API, sem validar a tela.
 - [ ] O nome do teste cita o requisito e o fluxo.
 - [ ] Os valores esperados vêm do seed e estão explicados.
 - [ ] O teste passa sozinho e passa na suíte inteira.
@@ -132,7 +176,11 @@ nada e espera a aplicação em `http://localhost:8080`.
 - Conferir que a URL ganhou `?categoria=2` ou `?status=ENTREGUE`: a URL é detalhe de navegação. Confira a legenda, a
   lista ou os valores que a tela mostra.
 - Chamar `/api/admin/analise` no teste para comparar com a tela: o teste passaria mesmo se a tela não renderizasse.
-- Criar pedido por SQL ou por API para depois "testar" a tela: use o fluxo de compra, que é o que o professor vai ver.
+- Criar por SQL ou por API o resultado que o cenário deve demonstrar (o pedido que a tela de checkout deve gerar):
+  use o fluxo real. Dados de apoio que não são o assunto, como um usuário para outro cenário, podem ser criados via
+  API.
+- Começar todo teste pela tela de login e validar o cabeçalho: o login só é cenário quando ele é o assunto; nos
+  demais, use `entrarNaApi`.
 - Ajustar a regra de status para ENTREGUE só para o cenário 6 da análise passar: o DRS manda contar APROVADA e EM
   TRANSPORTE também. A divergência se explica, não se implementa escondido.
 - Criar um `apresentacao<Fluxo>.spec.ts` que só verifica se a página abriu: o roteiro precisa percorrer a ação

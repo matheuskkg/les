@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.e2e.json",
     "test": "node --test \"src/**/*.test.ts\"",
-    "e2e": "playwright test",
+    "e2e": "playwright test --ui",
     "gerar-api": "openapi-typescript openapi.json -o src/api/esquema.d.ts"
   },
   "dependencies": {

@@ -32,7 +32,8 @@ mvn spring-boot:run                         # H2 em memória, sem o fake; o assi
 mvn spring-boot:run -Dspring-boot.run.profiles=h2,dev  # H2 com o fake, sem rede nem chave
 ```
 
-No `web` (`apps/web`), os scripts estão no `package.json`; `npm run e2e` sobe o server (h2,e2e) e o Vite sozinho.
+No `web` (`apps/web`), os scripts estão no `package.json`; `npm run e2e` sobe o server (h2,e2e) e o Vite sozinho e
+abre o Playwright UI Mode (no CI, rode `npx playwright test`).
 
 Ao mudar a API, grave o contrato e regenere os tipos do `web`:
 
@@ -89,13 +90,25 @@ Não há nada em produção. Consequências:
 Os E2E existem **somente para a apresentação** ao professor, não como suíte de regressão.
 
 - Todo roteiro fica em `apps/web/e2e/apresentacao<Fluxo>.spec.ts`; `fixtures.ts` é o apoio compartilhado.
-- Há só um comando: `npm run e2e` roda todos os roteiros; `npm run e2e -- e2e/apresentacaoAnalise.spec.ts` roda um
-  fluxo específico.
-- Não crie um script `e2e:*` por fluxo no `package.json`.
-- Fora do CI, o Chrome abre visível e cada ação espera 500 ms (`ESPERA_ENTRE_ACOES_MS`); no CI roda headless e sem
+- Se o cenário não é sobre login/cadastro, comece já autenticado com `entrarNaApi` e vá direto à tela do fluxo.
+  Dados de apoio que não são o assunto (um usuário, um endereço) podem ser criados via API com `apiDaPagina` e
+  `tokenCsrf`, sem validar em tela; só o que o cenário demonstra precisa passar pela tela.
+- Há só um comando local: `npm run e2e` abre o Playwright UI Mode com todos os roteiros. Na interface, escolha o
+  cenário, acompanhe o Chrome, repita a execução e volte passo a passo; `npm run e2e -- e2e/apresentacaoAnalise.spec.ts`
+  abre a interface filtrada para um fluxo específico.
+- Em automação e no CI, onde não há tela para a interface, `npx playwright test` roda tudo em modo headless e sem
   atraso.
+- Não crie um script `e2e:*` por fluxo no `package.json`.
+- Fora do CI, o Chrome abre maximizado na resolução da tela e cada ação espera 500 ms (`ESPERA_ENTRE_ACOES_MS`) para
+  o professor acompanhar; no CI roda com viewport 1280x720, headless e sem atraso.
+- Antes de validar conteúdo que pode estar abaixo da dobra, role até o alvo com `rolarAte` de `fixtures.ts`, para o
+  professor ver na tela o que o teste está conferindo.
+- Escolha dados e filtros que deem uma cena representativa para o cliente ver (tabela com várias linhas, lista com
+  status variados, gráfico com evolução), não o mínimo que só passa na asserção. No gráfico da análise, por exemplo,
+  use 6 a 12 meses ou o histórico completo do seed.
 - Contra o jar empacotado: `npm run e2e -- -c playwright.apresentacao.config.ts`.
-- O relatório é aberto com `npx playwright show-report`.
+- O relatório HTML, gerado só nas execuções sem interface (`npx playwright test`), é aberto com
+  `npx playwright show-report`.
 - Antes de criar ou alterar um roteiro, siga a skill [`e2e-testes`](.claude/skills/e2e-testes/SKILL.md).
 
 ## Rastreabilidade

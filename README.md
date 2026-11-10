@@ -44,9 +44,12 @@ Para usar o PostgreSQL, suba o banco com `docker compose up -d` em `apps/server`
 ```bash
 cd apps/server && mvn test      # back-end
 cd apps/web && npm test         # front-end
-cd apps/web && npm run e2e      # E2E com Playwright (usa o Chrome instalado)
+cd apps/web && npm run e2e      # E2E no Playwright UI Mode (usa o Chrome instalado)
 ```
 
-Os E2E são roteiros de apresentação e abrem o Chrome automaticamente. Use `npm run e2e` para todos ou
+Os E2E são roteiros de apresentação e abrem o Playwright UI Mode, onde você escolhe o cenário, acompanha cada passo,
+repete a execução e volta no tempo. O Chrome abre maximizado e, quando o alvo da validação fica abaixo da dobra, o
+teste rola até ele. Use `npm run e2e` para abrir todos no UI Mode ou
 `npm run e2e -- e2e/apresentacaoAnalise.spec.ts` para um fluxo; os detalhes estão no
-[guia](docs/guias/como-executar-e-apresentar.md#5-testes).
+[guia](docs/guias/como-executar-e-apresentar.md#5-testes). Para rodar sem a interface, como no CI, use
+`npx playwright test`.

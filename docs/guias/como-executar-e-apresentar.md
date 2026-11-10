@@ -124,16 +124,27 @@ O `playwright.config.ts` sobe o server com os profiles `h2,e2e,dev` e o Vite, e 
 (`channel: 'chrome'`). Cada teste chama `POST /api/teste/reset` antes de começar, volta o banco ao seed e zera o
 relógio controlado. Essas rotas só existem no profile `e2e`.
 
-Os E2E existem só para a apresentação. O Chrome abre visível e cada ação espera meio segundo, para o professor
-acompanhar o que está sendo feito. No CI, o mesmo comando roda em modo headless e sem atraso.
+Os E2E existem só para a apresentação. O comando abre o Playwright UI Mode: a lista de roteiros fica de um lado e,
+ao executar um cenário, o Chrome abre maximizado na resolução da tela, com cada ação esperando meio segundo. Quando a
+validação é sobre um valor que pode ficar abaixo da dobra, o teste rola até o alvo antes de conferir, para o professor
+ver o que está sendo validado. A interface permite rodar todos, repetir um cenário e voltar passo a passo. No CI,
+`npx playwright test` roda em modo headless e sem atraso.
 
-| O que rodar | Comando |
+Quando o login não é o cenário, o teste começa já autenticado pela API e vai direto à tela do fluxo. O login e o
+cadastro pela tela ficam reservados ao roteiro que quer demonstrá-los; dados de apoio, como um usuário para outro
+cenário, também podem ser criados pela API.
+
+| O que abrir | Comando |
 |---|---|
 | Todos os roteiros | `npm run e2e` |
 | Um fluxo | `npm run e2e -- e2e/apresentacaoAnalise.spec.ts` |
 | Um cenário do fluxo | `npm run e2e -- e2e/apresentacaoAnalise.spec.ts -g "6\."` |
 
-O relatório fica em `apps/web/playwright-report` e pode ser aberto com:
+Na janela do Playwright UI, clique em **Run all** ou no botão de executar ao lado do cenário. O botão de repetir roda
+de novo, e a linha do tempo de cada passo permite voltar ao estado anterior.
+
+O modo UI não gera o relatório HTML: o acompanhamento é na própria interface. Para gerar o relatório depois de uma
+execução sem interface (`npx playwright test`), ele fica em `apps/web/playwright-report` e pode ser aberto com:
 
 ```bash
 npx playwright show-report
@@ -158,8 +169,11 @@ npm run e2e -- e2e/apresentacaoAnalise.spec.ts
 ```
 
 Para apresentar outro módulo, crie `apps/web/e2e/apresentacao<Fluxo>.spec.ts` seguindo o exemplo da análise. Escolha
-os passos que o professor vai ver, na ordem em que ele vê, e deixe cada `test` contar um cenário. Use o login e as
-telas reais, não chamadas diretas à API.
+os passos que o professor vai ver, na ordem em que ele vê, e deixe cada `test` contar um cenário. Use as telas reais
+para o que o cenário demonstra. Quando o login ou o cadastro não é o assunto, o teste começa já autenticado pela API
+(`entrarNaApi`) e vai direto à tela do fluxo; dados de apoio também podem ser criados pela API, sem validar em tela.
+Escolha filtros e dados que deem ao professor uma cena representativa (uma tabela com várias linhas, um gráfico com
+evolução), não o mínimo que só faz a asserção passar.
 
 Não crie um script por fluxo no `package.json`: use `npm run e2e -- e2e/apresentacao<Fluxo>.spec.ts`. O pacote portátil copia a
 pasta `e2e` inteira; para continuar autossuficiente, o roteiro deve importar só `@playwright/test`, `./fixtures` e
@@ -181,7 +195,7 @@ npm run e2e -- -c playwright.apresentacao.config.ts
 
 O `playwright.apresentacao.config.ts` não sobe processo nenhum: ele espera a aplicação em `http://localhost:8080`.
 Por isso o server precisa estar rodando com o profile `e2e`, que expõe as rotas de reset e de relógio usadas pelos
-testes. O Chrome abre visível e as ações continuam desaceleradas.
+testes. O Playwright UI abre junto com o Chrome maximizado, e as ações continuam desaceleradas.
 
 ## 6. Pacote para o pendrive Windows
 
@@ -247,7 +261,8 @@ informe um JRE e um Node Linux; o script troca os launchers `.bat` por `.sh`.
 3. Dê um duplo clique em `iniciar-app.bat`. A janela do console fica aberta enquanto o sistema estiver rodando.
 4. Acesse `http://localhost:8080` e entre com o perfil do fluxo que será apresentado.
 5. Para os testes, deixe a janela do sistema aberta e dê um duplo clique em `rodar-testes.bat`. Ele verifica se a
-   aplicação está respondendo, abre o Chrome e roda todos os roteiros `apresentacao*.spec.ts`.
+   aplicação está respondendo e abre o Playwright UI com os roteiros `apresentacao*.spec.ts`. Na interface, rode todos
+   ou escolha um cenário; o Chrome abre maximizado para a apresentação.
 
 O sistema usa H2 em memória. Reiniciar o `iniciar-app.bat` zera as alterações e reaplica o seed. O profile `e2e`
 usado pelos launchers desliga as tarefas agendadas de expiração e expõe as rotas de teste; ele não ativa o `fake`.
@@ -301,18 +316,18 @@ cheio em cada uma.
 ### 7.2 Roteiro de demonstração
 
 Os oito cenários estão no arquivo `apps/web/e2e/apresentacaoAnalise.spec.ts`. Rodar o arquivo inteiro leva cerca de
-15 segundos e mostra cada teste no relatório.
+25 segundos e mostra cada teste na interface do Playwright UI.
 
 | Cenário da atividade | Teste | O que aparece |
 |---|---|---|
-| 1. Uma categoria em um período válido | teste 1 | Romance em 03/2025 com R$ 95,76, igual à soma do seed |
-| 2. Comparação entre categorias | teste 2 | História e Romance no mesmo mês, cada uma com R$ 95,76 |
-| 3. Gráfico de linhas em reais por mês | teste 3 | Fantasia e Romance de 03/2025 a 04/2025, no gráfico e na tabela |
-| 4. Alteração da data de início ou fim | teste 4 | Fim muda de 03/2025 para 04/2025 e o valor de Romance passa a R$ 168,99 |
-| 5. Compra com status diferente de ENTREGUE | teste 5 | Tecnologia em 03/2025 vale R$ 0,00 porque o único pedido é REPROVADA |
-| 6. Compra que passa a ENTREGUE | teste 6 | Pedido 242, EM TRANSPORTE, é entregue em 10/2026 e continua no gráfico |
+| 1. Uma categoria em um período válido | teste 1 | Romance de 01/2025 a 12/2025: R$ 95,76 em 03/2025, R$ 168,99 em 04/2025 e R$ 209,00 em 12/2025 |
+| 2. Comparação entre categorias | teste 2 | História e Romance de 01/2025 a 12/2025; em 03/2025, R$ 95,76 cada; em 04/2025, R$ 875,73 e R$ 168,99 |
+| 3. Gráfico de linhas em reais por mês | teste 3 | Fantasia e Romance de 11/2024 a 10/2026, o histórico completo no gráfico e na tabela |
+| 4. Alteração da data de início ou fim | teste 4 | Início em 01/2025; o fim muda de 06/2025 para 12/2025 e Romance passa a R$ 209,00 |
+| 5. Compra com status diferente de ENTREGUE | teste 5 | Tecnologia de 01/2025 a 12/2025: R$ 0,00 em 03/2025 porque o único pedido é REPROVADA; em 04/2025, R$ 671,10 |
+| 6. Compra que passa a ENTREGUE | teste 6 | Pedido 242, EM TRANSPORTE, é entregue em 10/2026 e continua no gráfico de 11/2025 a 10/2026 |
 | 7. Acesso só do administrador | teste 7 | Cliente entra e recebe "Acesso negado" ao abrir `/admin/analise` |
-| 8. Resposta em até 1 segundo | teste 8 | A consulta de 03/2025 responde em menos de 1 s; o backend também tem o `TempoDeRespostaTest` |
+| 8. Resposta em até 1 segundo | teste 8 | A consulta de 01/2025 a 12/2025 responde em menos de 1 s; o backend também tem o `TempoDeRespostaTest` |
 
 Para rodar só a apresentação da análise:
 
@@ -342,8 +357,8 @@ Credenciais:
 | Administrador | `admin@livraria.test` | `Admin@123` |
 | Cliente (Ana Souza) | `ana.souza@livraria.test` | `Senha@123` |
 
-O seed histórico da análise vai de novembro de 2024 a outubro de 2026. Março de 2025 é o mês de referência dos
-testes:
+O seed histórico da análise vai de novembro de 2024 a outubro de 2026. Os cenários de 2025 usam o ano inteiro, e o
+teste 3 usa o histórico completo; março de 2025 é o mês de referência dos valores:
 
 | Categoria | Valor em 03/2025 | Origem |
 |---|---:|---|
@@ -352,6 +367,8 @@ testes:
 | Ficção Científica | R$ 96,00 | 3 × Fundação menos 1 unidade em troca concluída |
 | Fantasia | R$ 80,00 | 2 × O Hobbit, com troca ainda autorizada |
 | Tecnologia | R$ 0,00 | o único pedido do mês é REPROVADA |
+
+Com períodos de 12 a 24 meses, o gráfico mostra a linha temporal e a tabela permite conferir o valor de cada mês.
 
 Em outubro de 2026 há pedidos ENTREGUE, EM TRANSPORTE, APROVADA e REPROVADA. O teste 6 usa o pedido 242, que está
 EM TRANSPORTE e tem itens de Fantasia, Ficção Científica e História.

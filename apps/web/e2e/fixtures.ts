@@ -1,4 +1,10 @@
-import { expect, test as base, type Page } from '@playwright/test';
+import {
+  expect,
+  test as base,
+  type APIRequestContext,
+  type Locator,
+  type Page,
+} from '@playwright/test';
 
 /** Apoio exposto pelos testes; o reset roda sozinho antes de cada teste (DEC-09). */
 interface ApoioAosTestes {
@@ -36,7 +42,52 @@ export const test = base.extend<ApoioAosTestes>({
 
 export { expect };
 
-/** Entra pela tela /login e espera o cabeçalho mostrar a sessão. */
+/**
+ * Rola a página até o elemento antes da validação, como o usuário faria para enxergar o resultado.
+ * As ações (click, fill, check) já rolam sozinhas; use isto nas asserções de conteúdo que podem
+ * ficar abaixo da dobra, para a apresentação mostrar o alvo do teste na tela.
+ */
+export async function rolarAte(locator: Locator): Promise<void> {
+  await locator.scrollIntoViewIfNeeded();
+}
+
+/**
+ * Contexto de API que compartilha os cookies do navegador. Use para preparar dados que não são o assunto do
+ * cenário (um usuário, um endereço, um cartão) sem passar pela tela.
+ */
+export function apiDaPagina(page: Page): APIRequestContext {
+  return page.context().request;
+}
+
+/**
+ * Lê o cookie XSRF-TOKEN que o server grava em `GET /api/sessao`. Toda escrita via API precisa do valor no
+ * cabeçalho `X-XSRF-TOKEN`; chame de novo depois de login/logout, que rotacionam o token.
+ */
+export async function tokenCsrf(page: Page): Promise<string> {
+  const consulta = await apiDaPagina(page).get('/api/sessao');
+  expect([200, 401]).toContain(consulta.status());
+  const token = (await page.context().cookies()).find((cookie) => cookie.name === 'XSRF-TOKEN')?.value;
+  expect(token, 'cookie XSRF-TOKEN').toBeTruthy();
+  return token ?? '';
+}
+
+/**
+ * Entra pela API, sem passar pela tela de login, e deixa o cookie de sessão no contexto do navegador.
+ * Use nos cenários em que o login não é o assunto; chame antes de abrir a tela do fluxo.
+ */
+export async function entrarNaApi(page: Page, login: string, senha: string): Promise<void> {
+  const csrf = await tokenCsrf(page);
+  const resposta = await apiDaPagina(page).post('/api/sessao', {
+    headers: { 'X-XSRF-TOKEN': csrf },
+    data: { login, senha },
+  });
+  expect(
+    resposta.status(),
+    `POST /api/sessao falhou (${resposta.status()}): ${await resposta.text()}`,
+  ).toBe(200);
+}
+
+/** Entra pela tela /login e espera o cabeçalho mostrar a sessão. Use só em cenário que demonstra o login. */
 export async function entrarComo(page: Page, login: string, senha: string): Promise<void> {
   await page.goto('/login');
   await page.getByLabel('E-mail ou telefone').fill(login);

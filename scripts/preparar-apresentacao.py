@@ -180,11 +180,11 @@ if errorlevel 1 (
   exit /b 1
 )
 echo.
-echo Rodando os testes de apresentacao no Chrome...
+echo Abrindo o Playwright UI com os testes de apresentacao...
 echo.
-"%NODE%" "%CLI%" test -c "%~dp0testes\\playwright.apresentacao.config.ts" --headed %*
+"%NODE%" "%CLI%" test -c "%~dp0testes\\playwright.apresentacao.config.ts" --ui %*
 echo.
-echo Testes concluidos. Relatorio: %~dp0playwright-report\\index.html
+echo Interface encerrada.
 pause
 """,
         windows=True,
@@ -212,7 +212,7 @@ if ! curl -fsS http://localhost:8080/v3/api-docs >/dev/null; then
   exit 1
 fi
 exec ./node/node ./testes/node_modules/@playwright/test/cli.js test \\
-  -c ./testes/playwright.apresentacao.config.ts --headed "$@"
+  -c ./testes/playwright.apresentacao.config.ts --ui "$@"
 """,
     )
     (destino / "iniciar-app.sh").chmod(0o755)
@@ -232,7 +232,7 @@ Conteudo:
   node/             Node portatil, usado so pelos testes
   testes/           Playwright + roteiros de apresentacao
   {launcher:<17} sobe o sistema em http://localhost:8080
-  {testes:<17} roda os testes no Chrome instalado
+  {testes:<17} abre o Playwright UI com os roteiros
 
 Como apresentar:
   1. Abra o Chrome na maquina.
@@ -242,7 +242,8 @@ Como apresentar:
        e-mail: admin@livraria.test
        senha:  Admin@123
   5. Com o sistema aberto, execute {testes} em outra janela.
-     O Chrome abre e percorre os cenarios dos roteiros de apresentacao.
+     A interface do Playwright abre; rode todos ou escolha um cenario, e o Chrome
+     percorre os roteiros de apresentacao.
 
 Observacoes:
   - O sistema usa H2 em memoria: reiniciar zera as alteracoes e reaplica o seed.
