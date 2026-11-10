@@ -1,0 +1,15 @@
+livraria:
+  seed:
+    # O seed do dev roda depois do seed padrão e ativa o fake (DEC-03).
+    local: classpath:seed/*.sql,classpath:seed-dev/*.sql
+  ia:
+    # No desenvolvimento, o fake atende sem rede e sem chave, mesmo com variáveis IA_* na máquina (DEC-03).
+    provedores:
+      gemini:
+        chave: ""
+      groq:
+        chave: ""
+      openrouter:
+        chave: ""
+      nvidia:
+        chave: ""

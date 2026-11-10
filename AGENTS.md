@@ -28,7 +28,8 @@ Comandos do `server` (rodar em `apps/server`; o profile `postgres` usa o `docker
 
 ```bash
 mvn test                                    # testes (unitários, integração em H2 e ArchUnit)
-mvn spring-boot:run                         # executa com H2 em memória (profile padrão)
+mvn spring-boot:run                         # H2 em memória, sem o fake; o assistente exige chave real
+mvn spring-boot:run -Dspring-boot.run.profiles=h2,dev  # H2 com o fake, sem rede nem chave
 ```
 
 No `web` (`apps/web`), os scripts estão no `package.json`; `npm run e2e` sobe o server (h2,e2e) e o Vite sozinho.

@@ -5,7 +5,8 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 
 /**
  * @param habilitado executa os seeds na inicialização
- * @param local padrão de recursos dos scripts, executados em ordem alfabética do nome do arquivo
+ * @param local padrões de recursos dos scripts, separados por vírgula e executados em ordem alfabética do nome do
+ *              arquivo
  */
 @ConfigurationProperties("livraria.seed")
 public record PropriedadesSeed(

@@ -19,8 +19,8 @@ com conta, por isso herda a consulta de livros e ganha casos próprios: carrinho
 recomendação. O Administrador consulta clientes, conduz pedidos e trocas e analisa as vendas. O ator Tempo representa
 o agendador do servidor, o mecanismo que executa tarefas em intervalos fixos, como a expiração de carrinhos e de
 sessões de compra. Fora da fronteira ficam os três sistemas externos. O serviço de frete e a operadora de cartão são
-simulados por regras fixas, sem rede. O provedor de IA generativa é real, mas há uma versão de teste, chamada de
-adapter fake, que responde sem rede quando não existe chave configurada.
+simulados por regras fixas, sem rede. O provedor de IA generativa é real na apresentação. No desenvolvimento e nos
+testes, há uma versão determinística, chamada de adapter fake, que responde sem rede e sem chave.
 
 ![](imagens/casos-de-uso.png)
 
@@ -110,9 +110,11 @@ por outros clientes. A personalização acompanha as compras e as avaliações s
 apenas vinte livros, não se usa busca por semelhança de textos.
 
 O pedido vai ao primeiro provedor da cadeia que tenha chave configurada. Os provedores gratuitos têm cota baixa, que
-pode acabar durante a apresentação, então, quando um falha, a chamada segue para o próximo. Por último, quando ativo, fica o provedor
-fake, que responde sempre igual e sem rede. Ele é usado quando nenhum outro tem chave, como nos testes automatizados, que não podem
-depender de rede nem de chave. Se todos os provedores ativos falharem, o assistente informa que está indisponível. A resposta volta em formato estruturado, validado, e o servidor confere os livros
+pode acabar durante a apresentação, então, quando um falha, a chamada segue para o próximo. Por último, quando o
+profile de desenvolvimento está ativo, fica o provedor fake, que responde sempre igual e sem rede. Ele atende os
+testes automatizados, que não podem depender de rede nem de chave, e fica inativo na apresentação. Se todos os
+provedores ativos falharem, o assistente informa que está indisponível. A resposta volta em formato estruturado,
+validado, e o servidor confere os livros
 citados contra o catálogo e o estoque, retirando os que não existem ou não podem ser vendidos. A IA não executa ações:
 adicionar ao carrinho é um botão da tela, sob controle do cliente. O cliente avalia cada resposta, e essas avaliações
 entram no perfil. Cada tentativa de chamada é registrada com tempo de resposta e resultado, e as métricas dessas chamadas aparecem na

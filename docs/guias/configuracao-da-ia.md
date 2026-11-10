@@ -5,12 +5,14 @@ Como ligar a recomendação e o chat com IA generativa (RNF-REC-001) a provedore
 
 ## Em resumo
 
-- **Sem nenhuma configuração, tudo funciona.** O assistente usa o provedor `fake`, que responde de forma
-  determinística e sem rede. É assim em `mvn test`, nos E2E e na primeira execução.
+- **Sem chave, o assistente fica indisponível.** O provedor `fake` existe, mas fica inativo por padrão; ele só é
+  ativado no profile `dev` e nos testes, onde responde de forma determinística e sem rede.
 - Para usar IA de verdade, crie a chave gratuita de pelo menos um provedor e defina a variável de ambiente
   correspondente antes de subir o `server`.
 - Com mais de uma chave, o server tenta os provedores na ordem da cadeia e passa ao próximo quando um falha ou
   esgota a cota.
+- No desenvolvimento com o `fake`, suba com `-Dspring-boot.run.profiles=h2,dev`; na apresentação, não use o
+  profile `dev`.
 
 ## Como a cadeia funciona
 
@@ -32,21 +34,25 @@ flowchart LR
     N -- sim --> NC[chama o NVIDIA NIM]
     NC -- ok --> R
     NC -- falha ou 429 --> F
-    N -- não --> F[fake]
+    N -- não --> F[fake<br/>só no profile dev]
     F --> R
 ```
 
-- **Ordem padrão:** `gemini`, `groq`, `openrouter`, `nvidia` e `fake`. O administrador muda a ordem e liga ou desliga
-  provedores na aba **Assistente** do admin, sem reiniciar. A mudança fica gravada no banco.
+- **Ordem padrão:** `gemini`, `groq`, `openrouter`, `nvidia` e `fake`, com o `fake` inativo. O administrador muda a
+  ordem e liga ou desliga provedores na aba **Assistente** do admin, sem reiniciar. A mudança fica gravada no banco.
+- **No profile padrão e na apresentação**, a cadeia termina no último provedor real; o `fake` não entra. Se todos
+  falharem, o assistente fica indisponível. **No profile `dev`**, o `fake` entra no fim da cadeia e atende sem rede.
 - **Cota esgotada:** um provedor que respondeu HTTP 429 fica fora da cadeia pelo tempo indicado no cabeçalho
   `Retry-After` (segundos ou data HTTP) ou no texto da mensagem, como "try again in 7.5s" ou "retry in 1m30s". O
   prazo fica entre 10 segundos e 5 minutos; sem indicação, são 5 minutos. Se a mensagem aponta cota diária ("per
-  day", "daily", "RPD"), o provedor só volta à meia-noite. O `fake`, no fim da cadeia, atende enquanto isso.
+  day", "daily", "RPD"), o provedor só volta à meia-noite. No profile `dev`, o `fake`, no fim da cadeia, atende
+  enquanto isso; na apresentação, o assistente fica indisponível até o provedor voltar.
 - **Registro:** toda tentativa, com sucesso ou falha, fica registrada e aparece nas métricas da mesma aba (latência,
   taxa de sucesso, erros por tipo e tokens). Cada linha também guarda quantas chamadas HTTP a mensagem fez
   (`chamadas_http`) e os tokens de cada volta (`tokens_das_voltas`), além dos tokens somados.
-- **Provedor `fake` desligado:** se todos os provedores ativos falharem, a vitrine mostra as recomendações
-  calculadas pelo server, sem justificativa, e o chat avisa que o assistente está indisponível.
+- **Provedor `fake` inativo (padrão):** se todos os provedores reais ativos falharem, a vitrine mostra as
+  recomendações calculadas pelo server, sem justificativa, e o chat avisa que o assistente está indisponível. No
+  profile `dev`, o `fake` evita esse cenário.
 
 ## O que vai no prompt do chat
 
@@ -226,13 +232,14 @@ Na IDE, defina as mesmas variáveis em *Environment variables* da configuração
 
 | Sintoma nas métricas | Causa provável | O que fazer |
 |---|---|---|
-| Todas as chamadas no `fake` | nenhuma chave definida no processo do server | confira as variáveis no mesmo terminal ou na configuração da IDE e reinicie |
+| Todas as chamadas no `fake` | profile `dev` ativo ou `fake` ligado no admin | use o profile padrão e deixe o `fake` inativo para testar os provedores reais |
+| Assistente indisponível (503) | nenhuma chave real e `fake` inativo (padrão) | defina a chave de pelo menos um provedor ou use o profile `dev` |
 | `ERRO_HTTP` 401 ou 403 | chave inválida ou revogada | gere outra chave no painel do provedor |
 | `COTA_ESGOTADA` | limite gratuito atingido | aguarde o prazo indicado pelo provedor (até 5 min, ou até a meia-noite na cota diária), ou ponha outro provedor na frente da cadeia |
 | `ERRO_HTTP` 404 | modelo inexistente ou retirado | troque a variável `IA_*_MODELO` |
 | `RESPOSTA_INVALIDA` | o modelo não segue o formato JSON ou não aceita ferramentas | escolha um modelo com tool calling e saída estruturada |
 | `LIMITE_DE_CHAMADAS` | o modelo passou de 3 voltas de tools, da correção ou de `max-chamadas` | escolha um modelo que siga as tools, aumente `max-chamadas` ou deixe outro provedor na cadeia |
-| `TEMPO_ESGOTADO` ou `ERRO_DE_REDE` | rede da apresentação instável ou provedor lento | deixe o `fake` ativo no fim da cadeia |
+| `TEMPO_ESGOTADO` ou `ERRO_DE_REDE` | rede da apresentação instável ou provedor lento | configure outro provedor real; no profile `dev`, o `fake` atende no fim da cadeia |
 
-Para a apresentação, é recomendável configurar pelo menos dois provedores e manter o `fake` ativo no fim da
-cadeia. Assim, uma cota esgotada nunca derruba o assistente.
+Para a apresentação, configure pelo menos dois provedores reais. O `fake` fica inativo e não mascara a falha: se
+todos os provedores falharem, o assistente fica indisponível em vez de responder com texto determinístico.

@@ -43,10 +43,12 @@ No primeiro, suba o back-end com o H2 em memória:
 
 ```bash
 cd apps/server
-mvn spring-boot:run
+mvn spring-boot:run -Dspring-boot.run.profiles=h2,dev
 ```
 
 O server fica em `http://localhost:8080`. O schema é criado pelo Hibernate e o seed é executado na inicialização.
+O profile `dev` ativa o provedor `fake`, então o assistente funciona sem rede e sem chave. Sem o `dev`, o `fake` fica
+inativo e o assistente só responde com uma chave real configurada.
 
 No segundo, suba o Vite:
 
@@ -118,7 +120,7 @@ npm run typecheck
 
 ### E2E de apresentação
 
-O `playwright.config.ts` sobe o server com os profiles `h2,e2e` e o Vite, e usa o Chrome instalado
+O `playwright.config.ts` sobe o server com os profiles `h2,e2e,dev` e o Vite, e usa o Chrome instalado
 (`channel: 'chrome'`). Cada teste chama `POST /api/teste/reset` antes de começar, volta o banco ao seed e zera o
 relógio controlado. Essas rotas só existem no profile `e2e`.
 
@@ -248,8 +250,10 @@ informe um JRE e um Node Linux; o script troca os launchers `.bat` por `.sh`.
    aplicação está respondendo, abre o Chrome e roda todos os roteiros `apresentacao*.spec.ts`.
 
 O sistema usa H2 em memória. Reiniciar o `iniciar-app.bat` zera as alterações e reaplica o seed. O profile `e2e`
-usado pelos launchers também desliga as tarefas agendadas de expiração e força o provedor fake da IA, para a
-apresentação não depender de rede.
+usado pelos launchers desliga as tarefas agendadas de expiração e expõe as rotas de teste; ele não ativa o `fake`.
+Para a IA real na apresentação, coloque o `.env` com as chaves na mesma pasta do `livraria.jar` (o
+`application.yml` lê `optional:file:.env`) ou defina as variáveis `IA_*_CHAVE` no sistema antes de abrir o
+`iniciar-app`.
 
 Se o Chrome não estiver instalado, instale-o ou troque `channel: 'chrome'` por `channel: 'msedge'` em
 `testes/playwright.apresentacao.config.ts`. No desenvolvimento, o mesmo ajuste vale para `playwright.config.ts`. O
@@ -266,8 +270,9 @@ Se usar outra porta, o `rodar-testes.bat` também precisa verificar a nova porta
 
 ### 6.5 Sem internet
 
-A apresentação não precisa de internet. O banco é H2 em memória e o assistente da vitrine usa o provedor fake quando
-não há chave configurada. Não abra a aba **Assistente** esperando resposta de um provedor real.
+A apresentação usa os provedores reais de IA; o `fake` fica inativo. Sem internet ou sem chave configurada, o
+assistente fica indisponível. O restante do sistema continua funcionando, porque o banco é H2 em memória. Para
+ensaiar sem rede com os testes, acrescente o profile `dev` (`h2,e2e,dev`); ele ativa o `fake`.
 
 ## 7. Exemplo: análise de vendas
 

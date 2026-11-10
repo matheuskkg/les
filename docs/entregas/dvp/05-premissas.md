@@ -13,9 +13,9 @@ mostrar falsa no decorrer da disciplina, o plano e o escopo devem ser reavaliado
   determinísticas, sem integração real com transportadoras ou gateways de pagamento.
 - O assistente de recomendação usa provedores de IA generativa com cota gratuita
   (Gemini, Groq, OpenRouter e NVIDIA NIM), configurados por variáveis de ambiente; as cotas são limitadas, por isso
-  o sistema mantém cadeia de provedores, adapter determinístico *fake* e gravação das métricas de chamada para operar
-  mesmo sem chave ou com a cota esgotada (DEC-03, Guia de Configuração da IA). Os testes automatizados não dependem de rede nem de
-  chave.
+  o sistema mantém cadeia de provedores e gravação das métricas de chamada. O adapter determinístico *fake* fica
+  disponível no desenvolvimento e nos testes, mas não é usado na apresentação (DEC-03, Guia de Configuração da IA).
+  Os testes automatizados não dependem de rede nem de chave.
 - O sistema não entra em produção na disciplina; o banco de dados pode ser resetado
   livremente, o schema e o seed podem mudar sem compatibilidade com dados anteriores, e os dados de teste,
   inclusive cartões fictícios, ficam no seed SQL executado na inicialização (DEC-14).

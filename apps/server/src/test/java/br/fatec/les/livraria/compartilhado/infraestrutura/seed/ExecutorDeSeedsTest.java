@@ -52,6 +52,18 @@ class ExecutorDeSeedsTest {
     }
 
     @Test
+    void executaPadroesSeparadosPorVirgulaEmOrdemAlfabetica() throws IOException {
+        Path primeiro = Files.createDirectories(pasta.resolve("primeiro"));
+        Path segundo = Files.createDirectories(pasta.resolve("segundo"));
+        Files.writeString(primeiro.resolve("001_tabela.sql"), "create table bandeira (nome varchar(50));");
+        Files.writeString(segundo.resolve("002_dados.sql"), "insert into bandeira (nome) values ('Visa');");
+
+        executor(primeiro.toUri() + "*.sql," + segundo.toUri() + "*.sql").executar();
+
+        assertThat(jdbc.sql("select nome from bandeira").query(String.class).list()).containsExactly("Visa");
+    }
+
+    @Test
     void naoExecutaDeNovoScriptJaRegistradoMesmoSeAlterado() throws IOException {
         escrever("001_tabela.sql", "create table bandeira (nome varchar(50));");
         escrever("002_dados.sql", "insert into bandeira (nome) values ('Visa');");
@@ -87,7 +99,15 @@ class ExecutorDeSeedsTest {
     }
 
     private ExecutorDeSeeds executor(boolean habilitado) {
-        PropriedadesSeed propriedades = new PropriedadesSeed(habilitado, pasta.toUri() + "*.sql");
+        return executor(habilitado, pasta.toUri() + "*.sql");
+    }
+
+    private ExecutorDeSeeds executor(String local) {
+        return executor(true, local);
+    }
+
+    private ExecutorDeSeeds executor(boolean habilitado, String local) {
+        PropriedadesSeed propriedades = new PropriedadesSeed(habilitado, local);
         return new ExecutorDeSeeds(dataSource, new DataSourceTransactionManager(dataSource), propriedades);
     }
 

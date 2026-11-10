@@ -238,8 +238,9 @@ Definido no [DEC-16](decisoes/DEC-16-modelo-de-dados.md):
   O módulo `analise` soma em Java por mês e categoria copiada no pedido e preenche com R$ 0,00 os meses sem venda
   (RN-ANA-001, RN-ANA-003); a validação do período e da seleção (RF-ANA-002, RF-ANA-003, RN-ANA-002) fica em regras.
   A exportação é em CSV ([DEC-15.4](decisoes/DEC-15.4-acesso-consultas-e-exportacao.md)).
-- **Recomendação (REC).** Porta `AssistenteDeLivros` com adapter fake por padrão. O provedor de IA real será definido
-  quando o módulo for implementado.
+- **Recomendação (REC).** Porta `AssistenteDeLivros` com adapters compatíveis com OpenAI (Gemini, Groq, OpenRouter e
+  NVIDIA NIM) e um adapter fake determinístico, ativo só no profile `dev` e nos testes. Na apresentação, a cadeia usa
+  apenas os provedores reais ([DEC-03](decisoes/DEC-03-recomendacao-com-ia-generativa.md)).
 
 ## Testes
 

@@ -38,7 +38,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'mvn -q spring-boot:run -Dspring-boot.run.profiles=h2,e2e',
+      command: 'mvn -q spring-boot:run -Dspring-boot.run.profiles=h2,e2e,dev',
       cwd: '../server',
       url: 'http://localhost:8080/v3/api-docs',
       timeout: 180_000,

@@ -5,10 +5,11 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HexFormat;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.sql.DataSource;
@@ -82,9 +83,20 @@ public class ExecutorDeSeeds implements ApplicationRunner {
     }
 
     private List<Resource> scripts() throws IOException {
-        Resource[] encontrados = new PathMatchingResourcePatternResolver().getResources(propriedades.local());
-        return Arrays.stream(encontrados)
-                .filter(Resource::isReadable)
+        PathMatchingResourcePatternResolver resolvedor = new PathMatchingResourcePatternResolver();
+        Map<String, Resource> encontrados = new LinkedHashMap<>();
+        for (String padrao : propriedades.local().split(",")) {
+            String limpo = padrao.trim();
+            if (limpo.isEmpty()) {
+                continue;
+            }
+            for (Resource recurso : resolvedor.getResources(limpo)) {
+                if (recurso.isReadable()) {
+                    encontrados.putIfAbsent(recurso.getFilename(), recurso);
+                }
+            }
+        }
+        return encontrados.values().stream()
                 .sorted(Comparator.comparing(Resource::getFilename))
                 .toList();
     }

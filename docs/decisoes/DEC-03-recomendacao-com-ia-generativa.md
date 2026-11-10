@@ -55,11 +55,13 @@ sem mudar o modelo.
   HTTP 429 ou 5xx, tempo esgotado ou resposta fora do formato), vai ao próximo. Um provedor que respondeu 429 sai da
   cadeia por 5 minutos. (Alterado no REC-09: a espera segue o `Retry-After` ou o tempo citado na mensagem, entre 10 s
   e 5 min, e, na cota diária, vai até a meia-noite; sem indicação, 5 min.)
-- O provedor `fake` (`AssistenteDeLivrosFake`, determinístico, sem rede) é o último da cadeia. Quando nenhum
-  provedor anterior tem chave, como em `mvn test` e nos E2E, a cadeia usa só o `fake`.
+- O provedor `fake` (`AssistenteDeLivrosFake`, determinístico, sem rede) é o último da cadeia, mas fica **inativo por
+  padrão** no seed. O profile `dev` e os testes o ativam por um seed próprio. Na apresentação, só os provedores reais
+  ativos atendem, e uma falha deles não é mascarada pelo fake; sem chave e sem o profile `dev`, o assistente fica
+  indisponível.
 - **Troca em tempo de execução:** a ordem e a ativação ficam na tabela `provedor_ia`, com seed `gemini`, `groq`,
-  `openrouter` e `fake` (alterado no REC-10: a ordem passa a ser `gemini`, `groq`, `openrouter`, `nvidia` e `fake`),
-  nessa ordem e todos ativos. O ADMIN consulta e altera a ordem e a ativação
+  `openrouter` e `fake` (alterado no REC-10: a ordem passa a ser `gemini`, `groq`, `openrouter`, `nvidia` e `fake`;
+  alterado depois: os provedores reais ficam ativos e o `fake`, inativo). O ADMIN consulta e altera a ordem e a ativação
   (`GET`/`PUT /api/admin/ia/provedores`). A resposta mostra, por provedor, se ele tem chave e a última falha. A chave
   e a URL ficam só na configuração e nunca são expostas nem alteradas pela API. A cadeia é lida da tabela e guardada
   em memória por 30 segundos; a alteração pelo ADMIN limpa esse cache. Os 5 minutos fora da cadeia depois de um 429

@@ -2,14 +2,3 @@ livraria:
   expiracao:
     # O E2E executa a ExpirarReservas pelo POST /api/teste/relogio, com o relógio controlado (DEC-09).
     agendada: false
-  ia:
-    # Sem rede no E2E: só o provedor fake atende, mesmo com variáveis IA_* na máquina (DEC-03).
-    provedores:
-      gemini:
-        chave: ""
-      groq:
-        chave: ""
-      openrouter:
-        chave: ""
-      nvidia:
-        chave: ""

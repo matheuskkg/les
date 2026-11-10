@@ -93,7 +93,7 @@ Restrições de qualidade, tecnologia e ambiente do projeto:
 | Stack do server | Java 21, Spring Boot 4.1.x, Maven, Spring Web, Spring Data JPA (Hibernate), Spring Security com JWT e papéis CLIENTE e ADMIN, Hibernate Envers para auditoria (RNF-GER-002), Lombok, MapStruct e springdoc (OpenAPI). Arquitetura hexagonal por módulo, testada por ArchUnit (Documento de Arquitetura do back-end). |
 | Bancos de dados | PostgreSQL e H2 (em memória, modo PostgreSQL), escolhidos por profile; sem migrations, o schema é gerado pelo ORM e os dados vêm de scripts de seed executados na inicialização (DEC-14). |
 | Stack do web | Preact, Vite e TypeScript, com CSS puro e formulários nativos; testes E2E com Playwright no Chrome instalado (DEC-01, DEC-02, DEC-17). |
-| IA generativa | Spring AI com clientes compatíveis com OpenAI e cadeia de provedores com cota gratuita (Gemini, Groq, OpenRouter e NVIDIA NIM), além de adapter determinístico fake para testes e execução sem chave (DEC-03). |
+| IA generativa | Spring AI com clientes compatíveis com OpenAI e cadeia de provedores com cota gratuita (Gemini, Groq, OpenRouter e NVIDIA NIM), além de um adapter determinístico fake, ativo apenas no desenvolvimento e nos testes (DEC-03). |
 | Segurança | Senhas codificadas com BCrypt (RNF-CLI-003), senha forte com confirmação dupla (RNF-CLI-001, RNF-CLI-002); o código de segurança (CVV) do cartão nunca é gravado. Sessão com cookie e token CSRF na mesma origem do front-end (DEC-08). |
 | Valores monetários | Tipo decimal exato (BigDecimal em value object Dinheiro, escala 2 e arredondamento HALF_UP apenas ao fim do cálculo; nunca o tipo double) (DEC-15.1). |
 | Tempo de resposta | Consultas de usuário em no máximo 1 segundo, com paginação e índices declarados (RNF-GER-001). |
