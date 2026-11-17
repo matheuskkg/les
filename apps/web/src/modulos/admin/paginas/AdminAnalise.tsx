@@ -210,8 +210,8 @@ export default function AdminAnalise() {
       <header>
         <h1>Análise de vendas</h1>
         <p class="pagina__introducao">
-          Vendas por categoria em cada mês, sem frete e descontadas as trocas concluídas. Contam os pedidos aprovados,
-          em transporte e entregues.
+          Vendas por categoria em cada mês, sem frete, sem abater o desconto promocional e descontadas as trocas
+          concluídas. Contam os pedidos aprovados, em transporte e entregues.
         </p>
       </header>
 

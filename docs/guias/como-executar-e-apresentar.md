@@ -309,25 +309,35 @@ usa um pedido REPROVADA, que não entra nas duas leituras. O cenário 6 mostra o
 que já estava EM TRANSPORTE já contava e continua contando depois de ENTREGUE. Se o professor exigir o critério da
 atividade, mostre o texto do RN-ANA-004 e explique que o projeto priorizou o requisito original.
 
-Os valores seguem o mês da finalização do pedido, sem frete e sem rateio do desconto promocional. O valor de cada
-item é o preço unitário multiplicado pela quantidade não trocada. Um livro com duas categorias entra com o valor
-cheio em cada uma.
+Os valores seguem o mês da finalização do pedido, sem frete, sem rateio do desconto promocional e descontadas as
+trocas concluídas. O valor de cada item é o preço unitário multiplicado pela quantidade não trocada. Um livro com
+duas categorias entra com o valor cheio em cada uma. Por exemplo, o pedido 44 de março/2025 tem R$ 95,76 de itens,
+R$ 18,00 de frete e R$ 10,00 de desconto; o gráfico mostra R$ 95,76.
 
 ### 7.2 Roteiro de demonstração
 
-Os oito cenários estão no arquivo `apps/web/e2e/apresentacaoAnalise.spec.ts`. Rodar o arquivo inteiro leva cerca de
-25 segundos e mostra cada teste na interface do Playwright UI.
+Os oito cenários estão no arquivo `apps/web/e2e/apresentacaoAnalise.spec.ts`, junto com dois extras: o período
+inválido e a exportação CSV. Rodar o arquivo inteiro leva cerca de 30 segundos e mostra cada teste na interface do
+Playwright UI.
 
 | Cenário da atividade | Teste | O que aparece |
 |---|---|---|
 | 1. Uma categoria em um período válido | teste 1 | Romance de 01/2025 a 12/2025: R$ 95,76 em 03/2025, R$ 168,99 em 04/2025 e R$ 209,00 em 12/2025 |
 | 2. Comparação entre categorias | teste 2 | História e Romance de 01/2025 a 12/2025; em 03/2025, R$ 95,76 cada; em 04/2025, R$ 875,73 e R$ 168,99 |
-| 3. Gráfico de linhas em reais por mês | teste 3 | Fantasia e Romance de 11/2024 a 10/2026, o histórico completo no gráfico e na tabela |
+| 3. Gráfico de linhas em reais por mês | teste 3 | Fantasia e Romance de 11/2024 a 10/2026, o histórico completo no gráfico e na tabela; a captura do gráfico fica anexada ao relatório |
 | 4. Alteração da data de início ou fim | teste 4 | Início em 01/2025; o fim muda de 06/2025 para 12/2025 e Romance passa a R$ 209,00 |
-| 5. Compra com status diferente de ENTREGUE | teste 5 | Tecnologia de 01/2025 a 12/2025: R$ 0,00 em 03/2025 porque o único pedido é REPROVADA; em 04/2025, R$ 671,10 |
-| 6. Compra que passa a ENTREGUE | teste 6 | Pedido 242, EM TRANSPORTE, é entregue em 10/2026 e continua no gráfico de 11/2025 a 10/2026 |
+| 5. Compra com status diferente de ENTREGUE | teste 5 | Tecnologia de 01/2025 a 12/2025: R$ 0,00 em 03/2025 porque o único pedido é REPROVADA; em 04/2025, R$ 671,10. O teste de controller de 10/2026 fixa APROVADA, EM TRANSPORTE e ENTREGUE |
+| 6. Compra que passa a ENTREGUE | teste 6 | Pedido 242, EM TRANSPORTE (R$ 47,88 em Fantasia, R$ 47,88 em Ficção e R$ 56,28 em História), é entregue em 10/2026 e continua no gráfico; os valores não mudam |
 | 7. Acesso só do administrador | teste 7 | Cliente entra e recebe "Acesso negado" ao abrir `/admin/analise` |
 | 8. Resposta em até 1 segundo | teste 8 | A consulta de 01/2025 a 12/2025 responde em menos de 1 s; o backend também tem o `TempoDeRespostaTest` |
+
+| Extra | Teste | O que aparece |
+|---|---|---|
+| Período inválido (RF-ANA-002) | teste 9 | Mês final antes do inicial: a tela mostra a violação e não desenha o gráfico |
+| Exportação CSV (RF-ANA-004) | teste 10 | História e Romance de 03/2025 a 04/2025; baixa o CSV com BOM, `;` e vírgula decimal |
+
+O teste 3 anexa o gráfico com a legenda ao relatório. Para ver a imagem, rode `npx playwright test` e abra
+`npx playwright show-report`; no Playwright UI, o anexo aparece nos detalhes do teste.
 
 Para rodar só a apresentação da análise:
 

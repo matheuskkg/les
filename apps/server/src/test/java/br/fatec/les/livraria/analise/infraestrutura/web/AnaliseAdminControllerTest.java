@@ -28,8 +28,10 @@ import jakarta.servlet.http.Cookie;
  * Análise de vendas do admin sobre o seed histórico (RF-ANA-001 a RF-ANA-004, RN-ANA-001 a RN-ANA-004, DEC-12,
  * DEC-15.4). Março de 2025 tem valores escritos à mão no {@code scripts/gerar_seed_historico.py}: dois Dom Casmurro
  * (Romance e História) com frete e promocional, três Fundação com uma unidade TROCADO, dois O Hobbit com uma unidade
- * em TROCA AUTORIZADA e um Código Limpo REPROVADA. Só meses passados são consultados, então os pedidos que outros
- * testes gravam com o relógio real não mudam os valores.
+ * em TROCA AUTORIZADA e um Código Limpo REPROVADA. Outubro de 2026 tem os pedidos 237, 238 e 241 APROVADA, o 242
+ * EM TRANSPORTE e o 244 REPROVADA, para fixar a regra do RN-ANA-004: aprovada, em transporte e entregue contam;
+ * reprovada não. Só meses passados são consultados, então os pedidos que outros testes gravam com o relógio real não
+ * mudam os valores.
  */
 @SpringBootTest
 @Transactional
@@ -71,6 +73,21 @@ class AnaliseAdminControllerTest {
                 .andExpect(jsonPath("$.series[3].valores", contains("80.00")))
                 // RN-ANA-003 e RN-ANA-004: o único pedido do mês é REPROVADA, então a linha vale zero.
                 .andExpect(jsonPath("$.series[4].valores", contains("0.00")));
+    }
+
+    @Test
+    void rnAna004_contamAprovadaEmTransporteEEntregueNoMesmoMes() throws Exception {
+        mvc.perform(como(1L, get(ROTA).param("inicio", "2026-10").param("fim", "2026-10")
+                .param("categoria", "1", "2", "3", "4", "5")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.meses", contains("2026-10")))
+                // Romance não tem pedido pendente em outubro; Ficção, Fantasia, Tecnologia e História somam os
+                // pedidos APROVADA 237, 238 e 241 e o EM TRANSPORTE 242, e deixam o REPROVADA 244 de fora.
+                .andExpect(jsonPath("$.series[0].valores", contains("84.17")))
+                .andExpect(jsonPath("$.series[1].valores", contains("235.04")))
+                .andExpect(jsonPath("$.series[2].valores", contains("198.54")))
+                .andExpect(jsonPath("$.series[3].valores", contains("423.75")))
+                .andExpect(jsonPath("$.series[4].valores", contains("353.28")));
     }
 
     @Test
