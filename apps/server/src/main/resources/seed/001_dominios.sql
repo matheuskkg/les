@@ -8,14 +8,22 @@ INSERT INTO autor (id, nome) VALUES
     (5, 'Robert C. Martin'),
     (6, 'Yuval Noah Harari'),
     (7, 'Ursula K. Le Guin'),
-    (8, 'Jane Austen');
+    (8, 'Jane Austen'),
+    (9, 'Aldous Huxley'),
+    (10, 'Gabriel García Márquez'),
+    (11, 'Milan Kundera'),
+    (12, 'H. G. Wells'),
+    (13, 'Charles Darwin'),
+    (14, 'Viktor Frankl');
 
 INSERT INTO editora (id, nome) VALUES
     (1, 'Companhia das Letras'),
     (2, 'Rocco'),
     (3, 'HarperCollins Brasil'),
     (4, 'Editora Sextante'),
-    (5, 'Novatec');
+    (5, 'Novatec'),
+    (6, 'Editora Record'),
+    (7, 'Leya');
 
 INSERT INTO categoria (id, nome) VALUES
     (1, 'Romance'),
@@ -32,4 +40,6 @@ INSERT INTO grupo_precificacao (id, nome, margem) VALUES
 INSERT INTO fornecedor (id, nome) VALUES
     (1, 'Distribuidora Livro Bom'),
     (2, 'Atacado das Letras'),
-    (3, 'Editoras Reunidas Distribuição');
+    (3, 'Editoras Reunidas Distribuição'),
+    (4, 'Livros do Sul Distribuição'),
+    (5, 'Rede Nacional de Livros');

@@ -1,5 +1,6 @@
 -- Entradas de estoque com custo, fornecedor e data fixa (RN-EST-001, DEC-15.3).
 -- O preço de venda não é gravado: é calculado depois como maior custo × (1 + margem) (RN-EST-002).
+-- Cada livro novo (21 a 26) tem duas entradas, com custos diferentes, para exercitar RN-EST-002: vale o maior.
 -- O livro 20 fica sem entrada, com saldo zero, para os testes E2E.
 
 INSERT INTO entrada_estoque (id, livro_id, fornecedor_id, quantidade, custo, data_entrada) VALUES
@@ -29,7 +30,19 @@ INSERT INTO entrada_estoque (id, livro_id, fornecedor_id, quantidade, custo, dat
     (24, 16, 3, 9, 44.40, '2026-05-05'),
     (25, 17, 1, 8, 39.90, '2026-02-25'),
     (26, 18, 2, 7, 42.20, '2026-03-30'),
-    (27, 19, 3, 5, 58.00, '2026-04-08');
+    (27, 19, 3, 5, 58.00, '2026-04-08'),
+    (28, 21, 4, 8, 38.00, '2026-02-14'),
+    (29, 21, 1, 10, 41.00, '2026-05-22'),
+    (30, 22, 5, 9, 34.00, '2026-01-18'),
+    (31, 22, 2, 7, 38.00, '2026-04-30'),
+    (32, 23, 4, 6, 48.00, '2026-03-12'),
+    (33, 23, 5, 8, 52.00, '2026-06-08'),
+    (34, 24, 2, 10, 32.00, '2026-02-06'),
+    (35, 24, 4, 8, 36.00, '2026-05-16'),
+    (36, 25, 1, 5, 54.00, '2026-03-25'),
+    (37, 25, 5, 7, 58.00, '2026-07-07'),
+    (38, 26, 3, 9, 40.00, '2026-01-29'),
+    (39, 26, 4, 6, 46.00, '2026-06-19');
 
 -- Saldo por livro, derivado das entradas (DEC-15.3). Todo livro tem exatamente um saldo, inclusive o livro 20,
 -- sem entradas, com quantidade zero. O id do saldo é o do livro, na faixa do seed.

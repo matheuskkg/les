@@ -54,8 +54,9 @@ class AcessoIntegracaoTest {
     }
 
     @Test
-    void listarAdministradoresRetornaOAdminDoSeed_DEC_13() {
-        assertThat(listarAdministradores.executar()).containsExactly(1L);
+    void listarAdministradoresRetornaOsAdminsDoSeed_DEC_13() {
+        // O seed 100_usuarios.sql tem o administrador principal (1) e dois de apoio (100 e 101).
+        assertThat(listarAdministradores.executar()).containsExactly(1L, 100L, 101L);
     }
 
     @Test

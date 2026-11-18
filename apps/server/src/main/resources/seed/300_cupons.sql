@@ -7,7 +7,11 @@ INSERT INTO cupom_promocional (id, codigo, tipo, valor, validade, valor_minimo) 
     (2, 'LIVROS15', 'PERCENTUAL', 15.00, DATE '2027-12-31', 100.00),
     (3, 'FRETEGRATIS', 'FRETE_GRATIS', NULL, DATE '2027-12-31', NULL),
     (4, 'FRETE5', 'FRETE_VALOR_FIXO', 5.00, DATE '2027-12-31', NULL),
-    (5, 'NATAL2025', 'VALOR_FIXO', 20.00, DATE '2025-12-31', NULL);
+    (5, 'NATAL2025', 'VALOR_FIXO', 20.00, DATE '2025-12-31', NULL),
+    (6, 'PRIMAVERA10', 'PERCENTUAL', 10.00, DATE '2027-12-31', 80.00),
+    (7, 'FRETE10', 'FRETE_VALOR_FIXO', 10.00, DATE '2027-12-31', NULL),
+    (8, 'CLUBE20', 'VALOR_FIXO', 20.00, DATE '2027-12-31', 150.00),
+    (9, 'LEITURA5', 'PERCENTUAL', 5.00, DATE '2027-12-31', NULL);
 
 -- Cupons de troca. A Ana (cliente 1) tem os valores do exemplo do RN-VEN-006 (R$ 20, R$ 40 e R$ 35), um já usado e
 -- um vencido; o Bruno (cliente 2) tem um.

@@ -23,7 +23,7 @@ import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 @Transactional
 class ConsultarPrecosDeVendaIntegracaoTest {
 
-    private static final List<Long> TODOS_OS_LIVROS = IntStream.rangeClosed(1, 20)
+    private static final List<Long> TODOS_OS_LIVROS = IntStream.rangeClosed(1, 26)
             .mapToObj(Long::valueOf)
             .toList();
 
@@ -47,7 +47,7 @@ class ConsultarPrecosDeVendaIntegracaoTest {
     void rfEst002_calculaPrecoDeTodosOsLivrosComEntradaDoSeed() {
         Map<Long, Dinheiro> precos = consultarPrecosDeVenda.executar(TODOS_OS_LIVROS);
 
-        assertThat(precos).hasSize(19).doesNotContainKey(20L);
+        assertThat(precos).hasSize(25).doesNotContainKey(20L);
         assertThat(precos)
                 .containsEntry(1L, Dinheiro.de("47.88"))
                 .containsEntry(2L, Dinheiro.de("64.13"))
@@ -67,6 +67,13 @@ class ConsultarPrecosDeVendaIntegracaoTest {
                 .containsEntry(16L, Dinheiro.de("59.94"))
                 .containsEntry(17L, Dinheiro.de("47.88"))
                 .containsEntry(18L, Dinheiro.de("56.97"))
-                .containsEntry(19L, Dinheiro.de("78.30"));
+                .containsEntry(19L, Dinheiro.de("78.30"))
+                // Livros novos: maior custo entre as duas entradas × margem do grupo (RN-EST-002, DEC-15.1).
+                .containsEntry(21L, Dinheiro.de("49.20"))
+                .containsEntry(22L, Dinheiro.de("51.30"))
+                .containsEntry(23L, Dinheiro.de("78.00"))
+                .containsEntry(24L, Dinheiro.de("48.60"))
+                .containsEntry(25L, Dinheiro.de("69.60"))
+                .containsEntry(26L, Dinheiro.de("69.00"));
     }
 }

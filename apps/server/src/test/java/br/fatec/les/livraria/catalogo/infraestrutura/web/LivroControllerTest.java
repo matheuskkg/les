@@ -27,9 +27,9 @@ import br.fatec.les.livraria.estoque.infraestrutura.persistencia.ReservaJpaRepos
 /**
  * Vitrine pública de livros sobre o seed em H2 (RF-LIV-005, RNF-LIV-001, DEC-07, DEC-15.3).
  *
- * <p>O seed tem 20 livros, ids 1 a 20; o livro 19 está inativo e o 20 está ativo, sem entrada de estoque e
- * sem preço. Os valores de preço saem das margens e dos custos de {@code 001_dominios.sql} e
- * {@code 003_estoque.sql}.
+ * <p>O seed tem 26 livros, ids 1 a 26; o livro 19 está inativo e o 20 está ativo, sem entrada de estoque e sem
+ * preço. Os livros 21 a 26 ampliam o catálogo e têm duas entradas de estoque cada. Os valores de preço saem das
+ * margens e dos custos de {@code 001_dominios.sql} e {@code 003_estoque.sql}.
  */
 @SpringBootTest
 @Transactional
@@ -54,9 +54,9 @@ class LivroControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pagina").value(0))
                 .andExpect(jsonPath("$.tamanho").value(20))
-                .andExpect(jsonPath("$.totalItens").value(19))
-                .andExpect(jsonPath("$.totalPaginas").value(1))
-                .andExpect(jsonPath("$.itens.length()").value(19))
+                .andExpect(jsonPath("$.totalItens").value(25))
+                .andExpect(jsonPath("$.totalPaginas").value(2))
+                .andExpect(jsonPath("$.itens.length()").value(20))
                 .andExpect(jsonPath("$.itens[0].titulo").value("21 Lições para o Século 21"))
                 .andExpect(jsonPath("$.itens[0].id").value(16))
                 .andExpect(jsonPath("$.itens[0].autores.length()").value(1))
@@ -71,8 +71,8 @@ class LivroControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pagina").value(1))
                 .andExpect(jsonPath("$.tamanho").value(5))
-                .andExpect(jsonPath("$.totalItens").value(19))
-                .andExpect(jsonPath("$.totalPaginas").value(4))
+                .andExpect(jsonPath("$.totalItens").value(25))
+                .andExpect(jsonPath("$.totalPaginas").value(5))
                 .andExpect(jsonPath("$.itens.length()").value(5));
     }
 
@@ -135,7 +135,7 @@ class LivroControllerTest {
                 .andExpect(jsonPath("$.totalItens").value(1));
         mvc.perform(get("/api/livros").param("q", "   "))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalItens").value(19));
+                .andExpect(jsonPath("$.totalItens").value(25));
     }
 
     @Test
@@ -209,7 +209,7 @@ class LivroControllerTest {
     void rfLiv005_ignoraParametrosEmBrancoEEspacos() throws Exception {
         mvc.perform(get("/api/livros").param("titulo", "   ").param("autor", ""))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalItens").value(19));
+                .andExpect(jsonPath("$.totalItens").value(25));
 
         mvc.perform(get("/api/livros").param("titulo", "  casmurro  "))
                 .andExpect(status().isOk())
