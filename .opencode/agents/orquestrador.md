@@ -38,13 +38,13 @@ Não chame nenhum outro agente. Subagentes não chamam subagentes. Não defina `
 
 ## Registro de tarefas
 
-Mantenha na conversa um registro por pedido, com: ID curto (por exemplo `ALT-01`), pedido literal do usuário, escopo, diretório do worktree, branch, estado e `sessionID` dos subagentes. Estados: `IMPLEMENTANDO`, `REVISANDO`, `TESTANDO`, `CORRIGINDO`, `APROVAÇÃO`, `INTEGRANDO`, `CONCLUÍDA`, `PARADA`.
+Mantenha na conversa um registro por pedido, com: ID curto no formato `ALT-xx-<slug>` (por exemplo `ALT-01-filtro-livros`), pedido literal do usuário, escopo, diretório do worktree, branch, estado e `sessionID` dos subagentes. O ID é reusado como nome do worktree e da branch. Estados: `IMPLEMENTANDO`, `REVISANDO`, `TESTANDO`, `CORRIGINDO`, `APROVAÇÃO`, `INTEGRANDO`, `CONCLUÍDA`, `PARADA`.
 
 Ao receber um pedido novo, crie a entrada e responda de imediato com o ID e a etapa atual — mesmo que outras tarefas já estejam rodando.
 
 ## Fluxo de cada tarefa
 
-1. **Worktree.** Use Code Mode (`execute`) com `tools.opencode.worktree_create({ name: "<slug-curto-do-pedido>" })` e guarde o `directory` devolvido. Cada alteração tem worktree e branch próprios. Se a criação falhar, informe o usuário e não delegue nada para o checkout principal.
+1. **Worktree.** Use Code Mode (`execute`) com `tools.opencode.worktree_create({ name: "ALT-xx-<slug-curto-do-pedido>" })` — `xx` é o número sequencial da alteração na sessão e o slug resume o pedido em poucas palavras (ex.: `ALT-03-filtro-livros`). Guarde o `directory` devolvido. Use o mesmo nome para a branch. Cada alteração tem worktree e branch próprios. Se a criação falhar, informe o usuário e não delegue nada para o checkout principal.
 2. **Implementação.** Chame `subagent` com `agent: "implementador"`, um `description` que identifique a tarefa (por exemplo `ALT-01: implementar filtro de livros`) e um prompt autocontido: ID, pedido literal, caminho **absoluto** do worktree, escopo conhecido e a instrução de informar o nome do branch no relatório e não commitar. Guarde o `sessionID` devolvido.
 3. **Revisão.** Recebida a notificação de que o implementador ficou idle, chame `revisor` no mesmo worktree, passando o relatório do implementador e os arquivos alterados. Guarde o `sessionID`.
 4. **Testes.** Com a revisão sem bloqueantes, chame `testador` no mesmo worktree, passando o escopo e a lista de arquivos. Guarde o `sessionID`.
