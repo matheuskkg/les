@@ -18,19 +18,19 @@ test('destinoSeguro aceita caminho interno da mesma origem', () => {
 test('destinoSeguro usa a área padrão sem destino', () => {
   assert.equal(destinoSeguro(undefined, cliente, origem), '/minha-conta');
   assert.equal(destinoSeguro('', cliente, origem), '/minha-conta');
-  assert.equal(destinoSeguro(undefined, admin, origem), '/admin');
+  assert.equal(destinoSeguro(undefined, admin, origem), '/admin/clientes');
 });
 
 test('destinoSeguro recusa outra origem, esquemas e barras invertidas', () => {
-  assert.equal(destinoSeguro('https://evil.example/admin', admin, origem), '/admin');
-  assert.equal(destinoSeguro('//evil.example/admin', admin, origem), '/admin');
-  assert.equal(destinoSeguro('/\\evil.example/admin', admin, origem), '/admin');
+  assert.equal(destinoSeguro('https://evil.example/admin', admin, origem), '/admin/clientes');
+  assert.equal(destinoSeguro('//evil.example/admin', admin, origem), '/admin/clientes');
+  assert.equal(destinoSeguro('/\\evil.example/admin', admin, origem), '/admin/clientes');
   assert.equal(destinoSeguro('javascript:alert(1)', cliente, origem), '/minha-conta');
-  assert.equal(destinoSeguro('admin', admin, origem), '/admin');
+  assert.equal(destinoSeguro('admin', admin, origem), '/admin/clientes');
 });
 
 test('destinoSeguro respeita o papel do usuário', () => {
   assert.equal(destinoSeguro('/admin', cliente, origem), '/minha-conta');
-  assert.equal(destinoSeguro('/minha-conta', admin, origem), '/admin');
+  assert.equal(destinoSeguro('/minha-conta', admin, origem), '/admin/clientes');
   assert.equal(destinoSeguro('/administracao', cliente, origem), '/administracao');
 });

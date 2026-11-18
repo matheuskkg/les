@@ -2,7 +2,6 @@ import './admin.css';
 
 import { lazy } from 'preact-iso';
 
-export const Admin = lazy(() => import('./paginas/Admin'));
 export const AdminAnalise = lazy(() => import('./paginas/AdminAnalise'));
 export const AdminAssistente = lazy(() => import('./paginas/AdminAssistente'));
 export const AdminCliente = lazy(() => import('./paginas/AdminCliente'));

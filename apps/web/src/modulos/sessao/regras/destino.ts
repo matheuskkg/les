@@ -13,7 +13,7 @@ export function destinoSeguro(
   usuario: Usuario,
   origem: string,
 ): string {
-  const inicial = usuario.papel === 'ADMIN' ? '/admin' : '/minha-conta';
+  const inicial = usuario.papel === 'ADMIN' ? '/admin/clientes' : '/minha-conta';
 
   if (!destino || !destino.startsWith('/') || destino.startsWith('//') || destino.includes('\\')) {
     return inicial;
