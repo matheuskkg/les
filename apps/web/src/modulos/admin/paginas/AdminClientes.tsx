@@ -87,41 +87,71 @@ export default function AdminClientes() {
         </p>
       </header>
 
-      <form class="cartao filtros" role="search" aria-label="Filtrar clientes" onSubmit={filtrar}>
-        <CampoDeFormulario id="filtro-nome" rotulo="Nome" valor={filtros.nome} name="nome"
-          aoMudar={(valor) => mudarCampo('nome', valor)} />
-        <CampoDeFormulario id="filtro-cpf" rotulo="CPF" valor={filtros.cpf} name="cpf" inputMode="numeric"
-          aoMudar={(valor) => mudarCampo('cpf', valor)} />
-        <CampoDeFormulario id="filtro-email" rotulo="E-mail" valor={filtros.email} name="email"
-          aoMudar={(valor) => mudarCampo('email', valor)} />
-        <CampoDeFormulario id="filtro-telefone" rotulo="Telefone" valor={filtros.telefone} name="telefone"
-          inputMode="tel" aoMudar={(valor) => mudarCampo('telefone', valor)} />
-        <CampoDeFormulario id="filtro-nascimento-de" rotulo="Nascimento de" tipo="date" name="dataNascimentoDe"
-          valor={filtros.dataNascimentoDe} aoMudar={(valor) => mudarCampo('dataNascimentoDe', valor)} />
-        <CampoDeFormulario id="filtro-nascimento-ate" rotulo="Nascimento até" tipo="date" name="dataNascimentoAte"
-          valor={filtros.dataNascimentoAte} aoMudar={(valor) => mudarCampo('dataNascimentoAte', valor)} />
-        <CampoDeFormulario id="filtro-cidade" rotulo="Cidade" valor={filtros.cidade} name="cidade"
-          aoMudar={(valor) => mudarCampo('cidade', valor)} />
-        <CampoDeSelecao
-          id="filtro-uf"
-          rotulo="UF"
-          name="uf"
-          valor={ufSelecionada}
-          placeholder="Todas"
-          opcoes={UFS.map((uf) => ({ valor: uf, rotulo: uf }))}
-          aoMudar={(valor) => {
-            const uf = UFS.find((item) => item === valor);
-            definirFiltros((atual) => ({ ...atual, uf: uf ? [uf] : [] }));
-          }}
-        />
+      {/* RF-CLI-004: os filtros são agrupados pelo que o administrador está procurando — quem é o cliente,
+          como contatá-lo, onde fica, quando nasceu e em que perfil/conta se enquadra. */}
+      <form class="cartao filtros filtros-admin" role="search" aria-label="Filtrar clientes" onSubmit={filtrar}>
+        <fieldset class="filtros-admin__grupo">
+          <legend class="filtros-admin__legenda">Identificação</legend>
+          <div class="filtros-admin__campos">
+            <CampoDeFormulario id="filtro-nome" rotulo="Nome" valor={filtros.nome} name="nome"
+              aoMudar={(valor) => mudarCampo('nome', valor)} />
+            <CampoDeFormulario id="filtro-cpf" rotulo="CPF" valor={filtros.cpf} name="cpf" inputMode="numeric"
+              aoMudar={(valor) => mudarCampo('cpf', valor)} />
+          </div>
+        </fieldset>
 
-        <OpcoesMarcaveis legenda="Gênero" nome="genero" opcoes={GENEROS} marcados={filtros.genero}
-          alternar={(valor) => definirFiltros((atual) => ({ ...atual, genero: alternado(atual.genero, valor) }))} />
-        <OpcoesMarcaveis legenda="Situação" nome="situacao" opcoes={SITUACOES} marcados={filtros.situacao}
-          alternar={(valor) =>
-            definirFiltros((atual) => ({ ...atual, situacao: alternado(atual.situacao, valor) }))} />
+        <fieldset class="filtros-admin__grupo">
+          <legend class="filtros-admin__legenda">Contato</legend>
+          <div class="filtros-admin__campos">
+            <CampoDeFormulario id="filtro-email" rotulo="E-mail" valor={filtros.email} name="email"
+              aoMudar={(valor) => mudarCampo('email', valor)} />
+            <CampoDeFormulario id="filtro-telefone" rotulo="Telefone" valor={filtros.telefone} name="telefone"
+              inputMode="tel" aoMudar={(valor) => mudarCampo('telefone', valor)} />
+          </div>
+        </fieldset>
 
-        <div class="acoes">
+        <fieldset class="filtros-admin__grupo">
+          <legend class="filtros-admin__legenda">Localização</legend>
+          <div class="filtros-admin__campos">
+            <CampoDeFormulario id="filtro-cidade" rotulo="Cidade" valor={filtros.cidade} name="cidade"
+              aoMudar={(valor) => mudarCampo('cidade', valor)} />
+            <CampoDeSelecao
+              id="filtro-uf"
+              rotulo="UF"
+              name="uf"
+              valor={ufSelecionada}
+              placeholder="Todas"
+              opcoes={UFS.map((uf) => ({ valor: uf, rotulo: uf }))}
+              aoMudar={(valor) => {
+                const uf = UFS.find((item) => item === valor);
+                definirFiltros((atual) => ({ ...atual, uf: uf ? [uf] : [] }));
+              }}
+            />
+          </div>
+        </fieldset>
+
+        <fieldset class="filtros-admin__grupo">
+          <legend class="filtros-admin__legenda">Nascimento</legend>
+          <div class="filtros-admin__campos">
+            <CampoDeFormulario id="filtro-nascimento-de" rotulo="Nascimento de" tipo="date" name="dataNascimentoDe"
+              valor={filtros.dataNascimentoDe} aoMudar={(valor) => mudarCampo('dataNascimentoDe', valor)} />
+            <CampoDeFormulario id="filtro-nascimento-ate" rotulo="Nascimento até" tipo="date" name="dataNascimentoAte"
+              valor={filtros.dataNascimentoAte} aoMudar={(valor) => mudarCampo('dataNascimentoAte', valor)} />
+          </div>
+        </fieldset>
+
+        <fieldset class="filtros-admin__grupo">
+          <legend class="filtros-admin__legenda">Perfil e conta</legend>
+          <div class="filtros-admin__campos filtros-admin__campos--opcoes">
+            <OpcoesMarcaveis legenda="Gênero" nome="genero" opcoes={GENEROS} marcados={filtros.genero}
+              alternar={(valor) => definirFiltros((atual) => ({ ...atual, genero: alternado(atual.genero, valor) }))} />
+            <OpcoesMarcaveis legenda="Situação" nome="situacao" opcoes={SITUACOES} marcados={filtros.situacao}
+              alternar={(valor) =>
+                definirFiltros((atual) => ({ ...atual, situacao: alternado(atual.situacao, valor) }))} />
+          </div>
+        </fieldset>
+
+        <div class="acoes filtros-admin__acoes">
           <Botao type="submit">
             Filtrar
           </Botao>

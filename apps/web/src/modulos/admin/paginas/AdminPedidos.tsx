@@ -149,50 +149,74 @@ export default function AdminPedidos() {
           urlDaConsulta({ ...estado, filtros: { ...estado.filtros, status: status ? [status] : [] }, pagina: 1 })}
       />
 
+      {/* RF-VEN-009: os filtros avançados seguem a pergunta do administrador — qual pedido, de qual cliente,
+          quando foi feito e em que situação está. Os filtros de status mais usados ficam nas abas acima. */}
       <details class="cartao filtros-recolhidos" open={filtrosAvancados > 0}>
         <summary>Mais filtros{filtrosAvancados > 0 && ` (${filtrosAvancados})`}</summary>
-      <form class="filtros" role="search" aria-label="Filtrar pedidos" onSubmit={filtrar}>
-        <CampoDeFormulario id="filtro-numero" rotulo="Número do pedido" valor={filtros.numero} name="numero"
-          inputMode="numeric" erro={numeroValido(filtros.numero) ? undefined : NUMERO_INVALIDO}
-          aoMudar={(valor) => mudarCampo('numero', valor)} />
-        <CampoDeFormulario id="filtro-cliente-id" rotulo="Código do cliente" valor={filtros.clienteId}
-          name="clienteId" inputMode="numeric"
-          erro={numeroValido(filtros.clienteId) ? undefined : CODIGO_INVALIDO}
-          aoMudar={(valor) => mudarCampo('clienteId', valor)} />
-        <CampoDeFormulario id="filtro-cliente" rotulo="Cliente" valor={filtros.cliente} name="cliente"
-          aoMudar={(valor) => mudarCampo('cliente', valor)} />
-        <CampoDeFormulario id="filtro-cpf" rotulo="CPF" valor={filtros.cpf} name="cpf" inputMode="numeric"
-          aoMudar={(valor) => mudarCampo('cpf', valor)} />
-        <CampoDeFormulario id="filtro-realizado-de" rotulo="Realizado de" tipo="date" name="realizadoEmDe"
-          valor={filtros.realizadoEmDe} aoMudar={(valor) => mudarCampo('realizadoEmDe', valor)} />
-        <CampoDeFormulario id="filtro-realizado-ate" rotulo="Realizado até" tipo="date" name="realizadoEmAte"
-          valor={filtros.realizadoEmAte} aoMudar={(valor) => mudarCampo('realizadoEmAte', valor)} />
+        <form class="filtros filtros-admin" role="search" aria-label="Filtrar pedidos" onSubmit={filtrar}>
+          <fieldset class="filtros-admin__grupo">
+            <legend class="filtros-admin__legenda">Identificação</legend>
+            <div class="filtros-admin__campos">
+              <CampoDeFormulario id="filtro-numero" rotulo="Número do pedido" valor={filtros.numero} name="numero"
+                inputMode="numeric" erro={numeroValido(filtros.numero) ? undefined : NUMERO_INVALIDO}
+                aoMudar={(valor) => mudarCampo('numero', valor)} />
+              <CampoDeFormulario id="filtro-cliente-id" rotulo="Código do cliente" valor={filtros.clienteId}
+                name="clienteId" inputMode="numeric"
+                erro={numeroValido(filtros.clienteId) ? undefined : CODIGO_INVALIDO}
+                aoMudar={(valor) => mudarCampo('clienteId', valor)} />
+            </div>
+          </fieldset>
 
-        <OpcoesMarcaveis legenda="Status" nome="status" opcoes={STATUS} marcados={filtros.status}
-          alternar={(valor) =>
-            definirFiltros((atual) => ({ ...atual, status: alternarNaOrdem(STATUS, atual.status, valor) }))} />
-        <OpcoesMarcaveis legenda="Situação da troca" nome="situacao" opcoes={SITUACOES_DA_TROCA}
-          marcados={filtros.situacao}
-          alternar={(valor) => definirFiltros((atual) => ({
-            ...atual,
-            situacao: alternarNaOrdem(SITUACOES_DA_TROCA, atual.situacao, valor),
-          }))} />
+          <fieldset class="filtros-admin__grupo">
+            <legend class="filtros-admin__legenda">Cliente</legend>
+            <div class="filtros-admin__campos">
+              <CampoDeFormulario id="filtro-cliente" rotulo="Cliente" valor={filtros.cliente} name="cliente"
+                aoMudar={(valor) => mudarCampo('cliente', valor)} />
+              <CampoDeFormulario id="filtro-cpf" rotulo="CPF" valor={filtros.cpf} name="cpf" inputMode="numeric"
+                aoMudar={(valor) => mudarCampo('cpf', valor)} />
+            </div>
+          </fieldset>
 
-        <div class="acoes">
-          <Botao type="submit" disabled={!numeroValido(filtros.numero) || !numeroValido(filtros.clienteId)}>
-            Filtrar
-          </Botao>
-          <Botao variante="secundario"
-            type="button"
-            onClick={() => {
-              definirFiltros(filtrosVazios());
-              route('/admin/pedidos');
-            }}
-          >
-            Limpar filtros
-          </Botao>
-        </div>
-      </form>
+          <fieldset class="filtros-admin__grupo">
+            <legend class="filtros-admin__legenda">Período</legend>
+            <div class="filtros-admin__campos">
+              <CampoDeFormulario id="filtro-realizado-de" rotulo="Realizado de" tipo="date" name="realizadoEmDe"
+                valor={filtros.realizadoEmDe} aoMudar={(valor) => mudarCampo('realizadoEmDe', valor)} />
+              <CampoDeFormulario id="filtro-realizado-ate" rotulo="Realizado até" tipo="date" name="realizadoEmAte"
+                valor={filtros.realizadoEmAte} aoMudar={(valor) => mudarCampo('realizadoEmAte', valor)} />
+            </div>
+          </fieldset>
+
+          <fieldset class="filtros-admin__grupo">
+            <legend class="filtros-admin__legenda">Situação do pedido</legend>
+            <div class="filtros-admin__campos filtros-admin__campos--opcoes">
+              <OpcoesMarcaveis legenda="Status" nome="status" opcoes={STATUS} marcados={filtros.status}
+                alternar={(valor) =>
+                  definirFiltros((atual) => ({ ...atual, status: alternarNaOrdem(STATUS, atual.status, valor) }))} />
+              <OpcoesMarcaveis legenda="Situação da troca" nome="situacao" opcoes={SITUACOES_DA_TROCA}
+                marcados={filtros.situacao}
+                alternar={(valor) => definirFiltros((atual) => ({
+                  ...atual,
+                  situacao: alternarNaOrdem(SITUACOES_DA_TROCA, atual.situacao, valor),
+                }))} />
+            </div>
+          </fieldset>
+
+          <div class="acoes filtros-admin__acoes">
+            <Botao type="submit" disabled={!numeroValido(filtros.numero) || !numeroValido(filtros.clienteId)}>
+              Filtrar
+            </Botao>
+            <Botao variante="secundario"
+              type="button"
+              onClick={() => {
+                definirFiltros(filtrosVazios());
+                route('/admin/pedidos');
+              }}
+            >
+              Limpar filtros
+            </Botao>
+          </div>
+        </form>
       </details>
 
       <Erro problema={problemaDaAcao} />
