@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { useLocation } from 'preact-iso';
 import { itemAtivoDaNavbar, type ItemDaNavbar } from './regras/itemAtivo';
+import { rotuloDoCarrinho } from './regras/rotuloDoCarrinho';
 import { iniciais } from '../compartilhado/iniciais';
 import { PrazoDaReserva, useCarrinho } from '../modulos/carrinho';
 import { useNotificacoes } from '../modulos/notificacoes';
@@ -42,19 +43,35 @@ function BuscaGlobal() {
   );
 }
 
+/** Botão de ícone na navegação: abre a gaveta do carrinho, que mantém o link para a página completa (ALT-12). */
 function BotaoDoCarrinho({ ativo }: { ativo: boolean }) {
-  const { carrinho, abrirGaveta } = useCarrinho();
+  const { carrinho, gavetaAberta, abrirGaveta } = useCarrinho();
   const quantidade = carrinho?.quantidadeDeItens ?? 0;
   return (
     <button
       type="button"
       class={`navegacao__link botao-do-carrinho${ativo ? ' navegacao__link--ativo' : ''}`}
       aria-haspopup="dialog"
+      aria-expanded={gavetaAberta}
       aria-current={ativo ? 'page' : undefined}
-      aria-label={quantidade > 0 ? `Carrinho: ${quantidade} ${quantidade === 1 ? 'item' : 'itens'}` : 'Carrinho'}
+      aria-label={rotuloDoCarrinho(quantidade)}
       onClick={abrirGaveta}
     >
-      Carrinho
+      <svg
+        class="botao-do-carrinho__icone"
+        aria-hidden="true"
+        focusable="false"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="9" cy="20" r="1" />
+        <circle cx="18" cy="20" r="1" />
+        <path d="M2 3h2.5l2.4 11.2a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L21 7H5.2" />
+      </svg>
       {quantidade > 0 && <span class="contador contador--neutro">{quantidade}</span>}
     </button>
   );
