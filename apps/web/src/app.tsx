@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { Router, Route } from 'preact-iso';
 import { Cabecalho, NaoEncontrada } from './layout';
 import {
-  Admin,
   AdminAnalise,
   AdminAssistente,
   AdminCliente,
@@ -82,8 +81,6 @@ function Rotas() {
         <Route path="/admin/trocas" component={TrocasDoAdmin} />
         <Route path="/admin/analise" component={AnaliseDoAdmin} />
         <Route path="/admin/assistente" component={AssistenteDoAdmin} />
-        <Route path="/admin" component={AreaDoAdmin} />
-        <Route path="/admin/*" component={AreaDoAdmin} />
         <Route default component={NaoEncontrada} />
       </Router>
     </>
@@ -118,7 +115,6 @@ const AreaDoCliente = doCliente(MinhaConta);
 const CarrinhoDoCliente = doCliente(Carrinho);
 const CheckoutDoCliente = doCliente(Checkout);
 const NotificacoesDoCliente = doCliente(Notificacoes);
-const AreaDoAdmin = doAdmin(Admin);
 const NotificacoesDoAdmin = doAdmin(Notificacoes);
 const ClientesDoAdmin = doAdmin(AdminClientes);
 const ClienteDoAdmin = doAdmin(AdminCliente);

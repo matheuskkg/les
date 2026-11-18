@@ -2,18 +2,16 @@ import type { ComponentChildren } from 'preact';
 import { useLocation } from 'preact-iso';
 
 const secoes = [
-  { caminho: '/admin', rotulo: 'Resumo' },
   { caminho: '/admin/clientes', rotulo: 'Clientes' },
-  { caminho: '/admin/livros', rotulo: 'Livros' },
   { caminho: '/admin/pedidos', rotulo: 'Pedidos' },
   { caminho: '/admin/trocas', rotulo: 'Trocas' },
   { caminho: '/admin/analise', rotulo: 'Análise de vendas' },
   { caminho: '/admin/assistente', rotulo: 'Assistente' },
 ];
 
-/** A seção ativa inclui as telas de detalhe dela (`/admin/pedidos/12` fica em Pedidos); o resumo só na própria rota. */
+/** A seção ativa inclui as telas de detalhe dela (`/admin/pedidos/12` fica em Pedidos). */
 function ativa(caminho: string, path: string) {
-  return path === caminho || (caminho !== '/admin' && path.startsWith(`${caminho}/`));
+  return path === caminho || path.startsWith(`${caminho}/`);
 }
 
 /** Abas das seções da administração, acima de todas as telas do administrador. */

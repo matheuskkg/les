@@ -120,7 +120,7 @@ export function Cabecalho() {
             </>
           )}
           {usuario?.papel === 'ADMIN' && (
-            <a class="navegacao__link" href="/admin">
+            <a class="navegacao__link" href="/admin/clientes">
               Administração
             </a>
           )}
