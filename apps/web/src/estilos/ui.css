@@ -379,7 +379,7 @@ select.campo__entrada--compacta:not([multiple]):not([size]) {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 0.5rem 0.75rem;
 }
 
 .paginacao__campo {
@@ -394,6 +394,23 @@ select.campo__entrada--compacta:not([multiple]):not([size]) {
   font-size: 0.9rem;
   white-space: nowrap;
   cursor: pointer;
+}
+
+/* Controles enxutos: o campo e o seletor mostram pouca informação, então não usam a largura/altura de formulário. */
+.paginacao__campo .campo__entrada--compacta {
+  width: auto;
+  min-height: 2rem;
+  padding: 0.3rem 0.45rem;
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+/* O campo de página cabe poucos dígitos; o seletor de itens por página acompanha a opção mais larga. */
+.paginacao__campo .paginacao__entrada-pagina {
+  width: 3.5rem;
+  max-width: 100%;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
 }
 
 .paginacao__posicao {
