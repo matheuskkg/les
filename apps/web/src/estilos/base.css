@@ -465,3 +465,10 @@ p {
   font-size: 0.95rem;
   font-weight: 600;
 }
+
+/* ALT-12: o rótulo visual do item é o ícone; nome e quantidade ficam no botão para leitores de tela. */
+.botao-do-carrinho__icone {
+  display: block;
+  width: 1.35rem;
+  height: 1.35rem;
+}
