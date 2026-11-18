@@ -43,7 +43,7 @@ function BuscaGlobal() {
   );
 }
 
-/** Botão de ícone na navegação: abre a gaveta do carrinho, que mantém o link para a página completa (ALT-12). */
+/** Botão de ícone nas ações do cabeçalho: abre a gaveta do carrinho, com link para a página completa (ALT-12). Fica depois dos links e antes da conta (ALT-15). */
 function BotaoDoCarrinho({ ativo }: { ativo: boolean }) {
   const { carrinho, gavetaAberta, abrirGaveta } = useCarrinho();
   const quantidade = carrinho?.quantidadeDeItens ?? 0;
@@ -143,16 +143,13 @@ export function Cabecalho() {
             Vitrine
           </a>
           {usuario?.papel === 'CLIENTE' && (
-            <>
-              <BotaoDoCarrinho ativo={ativo === 'carrinho'} />
-              <a
-                class={classeDoItem('minha-conta', ativo)}
-                href="/minha-conta"
-                aria-current={ativo === 'minha-conta' ? 'page' : undefined}
-              >
-                Minha conta
-              </a>
-            </>
+            <a
+              class={classeDoItem('minha-conta', ativo)}
+              href="/minha-conta"
+              aria-current={ativo === 'minha-conta' ? 'page' : undefined}
+            >
+              Minha conta
+            </a>
           )}
           {usuario?.papel === 'ADMIN' && (
             <a
@@ -177,6 +174,7 @@ export function Cabecalho() {
         </nav>
 
         <div class="sessao">
+          {usuario?.papel === 'CLIENTE' && <BotaoDoCarrinho ativo={ativo === 'carrinho'} />}
           {carregando ? (
             <span class="sessao__carregando" role="status">
               Carregando…

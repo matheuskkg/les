@@ -96,7 +96,7 @@ p {
   flex-direction: column;
 }
 
-/* Cabeçalho fixo no topo: marca, busca, carrinho e sessão. */
+/* Cabeçalho fixo no topo: marca, busca, navegação e ações (carrinho à direita, antes da sessão). */
 .cabecalho {
   position: sticky;
   top: 0;
