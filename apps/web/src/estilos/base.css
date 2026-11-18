@@ -203,6 +203,14 @@ p {
   color: var(--cor-primaria-escura);
 }
 
+/* Item da tela atual (ALT-08): fundo suave e sublinhado sem deslocar o conteúdo. */
+.navegacao__link--ativo,
+.navegacao__link--ativo:hover {
+  background: var(--cor-primaria-clara);
+  box-shadow: inset 0 -2px 0 var(--cor-primaria);
+  color: var(--cor-primaria-escura);
+}
+
 .contador {
   display: inline-grid;
   place-items: center;
