@@ -8,6 +8,7 @@
 | :-: | :-: | :-: | :-: | :-: |
 | 29/10/2026 | 1.0 | Versão inicial | Matheus Kazuo Koike Graciliano | Rodrigo Rocha Silva |
 | 01/11/2026 | 1.1 | Seções 7 a 16: visões arquiteturais com diagramas UML, tamanho e performance, qualidade, cronograma macro e referências | Matheus Kazuo Koike Graciliano | Rodrigo Rocha Silva |
+| 17/11/2026 | 1.2 | Seção 12: código do cliente deixou de ser exibido nas telas e passou a constar como identificador interno | Matheus Kazuo Koike Graciliano | Rodrigo Rocha Silva |
 
 | **Cliente** | FATEC, Laboratório de Engenharia de Software (LES), Prof. Rodrigo Rocha Silva |
 | -: | - |
