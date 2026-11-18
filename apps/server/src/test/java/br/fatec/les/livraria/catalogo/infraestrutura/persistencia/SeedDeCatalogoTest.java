@@ -20,10 +20,18 @@ class SeedDeCatalogoTest {
 
     @Test
     void seedCarregaOsLivrosDoCatalogo() {
-        assertThat(livros.count()).isEqualTo(20);
+        assertThat(livros.count()).isEqualTo(26);
 
         LivroJpa ativoSemEstoque = livros.findById(20L).orElseThrow();
         assertThat(ativoSemEstoque.isAtivo()).isTrue();
+
+        // Os seis livros novos (21 a 26) ampliam o catálogo do seed (RNF-LIV-002) com autores e editoras novos.
+        for (long id = 21; id <= 26; id++) {
+            LivroJpa livro = livros.findById(id).orElseThrow();
+            assertThat(livro.isAtivo()).isTrue();
+            assertThat(livro.getAutores()).isNotEmpty();
+            assertThat(livro.getCategorias()).isNotEmpty();
+        }
     }
 
     @Test

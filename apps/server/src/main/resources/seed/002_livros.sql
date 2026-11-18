@@ -62,7 +62,25 @@ INSERT INTO livro (id, editora_id, grupo_precificacao_id, titulo, ano, edicao, i
      23.00, 16.00, 2.30, 0.510, '7891000000199', false),
     (20, 4, 2, 'Persuasão', 1817, '1ª edição', '9788500010200', 272,
      'Romance de Jane Austen sobre amor, razão e as convenções sociais.',
-     21.00, 14.00, 1.70, 0.350, '7891000000205', true);
+     21.00, 14.00, 1.70, 0.350, '7891000000205', true),
+    (21, 6, 1, 'Admirável Mundo Novo', 2019, '1ª edição', '9788500010217', 288,
+     'Uma sociedade futura onde estabilidade e felicidade são impostas pela ciência e pelo controle.',
+     21.00, 14.00, 1.70, 0.360, '7891000000210', true),
+    (22, 6, 2, 'Cem Anos de Solidão', 2015, '1ª edição', '9788500010224', 320,
+     'A história da família Buendía em Macondo, entre o real e o fantástico.',
+     21.00, 14.00, 2.00, 0.420, '7891000000227', true),
+    (23, 7, 3, 'A Insustentável Leveza do Ser', 2017, '1ª edição', '9788500010231', 352,
+     'Amor, política e exílio na vida de personagens que enfrentam o peso e a leveza das escolhas.',
+     21.00, 14.00, 2.10, 0.440, '7891000000234', true),
+    (24, 7, 2, 'A Guerra dos Mundos', 2018, '2ª edição', '9788500010248', 272,
+     'A invasão marciana vista por um narrador que tenta sobreviver ao colapso da civilização.',
+     21.00, 14.00, 1.80, 0.380, '7891000000241', true),
+    (25, 6, 1, 'A Origem das Espécies', 2016, '1ª edição', '9788500010255', 480,
+     'A teoria da evolução e a seleção natural explicadas na obra que mudou a biologia.',
+     23.00, 16.00, 2.80, 0.680, '7891000000258', true),
+    (26, 7, 3, 'O Homem em Busca do Sentido', 2020, '1ª edição', '9788500010262', 224,
+     'A experiência de um psiquiatra nos campos de concentração e a busca por sentido na adversidade.',
+     21.00, 14.00, 1.50, 0.300, '7891000000265', true);
 
 INSERT INTO livro_autor (livro_id, autor_id) VALUES
     (1, 1),
@@ -87,7 +105,13 @@ INSERT INTO livro_autor (livro_id, autor_id) VALUES
     (18, 7),
     (19, 4),
     (19, 7),
-    (20, 8);
+    (20, 8),
+    (21, 9),
+    (22, 10),
+    (23, 11),
+    (24, 12),
+    (25, 13),
+    (26, 14);
 
 INSERT INTO livro_categoria (livro_id, categoria_id) VALUES
     (1, 1),
@@ -117,4 +141,12 @@ INSERT INTO livro_categoria (livro_id, categoria_id) VALUES
     (18, 2),
     (19, 2),
     (19, 3),
-    (20, 1);
+    (20, 1),
+    (21, 2),
+    (22, 1),
+    (23, 1),
+    (24, 2),
+    (24, 5),
+    (25, 5),
+    (26, 1),
+    (26, 5);

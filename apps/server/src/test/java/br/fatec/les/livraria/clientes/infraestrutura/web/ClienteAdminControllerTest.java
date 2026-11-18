@@ -31,7 +31,8 @@ import jakarta.servlet.http.Cookie;
 /**
  * Consulta de clientes do administrador sobre o seed 201_clientes.sql (RF-CLI-004, DEC-07, DEC-10). Seed: Ana
  * (FEMININO, 1990, SP), Bruno (MASCULINO, 1985, RJ), Carla (FEMININO, 1992, MG, INATIVA), Diego (MASCULINO, 1978,
- * PR, ENCERRADA) e Elisa (NAO_INFORMADO, 1995, RS e SP).
+ * PR, ENCERRADA), Elisa (NAO_INFORMADO, 1995, RS e SP) e mais cinco clientes (Fernanda, Gustavo, Helena, Ivan e
+ * Juliana), todos NAO_INFORMADO, nascidos antes de 1990 e em UFs novas, para não alterar os filtros existentes.
  */
 @SpringBootTest
 class ClienteAdminControllerTest {
@@ -70,9 +71,10 @@ class ClienteAdminControllerTest {
     void rfCli004_semFiltroListaTodosEmOrdemDeNomeNoEnvelope() throws Exception {
         mvc.perform(comoAdmin(get(ROTA)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalItens").value(5))
+                .andExpect(jsonPath("$.totalItens").value(10))
                 .andExpect(jsonPath("$.itens[*].nome", contains(
-                        "Ana Souza", "Bruno Lima", "Carla Mendes", "Diego Rocha", "Elisa Prado")))
+                        "Ana Souza", "Bruno Lima", "Carla Mendes", "Diego Rocha", "Elisa Prado",
+                        "Fernanda Alves", "Gustavo Nunes", "Helena Castro", "Ivan Barbosa", "Juliana Dias")))
                 .andExpect(jsonPath("$.itens[0].id").value(1))
                 .andExpect(jsonPath("$.itens[0].email").value("ana.souza@livraria.test"))
                 .andExpect(jsonPath("$.itens[0].situacao").value("ATIVA"));
@@ -82,7 +84,7 @@ class ClienteAdminControllerTest {
     void rfCli004_paginaEOrdenaPorDataDeNascimento() throws Exception {
         mvc.perform(comoAdmin(get(ROTA).param("tamanho", "2").param("ordem", "dataNascimento,desc")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalPaginas").value(3))
+                .andExpect(jsonPath("$.totalPaginas").value(5))
                 .andExpect(jsonPath("$.itens[*].nome", contains("Elisa Prado", "Carla Mendes")));
     }
 

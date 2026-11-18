@@ -20,7 +20,7 @@ Escopos:
 | [DEC-08](DEC-08-autenticacao-e-sessao.md) | Autenticação, sessão e modelo de usuário | Aceita |
 | [DEC-09](DEC-09-topologia-de-execucao.md) | Topologia de execução de web e server | Aceita |
 | [DEC-13](DEC-13-processamento-do-pedido-e-notificacoes.md) | Processamento do pedido e notificações | Aceita |
-| [DEC-14](DEC-14-ids-nomes-e-seed.md) | IDs, nomes e seed | Aceita |
+| [DEC-14](DEC-14-ids-nomes-e-seed.md) | IDs, nomes e seed | Aceita (janela/volume do histórico substituídos por [DEC-20](DEC-20-janela-e-densidade-do-seed.md)) |
 | [DEC-15.3](DEC-15.3-saldo-de-estoque.md) | Saldo de estoque | Aceita |
 | [DEC-16](DEC-16-modelo-de-dados.md) | Modelo de dados | Aceita |
 | [DEC-17](DEC-17-organizacao-do-web.md) | Organização do código do web | Aceita |
@@ -42,6 +42,7 @@ Escopos:
 | [DEC-15.4](DEC-15.4-acesso-consultas-e-exportacao.md) | Ajustes de acesso, consultas e exportação | Aceita |
 | [DEC-18](DEC-18-bandeira-identificada-pelo-numero.md) | Bandeira do cartão identificada pelo número | Aceita |
 | [DEC-19](DEC-19-filtro-da-analise-por-datas.md) | Filtro da análise de vendas por datas exatas | Aceita |
+| [DEC-20](DEC-20-janela-e-densidade-do-seed.md) | Janela e densidade do histórico de seed | Aceita |
 
 ## Modelo
 

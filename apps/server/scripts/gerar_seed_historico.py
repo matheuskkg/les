@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 """Gera src/main/resources/seed/400_pedidos_historicos.sql (DEC-14, faixa 4NN, card ANA-01).
 
-Pedidos de novembro/2024 a outubro/2026 da Carla (cliente 3) e da Elisa (cliente 5), para a análise de vendas
-(RF-ANA-001) e o ranking. A Ana e o Bruno ficam sem histórico, porque os testes partem deles sem pedidos.
+Pedidos de novembro/2023 a outubro/2026 (36 meses no banco) para a análise de vendas (RF-ANA-001) e o ranking. A
+janela de 24 meses da RN-ANA-002 limita o RECORTE consultado no gráfico, não o histórico armazenado (DEC-20): por isso
+o seed pode ir além dela. Os clientes do histórico são a Carla (3), a Elisa (5) e os cinco clientes novos do seed
+201_clientes.sql (6 a 10). A Ana e o Bruno ficam sem histórico, porque os testes partem deles sem pedidos.
 
-O sorteio usa semente fixa, então o arquivo gerado é sempre o mesmo. Março/2025 não é sorteado: os pedidos dele são
-escritos à mão para que os testes da análise tenham valores esperados independentes do código:
+O sorteio usa sementes fixas, então o arquivo gerado é sempre o mesmo. O laço original (nov/2024 a out/2026), a Carla
+e a Elisa foram mantidos sem alteração: os testes de controller e os roteiros E2E conferem valores exatos deles. A
+massa adicional entra em dois laços posteriores, cada um com a própria semente, só nos meses que nenhum teste fixa e
+só para os clientes novos: o primeiro densifica os 17 meses livres dos 24 finais; o segundo cobre os 12 meses novos
+(nov/2023 a out/2024). Nenhum valor ou ID já conferido muda.
+
+Março/2025 não é sorteado: os pedidos dele são escritos à mão para que os testes da análise tenham valores esperados
+independentes do código:
 
 - Romance 95,76 e História 95,76: 2 × Dom Casmurro (duas categorias, valor cheio em cada), com frete e promocional
   BEMVINDO10, que não entram;
@@ -69,9 +77,66 @@ CLIENTES = {
         'cartao_reprovado': {'id': 5, 'bandeira': 'Hipercard', 'ultimosDigitos': '0000'},
         'frete': '22.00',
     },
+    # Clientes novos do seed 201_clientes.sql. Só eles recebem os pedidos adicionais, para que o histórico da Carla
+    # e da Elisa — conferido valor a valor pelos testes e pelo E2E — continue exatamente o mesmo.
+    6: {
+        'json': {'id': 6, 'nome': 'Fernanda Alves', 'cpf': '12345678062',
+                 'email': 'fernanda.alves@livraria.test', 'telefone': '(47) 98888-7006'},
+        'endereco': {'id': 8, 'nomeCurto': 'Casa', 'tipoEndereco': 'CASA', 'tipoLogradouro': 'RUA',
+                     'logradouro': 'Rua do Lago', 'numero': '120', 'bairro': 'Centro', 'cep': '88010000',
+                     'cidade': 'Florianópolis', 'uf': 'SC', 'pais': 'Brasil'},
+        'cartao': {'id': 6, 'bandeira': 'Visa', 'ultimosDigitos': '5557'},
+        'frete': '16.00',
+    },
+    7: {
+        'json': {'id': 7, 'nome': 'Gustavo Nunes', 'cpf': '23456789092',
+                 'email': 'gustavo.nunes@livraria.test', 'telefone': '(71) 98888-7007'},
+        'endereco': {'id': 9, 'nomeCurto': 'Casa', 'tipoEndereco': 'CASA', 'tipoLogradouro': 'AVENIDA',
+                     'logradouro': 'Avenida Sete de Setembro', 'numero': '2340', 'bairro': 'Vitória',
+                     'cep': '40060000', 'cidade': 'Salvador', 'uf': 'BA', 'pais': 'Brasil'},
+        'cartao': {'id': 7, 'bandeira': 'Mastercard', 'ultimosDigitos': '4442'},
+        'frete': '20.00',
+    },
+    8: {
+        'json': {'id': 8, 'nome': 'Helena Castro', 'cpf': '34567890175',
+                 'email': 'helena.castro@livraria.test', 'telefone': '(81) 98888-7008'},
+        'endereco': {'id': 10, 'nomeCurto': 'Casa', 'tipoEndereco': 'CASA', 'tipoLogradouro': 'RUA',
+                     'logradouro': 'Rua da Aurora', 'numero': '765', 'bairro': 'Boa Vista', 'cep': '50050040',
+                     'cidade': 'Recife', 'uf': 'PE', 'pais': 'Brasil'},
+        'cartao': {'id': 8, 'bandeira': 'Elo', 'ultimosDigitos': '7017'},
+        'frete': '18.00',
+    },
+    9: {
+        'json': {'id': 9, 'nome': 'Ivan Barbosa', 'cpf': '45678901249',
+                 'email': 'ivan.barbosa@livraria.test', 'telefone': '(91) 98888-7009'},
+        'endereco': {'id': 11, 'nomeCurto': 'Casa', 'tipoEndereco': 'CASA', 'tipoLogradouro': 'AVENIDA',
+                     'logradouro': 'Avenida Presidente Vargas', 'numero': '890', 'bairro': 'Centro',
+                     'cep': '66010000', 'cidade': 'Belém', 'uf': 'PA', 'pais': 'Brasil'},
+        'cartao': {'id': 9, 'bandeira': 'American Express', 'ultimosDigitos': '0006'},
+        'frete': '24.00',
+    },
+    10: {
+        'json': {'id': 10, 'nome': 'Juliana Dias', 'cpf': '56789012303',
+                 'email': 'juliana.dias@livraria.test', 'telefone': '(62) 98888-7010'},
+        'endereco': {'id': 12, 'nomeCurto': 'Casa', 'tipoEndereco': 'CASA', 'tipoLogradouro': 'RUA',
+                     'logradouro': 'Rua 24 de Outubro', 'numero': '315', 'bairro': 'Setor Marista',
+                     'cep': '74175020', 'cidade': 'Goiânia', 'uf': 'GO', 'pais': 'Brasil'},
+        'cartao': {'id': 10, 'bandeira': 'Hipercard', 'ultimosDigitos': '0004'},
+        'frete': '19.00',
+    },
 }
 
-PROMOCIONAIS = {1: ('BEMVINDO10', 'VALOR_FIXO'), 4: ('FRETE5', 'FRETE_VALOR_FIXO')}
+PROMOCIONAIS = {1: ('BEMVINDO10', 'VALOR_FIXO'), 4: ('FRETE5', 'FRETE_VALOR_FIXO'),
+                7: ('FRETE10', 'FRETE_VALOR_FIXO')}
+
+# Meses sem valor fixado por teste de controller nem por roteiro E2E. O histórico continua cobrindo os 24 meses; estes
+# são os meses em que a massa adicional pode entrar sem alterar os valores que a apresentação mostra.
+MESES_EXTRA = [(2024, 12), (2025, 2), (2025, 5), (2025, 7), (2025, 8), (2025, 9), (2025, 10), (2025, 11),
+               (2026, 1), (2026, 2), (2026, 3), (2026, 4), (2026, 5), (2026, 6), (2026, 7), (2026, 8), (2026, 9)]
+# Os 12 meses que antecedem o histórico original. A consulta da análise continua limitada a 24 meses (RN-ANA-002);
+# estes meses ampliam a janela do banco, não a da tela (DEC-20).
+MESES_ANTIGOS = [(2023, 11), (2023, 12)] + [(2024, mes) for mes in range(1, 11)]
+NOVOS_CLIENTES = [6, 7, 8, 9, 10]
 
 
 def js(valor):
@@ -109,6 +174,8 @@ class Seed:
             desconto = Decimal('10.00')
         elif promocional == 4:
             desconto = Decimal('5.00')
+        elif promocional == 7:
+            desconto = Decimal('10.00')
         total = subtotal + frete - desconto
         entregue_em = None
         if status == 'ENTREGUE':
@@ -231,8 +298,69 @@ def main():
                 if escolhidos:
                     troca = (sorteio.choice(['TROCADO', 'TROCADO', 'TROCA_RECUSADA']), escolhidos)
             seed.pedido(cliente, realizado, status, itens, promocional=promocional, troca=troca)
+
+    # Massa adicional: semente separada para não deslocar o sorteio original; só clientes novos e só meses sem valor
+    # fixado por teste de controller ou roteiro E2E. O período continua sendo nov/2024 a out/2026 (24 meses,
+    # RN-ANA-002), agora com bem mais pedidos e trocas distribuídos por ele.
+    extra = random.Random(2027)
+    # DEC-15.2: cada cliente usa cada promocional no máximo uma vez (há unique constraint no banco).
+    usos_promocionais = set()
+    for ano, mes in MESES_EXTRA:
+        for _ in range(extra.randint(18, 26)):
+            dia = extra.randint(1, 28)
+            realizado = datetime(ano, mes, dia, extra.randint(8, 21), extra.choice([0, 15, 30, 45]))
+            cliente = extra.choice(NOVOS_CLIENTES)
+            livros = extra.sample(sorted(LIVROS), extra.choice([1, 1, 2, 2, 3]))
+            itens = [(livro, extra.choice([1, 1, 1, 2, 3]), LIVROS[livro][6]) for livro in livros]
+            if extra.random() < 0.08:
+                status = 'REPROVADA'
+            elif (ano, mes) == (2026, 9) and dia >= 22:
+                status = extra.choice(['APROVADA', 'EM_TRANSPORTE'])
+            else:
+                status = 'ENTREGUE'
+            promocional = None
+            if status != 'REPROVADA':
+                disponiveis = [p for p in (4, 7) if (p, cliente) not in usos_promocionais]
+                if disponiveis and extra.random() < 0.15:
+                    promocional = extra.choice(disponiveis)
+                    usos_promocionais.add((promocional, cliente))
+            troca = None
+            if status == 'ENTREGUE' and extra.random() < 0.20:
+                escolhidos = [(i, extra.randint(1, itens[i][1])) for i in range(len(itens)) if extra.random() < 0.7]
+                if escolhidos:
+                    trocas = ['TROCADO', 'TROCADO', 'TROCADO', 'TROCA_RECUSADA', 'TROCA_AUTORIZADA']
+                    troca = (extra.choice(trocas), escolhidos)
+            seed.pedido(cliente, realizado, status, itens, promocional=promocional, troca=troca)
+
+    # Janela estendida do banco: nov/2023 a out/2024, 12 meses novos com a mesma densidade dos meses densificados.
+    # Semente própria para não deslocar os laços anteriores, e nenhum mês fica sem venda. A RN-ANA-002 continua
+    # limitando o recorte da análise a 24 meses; aqui se amplia só o histórico disponível (DEC-20).
+    antigos = random.Random(2030)
+    for ano, mes in MESES_ANTIGOS:
+        for _ in range(antigos.randint(16, 22)):
+            dia = antigos.randint(1, 28)
+            realizado = datetime(ano, mes, dia, antigos.randint(8, 21), antigos.choice([0, 15, 30, 45]))
+            cliente = antigos.choice(NOVOS_CLIENTES)
+            livros = antigos.sample(sorted(LIVROS), antigos.choice([1, 1, 2, 2, 3]))
+            itens = [(livro, antigos.choice([1, 1, 1, 2, 3]), LIVROS[livro][6]) for livro in livros]
+            status = 'REPROVADA' if antigos.random() < 0.08 else 'ENTREGUE'
+            promocional = None
+            if status != 'REPROVADA':
+                disponiveis = [p for p in (4, 7) if (p, cliente) not in usos_promocionais]
+                if disponiveis and antigos.random() < 0.10:
+                    promocional = antigos.choice(disponiveis)
+                    usos_promocionais.add((promocional, cliente))
+            troca = None
+            if status == 'ENTREGUE' and antigos.random() < 0.18:
+                escolhidos = [(i, antigos.randint(1, itens[i][1])) for i in range(len(itens)) if antigos.random() < 0.7]
+                if escolhidos:
+                    trocas = ['TROCADO', 'TROCADO', 'TROCA_RECUSADA', 'TROCA_AUTORIZADA']
+                    troca = (antigos.choice(trocas), escolhidos)
+            seed.pedido(cliente, realizado, status, itens, promocional=promocional, troca=troca)
+
     SAIDA.write_text(seed.sql() + '\n', encoding='utf-8')
-    print(f'{SAIDA.name}: {len(seed.pedidos)} pedidos, {len(seed.itens)} itens, {len(seed.trocas)} trocas')
+    print(f'{SAIDA.name}: {len(seed.pedidos)} pedidos, {len(seed.itens)} itens, {len(seed.trocas)} trocas, '
+          f'{len(seed.cupons)} cupons de troca')
 
 
 if __name__ == '__main__':
