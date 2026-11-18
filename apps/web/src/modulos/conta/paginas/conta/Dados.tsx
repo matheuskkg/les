@@ -125,7 +125,6 @@ export function Dados() {
     <>
       <form class="formulario cartao" noValidate onSubmit={(evento) => void salvar(evento)}>
         <h2>Meus dados</h2>
-        <p>Código do cliente: {dados.id}</p>
         <p>
           Ranking de cliente: <strong data-testid="ranking">{dados.ranking}</strong> de 100, pelas compras dos últimos
           12 meses.

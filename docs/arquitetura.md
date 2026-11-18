@@ -173,8 +173,9 @@ banco Postgres de desenvolvimento (não há dados reais).
 
 Definidos no [DEC-14](decisoes/DEC-14-ids-nomes-e-seed.md):
 
-- ID `Long` por `SEQUENCE` própria de cada tabela (`<tabela>_seq`, valor inicial 10000). O ID é o código exibido de
-  cliente, livro e pedido.
+- ID `Long` por `SEQUENCE` própria de cada tabela (`<tabela>_seq`, valor inicial 10000). O ID é o código do cliente, o
+  código do livro e o número do pedido; o código do cliente é identificador interno e não aparece na interface
+  (ALT-11).
 - Tabelas e colunas em snake_case, em português e no singular, com `@Table(name = ...)` em cada `*Jpa`. Tabelas do
   Envers com sufixo `_aud`.
 - Índices em `@Table(indexes = ...)` nas colunas filtradas ou ordenadas e nas chaves estrangeiras consultadas

@@ -77,7 +77,6 @@ export default function AdminCliente() {
           <div class="cartao">
             <h2>Dados</h2>
             <dl class="detalhe__campos">
-              <div><dt>Código</dt><dd>{visivel.cliente.id}</dd></div>
               <div><dt>CPF</dt><dd>{formatarCpf(visivel.cliente.cpf)}</dd></div>
               <div><dt>E-mail</dt><dd>{visivel.cliente.email}</dd></div>
               <div><dt>Telefone</dt><dd>{visivel.cliente.telefone ?? '—'}</dd></div>

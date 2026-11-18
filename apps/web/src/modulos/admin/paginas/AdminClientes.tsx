@@ -84,7 +84,7 @@ export default function AdminClientes() {
       <header>
         <h1>Clientes</h1>
         <p class="pagina__introducao">
-          Consulte os clientes por qualquer combinação dos campos. O código é o número do cadastro.
+          Consulte os clientes por qualquer combinação dos campos.
         </p>
       </header>
 
@@ -192,7 +192,6 @@ export default function AdminClientes() {
             <table class="tabela">
               <thead>
                 <tr>
-                  <th scope="col">Código</th>
                   <th scope="col">Nome</th>
                   <th scope="col">CPF</th>
                   <th scope="col">E-mail</th>
@@ -206,7 +205,6 @@ export default function AdminClientes() {
               <tbody>
                 {pagina.itens.map((item) => (
                   <tr key={item.id}>
-                    <td>{item.id}</td>
                     <td>
                       <a href={urlDoCliente(item.id, busca)}>{item.nome}</a>
                     </td>
