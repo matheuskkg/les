@@ -8,6 +8,7 @@ import { useNotificacoes } from '../modulos/notificacoes';
 import { paginaDeNotificacoes, textoDoContador } from '../modulos/notificacoes/regras/notificacoes';
 import { useSessao } from '../modulos/sessao';
 import { Botao, BotaoLink } from '../ui/Botao';
+import { IconeCarrinho } from '../ui/icones';
 
 /** Busca livre da vitrine (título, autor, editora ou ISBN); acompanha o `q` da URL. */
 function BuscaGlobal() {
@@ -57,21 +58,7 @@ function BotaoDoCarrinho({ ativo }: { ativo: boolean }) {
       aria-label={rotuloDoCarrinho(quantidade)}
       onClick={abrirGaveta}
     >
-      <svg
-        class="botao-do-carrinho__icone"
-        aria-hidden="true"
-        focusable="false"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <circle cx="9" cy="20" r="1" />
-        <circle cx="18" cy="20" r="1" />
-        <path d="M2 3h2.5l2.4 11.2a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L21 7H5.2" />
-      </svg>
+      <IconeCarrinho class="botao-do-carrinho__icone" />
       {quantidade > 0 && <span class="contador contador--neutro">{quantidade}</span>}
     </button>
   );
