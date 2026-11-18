@@ -18,6 +18,7 @@ import {
   type EstadoDaAnalise,
 } from '../regras/filtrosDaAnalise';
 import { formatarDinheiro } from '../../../compartilhado/formatacao';
+import { buscaDaUrl } from '../../../compartilhado/url';
 import { Botao } from '../../../ui/Botao';
 
 type Analise = components['schemas']['AnaliseDeVendasDto'];
@@ -61,7 +62,7 @@ async function carregarCatalogo(signal: AbortSignal): Promise<Categoria[]> {
 
 export default function AdminAnalise() {
   const { url, route } = useLocation();
-  const busca = url.includes('?') ? url.slice(url.indexOf('?')) : '';
+  const busca = buscaDaUrl(url);
   const estado = useMemo(() => lerEstadoDaAnalise(busca, new Date()), [busca]);
   const [catalogo, definirCatalogo] = useState<Categoria[] | null>(null);
   const [problemaDoCatalogo, definirProblemaDoCatalogo] = useState<ProblemaDetalhe | null>(null);

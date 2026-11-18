@@ -29,6 +29,11 @@ test('destinoSeguro recusa outra origem, esquemas e barras invertidas', () => {
   assert.equal(destinoSeguro('admin', admin, origem), '/admin/clientes');
 });
 
+test('destinoSeguro recusa caracteres de controle que o parser de URL remove', () => {
+  assert.equal(destinoSeguro('/\t/evil.example/admin', admin, origem), '/admin/clientes');
+  assert.equal(destinoSeguro('/\n/evil.example/minha-conta', cliente, origem), '/minha-conta');
+});
+
 test('destinoSeguro respeita o papel do usuário', () => {
   assert.equal(destinoSeguro('/admin', cliente, origem), '/minha-conta');
   assert.equal(destinoSeguro('/minha-conta', admin, origem), '/admin/clientes');

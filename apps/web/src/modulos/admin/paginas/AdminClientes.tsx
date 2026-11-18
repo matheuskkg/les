@@ -9,6 +9,7 @@ import { OpcoesMarcaveis } from '../../../ui/OpcoesMarcaveis';
 import { GENEROS, ORDENS, SITUACOES, UFS, consultaDoEstado, filtrosVazios, lerEstadoDaConsulta, rotuloDe, urlDaConsulta, urlDoCliente, type CampoDeTexto, type FiltrosDeClientes } from '../regras/filtrosDeClientes';
 import { OPCOES_DE_TAMANHO } from '../regras/paginacao';
 import { formatarCpf, formatarData } from '../../../compartilhado/formatacao';
+import { buscaDaUrl } from '../../../compartilhado/url';
 import { Botao } from '../../../ui/Botao';
 import { Paginacao } from '../../../ui/Paginacao';
 import { SeletorDeOrdem } from '../../../ui/SeletorDeOrdem';
@@ -28,7 +29,7 @@ function alternado<T>(lista: T[], valor: T): T[] {
 /** Consulta de clientes do administrador, com filtros combinados guardados na URL (RF-CLI-004). */
 export default function AdminClientes() {
   const { url, route } = useLocation();
-  const busca = url.includes('?') ? url.slice(url.indexOf('?')) : '';
+  const busca = buscaDaUrl(url);
   const estado = useMemo(() => lerEstadoDaConsulta(busca), [busca]);
   const [filtros, definirFiltros] = useState<FiltrosDeClientes>(estado.filtros);
   const [resultado, definirResultado] = useState<Resultado | null>(null);

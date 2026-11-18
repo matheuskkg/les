@@ -3,6 +3,7 @@ import { useLocation } from 'preact-iso';
 import { cliente } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
 import { formatarData } from '../../../compartilhado/formatacao';
+import { buscaDaUrl } from '../../../compartilhado/url';
 import { useCarregamento } from '../../../compartilhado/useCarregamento';
 import { Botao } from '../../../ui/Botao';
 import { CampoDeFormulario } from '../../../ui/CampoDeFormulario';
@@ -31,7 +32,7 @@ type ProvedorIa = components['schemas']['ProvedorIaDto'];
  */
 export default function AdminAssistente() {
   const { url, route } = useLocation();
-  const busca = url.includes('?') ? url.slice(url.indexOf('?')) : '';
+  const busca = buscaDaUrl(url);
   const periodo = useMemo(() => lerPeriodoDasMetricas(busca, new Date()), [busca]);
   const [filtros, definirFiltros] = useState<PeriodoDasMetricas>(periodo);
   const [cadeia, definirCadeia] = useState<ProvedorIa[] | null>(null);

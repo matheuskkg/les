@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { consultaDoEstado, lerEstadoDaConsulta, numeroValido, urlDaConsulta } from './filtrosDePedidos.ts';
+import {
+  consultaDoEstado,
+  lerEstadoDaConsulta,
+  numeroValido,
+  urlDaConsulta,
+  urlDeVoltaDoPedido,
+  urlDoPedido,
+} from './filtrosDePedidos.ts';
+import { buscaDaUrl, urlDoDetalhe } from '../../../compartilhado/url.ts';
+import { urlDoCliente } from './filtrosDeClientes.ts';
 import { TAMANHO_PADRAO } from './paginacao.ts';
 
 test('lerEstadoDaConsulta usa os padrões e ignora valores desconhecidos', () => {
@@ -51,4 +60,33 @@ test('consultaDoEstado não envia número que não é inteiro', () => {
   assert.equal(numeroValido('12a'), false);
   assert.equal(consultaDoEstado(lerEstadoDaConsulta('?numero=12a')).numero, undefined);
   assert.equal(consultaDoEstado(lerEstadoDaConsulta('?numero=-3')).numero, undefined);
+});
+
+test('urlDoPedido e urlDeVoltaDoPedido preservam filtros, ordem, página e tamanho (RF-VEN-009, RNF-GER-001)', () => {
+  const estado = lerEstadoDaConsulta(
+    '?numero=10001&cliente=ana&realizadoEmDe=2026-10-01&status=APROVADA&status=ENTREGUE' +
+      '&situacao=EM_TROCA&ordem=total,asc&tamanho=50&pagina=3',
+  );
+  const consulta = urlDaConsulta(estado);
+  const detalhe = urlDoPedido(123, consulta.slice(consulta.indexOf('?')));
+
+  const volta = urlDeVoltaDoPedido(buscaDaUrl(detalhe));
+  assert.equal(volta, consulta);
+  assert.deepEqual(lerEstadoDaConsulta(volta.slice(volta.indexOf('?'))), estado);
+});
+
+test('RF-CLI-005: pedido aberto no cadastro do cliente volta com os filtros dele', () => {
+  const origem = urlDoCliente(42, '?nome=ana&situacao=ATIVA&pagina=2&tamanho=20');
+  const detalhe = urlDoDetalhe('/admin/pedidos/123', origem);
+  assert.equal(urlDeVoltaDoPedido(buscaDaUrl(detalhe)), origem);
+});
+
+test('urlDeVoltaDoPedido aceita qualquer origem válida e volta aos pedidos sem uma (RF-VEN-013)', () => {
+  const origem = '/admin/trocas?status=TROCADO&pagina=2';
+  const detalhe = urlDoPedido(123, '?status=APROVADA');
+  const parametros = new URLSearchParams(buscaDaUrl(detalhe));
+  parametros.set('de', origem);
+  assert.equal(urlDeVoltaDoPedido(`?${parametros}`), origem);
+  assert.equal(urlDeVoltaDoPedido('?de=javascript%3Aalert(1)'), '/admin/pedidos');
+  assert.equal(urlDeVoltaDoPedido(''), '/admin/pedidos');
 });

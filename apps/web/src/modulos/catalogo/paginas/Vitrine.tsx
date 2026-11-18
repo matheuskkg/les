@@ -3,6 +3,7 @@ import { useLocation } from 'preact-iso';
 import { cliente } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
 import { formatarDinheiro } from '../../../compartilhado/formatacao';
+import { buscaDaUrl } from '../../../compartilhado/url';
 import { useCarregamento } from '../../../compartilhado/useCarregamento';
 import { Botao } from '../../../ui/Botao';
 import { CampoDeFormulario } from '../../../ui/CampoDeFormulario';
@@ -21,6 +22,7 @@ import {
   filtrosVazios,
   lerEstadoDaVitrine,
   urlDoEstado,
+  urlDoLivro,
   type CampoDeTexto,
   type EstadoDaVitrine,
   type FiltrosDeLivros,
@@ -41,18 +43,20 @@ const CAMPOS_AVANCADOS: readonly { campo: CampoDeTexto; rotulo: string; placehol
   { campo: 'anoAte', rotulo: 'Ano até', placeholder: 'Ex.: 2026' },
 ];
 
-function CartaoDeLivro({ livro }: { livro: LivroListado }) {
+function CartaoDeLivro({ livro, busca }: { livro: LivroListado; busca: string }) {
   const disponivel = livro.disponivel > 0;
   const autores = livro.autores.join('; ');
   const meta = `${livro.editora} · ${livro.ano}`;
+  // A busca da vitrine acompanha o detalhe, para o "Voltar" reconstruí-la (RF-LIV-005).
+  const href = urlDoLivro(livro.id, busca);
 
   return (
     <article class={`livro${disponivel ? '' : ' livro--esgotado'}`}>
-      <a class="livro__capa" href={`/livros/${livro.id}`} tabIndex={-1} aria-hidden="true">
+      <a class="livro__capa" href={href} tabIndex={-1} aria-hidden="true">
         <CapaDeLivro titulo={livro.titulo} autores={livro.autores} categoria={livro.categorias[0]?.nome} />
       </a>
       <h2 class="livro__titulo" title={livro.titulo}>
-        <a href={`/livros/${livro.id}`}>{livro.titulo}</a>
+        <a href={href}>{livro.titulo}</a>
       </h2>
       <p class="livro__autores" title={autores}>
         {autores}
@@ -109,7 +113,7 @@ function Categorias({
 export default function Vitrine() {
   const { url, route } = useLocation();
   const { usuario } = useSessao();
-  const busca = url.includes('?') ? url.slice(url.indexOf('?')) : '';
+  const busca = buscaDaUrl(url);
   const estado = useMemo(() => lerEstadoDaVitrine(busca), [busca]);
   const [filtros, definirFiltros] = useState<FiltrosDeLivros>(estado.filtros);
 
@@ -230,7 +234,7 @@ export default function Vitrine() {
               <ul class={`grade-de-livros${livros.carregando ? ' grade-de-livros--atualizando' : ''}`}>
                 {pagina.itens.map((livro) => (
                   <li key={livro.id}>
-                    <CartaoDeLivro livro={livro} />
+                    <CartaoDeLivro livro={livro} busca={busca} />
                   </li>
                 ))}
               </ul>

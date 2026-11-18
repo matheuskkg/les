@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { buscaDaUrl } from '../../../compartilhado/url.ts';
 import {
   ORDEM_PADRAO,
   TAMANHO_DA_PAGINA,
@@ -9,7 +10,9 @@ import {
   filtrosVazios,
   lerEstadoDaVitrine,
   ordemValida,
+  urlDeVoltaAVitrine,
   urlDoEstado,
+  urlDoLivro,
   type EstadoDaVitrine,
 } from './filtrosDeLivros.ts';
 
@@ -160,6 +163,22 @@ test('RF-LIV-005: a busca livre q vai da URL para a consulta', () => {
   assert.equal(estado.filtros.q, 'machado');
   assert.equal(consultaDoEstado(estado).q, 'machado');
   assert.equal(urlDoEstado(estado), '/?q=machado');
+});
+
+test('RF-LIV-005: urlDoLivro e urlDeVoltaAVitrine preservam a busca no retorno', () => {
+  const busca = '?q=machado&categoria=3&ordem=ano,desc&pagina=2';
+  const detalhe = urlDoLivro(12, busca);
+  const volta = urlDeVoltaAVitrine(buscaDaUrl(detalhe));
+
+  assert.equal(volta, urlDoEstado(lerEstadoDaVitrine(busca)));
+  assert.deepEqual(lerEstadoDaVitrine(volta.slice(volta.indexOf('?'))), lerEstadoDaVitrine(busca));
+});
+
+test('RF-LIV-005: sem filtros o link do livro fica limpo e o voltar é a vitrine', () => {
+  assert.equal(urlDoLivro(12, ''), '/livros/12');
+  assert.equal(urlDoLivro(12, '?ordem=titulo,asc&pagina=1&categoria=x'), '/livros/12');
+  assert.equal(urlDeVoltaAVitrine(''), '/');
+  assert.equal(urlDeVoltaAVitrine('?de=https%3A%2F%2Fexemplo.com'), '/');
 });
 
 test('filtrosEmUso conta textos preenchidos e categorias', () => {

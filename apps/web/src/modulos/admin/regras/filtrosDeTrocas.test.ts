@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { consultaDasTrocas, lerEstadoDasTrocas, urlDasTrocas } from './filtrosDeTrocas.ts';
 import { TAMANHO_PADRAO } from './paginacao.ts';
+import { urlDeVoltaDoPedido } from './filtrosDePedidos.ts';
+import { buscaDaUrl, urlDoDetalhe } from '../../../compartilhado/url.ts';
 
 test('RF-VEN-013: sem filtro na URL, a tela mostra as trocas EM TROCA', () => {
   assert.deepEqual(lerEstadoDasTrocas(''), { status: 'EM_TROCA', pagina: 1, tamanho: TAMANHO_PADRAO });
@@ -19,6 +21,15 @@ test('RF-VEN-013: status, página e tamanho fazem ida e volta pela URL', () => {
   const url = urlDasTrocas(estado);
   assert.ok(url.includes('tamanho=20'));
   assert.deepEqual(lerEstadoDasTrocas(url.slice(url.indexOf('?'))), estado);
+});
+
+test('RF-VEN-013: o filtro das trocas sobrevive à ida ao pedido e ao voltar', () => {
+  const estado = lerEstadoDasTrocas('?status=TROCADO&tamanho=50&pagina=3');
+  const detalhe = urlDoDetalhe('/admin/pedidos/123', urlDasTrocas(estado));
+  const volta = urlDeVoltaDoPedido(buscaDaUrl(detalhe));
+
+  assert.equal(volta, urlDasTrocas(estado));
+  assert.deepEqual(lerEstadoDasTrocas(volta.slice(volta.indexOf('?'))), estado);
 });
 
 test('RNF-GER-001: "todas" não envia status e a página da API começa em 0', () => {

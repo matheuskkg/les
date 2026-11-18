@@ -1,5 +1,6 @@
 import type { paths } from '../../../api/esquema';
 import { textoDoStatus } from '../../../compartilhado/formatacao.ts';
+import { urlDeVolta, urlDoDetalhe } from '../../../compartilhado/url.ts';
 import { TAMANHO_PADRAO, normalizarPagina, normalizarTamanho } from './paginacao.ts';
 
 /** Parâmetros de `GET /api/admin/pedidos`, como definidos no contrato (RF-VEN-009, DEC-07). */
@@ -99,6 +100,19 @@ export function urlDaConsulta(estado: EstadoDaConsulta): string {
   }
   const texto = parametros.toString();
   return texto === '' ? '/admin/pedidos' : `/admin/pedidos?${texto}`;
+}
+
+/**
+ * Leva a consulta aplicada para a URL do detalhe do pedido, de modo que o retorno não perca filtros, ordem, página
+ * ou tamanho (RF-VEN-009, RNF-GER-001). A busca é normalizada como em {@link urlDaConsulta}.
+ */
+export function urlDoPedido(id: string | number, busca: string): string {
+  return urlDoDetalhe(`/admin/pedidos/${id}`, urlDaConsulta(lerEstadoDaConsulta(busca)));
+}
+
+/** Recompõe a consulta de origem guardada na URL do detalhe (RF-VEN-009, RF-VEN-013). */
+export function urlDeVoltaDoPedido(busca: string): string {
+  return urlDeVolta(busca, '/admin/pedidos');
 }
 
 /** Número (do pedido ou do cliente) em branco ou só com dígitos; outro texto não vai para a API. */
