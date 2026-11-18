@@ -116,6 +116,11 @@
   height: 1.15rem;
 }
 
+.cadeia__acoes {
+  /* Mantém Subir e Descer na mesma linha; o alinhamento à esquerda vem da tabela. */
+  white-space: nowrap;
+}
+
 .metricas__falhas {
   margin: 0;
   padding: 0;

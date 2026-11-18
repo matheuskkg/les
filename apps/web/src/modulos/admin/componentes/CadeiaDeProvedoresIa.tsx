@@ -86,7 +86,7 @@ export function CadeiaDeProvedoresIa({ gravada, aoSalvar }: Props) {
         <table class="tabela" aria-label="Cadeia de provedores de IA">
           <thead>
             <tr>
-              <th scope="col" class="tabela__numero">Ordem</th>
+              <th scope="col">Ordem</th>
               <th scope="col">Provedor</th>
               <th scope="col">Chave</th>
               <th scope="col">Última falha</th>
@@ -97,7 +97,7 @@ export function CadeiaDeProvedoresIa({ gravada, aoSalvar }: Props) {
           <tbody>
             {editada.map((provedor, indice) => (
               <tr key={provedor.id}>
-                <td class="tabela__numero">{indice + 1}</td>
+                <td>{indice + 1}</td>
                 <td>
                   <strong>{provedor.nome}</strong>
                   {provedor.modelo && <span class="cadeia__modelo">{provedor.modelo}</span>}
@@ -120,7 +120,7 @@ export function CadeiaDeProvedoresIa({ gravada, aoSalvar }: Props) {
                   />
                 </td>
                 <td>
-                  <div class="tabela__acoes">
+                  <div class="cadeia__acoes">
                     <Botao id={`provedor-subir-${provedor.id}`} variante="discreto" disabled={indice === 0}
                       aria-label={`Subir ${provedor.nome}`} onClick={() => mover(provedor.id, -1)}>
                       Subir
