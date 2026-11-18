@@ -373,12 +373,26 @@ select.campo__entrada--compacta:not([multiple]):not([size]) {
   -webkit-appearance: none;
 }
 
-/* Paginação. */
+/* Paginação: "Itens por página" na ponta esquerda e a navegação centrada na linha inteira.
+   As faixas laterais de mesma largura mantêm o centro no centro, sem serem deslocadas pelo seletor. */
 .paginacao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.paginacao__tamanho {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.paginacao__central {
+  grid-column: 2;
+  justify-self: center;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem 0.75rem;
 }
 
@@ -419,6 +433,20 @@ select.campo__entrada--compacta:not([multiple]):not([size]) {
   font-size: 0.9rem;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+/* Em telas estreitas o seletor e a navegação empilham, os dois centralizados. */
+@media (max-width: 640px) {
+  .paginacao {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .paginacao__tamanho,
+  .paginacao__central {
+    grid-column: 1;
+    justify-self: center;
+  }
 }
 
 /* Tabelas. */
