@@ -14,10 +14,12 @@ import {
   lerEstadoDaConsulta,
   numeroValido,
   urlDaConsulta,
+  urlDoPedido,
   type CampoDeTexto,
   type FiltrosDePedidos,
 } from '../regras/filtrosDePedidos';
 import { formatarCpf, formatarDataHora, formatarDinheiro } from '../../../compartilhado/formatacao';
+import { buscaDaUrl } from '../../../compartilhado/url';
 import { Botao } from '../../../ui/Botao';
 import { EtiquetaDeStatus } from '../../../ui/EtiquetaDeStatus';
 import { Paginacao } from '../../../ui/Paginacao';
@@ -50,7 +52,7 @@ function alternarNaOrdem<T extends string>(opcoes: readonly { valor: T }[], marc
  */
 export default function AdminPedidos() {
   const { url, route } = useLocation();
-  const busca = url.includes('?') ? url.slice(url.indexOf('?')) : '';
+  const busca = buscaDaUrl(url);
   const estado = useMemo(() => lerEstadoDaConsulta(busca), [busca]);
   const [filtros, definirFiltros] = useState<FiltrosDePedidos>(estado.filtros);
   const [resultado, definirResultado] = useState<Resultado | null>(null);
@@ -263,7 +265,7 @@ export default function AdminPedidos() {
                 {pagina.itens.map((item) => (
                   <tr key={item.id}>
                     <td>
-                      <a href={`/admin/pedidos/${item.id}`}>{item.id}</a>
+                      <a href={urlDoPedido(item.id, busca)}>{item.id}</a>
                     </td>
                     <td>{formatarDataHora(item.realizadoEm)}</td>
                     <td>{item.clienteNome}</td>

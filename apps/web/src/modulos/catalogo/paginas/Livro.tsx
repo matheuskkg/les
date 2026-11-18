@@ -1,7 +1,9 @@
-import { useRoute } from 'preact-iso';
+import { useLocation, useRoute } from 'preact-iso';
 import { cliente } from '../../../api/cliente';
 import { formatarDecimal, formatarDinheiro } from '../../../compartilhado/formatacao';
+import { buscaDaUrl } from '../../../compartilhado/url';
 import { useCarregamento } from '../../../compartilhado/useCarregamento';
+import { urlDeVoltaAVitrine } from '../regras/filtrosDeLivros';
 import { BotaoLink } from '../../../ui/Botao';
 import { CapaDeLivro } from '../../../ui/CapaDeLivro';
 import { Erro } from '../../../ui/Erro';
@@ -16,13 +18,13 @@ function codigoDaRota(valor: string | undefined): number | null {
   return Number.isSafeInteger(codigo) ? codigo : null;
 }
 
-function NaoEncontrado() {
+function NaoEncontrado({ voltar }: { voltar: string }) {
   return (
     <section class="pagina pagina--estreita">
       <h1>Livro não encontrado.</h1>
       <p class="pagina__introducao">O livro consultado não existe, foi inativado ou saiu da vitrine.</p>
       <div class="acoes">
-        <BotaoLink href="/">Voltar para a vitrine</BotaoLink>
+        <BotaoLink href={voltar}>Voltar para a vitrine</BotaoLink>
       </div>
     </section>
   );
@@ -31,6 +33,9 @@ function NaoEncontrado() {
 /** Detalhe do livro (RF-LIV-005): capa, preço e compra lado a lado, com a ficha técnica e a sinopse abaixo. */
 export default function Livro() {
   const { params } = useRoute();
+  const { url } = useLocation();
+  // A vitrine guarda a busca em `de` no link do livro; sem ela, o voltar vai para a raiz (RF-LIV-005).
+  const voltar = urlDeVoltaAVitrine(buscaDaUrl(url));
   const codigo = codigoDaRota(params.id);
   const { dados: livro, problema, carregando } = useCarregamento(
     (signal) => cliente.GET('/api/livros/{id}', { params: { path: { id: codigo ?? 0 } }, signal }),
@@ -38,7 +43,7 @@ export default function Livro() {
   );
 
   if (codigo === null || problema?.status === 404) {
-    return <NaoEncontrado />;
+    return <NaoEncontrado voltar={voltar} />;
   }
 
   if (carregando && livro?.id !== codigo) {
@@ -55,7 +60,7 @@ export default function Livro() {
         <h1>Livro</h1>
         <Erro problema={problema} />
         <div class="acoes">
-          <BotaoLink href="/">Voltar para a vitrine</BotaoLink>
+          <BotaoLink href={voltar}>Voltar para a vitrine</BotaoLink>
         </div>
       </section>
     );
@@ -81,7 +86,7 @@ export default function Livro() {
 
   return (
     <article class="pagina livro-detalhe">
-      <a class="livro-detalhe__voltar" href="/">
+      <a class="livro-detalhe__voltar" href={voltar}>
         ← Voltar para a vitrine
       </a>
 

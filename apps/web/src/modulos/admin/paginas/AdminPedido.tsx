@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { useRoute } from 'preact-iso';
+import { useLocation, useRoute } from 'preact-iso';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
 import { CopiasDoPedido, AcoesDaTroca, RecebimentoDaTroca, TrocasDoPedido } from '../../pedidos';
 import { Erro } from '../../../ui/Erro';
 import { useRecargaPorNotificacao } from '../../notificacoes';
 import { formatarDataHora } from '../../../compartilhado/formatacao';
+import { buscaDaUrl } from '../../../compartilhado/url';
+import { urlDeVoltaDoPedido } from '../regras/filtrosDePedidos';
+import { rotuloDoRetorno } from '../regras/rotuloDoRetorno';
 import { Botao } from '../../../ui/Botao';
 import { EtiquetaDeStatus } from '../../../ui/EtiquetaDeStatus';
 
@@ -33,7 +36,11 @@ const ACOES: Partial<Record<PedidoDetalhe['status'], { acao: Acao; rotulo: strin
  */
 export default function AdminPedido() {
   const { params } = useRoute();
+  const { url } = useLocation();
   const id = params.id ?? '';
+  // O detalhe é alcançado pela consulta de pedidos, pelas trocas e pelo cadastro do cliente: `volta` acompanha a
+  // URL (`de`) e reconstrói filtros, ordem, página e tamanho da origem (RF-VEN-009, RF-VEN-013, RF-CLI-005).
+  const volta = urlDeVoltaDoPedido(buscaDaUrl(url));
   const [resultado, definirResultado] = useState<Resultado | null>(null);
   // Ação em andamento e erro dela ficam presos ao pedido da tela; trocar de pedido não os herda.
   const [enviandoEm, definirEnviandoEm] = useState<string | null>(null);
@@ -136,7 +143,7 @@ export default function AdminPedido() {
   return (
     <section class="pagina">
       <p>
-        <a href="/admin/pedidos">← Voltar para os pedidos</a>
+        <a href={volta}>{rotuloDoRetorno(volta)}</a>
       </p>
 
       {visivel === null ? (

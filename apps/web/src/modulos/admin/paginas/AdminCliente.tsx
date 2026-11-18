@@ -6,6 +6,7 @@ import { Erro } from '../../../ui/Erro';
 import { PedidosDoCliente } from '../componentes/PedidosDoCliente';
 import { GENEROS, SITUACOES, rotuloDe, urlDeVoltaAosClientes } from '../regras/filtrosDeClientes';
 import { formatarCep, formatarCpf, formatarData } from '../../../compartilhado/formatacao';
+import { buscaDaUrl } from '../../../compartilhado/url';
 
 type ClienteDetalhe = components['schemas']['ClienteDetalheDto'];
 
@@ -29,7 +30,7 @@ export default function AdminCliente() {
   const { url } = useLocation();
   const id = params.id ?? '';
   // A consulta que trouxe o admin até aqui viaja na query string da URL do detalhe (RF-CLI-004).
-  const busca = url.includes('?') ? url.slice(url.indexOf('?')) : '';
+  const busca = buscaDaUrl(url);
   const [resultado, definirResultado] = useState<Resultado | null>(null);
 
   useEffect(() => {
@@ -119,7 +120,7 @@ export default function AdminCliente() {
             )}
           </div>
 
-          <PedidosDoCliente clienteId={visivel.cliente.id} />
+          <PedidosDoCliente clienteId={visivel.cliente.id} buscaDoCliente={busca} />
         </>
       )}
     </section>

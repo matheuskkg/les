@@ -1,4 +1,5 @@
 import type { paths } from '../../../api/esquema';
+import { urlDeVolta, urlDoDetalhe } from '../../../compartilhado/url.ts';
 
 /** Parâmetros de `GET /api/livros`, como definidos no contrato (DEC-07). */
 export type ConsultaDeLivros = NonNullable<paths['/api/livros']['get']['parameters']['query']>;
@@ -157,6 +158,20 @@ export function filtrosEmUso(filtros: FiltrosDeLivros): number {
 
 export function urlDoEstado(estado: EstadoDaVitrine): string {
   return `/${buscaDoEstado(estado)}`;
+}
+
+/**
+ * Leva a busca da vitrine para o detalhe do livro, para que o voltar não perca filtros, ordem ou página (RF-LIV-005).
+ * Sem filtros, a URL do livro fica limpa: a vitrine sem busca é a própria raiz.
+ */
+export function urlDoLivro(id: string | number, busca: string): string {
+  const origem = urlDoEstado(lerEstadoDaVitrine(busca));
+  return origem === '/' ? `/livros/${id}` : urlDoDetalhe(`/livros/${id}`, origem);
+}
+
+/** Recompõe a busca da vitrine guardada na URL do detalhe (RF-LIV-005). */
+export function urlDeVoltaAVitrine(busca: string): string {
+  return urlDeVolta(busca, '/');
 }
 
 /**

@@ -1,3 +1,4 @@
+import { caminhoInterno } from '../../../compartilhado/url.ts';
 import type { Usuario } from '../api';
 
 function naArea(pathname: string, area: string): boolean {
@@ -15,20 +16,12 @@ export function destinoSeguro(
 ): string {
   const inicial = usuario.papel === 'ADMIN' ? '/admin/clientes' : '/minha-conta';
 
-  if (!destino || !destino.startsWith('/') || destino.startsWith('//') || destino.includes('\\')) {
+  // Mesma validação de destino do "Voltar" das consultas: rejeita controles e confere a origem após resolver a URL.
+  if (!destino || !caminhoInterno(destino, origem)) {
     return inicial;
   }
 
-  let alvo: URL;
-  try {
-    alvo = new URL(destino, origem);
-  } catch {
-    return inicial;
-  }
-
-  if (alvo.origin !== origem || !alvo.pathname.startsWith('/')) {
-    return inicial;
-  }
+  const alvo = new URL(destino, origem);
   if (naArea(alvo.pathname, '/admin') && usuario.papel !== 'ADMIN') {
     return inicial;
   }

@@ -13,6 +13,7 @@ import {
 } from '../regras/filtrosDeTrocas';
 import { OPCOES_DE_TAMANHO } from '../regras/paginacao';
 import { formatarCpf, formatarDataHora } from '../../../compartilhado/formatacao';
+import { buscaDaUrl, urlDoDetalhe } from '../../../compartilhado/url';
 import { EtiquetaDeStatus } from '../../../ui/EtiquetaDeStatus';
 import { Paginacao } from '../../../ui/Paginacao';
 
@@ -30,7 +31,7 @@ interface Resultado {
  */
 export default function AdminTrocas() {
   const { url, route } = useLocation();
-  const busca = url.includes('?') ? url.slice(url.indexOf('?')) : '';
+  const busca = buscaDaUrl(url);
   const estado = useMemo(() => lerEstadoDasTrocas(busca), [busca]);
   const [resultado, definirResultado] = useState<Resultado | null>(null);
   const [recarga, definirRecarga] = useState(0);
@@ -122,7 +123,9 @@ export default function AdminTrocas() {
                   <tr key={troca.id}>
                     <td>{troca.id}</td>
                     <td>
-                      <a href={`/admin/pedidos/${troca.pedidoId}`}>{troca.pedidoId}</a>
+                      <a href={urlDoDetalhe(`/admin/pedidos/${troca.pedidoId}`, urlDasTrocas(estado))}>
+                        {troca.pedidoId}
+                      </a>
                     </td>
                     <td>{troca.clienteNome}</td>
                     <td>{formatarCpf(troca.clienteCpf)}</td>

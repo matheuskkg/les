@@ -2,7 +2,9 @@ import { useEffect, useState } from 'preact/hooks';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
 import { filtrosVazios, urlDaConsulta } from '../regras/filtrosDePedidos';
+import { urlDoCliente } from '../regras/filtrosDeClientes';
 import { formatarDataHora, formatarDinheiro } from '../../../compartilhado/formatacao';
+import { urlDoDetalhe } from '../../../compartilhado/url';
 import { Erro } from '../../../ui/Erro';
 import { EtiquetaDeStatus } from '../../../ui/EtiquetaDeStatus';
 
@@ -21,7 +23,7 @@ interface Resultado {
  * buscados pelo código do cliente na consulta de pedidos (RF-VEN-009), com o link para a consulta completa. Não
  * usa o CPF, que uma conta encerrada libera para outro cadastro (DEC-10).
  */
-export function PedidosDoCliente({ clienteId }: { clienteId: number }) {
+export function PedidosDoCliente({ clienteId, buscaDoCliente }: { clienteId: number; buscaDoCliente: string }) {
   const [resultado, definirResultado] = useState<Resultado | null>(null);
 
   useEffect(() => {
@@ -88,7 +90,9 @@ export function PedidosDoCliente({ clienteId }: { clienteId: number }) {
                 {dados.itens.map((item) => (
                   <tr key={item.id}>
                     <td>
-                      <a href={`/admin/pedidos/${item.id}`}>{item.id}</a>
+                      <a href={urlDoDetalhe(`/admin/pedidos/${item.id}`, urlDoCliente(clienteId, buscaDoCliente))}>
+                        {item.id}
+                      </a>
                     </td>
                     <td>{formatarDataHora(item.realizadoEm)}</td>
                     <td><EtiquetaDeStatus status={item.status} /></td>
