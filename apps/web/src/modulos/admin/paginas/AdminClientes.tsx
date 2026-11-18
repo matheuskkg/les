@@ -6,7 +6,7 @@ import { CampoDeFormulario } from '../../../ui/CampoDeFormulario';
 import { CampoDeSelecao } from '../../../ui/CampoDeSelecao';
 import { Erro } from '../../../ui/Erro';
 import { OpcoesMarcaveis } from '../../../ui/OpcoesMarcaveis';
-import { GENEROS, ORDENS, SITUACOES, UFS, consultaDoEstado, filtrosVazios, lerEstadoDaConsulta, rotuloDe, urlDaConsulta, type CampoDeTexto, type FiltrosDeClientes } from '../regras/filtrosDeClientes';
+import { GENEROS, ORDENS, SITUACOES, UFS, consultaDoEstado, filtrosVazios, lerEstadoDaConsulta, rotuloDe, urlDaConsulta, urlDoCliente, type CampoDeTexto, type FiltrosDeClientes } from '../regras/filtrosDeClientes';
 import { formatarCpf, formatarData } from '../../../compartilhado/formatacao';
 import { Botao } from '../../../ui/Botao';
 import { Paginacao } from '../../../ui/Paginacao';
@@ -177,7 +177,7 @@ export default function AdminClientes() {
                   <tr key={item.id}>
                     <td>{item.id}</td>
                     <td>
-                      <a href={`/admin/clientes/${item.id}`}>{item.nome}</a>
+                      <a href={urlDoCliente(item.id, busca)}>{item.nome}</a>
                     </td>
                     <td>{formatarCpf(item.cpf)}</td>
                     <td>{item.email}</td>
