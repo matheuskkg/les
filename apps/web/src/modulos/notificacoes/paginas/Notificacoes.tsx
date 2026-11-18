@@ -146,23 +146,25 @@ export default function Notificacoes() {
 
           {dados.totalPaginas > 1 && (
             <nav class="paginacao" aria-label="Páginas de notificações">
-              <Botao variante="secundario"
-                type="button"
-                disabled={pagina === 0}
-                onClick={() => definirPagina(pagina - 1)}
-              >
-                Anterior
-              </Botao>
-              <span class="paginacao__posicao">
-                Página {pagina + 1} de {dados.totalPaginas}
-              </span>
-              <Botao variante="secundario"
-                type="button"
-                disabled={pagina + 1 >= dados.totalPaginas}
-                onClick={() => definirPagina(pagina + 1)}
-              >
-                Próxima
-              </Botao>
+              <div class="paginacao__central">
+                <Botao variante="secundario"
+                  type="button"
+                  disabled={pagina === 0}
+                  onClick={() => definirPagina(pagina - 1)}
+                >
+                  Anterior
+                </Botao>
+                <span class="paginacao__posicao">
+                  Página {pagina + 1} de {dados.totalPaginas}
+                </span>
+                <Botao variante="secundario"
+                  type="button"
+                  disabled={pagina + 1 >= dados.totalPaginas}
+                  onClick={() => definirPagina(pagina + 1)}
+                >
+                  Próxima
+                </Botao>
+              </div>
             </nav>
           )}
         </>

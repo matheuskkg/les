@@ -78,7 +78,7 @@ export function Paginacao({
   return (
     <nav class="paginacao" aria-label={rotulo}>
       {seletorDeTamanho && (
-        <div class="paginacao__campo">
+        <div class="paginacao__campo paginacao__tamanho">
           <label for={idTamanho} onClick={(evento) => abrirOpcoesPeloRotulo(evento, idTamanho)}>
             Itens por página
           </label>
@@ -97,12 +97,15 @@ export function Paginacao({
         </div>
       )}
       {totalPaginas > 1 && (
-        <>
+        <div class="paginacao__central">
           <BotaoLink variante="secundario" href={pagina > 1 ? urlDaPagina(pagina - 1) : null}>
             Anterior
           </BotaoLink>
           <div class="paginacao__campo">
-            <label for={idPagina}>Página</label>
+            {/* O rótulo continua associado ao campo para leitores de tela; só a exibição visual sai da linha. */}
+            <label for={idPagina} class="visualmente-oculto">
+              Página
+            </label>
             <span id={idDicaPagina} class="visualmente-oculto">
               Digite um número de 1 a {totalPaginas} e pressione Enter ou saia do campo para navegar.
             </span>
@@ -139,7 +142,7 @@ export function Paginacao({
           <BotaoLink variante="secundario" href={pagina < totalPaginas ? urlDaPagina(pagina + 1) : null}>
             Próxima
           </BotaoLink>
-        </>
+        </div>
       )}
     </nav>
   );
