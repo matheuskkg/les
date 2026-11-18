@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: entregas-e-e2e
+expected_outcome: |
+  A revisão lê docs/entregas/dvp/AGENTS.md e aciona humanizar-texto e e2e-testes. Aponta o placeholder "a definir" e os caminhos do repositório no texto que vira .docx, e reprova o E2E por testar disabled e fazer chamada de API isolada em vez de um roteiro de apresentação. Lista as instruções lidas.

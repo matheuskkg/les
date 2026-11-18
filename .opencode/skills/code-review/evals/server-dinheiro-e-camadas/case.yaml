@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: server-dinheiro-e-camadas
+expected_outcome: |
+  A revisão lê docs/arquitetura.md, DEC-15.1, DEC-16, DEC-07 e o requisito do módulo, e aponta como bloqueantes o double para dinheiro no DTO, a injeção genérica de List<Regra<Cliente>>, o @ManyToOne entre módulos e a ausência de Dinheiro no DTO. O relatório cita IDs e lista as instruções lidas.

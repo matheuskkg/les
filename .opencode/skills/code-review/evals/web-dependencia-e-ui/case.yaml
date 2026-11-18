@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: web-dependencia-e-ui
+expected_outcome: |
+  A revisão lê DEC-01, DEC-17 e DEC-07 e aponta como bloqueantes a dependência zustand fora da lista fechada, o componente de ui/ importando e chamando a API de um módulo, a conta de dinheiro com number e a formatação R$ com ponto decimal. O relatório cita os IDs e lista as instruções lidas.

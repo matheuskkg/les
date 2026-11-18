@@ -82,7 +82,7 @@ Não há nada em produção. Consequências:
 - Valores monetários com tipo decimal exato (nunca float); formatação `R$ 1.234,56` na UI.
 - Senhas com hash forte (bcrypt/argon2) — `RNF-CLI-003`.
 - Documentos formais (entregas em `docs/entregas/`, que viram .docx): escreva e revise com a skill
-  [`humanizar-texto`](.claude/skills/humanizar-texto/SKILL.md); ao delegar a escrita, repasse as regras dela no prompt.
+  [`humanizar-texto`](.opencode/skills/humanizar-texto/SKILL.md); ao delegar a escrita, repasse as regras dela no prompt.
 - Referencie o ID do requisito em testes e, quando útil, em comentários (`// RN-VEN-004`).
 
 ## Testes E2E
@@ -109,7 +109,7 @@ Os E2E existem **somente para a apresentação** ao professor, não como suíte 
 - Contra o jar empacotado: `npm run e2e -- -c playwright.apresentacao.config.ts`.
 - O relatório HTML, gerado só nas execuções sem interface (`npx playwright test`), é aberto com
   `npx playwright show-report`.
-- Antes de criar ou alterar um roteiro, siga a skill [`e2e-testes`](.claude/skills/e2e-testes/SKILL.md).
+- Antes de criar ou alterar um roteiro, siga a skill [`e2e-testes`](.opencode/skills/e2e-testes/SKILL.md).
 
 ## Rastreabilidade
 
