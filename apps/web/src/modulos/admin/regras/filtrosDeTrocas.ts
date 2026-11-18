@@ -1,44 +1,44 @@
 import type { paths } from '../../../api/esquema';
-import { SITUACOES_DA_TROCA } from './filtrosDePedidos.ts';
+import { textoDoStatus } from '../../../compartilhado/formatacao.ts';
 import { TAMANHO_PADRAO, normalizarPagina, normalizarTamanho } from './paginacao.ts';
 
 /** Parâmetros de `GET /api/admin/trocas`, como definidos no contrato (RF-VEN-013, DEC-07). */
 export type ConsultaDeTrocas = NonNullable<paths['/api/admin/trocas']['get']['parameters']['query']>;
 export type StatusDaTroca = NonNullable<ConsultaDeTrocas['status']>[number];
 
-/** Filtro de status da tela: um status da troca ou todas. Sem nada na URL, mostra as trocas a autorizar. */
-export type FiltroDeStatus = StatusDaTroca | 'TODAS';
+/** Status do ciclo da troca, declarados aqui e não tirados de `SITUACOES_DA_TROCA` (indicador do pedido, DEC-12). */
+export const STATUS_DA_TROCA: readonly { valor: StatusDaTroca; rotulo: string }[] = (
+  ['EM_TROCA', 'TROCA_AUTORIZADA', 'TROCA_RECUSADA', 'TROCADO'] as const
+).map((valor) => ({ valor, rotulo: textoDoStatus(valor) }));
 
-export const FILTRO_PADRAO: FiltroDeStatus = 'EM_TROCA';
-
-export const OPCOES_DE_STATUS: readonly { valor: FiltroDeStatus; rotulo: string }[] = [
-  ...SITUACOES_DA_TROCA,
-  { valor: 'TODAS', rotulo: 'Todas' },
-];
-
-/** Estado da tela: status, página (a partir de 1 na URL) e itens por página. */
+/** Estado da tela: vários status selecionados, página (a partir de 1 na URL) e itens por página. */
 export interface EstadoDasTrocas {
-  status: FiltroDeStatus;
+  status: StatusDaTroca[];
   pagina: number;
   tamanho: number;
 }
 
-/** Lê o estado da query string; status desconhecido volta ao padrão. */
+/** Opções conhecidas entre as lidas, sem repetição e na ordem do ciclo, como na consulta de pedidos. */
+function lerStatus(valores: string[]): StatusDaTroca[] {
+  const lidos = new Set(valores);
+  return STATUS_DA_TROCA.map((opcao) => opcao.valor).filter((valor) => lidos.has(valor));
+}
+
+/** Lê o estado da query string; status desconhecidos são ignorados e nenhum status marcado significa todos. */
 export function lerEstadoDasTrocas(busca: string): EstadoDasTrocas {
   const parametros = new URLSearchParams(busca);
-  const status = OPCOES_DE_STATUS.find((opcao) => opcao.valor === parametros.get('status')?.trim());
   return {
-    status: status?.valor ?? FILTRO_PADRAO,
+    status: lerStatus(parametros.getAll('status').map((valor) => valor.trim())),
     pagina: normalizarPagina(parametros.get('pagina')),
     tamanho: normalizarTamanho(parametros.get('tamanho')),
   };
 }
 
-/** Caminho da tela para o estado, com os padrões omitidos. */
+/** Caminho da tela para o estado, com um parâmetro por status marcado e os padrões omitidos. */
 export function urlDasTrocas(estado: EstadoDasTrocas): string {
   const parametros = new URLSearchParams();
-  if (estado.status !== FILTRO_PADRAO) {
-    parametros.set('status', estado.status);
+  for (const status of estado.status) {
+    parametros.append('status', status);
   }
   if (estado.tamanho !== TAMANHO_PADRAO) {
     parametros.set('tamanho', String(estado.tamanho));
@@ -50,10 +50,24 @@ export function urlDasTrocas(estado: EstadoDasTrocas): string {
   return texto === '' ? '/admin/trocas' : `/admin/trocas?${texto}`;
 }
 
-/** Consulta do contrato para o estado: "todas" não envia status, e a página vai a partir de 0. */
+/** Marca ou desmarca o valor, mantendo a ordem do ciclo (RF-VEN-013). */
+export function alternarStatus(marcados: readonly StatusDaTroca[], valor: StatusDaTroca): StatusDaTroca[] {
+  const selecionados = new Set(marcados);
+  if (selecionados.has(valor)) {
+    selecionados.delete(valor);
+  } else {
+    selecionados.add(valor);
+  }
+  return STATUS_DA_TROCA.map((opcao) => opcao.valor).filter((item) => selecionados.has(item));
+}
+
+/**
+ * Consulta do contrato para o estado (RF-VEN-013, RNF-GER-001): sem status marcado não envia o parâmetro, a página vai
+ * a partir de 0 e o tamanho é o escolhido na paginação.
+ */
 export function consultaDasTrocas(estado: EstadoDasTrocas): ConsultaDeTrocas {
   return {
-    ...(estado.status === 'TODAS' ? {} : { status: [estado.status] }),
+    ...(estado.status.length > 0 ? { status: [...estado.status] } : {}),
     pagina: Math.max(estado.pagina - 1, 0),
     tamanho: estado.tamanho,
     ordem: ['solicitadaEm,desc'],
