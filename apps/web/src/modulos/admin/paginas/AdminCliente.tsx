@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'preact/hooks';
-import { useRoute } from 'preact-iso';
+import { useLocation, useRoute } from 'preact-iso';
 import { cliente, interpretarProblema, type ProblemaDetalhe } from '../../../api/cliente';
 import type { components } from '../../../api/esquema';
 import { Erro } from '../../../ui/Erro';
 import { PedidosDoCliente } from '../componentes/PedidosDoCliente';
-import { GENEROS, SITUACOES, rotuloDe } from '../regras/filtrosDeClientes';
+import { GENEROS, SITUACOES, rotuloDe, urlDeVoltaAosClientes } from '../regras/filtrosDeClientes';
 import { formatarCep, formatarCpf, formatarData } from '../../../compartilhado/formatacao';
 
 type ClienteDetalhe = components['schemas']['ClienteDetalheDto'];
@@ -26,7 +26,10 @@ function formatarValidade(validade: string): string {
  */
 export default function AdminCliente() {
   const { params } = useRoute();
+  const { url } = useLocation();
   const id = params.id ?? '';
+  // A consulta que trouxe o admin até aqui viaja na query string da URL do detalhe (RF-CLI-004).
+  const busca = url.includes('?') ? url.slice(url.indexOf('?')) : '';
   const [resultado, definirResultado] = useState<Resultado | null>(null);
 
   useEffect(() => {
@@ -56,7 +59,7 @@ export default function AdminCliente() {
   return (
     <section class="pagina">
       <p>
-        <a href="/admin/clientes">← Voltar para os clientes</a>
+        <a href={urlDeVoltaAosClientes(busca)}>← Voltar para os clientes</a>
       </p>
 
       {visivel === null ? (

@@ -106,8 +106,8 @@ export function lerEstadoDaConsulta(busca: string): EstadoDaConsulta {
   };
 }
 
-/** Caminho da consulta para o estado, com os padrões omitidos. */
-export function urlDaConsulta(estado: EstadoDaConsulta): string {
+/** Query string canônica do estado da consulta, começando por `?` ou vazia. */
+export function buscaDaConsulta(estado: EstadoDaConsulta): string {
   const parametros = new URLSearchParams();
   for (const campo of CAMPOS_DE_TEXTO) {
     const valor = estado.filtros[campo].trim();
@@ -127,7 +127,25 @@ export function urlDaConsulta(estado: EstadoDaConsulta): string {
     parametros.set('pagina', String(estado.pagina));
   }
   const texto = parametros.toString();
-  return texto === '' ? '/admin/clientes' : `/admin/clientes?${texto}`;
+  return texto === '' ? '' : `?${texto}`;
+}
+
+/** Caminho da consulta para o estado, com os padrões omitidos. */
+export function urlDaConsulta(estado: EstadoDaConsulta): string {
+  return `/admin/clientes${buscaDaConsulta(estado)}`;
+}
+
+/**
+ * Leva os filtros aplicados para a URL do detalhe do cliente, de modo que o retorno à consulta não os perca
+ * (RF-CLI-004). A busca é normalizada: valores desconhecidos e padrões não aparecem na URL do detalhe.
+ */
+export function urlDoCliente(id: string | number, busca: string): string {
+  return `/admin/clientes/${id}${buscaDaConsulta(lerEstadoDaConsulta(busca))}`;
+}
+
+/** Recompõe a consulta a partir da busca preservada na URL do detalhe (RF-CLI-004). */
+export function urlDeVoltaAosClientes(busca: string): string {
+  return `/admin/clientes${buscaDaConsulta(lerEstadoDaConsulta(busca))}`;
 }
 
 /**
