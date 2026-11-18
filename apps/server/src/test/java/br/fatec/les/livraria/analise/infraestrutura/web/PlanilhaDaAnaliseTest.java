@@ -3,6 +3,7 @@ package br.fatec.les.livraria.analise.infraestrutura.web;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Set;
@@ -20,7 +21,8 @@ class PlanilhaDaAnaliseTest {
     @Test
     void rfAna004_csvComBomPontoEVirgulaEVirgulaDecimalSemMilhar_DEC_15_4() {
         YearMonth janeiro = YearMonth.of(2025, 1);
-        AnaliseDeVendas analise = AnaliseDeVendas.calcular(new PeriodoDeAnalise(janeiro, janeiro.plusMonths(1)),
+        AnaliseDeVendas analise = AnaliseDeVendas.calcular(
+                new PeriodoDeAnalise(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 2, 28)),
                 List.of(new CategoriaAnalisada(2L, "Ficção Científica"), new CategoriaAnalisada(9L, "Contos; \"curtos\"")),
                 List.of(new VendaNoMes(janeiro, Set.of(2L), Dinheiro.de("12345.60"))));
 
@@ -38,8 +40,8 @@ class PlanilhaDaAnaliseTest {
 
     @Test
     void rfAna004_nomeQueComecaComoFormulaGanhaApostrofo() {
-        YearMonth janeiro = YearMonth.of(2025, 1);
-        AnaliseDeVendas analise = AnaliseDeVendas.calcular(new PeriodoDeAnalise(janeiro, janeiro),
+        AnaliseDeVendas analise = AnaliseDeVendas.calcular(
+                new PeriodoDeAnalise(LocalDate.of(2025, 1, 5), LocalDate.of(2025, 1, 20)),
                 List.of(new CategoriaAnalisada(1L, "=1+1"), new CategoriaAnalisada(2L, "-Ofertas")), List.of());
 
         assertThat(new String(PlanilhaDaAnalise.csv(analise), StandardCharsets.UTF_8))

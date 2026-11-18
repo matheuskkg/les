@@ -11,6 +11,7 @@ import {
   consultaDaAnalise,
   corDaCategoria,
   lerEstadoDaAnalise,
+  rotuloDoDia,
   rotuloDoMes,
   urlDaAnalise,
   urlDaExportacao,
@@ -29,9 +30,10 @@ interface Resultado {
 }
 
 /**
- * Análise de vendas do administrador (RF-ANA-001 a RF-ANA-004): período em meses e categorias na URL, gráfico de
- * linhas com uma linha por categoria, tabela com os mesmos valores e exportação em CSV. As regras do período e da
- * seleção são do server, que responde 422 com o requisito violado.
+ * Análise de vendas do administrador (RF-ANA-001 a RF-ANA-004): datas exatas e categorias na URL, gráfico de linhas
+ * com um ponto por mês e uma linha por categoria, tabela com os mesmos valores e exportação em CSV. O filtro é por dia,
+ * mas a agregação continua mensal (DEC-19). As regras do período e da seleção são do server, que responde 422 com o
+ * requisito violado.
  */
 class ProblemaDoCatalogo extends Error {
   constructor(readonly problema: ProblemaDetalhe) {
@@ -97,7 +99,7 @@ export default function AdminAnalise() {
     definirFiltros({ ...estado, categorias: estado.categorias.length > 0 ? estado.categorias : idsDoCatalogo });
     definirSemCategoria(false);
     definirProblemaDaExportacao(null);
-    // idsDoCatalogo fica de fora: a chegada do catálogo só marca as categorias, sem desfazer os meses digitados.
+    // idsDoCatalogo fica de fora: a chegada do catálogo só marca as categorias, sem desfazer as datas digitadas.
   }, [estado]);
 
   useEffect(() => {
@@ -210,17 +212,18 @@ export default function AdminAnalise() {
       <header>
         <h1>Análise de vendas</h1>
         <p class="pagina__introducao">
-          Vendas por categoria em cada mês, sem frete, sem abater o desconto promocional e descontadas as trocas
-          concluídas. Contam os pedidos aprovados, em transporte e entregues.
+          Escolha as datas e as categorias: o gráfico mostra cada mês do período, com as vendas dos dias selecionados
+          nos meses das bordas. Sem frete, sem abater o desconto promocional e descontadas as trocas concluídas. Contam
+          os pedidos aprovados, em transporte e entregues.
         </p>
       </header>
 
       <Erro problema={problemaDoCatalogo} />
 
       <form class="cartao filtros" aria-label="Filtrar análise" onSubmit={filtrar}>
-        <CampoDeFormulario id="analise-inicio" rotulo="Mês inicial" tipo="month" name="inicio" required
+        <CampoDeFormulario id="analise-inicio" rotulo="Data inicial" tipo="date" name="inicio" required
           valor={filtros.inicio} aoMudar={(valor) => definirFiltros((atual) => ({ ...atual, inicio: valor }))} />
-        <CampoDeFormulario id="analise-fim" rotulo="Mês final" tipo="month" name="fim" required
+        <CampoDeFormulario id="analise-fim" rotulo="Data final" tipo="date" name="fim" required
           valor={filtros.fim} aoMudar={(valor) => definirFiltros((atual) => ({ ...atual, fim: valor }))} />
         <OpcoesMarcaveis legenda="Categorias" nome="categoria" opcoes={opcoes}
           marcados={filtros.categorias.map(String)} alternar={alternarCategoria} />
@@ -258,7 +261,7 @@ export default function AdminAnalise() {
           <>
             <div class="cartao">
               <h2>
-                Evolução de {rotuloDoMes(analise.inicio)} a {rotuloDoMes(analise.fim)}
+                Evolução de {rotuloDoDia(analise.inicio)} a {rotuloDoDia(analise.fim)}
               </h2>
               <GraficoDeVendas meses={meses} series={series} />
             </div>

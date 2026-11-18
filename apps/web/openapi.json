@@ -17,8 +17,7 @@
           "required" : true,
           "schema" : {
             "type" : "string",
-            "example" : "2027-08",
-            "pattern" : "^\\d{4}-\\d{2}$"
+            "format" : "date"
           }
         }, {
           "in" : "query",
@@ -26,8 +25,7 @@
           "required" : true,
           "schema" : {
             "type" : "string",
-            "example" : "2027-08",
-            "pattern" : "^\\d{4}-\\d{2}$"
+            "format" : "date"
           }
         }, {
           "in" : "query",
@@ -60,7 +58,7 @@
                 }
               }
             },
-            "description" : "Mês malformado, ausente ou categoria inexistente"
+            "description" : "Data malformada, ausente ou categoria inexistente"
           },
           "422" : {
             "content" : {
@@ -70,7 +68,7 @@
                 }
               }
             },
-            "description" : "Período invertido ou maior que 24 meses, ou nenhuma categoria selecionada"
+            "description" : "Período invertido ou que toca mais de 24 meses, ou nenhuma categoria selecionada"
           }
         },
         "summary" : "Vendas por categoria e mês, para o gráfico de evolução",
@@ -86,8 +84,7 @@
           "required" : true,
           "schema" : {
             "type" : "string",
-            "example" : "2027-08",
-            "pattern" : "^\\d{4}-\\d{2}$"
+            "format" : "date"
           }
         }, {
           "in" : "query",
@@ -95,8 +92,7 @@
           "required" : true,
           "schema" : {
             "type" : "string",
-            "example" : "2027-08",
-            "pattern" : "^\\d{4}-\\d{2}$"
+            "format" : "date"
           }
         }, {
           "in" : "query",
@@ -130,7 +126,7 @@
                 }
               }
             },
-            "description" : "Mês malformado, ausente ou categoria inexistente"
+            "description" : "Data malformada, ausente ou categoria inexistente"
           },
           "422" : {
             "content" : {
@@ -140,7 +136,7 @@
                 }
               }
             },
-            "description" : "Período invertido ou maior que 24 meses, ou nenhuma categoria selecionada"
+            "description" : "Período invertido ou que toca mais de 24 meses, ou nenhuma categoria selecionada"
           }
         },
         "summary" : "Exporta os dados do gráfico em CSV (mes;categoria;valor)",
@@ -3046,13 +3042,11 @@
         "properties" : {
           "fim" : {
             "type" : "string",
-            "example" : "2027-08",
-            "pattern" : "^\\d{4}-\\d{2}$"
+            "format" : "date"
           },
           "inicio" : {
             "type" : "string",
-            "example" : "2027-08",
-            "pattern" : "^\\d{4}-\\d{2}$"
+            "format" : "date"
           },
           "meses" : {
             "type" : "array",

@@ -43,8 +43,8 @@ public class AnalisarVendas {
     private final ConsultarItensVendidos consultarItensVendidos;
 
     /**
-     * @param solicitacao meses e categorias pedidos
-     * @return uma linha por categoria, na ordem informada, com um valor por mês
+     * @param solicitacao datas e categorias pedidas
+     * @return uma linha por categoria, na ordem informada, com um valor por mês tocado pelo período
      * @throws br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio se o período ou a seleção violarem as
      *         regras (HTTP 422)
      * @throws ParametroInvalido se alguma categoria não existir (HTTP 400)

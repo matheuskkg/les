@@ -1,14 +1,14 @@
 import type { paths } from '../../../api/esquema';
 
-/** Parâmetros de `GET /api/admin/analise`, os mesmos da exportação (RF-ANA-001 a RF-ANA-004, DEC-15.4). */
+/** Parâmetros de `GET /api/admin/analise`, os mesmos da exportação (RF-ANA-001 a RF-ANA-004, DEC-15.4, DEC-19). */
 export type ConsultaDaAnalise = paths['/api/admin/analise']['get']['parameters']['query'];
 
-/** Meses do período padrão: os 12 últimos, contando o atual (RN-ANA-002 aceita de 1 a 24). */
+/** Meses do período padrão: os 12 últimos, contando o atual (RN-ANA-002 aceita até 24). */
 export const MESES_DO_PERIODO_PADRAO = 12;
 
 /**
- * Estado da tela na URL. Meses no formato `AAAA-MM`; sem categoria na URL, todas são analisadas, porque a análise
- * exige ao menos uma (RF-ANA-003).
+ * Estado da tela na URL. Datas no formato `AAAA-MM-DD`, ambas inclusivas; sem categoria na URL, todas são analisadas,
+ * porque a análise exige ao menos uma (RF-ANA-003). O gráfico continua com um ponto por mês (DEC-19).
  */
 export interface EstadoDaAnalise {
   inicio: string;
@@ -16,7 +16,23 @@ export interface EstadoDaAnalise {
   categorias: number[];
 }
 
-const FORMATO_DO_MES = /^\d{4}-(0[1-9]|1[0-2])$/;
+const FORMATO_DO_DIA = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Confere o formato e também a data: 30/02 e 31/04 não passam. */
+function dataValida(texto: string): boolean {
+  const [ano = 0, mes = 0, dia = 0] = texto.split('-').map(Number);
+  if (ano < 1 || mes < 1 || mes > 12 || dia < 1) {
+    return false;
+  }
+  const data = new Date(0);
+  data.setFullYear(ano, mes - 1, dia);
+  return data.getFullYear() === ano && data.getMonth() === mes - 1 && data.getDate() === dia;
+}
+
+/** Data `AAAA-MM-DD` no fuso do navegador. */
+export function diaDe(data: Date): string {
+  return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`;
+}
 
 /** Mês `AAAA-MM` da data, no fuso do navegador. */
 export function mesDe(data: Date): string {
@@ -30,12 +46,13 @@ export function somarMeses(mes: string, quantidade: number): string {
   return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, '0')}`;
 }
 
-/** Lê o estado da query string; mês ausente ou malformado volta ao período padrão, que termina em `hoje`. */
+/** Lê o estado da query string; data ausente ou malformada volta ao período padrão, que termina em `hoje`. */
 export function lerEstadoDaAnalise(busca: string, hoje: Date): EstadoDaAnalise {
   const parametros = new URLSearchParams(busca);
-  const fimPadrao = mesDe(hoje);
-  const fim = lerMes(parametros.get('fim')) ?? fimPadrao;
-  const inicio = lerMes(parametros.get('inicio')) ?? somarMeses(fim, 1 - MESES_DO_PERIODO_PADRAO);
+  const fimPadrao = diaDe(hoje);
+  const fim = lerData(parametros.get('fim')) ?? fimPadrao;
+  const inicio = lerData(parametros.get('inicio'))
+    ?? `${somarMeses(fim.slice(0, 7), 1 - MESES_DO_PERIODO_PADRAO)}-01`;
   const categorias = parametros
     .getAll('categoria')
     .map((valor) => Number(valor.trim()))
@@ -43,9 +60,9 @@ export function lerEstadoDaAnalise(busca: string, hoje: Date): EstadoDaAnalise {
   return { inicio, fim, categorias };
 }
 
-function lerMes(valor: string | null): string | null {
+function lerData(valor: string | null): string | null {
   const texto = valor?.trim() ?? '';
-  return FORMATO_DO_MES.test(texto) ? texto : null;
+  return FORMATO_DO_DIA.test(texto) && dataValida(texto) ? texto : null;
 }
 
 /** Caminho da tela para o estado. */
@@ -69,6 +86,12 @@ export function urlDaExportacao(consulta: ConsultaDaAnalise): string {
   const parametros = new URLSearchParams({ inicio: consulta.inicio, fim: consulta.fim });
   (consulta.categoria ?? []).forEach((id) => parametros.append('categoria', String(id)));
   return `/api/admin/analise/exportacao?${parametros}`;
+}
+
+/** Rótulo da data no cabeçalho: `15/03/2025` (DEC-19). */
+export function rotuloDoDia(data: string): string {
+  const [ano, mes, dia] = data.split('-');
+  return `${dia}/${mes}/${ano}`;
 }
 
 /** Rótulo do mês no eixo X e na tabela: `03/2025` (RNF-ANA-001). */

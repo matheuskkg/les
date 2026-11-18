@@ -7,9 +7,10 @@ import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 
 /**
- * O período tem de 1 a {@value #MAXIMO_DE_MESES} meses, contando o inicial e o final (RN-ANA-002). O mínimo de 1 mês
- * é o de um período com o mesmo mês no início e no fim; um fim anterior ao início é tratado pelo
- * {@link FimNaoAnteriorAoInicio}.
+ * O período pode tocar de 1 a {@value #MAXIMO_DE_MESES} meses calendário, contando o mês do início e o do fim
+ * (RN-ANA-002). Como as datas são exatas, um mesmo mês no início e no fim — ainda que em dias diferentes — é um mês.
+ * A conta usa aritmética de meses, não de dias, para não variar com anos bissextos nem com o tamanho dos meses. Um fim
+ * anterior ao início é tratado pelo {@link FimNaoAnteriorAoInicio}.
  */
 @Component
 public class PeriodoDeAte24Meses implements Regra<SolicitacaoDeAnalise> {

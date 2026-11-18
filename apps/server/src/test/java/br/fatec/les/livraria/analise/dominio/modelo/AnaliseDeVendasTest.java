@@ -3,6 +3,7 @@ package br.fatec.les.livraria.analise.dominio.modelo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
@@ -23,7 +24,7 @@ class AnaliseDeVendasTest {
 
     @Test
     void rnAna001_somaAsVendasDeCadaCategoriaPorMes() {
-        AnaliseDeVendas analise = AnaliseDeVendas.calcular(new PeriodoDeAnalise(JANEIRO, FEVEREIRO), List.of(ROMANCE),
+        AnaliseDeVendas analise = AnaliseDeVendas.calcular(periodo(JANEIRO, FEVEREIRO), List.of(ROMANCE),
                 List.of(venda(JANEIRO, "10.00", 1L), venda(JANEIRO, "5.50", 1L), venda(FEVEREIRO, "7.25", 1L)));
 
         assertThat(analise.series()).singleElement()
@@ -33,7 +34,7 @@ class AnaliseDeVendasTest {
 
     @Test
     void rnAna001_itemComVariasCategoriasEntraComValorCheioEmCadaUma_DEC_12() {
-        AnaliseDeVendas analise = AnaliseDeVendas.calcular(new PeriodoDeAnalise(MARCO, MARCO),
+        AnaliseDeVendas analise = AnaliseDeVendas.calcular(periodo(MARCO, MARCO),
                 List.of(ROMANCE, HISTORIA), List.of(venda(MARCO, "95.76", 1L, 5L)));
 
         assertThat(analise.series()).extracting(SerieDeVendas::valores)
@@ -42,7 +43,7 @@ class AnaliseDeVendasTest {
 
     @Test
     void rnAna003_mesesSemVendaValemZeroNaOrdemDosMeses() {
-        AnaliseDeVendas analise = AnaliseDeVendas.calcular(new PeriodoDeAnalise(JANEIRO, MARCO),
+        AnaliseDeVendas analise = AnaliseDeVendas.calcular(periodo(JANEIRO, MARCO),
                 List.of(TECNOLOGIA, ROMANCE), List.of(venda(FEVEREIRO, "20.00", 1L)));
 
         assertThat(analise.series()).extracting(serie -> serie.categoria().nome())
@@ -54,7 +55,7 @@ class AnaliseDeVendasTest {
 
     @Test
     void rfAna003_ignoraCategoriasNaoSelecionadasEMesesForaDoPeriodo() {
-        AnaliseDeVendas analise = AnaliseDeVendas.calcular(new PeriodoDeAnalise(FEVEREIRO, FEVEREIRO),
+        AnaliseDeVendas analise = AnaliseDeVendas.calcular(periodo(FEVEREIRO, FEVEREIRO),
                 List.of(ROMANCE), List.of(venda(JANEIRO, "1.00", 1L), venda(FEVEREIRO, "2.00", 4L)));
 
         assertThat(analise.series().getFirst().valores()).containsExactly(Dinheiro.ZERO);
@@ -62,13 +63,26 @@ class AnaliseDeVendasTest {
 
     @Test
     void rfAna002_periodoTemOsMesesInicialEFinalEOsInstantesDoFusoDaLoja() {
-        PeriodoDeAnalise periodo = new PeriodoDeAnalise(YearMonth.of(2024, 12), FEVEREIRO);
+        PeriodoDeAnalise periodo = new PeriodoDeAnalise(LocalDate.of(2024, 12, 15), LocalDate.of(2025, 2, 10));
 
         assertThat(periodo.meses()).containsExactly(YearMonth.of(2024, 12), JANEIRO, FEVEREIRO);
-        assertThat(periodo.primeiroInstante()).isEqualTo(LocalDateTime.of(2024, 12, 1, 0, 0));
-        assertThat(periodo.fimExclusivo()).isEqualTo(LocalDateTime.of(2025, 3, 1, 0, 0));
-        assertThatThrownBy(() -> new PeriodoDeAnalise(FEVEREIRO, JANEIRO))
+        assertThat(periodo.primeiroInstante()).isEqualTo(LocalDateTime.of(2024, 12, 15, 0, 0));
+        assertThat(periodo.fimExclusivo()).isEqualTo(LocalDateTime.of(2025, 2, 11, 0, 0));
+        assertThatThrownBy(() -> new PeriodoDeAnalise(LocalDate.of(2025, 2, 10), LocalDate.of(2025, 1, 15)))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void rfAna002_umMesParcialContinuaSendoUmPontoNoGrafico_DEC_19() {
+        PeriodoDeAnalise periodo = new PeriodoDeAnalise(LocalDate.of(2025, 3, 12), LocalDate.of(2025, 3, 20));
+
+        assertThat(periodo.meses()).containsExactly(MARCO);
+        assertThat(periodo.primeiroInstante()).isEqualTo(LocalDateTime.of(2025, 3, 12, 0, 0));
+        assertThat(periodo.fimExclusivo()).isEqualTo(LocalDateTime.of(2025, 3, 21, 0, 0));
+    }
+
+    private static PeriodoDeAnalise periodo(YearMonth inicio, YearMonth fim) {
+        return new PeriodoDeAnalise(inicio.atDay(1), fim.atEndOfMonth());
     }
 
     private static VendaNoMes venda(YearMonth mes, String valor, Long... categorias) {

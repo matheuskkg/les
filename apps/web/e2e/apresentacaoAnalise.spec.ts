@@ -14,7 +14,8 @@ import { entrarNaApi, expect, rolarAte, test } from './fixtures';
  * O DRS manda somar pedidos APROVADA, EM TRANSPORTE e ENTREGUE (RN-ANA-004); o critério (d) da atividade pede
  * somente ENTREGUE. O projeto segue o DRS: o teste 5 deixa REPROVADA de fora e o teste 6 mostra que um pedido
  * EM TRANSPORTE já conta e continua contando depois da entrega, dentro do período consultado. O teste 9 valida o
- * período invertido (RF-ANA-002), o 10 exporta o CSV (RF-ANA-004) e o 3 anexa uma captura do gráfico ao relatório.
+ * período invertido (RF-ANA-002), o 10 exporta o CSV (RF-ANA-004), o 11 mostra o filtro por dias dentro de um mês e o
+ * 3 anexa uma captura do gráfico ao relatório. Desde o DEC-19 as datas são exatas, mas o eixo X continua mensal.
  */
 
 const ADMIN = { login: 'admin@livraria.test', senha: 'Admin@123' };
@@ -80,8 +81,8 @@ async function abrirAnalise(page: Page): Promise<void> {
 }
 
 async function informarPeriodo(page: Page, inicio: string, fim: string): Promise<void> {
-  await page.getByLabel('Mês inicial').fill(inicio);
-  await page.getByLabel('Mês final').fill(fim);
+  await page.getByLabel('Data inicial').fill(inicio);
+  await page.getByLabel('Data final').fill(fim);
 }
 
 /** Deixa marcadas só as categorias pedidas, como quem desmarca as caixas na tela. */
@@ -129,11 +130,11 @@ test('1. administrador consulta uma categoria no período e vê os totais dos me
   page,
 }) => {
   await abrirAnalise(page);
-  await informarPeriodo(page, '2025-01', '2025-12');
+  await informarPeriodo(page, '2025-01-01', '2025-12-31');
   await escolherCategorias(page, ['Romance']);
   await atualizar(page);
 
-  await conferirResultado(page, '01/2025', '12/2025');
+  await conferirResultado(page, '01/01/2025', '31/12/2025');
   await conferirLegenda(page, ['Romance']);
   // O pedido 44 tem R$ 95,76 de itens, R$ 18,00 de frete e R$ 10,00 de desconto; o gráfico mostra os itens, sem
   // frete e sem abater o desconto.
@@ -144,11 +145,11 @@ test('1. administrador consulta uma categoria no período e vê os totais dos me
 
 test('2. administrador compara duas categorias no mesmo período (RF-ANA-001, RF-ANA-003)', async ({ page }) => {
   await abrirAnalise(page);
-  await informarPeriodo(page, '2025-01', '2025-12');
+  await informarPeriodo(page, '2025-01-01', '2025-12-31');
   await escolherCategorias(page, ['História', 'Romance']);
   await atualizar(page);
 
-  await conferirResultado(page, '01/2025', '12/2025');
+  await conferirResultado(page, '01/01/2025', '31/12/2025');
   await conferirLegenda(page, ['História', 'Romance']);
   await conferirLinha(page, '03/2025', ['R$ 95,76', 'R$ 95,76']);
   await conferirLinha(page, '04/2025', ['R$ 875,73', 'R$ 168,99']);
@@ -159,11 +160,11 @@ test('3. resultado aparece em gráfico de linhas e tabela, em reais e por mês (
   page,
 }) => {
   await abrirAnalise(page);
-  await informarPeriodo(page, '2024-11', '2026-10');
+  await informarPeriodo(page, '2024-11-01', '2026-10-31');
   await escolherCategorias(page, ['Fantasia', 'Romance']);
   await atualizar(page);
 
-  await conferirResultado(page, '11/2024', '10/2026');
+  await conferirResultado(page, '01/11/2024', '31/10/2026');
 
   const grafico = page.getByRole('img', { name: /Gráfico de linhas/ });
   await rolarAte(grafico);
@@ -190,29 +191,29 @@ test('3. resultado aparece em gráfico de linhas e tabela, em reais e por mês (
 
 test('4. alterar a data final do período traz um novo resultado ao gráfico (RF-ANA-002)', async ({ page }) => {
   await abrirAnalise(page);
-  await informarPeriodo(page, '2025-01', '2025-06');
+  await informarPeriodo(page, '2025-01-01', '2025-06-30');
   await escolherCategorias(page, ['Romance']);
   await atualizar(page);
-  await conferirResultado(page, '01/2025', '06/2025');
+  await conferirResultado(page, '01/01/2025', '30/06/2025');
   await conferirLinha(page, '01/2025', ['R$ 172,06']);
   await conferirLinha(page, '06/2025', ['R$ 327,65']);
 
-  await page.getByLabel('Mês final').fill('2025-12');
+  await page.getByLabel('Data final').fill('2025-12-31');
   await atualizar(page);
 
-  await conferirResultado(page, '01/2025', '12/2025');
+  await conferirResultado(page, '01/01/2025', '31/12/2025');
   await conferirLinha(page, '12/2025', ['R$ 209,00']);
 });
 
 test('5. pedido reprovado não entra no valor da categoria (RN-ANA-004)', async ({ page }) => {
   await abrirAnalise(page);
-  await informarPeriodo(page, '2025-01', '2025-12');
+  await informarPeriodo(page, '2025-01-01', '2025-12-31');
   // O DRS conta APROVADA, EM TRANSPORTE e ENTREGUE; REPROVADA fica fora. O teste de controller de 10/2026 fixa os
   // três status que contam. Em março, o único pedido de Tecnologia foi REPROVADA; em abril, há vendas entregues.
   await escolherCategorias(page, ['Romance', 'Tecnologia']);
   await atualizar(page);
 
-  await conferirResultado(page, '01/2025', '12/2025');
+  await conferirResultado(page, '01/01/2025', '31/12/2025');
   await conferirLinha(page, '03/2025', ['R$ 95,76', 'R$ 0,00']);
   await conferirLinha(page, '04/2025', ['R$ 168,99', 'R$ 671,10']);
 });
@@ -227,10 +228,10 @@ test('6. compra que passa a ENTREGUE dentro do período continua contabilizada (
   // projeto segue o RN-ANA-004.
   await ajustarRelogio('2026-10-20T12:00:00-03:00');
   await abrirAnalise(page);
-  await informarPeriodo(page, '2025-11', '2026-10');
+  await informarPeriodo(page, '2025-11-01', '2026-10-31');
   await escolherCategorias(page, ['Fantasia', 'Ficção Científica', 'História']);
   await atualizar(page);
-  await conferirResultado(page, '11/2025', '10/2026');
+  await conferirResultado(page, '01/11/2025', '31/10/2026');
 
   const linhaDeOutubro = linhaDoMes(page, '10/2026');
   await rolarAte(linhaDeOutubro);
@@ -260,11 +261,11 @@ test('6. compra que passa a ENTREGUE dentro do período continua contabilizada (
 
   await page.getByRole('link', { name: 'Análise de vendas' }).click();
   await esperarAnalisePronta(page);
-  await informarPeriodo(page, '2025-11', '2026-10');
+  await informarPeriodo(page, '2025-11-01', '2026-10-31');
   await escolherCategorias(page, ['Fantasia', 'Ficção Científica', 'História']);
   await atualizar(page);
 
-  await conferirResultado(page, '11/2025', '10/2026');
+  await conferirResultado(page, '01/11/2025', '31/10/2026');
   await conferirLinha(page, '10/2026', antes);
 });
 
@@ -279,19 +280,19 @@ test('7. cliente não abre a análise, que é exclusiva do administrador (RF-ANA
 
 test('8. consulta da análise responde em até 1 segundo (RNF-GER-001)', async ({ page }) => {
   await abrirAnalise(page);
-  await informarPeriodo(page, '2025-01', '2025-06');
+  await informarPeriodo(page, '2025-01-01', '2025-06-30');
   await escolherCategorias(page, ['Romance']);
   await atualizar(page);
-  await conferirResultado(page, '01/2025', '06/2025');
+  await conferirResultado(page, '01/01/2025', '30/06/2025');
 
-  await informarPeriodo(page, '2025-01', '2025-12');
+  await informarPeriodo(page, '2025-01-01', '2025-12-31');
   const inicio = Date.now();
   await Promise.all([
     page.waitForResponse(
       (resposta) =>
         resposta.url().includes('/api/admin/analise?') &&
-        resposta.url().includes('inicio=2025-01') &&
-        resposta.url().includes('fim=2025-12') &&
+        resposta.url().includes('inicio=2025-01-01') &&
+        resposta.url().includes('fim=2025-12-31') &&
         resposta.status() === 200,
     ),
     atualizar(page),
@@ -299,29 +300,29 @@ test('8. consulta da análise responde em até 1 segundo (RNF-GER-001)', async (
   const tempo = Date.now() - inicio;
 
   expect(tempo).toBeLessThan(1000);
-  await conferirResultado(page, '01/2025', '12/2025');
+  await conferirResultado(page, '01/01/2025', '31/12/2025');
   await conferirLinha(page, '03/2025', ['R$ 95,76']);
 });
 
 test('9. (extra) período inválido mostra a violação e não desenha o gráfico (RF-ANA-002)', async ({ page }) => {
   await abrirAnalise(page);
-  await informarPeriodo(page, '2025-12', '2025-01');
+  await informarPeriodo(page, '2025-12-01', '2025-01-31');
   await escolherCategorias(page, ['Romance']);
   await atualizar(page);
 
   const alerta = page.getByRole('alert').filter({ hasText: 'RF-ANA-002' });
   await rolarAte(alerta);
-  await expect(alerta).toContainText('O mês final não pode ser anterior ao inicial.');
+  await expect(alerta).toContainText('A data final não pode ser anterior à inicial.');
   await expect(page.getByRole('heading', { name: /Evolução de/ })).toHaveCount(0);
   await expect(page.getByRole('img', { name: /Gráfico de linhas/ })).toHaveCount(0);
 });
 
 test('10. (extra) administrador exporta os dados do gráfico em CSV (RF-ANA-004)', async ({ page }) => {
   await abrirAnalise(page);
-  await informarPeriodo(page, '2025-03', '2025-04');
+  await informarPeriodo(page, '2025-03-01', '2025-04-30');
   await escolherCategorias(page, ['História', 'Romance']);
   await atualizar(page);
-  await conferirResultado(page, '03/2025', '04/2025');
+  await conferirResultado(page, '01/03/2025', '30/04/2025');
   await conferirLinha(page, '03/2025', ['R$ 95,76', 'R$ 95,76']);
   await conferirLinha(page, '04/2025', ['R$ 875,73', 'R$ 168,99']);
 
@@ -334,9 +335,9 @@ test('10. (extra) administrador exporta os dados do gráfico em CSV (RF-ANA-004)
     page.getByRole('button', { name: 'Exportar CSV' }).click(),
   ]);
 
-  expect(download.suggestedFilename()).toBe('analise-de-vendas-2025-03-a-2025-04.csv');
+  expect(download.suggestedFilename()).toBe('analise-de-vendas-2025-03-01-a-2025-04-30.csv');
   expect(resposta.headers()['content-disposition'] ?? '').toContain(
-    'analise-de-vendas-2025-03-a-2025-04.csv',
+    'analise-de-vendas-2025-03-01-a-2025-04-30.csv',
   );
   // O navegador consome a resposta para gerar o download; o conteúdo é lido do arquivo que o usuário recebeu.
   const caminho = await download.path();
@@ -350,4 +351,28 @@ test('10. (extra) administrador exporta os dados do gráfico em CSV (RF-ANA-004)
       '2025-04;Romance;168,99\r\n',
   );
   await test.info().attach('csv-da-analise', { body: csv, contentType: 'text/csv' });
+});
+
+test('11. (extra) filtra por dias dentro de um mês e mantém um único ponto no gráfico (RF-ANA-002, DEC-19)', async ({
+  page,
+}) => {
+  await abrirAnalise(page);
+  await informarPeriodo(page, '2025-03-01', '2025-03-10');
+  await escolherCategorias(page, ['Ficção Científica', 'Fantasia', 'Romance']);
+  await atualizar(page);
+
+  await conferirResultado(page, '01/03/2025', '10/03/2025');
+  // O pedido 44, de 05/03, é o único do recorte: Dom Casmurro entra cheio em Romance (2 × R$ 47,88).
+  await conferirLinha(page, '03/2025', ['R$ 0,00', 'R$ 0,00', 'R$ 95,76']);
+  // Mesmo filtrando por dias, o eixo segue mensal: março aparece uma única vez na tabela.
+  await expect(page.getByRole('row', { name: /^\d{2}\/\d{4}/ })).toHaveCount(1);
+
+  // O administrador aproxima o recorte para 12/03–20/03: agora entram os pedidos 45 e 46, e não o de 05/03.
+  await informarPeriodo(page, '2025-03-12', '2025-03-20');
+  await atualizar(page);
+
+  await conferirResultado(page, '12/03/2025', '20/03/2025');
+  // 12/03: Fundação (3 × R$ 48,00 menos a unidade trocada) = R$ 96,00. 18/03: O Hobbit (2 × R$ 40,00) = R$ 80,00.
+  await conferirLinha(page, '03/2025', ['R$ 80,00', 'R$ 96,00', 'R$ 0,00']);
+  await expect(page.getByRole('row', { name: /^\d{2}\/\d{4}/ })).toHaveCount(1);
 });

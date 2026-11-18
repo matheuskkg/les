@@ -12,7 +12,8 @@ import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
  * CSV da exportação da análise (RF-ANA-004, DEC-15.4), para abrir direto no Excel em português: UTF-8 com BOM,
  * separador {@code ;}, colunas {@code mes} ({@code AAAA-MM}), {@code categoria} e {@code valor} com vírgula decimal e
  * sem separador de milhar. Uma linha por mês e categoria, inclusive as de R$ 0,00 (RN-ANA-003), ordenadas por mês e,
- * dentro do mês, na ordem das categorias do gráfico.
+ * dentro do mês, na ordem das categorias do gráfico. Um mês parcial na borda do período traz só as vendas dos dias
+ * selecionados (DEC-19).
  */
 final class PlanilhaDaAnalise {
 

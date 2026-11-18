@@ -983,9 +983,9 @@ export interface components {
             senhaAtual: string;
         };
         AnaliseDeVendasDto: {
-            /** @example 2027-08 */
+            /** Format: date */
             fim: string;
-            /** @example 2027-08 */
+            /** Format: date */
             inicio: string;
             meses: string[];
             series: components["schemas"]["SerieDeVendasDto"][];
@@ -1911,7 +1911,7 @@ export interface operations {
                     "application/json": components["schemas"]["AnaliseDeVendasDto"];
                 };
             };
-            /** @description Mês malformado, ausente ou categoria inexistente */
+            /** @description Data malformada, ausente ou categoria inexistente */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1920,7 +1920,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
-            /** @description Período invertido ou maior que 24 meses, ou nenhuma categoria selecionada */
+            /** @description Período invertido ou que toca mais de 24 meses, ou nenhuma categoria selecionada */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -1953,7 +1953,7 @@ export interface operations {
                     "text/csv": string;
                 };
             };
-            /** @description Mês malformado, ausente ou categoria inexistente */
+            /** @description Data malformada, ausente ou categoria inexistente */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1962,7 +1962,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
-            /** @description Período invertido ou maior que 24 meses, ou nenhuma categoria selecionada */
+            /** @description Período invertido ou que toca mais de 24 meses, ou nenhuma categoria selecionada */
             422: {
                 headers: {
                     [name: string]: unknown;

@@ -64,8 +64,8 @@ class TempoDeRespostaTest {
             "1 | /api/admin/pedidos/contagem",
             "1 | /api/admin/trocas?tamanho=100",
             "1 | /api/admin/trocas?status=TROCADO&tamanho=100",
-            "1 | /api/admin/analise?inicio=2024-11&fim=2026-10&categoria=1&categoria=2&categoria=3&categoria=4&categoria=5",
-            "1 | /api/admin/analise/exportacao?inicio=2024-11&fim=2026-10&categoria=1&categoria=2&categoria=3&categoria=4&categoria=5",
+            "1 | /api/admin/analise?inicio=2024-11-01&fim=2026-10-31&categoria=1&categoria=2&categoria=3&categoria=4&categoria=5",
+            "1 | /api/admin/analise/exportacao?inicio=2024-11-01&fim=2026-10-31&categoria=1&categoria=2&categoria=3&categoria=4&categoria=5",
             "6 | /api/me",
             "6 | /api/me/pedidos?tamanho=100",
             "6 | /api/me/notificacoes?tamanho=100" })
