@@ -28,9 +28,12 @@ iguais em H2 e Postgres (`arquitetura.md`). Falta definir:
   - O seed não precisa ajustar sequences: `setval` e o reinício de identity têm sintaxe diferente em H2 e Postgres.
   - O `POST /api/teste/reset` ([DEC-09](DEC-09-topologia-de-execucao.md)) limpa as tabelas e reinsere o seed com os
     mesmos IDs, sem tocar nas sequences.
-- O ID é o **código exibido**: código do cliente (RNF-CLI-005, [DEC-10](DEC-10-cliente-enderecos-e-cartoes.md)),
-  código do livro (RNF-LIV-001) e número do pedido. O ISBN é um atributo do livro, não o código.
-- O código do cliente é exibido, mas não é filtro da consulta do admin.
+- O ID é o **código** do cliente (RNF-CLI-005, [DEC-10](DEC-10-cliente-enderecos-e-cartoes.md)), o código do livro
+  (RNF-LIV-001) e o número do pedido. O ISBN é um atributo do livro, não o código. O código do livro e o número do
+  pedido seguem exibidos na UI; desde o ALT-11 o código do cliente é identificador interno, não exibido como dado na
+  consulta e no detalhe do cliente nem em "Meus dados".
+- O código do cliente não é filtro da consulta de clientes do admin; permanece o filtro "Código do cliente" na consulta
+  de pedidos (RF-VEN-009), fora do pedido da ALT-11.
 
 Fundamento:
 

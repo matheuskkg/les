@@ -58,9 +58,11 @@ fim da conta é a inativação.
 
 ### Código de cliente (RNF-CLI-005)
 
-O código único é o próprio **id** do cliente, sem campo extra. É o valor exibido ao usuário e usado como filtro na
+O código único é o próprio **id** do cliente, sem campo extra. É um identificador interno, usado na navegação e na
 consulta do admin (igualdade, [DEC-07](DEC-07-convencoes-da-api-rest.md)) (alterado pelo
-[DEC-14](DEC-14-ids-nomes-e-seed.md): o código é exibido, mas não é filtro da consulta do admin).
+[DEC-14](DEC-14-ids-nomes-e-seed.md): não é filtro da consulta do admin). Desde o ALT-11 não é exibido como dado na
+consulta e no detalhe do cliente nem em "Meus dados"; segue existindo, fora deste pedido, o filtro "Código do cliente"
+na consulta de pedidos do admin (RF-VEN-009).
 
 ### Valores de domínio
 
