@@ -21,7 +21,6 @@ const secoes = [
   { caminho: '/minha-conta/enderecos', rotulo: 'Endereços' },
   { caminho: '/minha-conta/cartoes', rotulo: 'Cartões' },
   { caminho: '/minha-conta/senha', rotulo: 'Senha' },
-  { caminho: '/minha-conta/notificacoes', rotulo: 'Notificações' },
 ];
 
 function UltimoPedido() {

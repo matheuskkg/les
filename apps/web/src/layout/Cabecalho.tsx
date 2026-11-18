@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { useLocation } from 'preact-iso';
+import { itemAtivoDaNavbar, type ItemDaNavbar } from './regras/itemAtivo';
 import { iniciais } from '../compartilhado/iniciais';
 import { PrazoDaReserva, useCarrinho } from '../modulos/carrinho';
 import { useNotificacoes } from '../modulos/notificacoes';
@@ -41,14 +42,15 @@ function BuscaGlobal() {
   );
 }
 
-function BotaoDoCarrinho() {
+function BotaoDoCarrinho({ ativo }: { ativo: boolean }) {
   const { carrinho, abrirGaveta } = useCarrinho();
   const quantidade = carrinho?.quantidadeDeItens ?? 0;
   return (
     <button
       type="button"
-      class="navegacao__link botao-do-carrinho"
+      class={`navegacao__link botao-do-carrinho${ativo ? ' navegacao__link--ativo' : ''}`}
       aria-haspopup="dialog"
+      aria-current={ativo ? 'page' : undefined}
       aria-label={quantidade > 0 ? `Carrinho: ${quantidade} ${quantidade === 1 ? 'item' : 'itens'}` : 'Carrinho'}
       onClick={abrirGaveta}
     >
@@ -93,10 +95,18 @@ function FaixaDeReserva() {
   );
 }
 
+/** Classe de um item da navegação, com o destaque do item ativo e qualquer classe própria do item. */
+function classeDoItem(item: ItemDaNavbar, ativo: ItemDaNavbar | null, classeExtra = '') {
+  return `navegacao__link${classeExtra ? ` ${classeExtra}` : ''}${ativo === item ? ' navegacao__link--ativo' : ''}`;
+}
+
 export function Cabecalho() {
+  const { path } = useLocation();
   const { usuario, carregando, encerrarSessao } = useSessao();
   const { naoLidas } = useNotificacoes();
   const contador = textoDoContador(naoLidas);
+  const caminhoDasNotificacoes = usuario ? paginaDeNotificacoes(usuario.papel) : '';
+  const ativo = itemAtivoDaNavbar(path, caminhoDasNotificacoes);
 
   return (
     <header class="cabecalho">
@@ -108,26 +118,39 @@ export function Cabecalho() {
         {usuario?.papel !== 'ADMIN' && <BuscaGlobal />}
 
         <nav class="navegacao" aria-label="Principal">
-          <a class="navegacao__link navegacao__link--inicio" href="/">
+          <a
+            class={classeDoItem('vitrine', ativo, 'navegacao__link--inicio')}
+            href="/"
+            aria-current={ativo === 'vitrine' ? 'page' : undefined}
+          >
             Vitrine
           </a>
           {usuario?.papel === 'CLIENTE' && (
             <>
-              <BotaoDoCarrinho />
-              <a class="navegacao__link" href="/minha-conta">
+              <BotaoDoCarrinho ativo={ativo === 'carrinho'} />
+              <a
+                class={classeDoItem('minha-conta', ativo)}
+                href="/minha-conta"
+                aria-current={ativo === 'minha-conta' ? 'page' : undefined}
+              >
                 Minha conta
               </a>
             </>
           )}
           {usuario?.papel === 'ADMIN' && (
-            <a class="navegacao__link" href="/admin/clientes">
+            <a
+              class={classeDoItem('administracao', ativo)}
+              href="/admin/clientes"
+              aria-current={ativo === 'administracao' ? 'page' : undefined}
+            >
               Administração
             </a>
           )}
           {usuario && (
             <a
-              class="navegacao__link"
-              href={paginaDeNotificacoes(usuario.papel)}
+              class={classeDoItem('notificacoes', ativo)}
+              href={caminhoDasNotificacoes}
+              aria-current={ativo === 'notificacoes' ? 'page' : undefined}
               aria-label={naoLidas > 0 ? `Notificações: ${naoLidas} não lidas` : 'Notificações'}
             >
               Notificações
