@@ -241,7 +241,6 @@ test('6. compra que passa a ENTREGUE dentro do período continua contabilizada (
   // O administrador encontra o pedido 242, confirma a entrega e volta à análise.
   await page.getByRole('link', { name: 'Pedidos' }).click();
   await expect(page.getByRole('heading', { name: 'Pedidos' })).toBeVisible();
-  await page.getByText('Mais filtros').click();
   await page.getByLabel('Número do pedido').fill('242');
   await page.getByRole('button', { name: 'Filtrar' }).click();
   const linhaDoPedido = page
