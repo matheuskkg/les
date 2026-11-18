@@ -1,4 +1,29 @@
 /* Tabelas de consulta do administrador (RF-CLI-004) */
+
+/*
+ * Espaçamento vertical e altura uniforme das linhas (ALT-04). Linhas com botões de ação ficavam mais altas que as
+ * outras porque o padding do botão definia a altura da célula. Altura fixa da linha e botões contidos nela resolvem
+ * sem mudar o comportamento dos botões.
+ */
+.area-do-admin .tabela tbody tr {
+  height: 3.5rem;
+}
+
+.area-do-admin .tabela th,
+.area-do-admin .tabela td {
+  padding: 0.75rem;
+  line-height: 1.4;
+  vertical-align: middle;
+}
+
+.area-do-admin .tabela .botao {
+  /* Os 2 px reservados evitam que o baseline da linha deixe as linhas com botão mais altas. */
+  height: calc(2rem - 2px);
+  padding: 0 0.75rem;
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
 .resultado__cabecalho {
   display: flex;
   flex-wrap: wrap;

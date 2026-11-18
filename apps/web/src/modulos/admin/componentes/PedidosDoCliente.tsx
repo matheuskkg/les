@@ -54,7 +54,12 @@ export function PedidosDoCliente({ clienteId }: { clienteId: number }) {
 
   const visivel = resultado?.clienteId === clienteId ? resultado : null;
   const dados = visivel?.dados ?? null;
-  const consultaCompleta = urlDaConsulta({ filtros: { ...filtrosVazios(), clienteId: String(clienteId) }, ordem: 'realizadoEm,desc', pagina: 1 });
+  const consultaCompleta = urlDaConsulta({
+    filtros: { ...filtrosVazios(), clienteId: String(clienteId) },
+    ordem: 'realizadoEm,desc',
+    pagina: 1,
+    tamanho: TAMANHO,
+  });
 
   return (
     <div class="cartao">

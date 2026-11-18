@@ -11,6 +11,7 @@ import {
   lerEstadoDasTrocas,
   urlDasTrocas,
 } from '../regras/filtrosDeTrocas';
+import { OPCOES_DE_TAMANHO } from '../regras/paginacao';
 import { formatarCpf, formatarDataHora } from '../../../compartilhado/formatacao';
 import { EtiquetaDeStatus } from '../../../ui/EtiquetaDeStatus';
 import { Paginacao } from '../../../ui/Paginacao';
@@ -82,7 +83,7 @@ export default function AdminTrocas() {
           aoMudar={(valor) => {
             const opcao = OPCOES_DE_STATUS.find((item) => item.valor === valor);
             if (opcao) {
-              route(urlDasTrocas({ status: opcao.valor, pagina: 1 }));
+              route(urlDasTrocas({ status: opcao.valor, pagina: 1, tamanho: estado.tamanho }));
             }
           }}
         />
@@ -97,7 +98,7 @@ export default function AdminTrocas() {
       ) : pagina !== null && pagina.itens.length === 0 && pagina.totalItens > 0 ? (
         <p class="aviso">
           Esta página não existe mais.{' '}
-          <a href={urlDasTrocas({ status: estado.status, pagina: 1 })}>Ir para a primeira página</a>
+          <a href={urlDasTrocas({ status: estado.status, pagina: 1, tamanho: estado.tamanho })}>Ir para a primeira página</a>
         </p>
       ) : pagina === null || pagina.totalItens === 0 ? (
         <p>Nenhuma troca encontrada.</p>
@@ -133,7 +134,17 @@ export default function AdminTrocas() {
               </tbody>
             </table>
           </div>
-          <Paginacao pagina={estado.pagina} totalPaginas={pagina.totalPaginas} rotulo="Páginas de trocas" urlDaPagina={(numero) => urlDasTrocas({ ...estado, pagina: numero })} />
+          <Paginacao
+            id="paginacao-trocas"
+            pagina={estado.pagina}
+            totalPaginas={pagina.totalPaginas}
+            rotulo="Páginas de trocas"
+            urlDaPagina={(numero) => urlDasTrocas({ ...estado, pagina: numero })}
+            aoNavegar={route}
+            tamanho={estado.tamanho}
+            opcoesDeTamanho={OPCOES_DE_TAMANHO}
+            urlDoTamanho={(tamanho) => urlDasTrocas({ ...estado, tamanho, pagina: 1 })}
+          />
         </>
       )}
     </section>
