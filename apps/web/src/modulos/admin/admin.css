@@ -169,3 +169,64 @@
 .grafico__area--chamadas {
   min-height: 280px;
 }
+
+/* Filtros das consultas do admin organizados por contexto (RF-CLI-004, RF-VEN-009).
+   Cada grupo responde a uma pergunta da busca — quem é, como contatar, onde, quando e em que
+   situação. Os grupos quebram para uma coluna em telas estreitas e os campos de cada grupo
+   também se acomodam sozinhos quando não cabe mais de um lado do outro. */
+.filtros.filtros-admin {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+  gap: 1.25rem 1.5rem;
+  align-items: start;
+}
+
+.filtros-admin__grupo {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.filtros-admin__legenda {
+  width: 100%;
+  margin-bottom: 0.7rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--cor-borda);
+  color: var(--cor-texto-suave);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.filtros-admin__campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.filtros-admin__campos--opcoes {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.9rem;
+}
+
+/* Dentro de um grupo, o nome do subgrupo é um rótulo comum e não um segundo título em caixa alta. */
+.filtros-admin .grupo-de-categorias legend {
+  margin-bottom: 0.25rem;
+  color: var(--cor-texto);
+  font-size: 0.85rem;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.filtros-admin .categorias {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.35rem 0.75rem;
+}
+
+.filtros-admin__acoes {
+  margin-top: 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--cor-borda);
+}
