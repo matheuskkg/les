@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'preact/hooks';
 import { useLocation } from 'preact-iso';
+import { MenuDoUsuario } from './MenuDoUsuario';
 import { itemAtivoDaNavbar, type ItemDaNavbar } from './regras/itemAtivo';
 import { rotuloDoCarrinho } from './regras/rotuloDoCarrinho';
-import { iniciais } from '../compartilhado/iniciais';
 import { PrazoDaReserva, useCarrinho } from '../modulos/carrinho';
 import { useNotificacoes } from '../modulos/notificacoes';
 import { paginaDeNotificacoes, textoDoContador } from '../modulos/notificacoes/regras/notificacoes';
 import { useSessao } from '../modulos/sessao';
-import { Botao, BotaoLink } from '../ui/Botao';
+import { BotaoLink } from '../ui/Botao';
 import { IconeCarrinho } from '../ui/icones';
 
 /** Busca livre da vitrine (título, autor, editora ou ISBN); acompanha o `q` da URL. */
@@ -129,15 +129,6 @@ export function Cabecalho() {
           >
             Vitrine
           </a>
-          {usuario?.papel === 'CLIENTE' && (
-            <a
-              class={classeDoItem('minha-conta', ativo)}
-              href="/minha-conta"
-              aria-current={ativo === 'minha-conta' ? 'page' : undefined}
-            >
-              Minha conta
-            </a>
-          )}
           {usuario?.papel === 'ADMIN' && (
             <a
               class={classeDoItem('administracao', ativo)}
@@ -167,22 +158,7 @@ export function Cabecalho() {
               Carregando…
             </span>
           ) : usuario ? (
-            <>
-              <span class="sessao__usuario" title={usuario.email}>
-                <span class="avatar" aria-hidden="true">
-                  {iniciais(usuario.nome)}
-                </span>
-                <span class="sessao__nome">{usuario.nome}</span>
-              </span>
-              <Botao
-                variante="secundario"
-                onClick={() => {
-                  void encerrarSessao();
-                }}
-              >
-                Sair
-              </Botao>
-            </>
+            <MenuDoUsuario usuario={usuario} ativo={ativo === 'minha-conta'} aoSair={() => void encerrarSessao()} />
           ) : (
             <>
               <BotaoLink variante="secundario" href="/login">

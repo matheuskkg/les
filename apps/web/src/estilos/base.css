@@ -472,3 +472,80 @@ p {
   width: 1.35rem;
   height: 1.35rem;
 }
+
+/* ALT-16: avatar, nome e seta do usuário abrem o menu com "Minha conta" e "Sair". */
+.menu-do-usuario {
+  position: relative;
+  display: flex;
+}
+
+.menu-do-usuario__gatilho {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.45rem;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--raio-pequeno);
+  color: var(--cor-texto);
+  cursor: pointer;
+  font: inherit;
+}
+.menu-do-usuario__gatilho:hover {
+  background: var(--cor-fundo);
+  border-color: var(--cor-borda);
+}
+.menu-do-usuario__gatilho.navegacao__link--ativo,
+.menu-do-usuario__gatilho.navegacao__link--ativo:hover {
+  background: var(--cor-primaria-clara);
+  box-shadow: inset 0 -2px 0 var(--cor-primaria);
+  color: var(--cor-primaria-escura);
+}
+.menu-do-usuario__gatilho.navegacao__link--ativo .sessao__usuario {
+  color: inherit;
+}
+
+.menu-do-usuario__seta {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.15s ease;
+}
+.menu-do-usuario__gatilho[aria-expanded='true'] .menu-do-usuario__seta {
+  transform: rotate(180deg);
+}
+
+.menu-do-usuario__painel {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  min-width: 12rem;
+  flex-direction: column;
+  padding: 0.35rem;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 12%);
+}
+
+.menu-do-usuario__opcao {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  background: none;
+  border: 0;
+  border-radius: var(--raio-pequeno);
+  color: var(--cor-texto);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+}
+.menu-do-usuario__opcao:hover {
+  background: var(--cor-fundo);
+  color: var(--cor-primaria-escura);
+}

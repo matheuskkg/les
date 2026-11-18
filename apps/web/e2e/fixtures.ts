@@ -87,18 +87,24 @@ export async function entrarNaApi(page: Page, login: string, senha: string): Pro
   ).toBe(200);
 }
 
+/** Abre o menu do usuário no cabeçalho (avatar, nome e seta), onde ficaram "Minha conta" e "Sair" (ALT-16). */
+export async function abrirMenuDoUsuario(page: Page): Promise<void> {
+  await page.getByRole('banner').getByRole('button', { name: /opções da conta/i }).click();
+}
+
 /** Entra pela tela /login e espera o cabeçalho mostrar a sessão. Use só em cenário que demonstra o login. */
 export async function entrarComo(page: Page, login: string, senha: string): Promise<void> {
   await page.goto('/login');
   await page.getByLabel('E-mail ou telefone').fill(login);
   await page.getByLabel('Senha').fill(senha);
   await page.getByRole('button', { name: 'Entrar' }).click();
-  await expect(page.getByRole('banner').getByRole('button', { name: 'Sair' })).toBeVisible();
+  await expect(page.getByRole('banner').getByRole('button', { name: /opções da conta/i })).toBeVisible();
 }
 
-/** Sai pelo botão do cabeçalho. */
+/** Sai pelo menu do usuário no cabeçalho. */
 export async function sair(page: Page): Promise<void> {
-  await page.getByRole('banner').getByRole('button', { name: 'Sair' }).click();
+  await abrirMenuDoUsuario(page);
+  await page.getByRole('menu').getByRole('menuitem', { name: 'Sair' }).click();
 }
 
 /** Põe um Dom Casmurro (livro 1, R$ 47,88) no carrinho pela página do livro. */
