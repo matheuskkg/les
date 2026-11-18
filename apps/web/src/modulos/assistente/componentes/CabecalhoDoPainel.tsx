@@ -1,5 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { Botao } from '../../../ui/Botao';
+import { IconeFechar } from '../../../ui/icones';
 
 interface Props {
   tituloId: string;
@@ -15,8 +16,8 @@ export function CabecalhoDoPainel({ tituloId, aoFechar, children }: Props) {
       <h2 id={tituloId}>Assistente da livraria</h2>
       <div class="assistente__acoes">
         {children}
-        <Botao variante="discreto" onClick={aoFechar}>
-          Fechar
+        <Botao variante="discreto" aria-label="Fechar" onClick={aoFechar}>
+          <IconeFechar tamanho="1.25rem" />
         </Botao>
       </div>
     </div>
