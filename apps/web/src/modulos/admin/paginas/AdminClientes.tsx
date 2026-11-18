@@ -7,6 +7,7 @@ import { CampoDeSelecao } from '../../../ui/CampoDeSelecao';
 import { Erro } from '../../../ui/Erro';
 import { OpcoesMarcaveis } from '../../../ui/OpcoesMarcaveis';
 import { GENEROS, ORDENS, SITUACOES, UFS, consultaDoEstado, filtrosVazios, lerEstadoDaConsulta, rotuloDe, urlDaConsulta, urlDoCliente, type CampoDeTexto, type FiltrosDeClientes } from '../regras/filtrosDeClientes';
+import { OPCOES_DE_TAMANHO } from '../regras/paginacao';
 import { formatarCpf, formatarData } from '../../../compartilhado/formatacao';
 import { Botao } from '../../../ui/Botao';
 import { Paginacao } from '../../../ui/Paginacao';
@@ -71,7 +72,7 @@ export default function AdminClientes() {
 
   function filtrar(evento: Event) {
     evento.preventDefault();
-    route(urlDaConsulta({ filtros, ordem: estado.ordem, pagina: 1 }));
+    route(urlDaConsulta({ filtros, ordem: estado.ordem, pagina: 1, tamanho: estado.tamanho }));
   }
 
   const visivel = resultado?.busca === busca ? resultado : null;
@@ -192,7 +193,17 @@ export default function AdminClientes() {
             </table>
           </div>
 
-          <Paginacao pagina={estado.pagina} totalPaginas={pagina.totalPaginas} rotulo="Páginas de clientes" urlDaPagina={(numero) => urlDaConsulta({ ...estado, pagina: numero })} />
+          <Paginacao
+            id="paginacao-clientes"
+            pagina={estado.pagina}
+            totalPaginas={pagina.totalPaginas}
+            rotulo="Páginas de clientes"
+            urlDaPagina={(numero) => urlDaConsulta({ ...estado, pagina: numero })}
+            aoNavegar={route}
+            tamanho={estado.tamanho}
+            opcoesDeTamanho={OPCOES_DE_TAMANHO}
+            urlDoTamanho={(tamanho) => urlDaConsulta({ ...estado, tamanho, pagina: 1 })}
+          />
         </>
       )}
     </section>

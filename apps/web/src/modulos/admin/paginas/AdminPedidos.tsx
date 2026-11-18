@@ -24,6 +24,7 @@ import { Paginacao } from '../../../ui/Paginacao';
 import { SeletorDeOrdem } from '../../../ui/SeletorDeOrdem';
 import { useCarregamento } from '../../../compartilhado/useCarregamento';
 import { AbasDeStatus } from '../componentes/AbasDeStatus';
+import { OPCOES_DE_TAMANHO } from '../regras/paginacao';
 
 type PaginaDePedidos = components['schemas']['PaginaPedidoListadoDto'];
 
@@ -123,7 +124,7 @@ export default function AdminPedidos() {
 
   function filtrar(evento: Event) {
     evento.preventDefault();
-    route(urlDaConsulta({ filtros, ordem: estado.ordem, pagina: 1 }));
+    route(urlDaConsulta({ filtros, ordem: estado.ordem, pagina: 1, tamanho: estado.tamanho }));
   }
 
   const { status: _status, ...avancados } = estado.filtros;
@@ -267,7 +268,17 @@ export default function AdminPedidos() {
             </table>
           </div>
 
-          <Paginacao pagina={estado.pagina} totalPaginas={pagina.totalPaginas} rotulo="Páginas de pedidos" urlDaPagina={(numero) => urlDaConsulta({ ...estado, pagina: numero })} />
+          <Paginacao
+            id="paginacao-pedidos"
+            pagina={estado.pagina}
+            totalPaginas={pagina.totalPaginas}
+            rotulo="Páginas de pedidos"
+            urlDaPagina={(numero) => urlDaConsulta({ ...estado, pagina: numero })}
+            aoNavegar={route}
+            tamanho={estado.tamanho}
+            opcoesDeTamanho={OPCOES_DE_TAMANHO}
+            urlDoTamanho={(tamanho) => urlDaConsulta({ ...estado, tamanho, pagina: 1 })}
+          />
         </>
       )}
     </section>

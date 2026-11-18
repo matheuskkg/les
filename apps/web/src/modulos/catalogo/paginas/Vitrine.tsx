@@ -235,10 +235,12 @@ export default function Vitrine() {
                 ))}
               </ul>
               <Paginacao
+                id="paginacao-vitrine"
                 pagina={estado.pagina}
                 totalPaginas={pagina.totalPaginas}
                 rotulo="Paginação da vitrine"
                 urlDaPagina={(numero) => urlDoEstado({ ...estado, pagina: numero })}
+                aoNavegar={route}
               />
             </>
           )}

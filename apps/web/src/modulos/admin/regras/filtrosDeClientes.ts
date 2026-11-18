@@ -1,4 +1,5 @@
 import type { paths } from '../../../api/esquema';
+import { TAMANHO_PADRAO, normalizarPagina, normalizarTamanho } from './paginacao.ts';
 
 /** Parâmetros de `GET /api/admin/clientes`, como definidos no contrato (RF-CLI-004, DEC-07). */
 export type ConsultaDeClientes = NonNullable<paths['/api/admin/clientes']['get']['parameters']['query']>;
@@ -32,7 +33,6 @@ export const ORDENS: readonly { valor: string; rotulo: string }[] = [
 ];
 
 export const ORDEM_PADRAO = 'nome,asc';
-export const TAMANHO_DA_PAGINA = 20;
 
 const CAMPOS_DE_TEXTO = [
   'nome',
@@ -53,11 +53,12 @@ export interface FiltrosDeClientes extends Record<CampoDeTexto, string> {
   uf: Uf[];
 }
 
-/** Estado da tela: filtros, ordenação e página (a partir de 1 na URL). */
+/** Estado da tela: filtros, ordenação, página (a partir de 1 na URL) e itens por página. */
 export interface EstadoDaConsulta {
   filtros: FiltrosDeClientes;
   ordem: string;
   pagina: number;
+  tamanho: number;
 }
 
 export function filtrosVazios(): FiltrosDeClientes {
@@ -98,11 +99,11 @@ export function lerEstadoDaConsulta(busca: string): EstadoDaConsulta {
   filtros.uf = somenteValidos(parametros.getAll('uf'), UFS);
 
   const ordem = parametros.get('ordem');
-  const pagina = Number.parseInt(parametros.get('pagina') ?? '', 10);
   return {
     filtros,
     ordem: ORDENS.some((item) => item.valor === ordem) && ordem !== null ? ordem : ORDEM_PADRAO,
-    pagina: Number.isSafeInteger(pagina) && pagina > 1 ? pagina : 1,
+    pagina: normalizarPagina(parametros.get('pagina')),
+    tamanho: normalizarTamanho(parametros.get('tamanho')),
   };
 }
 
@@ -122,6 +123,9 @@ export function buscaDaConsulta(estado: EstadoDaConsulta): string {
   }
   if (estado.ordem !== ORDEM_PADRAO) {
     parametros.set('ordem', estado.ordem);
+  }
+  if (estado.tamanho !== TAMANHO_PADRAO) {
+    parametros.set('tamanho', String(estado.tamanho));
   }
   if (estado.pagina > 1) {
     parametros.set('pagina', String(estado.pagina));
@@ -155,7 +159,7 @@ export function urlDeVoltaAosClientes(busca: string): string {
 export function consultaDoEstado(estado: EstadoDaConsulta): ConsultaDeClientes {
   const consulta: ConsultaDeClientes = {
     pagina: Math.max(estado.pagina - 1, 0),
-    tamanho: TAMANHO_DA_PAGINA,
+    tamanho: estado.tamanho,
     ordem: [estado.ordem],
   };
   for (const campo of CAMPOS_DE_TEXTO) {

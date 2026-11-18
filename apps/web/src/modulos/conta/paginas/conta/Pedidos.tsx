@@ -29,7 +29,7 @@ function urlDaPagina(pagina: number): string {
  * página fica na URL, para o "Voltar" do detalhe e os links voltarem a ela.
  */
 export function MeusPedidos() {
-  const { query } = useLocation();
+  const { query, route } = useLocation();
   const lida = Number.parseInt(query.pagina ?? '', 10);
   const pagina = Number.isSafeInteger(lida) && lida > 1 ? lida : 1;
   const [lista, definirLista] = useState<Lista | null>(null);
@@ -108,7 +108,14 @@ export function MeusPedidos() {
               </tbody>
             </table>
           </div>
-          <Paginacao pagina={pagina} totalPaginas={dados.totalPaginas} rotulo="Páginas de pedidos" urlDaPagina={urlDaPagina} />
+          <Paginacao
+            id="paginacao-meus-pedidos"
+            pagina={pagina}
+            totalPaginas={dados.totalPaginas}
+            rotulo="Páginas de pedidos"
+            urlDaPagina={urlDaPagina}
+            aoNavegar={route}
+          />
         </>
       )}
     </div>

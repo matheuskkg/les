@@ -1,5 +1,6 @@
 import type { paths } from '../../../api/esquema';
 import { textoDoStatus } from '../../../compartilhado/formatacao.ts';
+import { TAMANHO_PADRAO, normalizarPagina, normalizarTamanho } from './paginacao.ts';
 
 /** Parâmetros de `GET /api/admin/pedidos`, como definidos no contrato (RF-VEN-009, DEC-07). */
 export type ConsultaDePedidos = NonNullable<paths['/api/admin/pedidos']['get']['parameters']['query']>;
@@ -24,7 +25,6 @@ export const ORDENS: readonly { valor: string; rotulo: string }[] = [
 ];
 
 export const ORDEM_PADRAO = 'realizadoEm,desc';
-export const TAMANHO_DA_PAGINA = 20;
 
 const CAMPOS_DE_TEXTO = ['numero', 'clienteId', 'cliente', 'cpf', 'realizadoEmDe', 'realizadoEmAte'] as const;
 
@@ -36,11 +36,12 @@ export interface FiltrosDePedidos extends Record<CampoDeTexto, string> {
   situacao: SituacaoDaTroca[];
 }
 
-/** Estado da tela: filtros, ordenação e página (a partir de 1 na URL). */
+/** Estado da tela: filtros, ordenação, página (a partir de 1 na URL) e itens por página. */
 export interface EstadoDaConsulta {
   filtros: FiltrosDePedidos;
   ordem: string;
   pagina: number;
+  tamanho: number;
 }
 
 export function filtrosVazios(): FiltrosDePedidos {
@@ -64,11 +65,11 @@ export function lerEstadoDaConsulta(busca: string): EstadoDaConsulta {
   filtros.situacao = lerOpcoes(parametros.getAll('situacao'), SITUACOES_DA_TROCA);
 
   const ordem = parametros.get('ordem');
-  const pagina = Number.parseInt(parametros.get('pagina') ?? '', 10);
   return {
     filtros,
     ordem: ordem !== null && ORDENS.some((item) => item.valor === ordem) ? ordem : ORDEM_PADRAO,
-    pagina: Number.isSafeInteger(pagina) && pagina > 1 ? pagina : 1,
+    pagina: normalizarPagina(parametros.get('pagina')),
+    tamanho: normalizarTamanho(parametros.get('tamanho')),
   };
 }
 
@@ -89,6 +90,9 @@ export function urlDaConsulta(estado: EstadoDaConsulta): string {
   }
   if (estado.ordem !== ORDEM_PADRAO) {
     parametros.set('ordem', estado.ordem);
+  }
+  if (estado.tamanho !== TAMANHO_PADRAO) {
+    parametros.set('tamanho', String(estado.tamanho));
   }
   if (estado.pagina > 1) {
     parametros.set('pagina', String(estado.pagina));
@@ -111,7 +115,7 @@ export function numeroValido(numero: string): boolean {
 export function consultaDoEstado(estado: EstadoDaConsulta): ConsultaDePedidos {
   const consulta: ConsultaDePedidos = {
     pagina: Math.max(estado.pagina - 1, 0),
-    tamanho: TAMANHO_DA_PAGINA,
+    tamanho: estado.tamanho,
     ordem: [estado.ordem],
   };
   for (const campo of ['numero', 'clienteId'] as const) {
