@@ -113,7 +113,7 @@ class AlterarDadosClienteTest {
         DadosAlteradosDoCliente comando = new DadosAlteradosDoCliente(2L, "Ana Souza", Genero.FEMININO,
                 LocalDate.of(1990, 3, 14), CPF, "bruno@livraria.test", TipoTelefone.CELULAR, "21", "988887002");
 
-        ExcecaoDeNegocio erro = catchThrowableOfType(() -> caso.executar(comando), ExcecaoDeNegocio.class);
+        ExcecaoDeNegocio erro = catchThrowableOfType(ExcecaoDeNegocio.class, () -> caso.executar(comando));
 
         assertThat(erro.getViolacoes()).extracting(Violacao::codigo)
                 .containsOnly("RF-CLI-002")
@@ -127,7 +127,7 @@ class AlterarDadosClienteTest {
         DadosAlteradosDoCliente invalido = new DadosAlteradosDoCliente(2L, " ", null, null, "123",
                 "sem-arroba", null, "1", "12");
 
-        ExcecaoDeNegocio erro = catchThrowableOfType(() -> caso.executar(invalido), ExcecaoDeNegocio.class);
+        ExcecaoDeNegocio erro = catchThrowableOfType(ExcecaoDeNegocio.class, () -> caso.executar(invalido));
 
         assertThat(erro.getViolacoes()).extracting(Violacao::codigo)
                 .containsOnly("RN-CLI-006")
@@ -140,7 +140,7 @@ class AlterarDadosClienteTest {
     void rfCli002_clienteSemCadastroNaoEhEncontrado() {
         clientes.salvos.clear();
 
-        assertThat(catchThrowableOfType(() -> caso.executar(alteracao()), ExcecaoDeRecursoNaoEncontrado.class))
+        assertThat(catchThrowableOfType(ExcecaoDeRecursoNaoEncontrado.class, () -> caso.executar(alteracao())))
                 .hasMessage("Cliente não encontrado.");
     }
 

@@ -1,6 +1,7 @@
 package br.fatec.les.livraria.acesso.infraestrutura.seguranca;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -23,6 +24,7 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -77,8 +79,9 @@ public class ConfiguracaoDeSeguranca {
                 .build();
         JwtTimestampValidator validade = new JwtTimestampValidator();
         validade.setClock(new RelogioComoClock(relogio));
+        // A sobrecarga com List evita a criação de array genérico (aviso de unchecked) do varargs.
         decodificador.setJwtValidator(JwtValidators.createDefaultWithValidators(
-                new JwtIssuerValidator(EmissorDeToken.EMISSOR), validade));
+                List.of(new JwtIssuerValidator(EmissorDeToken.EMISSOR), validade)));
         return decodificador;
     }
 
@@ -126,8 +129,11 @@ public class ConfiguracaoDeSeguranca {
         JwtAuthenticationProvider provedor = new JwtAuthenticationProvider(jwtDecoder);
         provedor.setJwtAuthenticationConverter(conversorDeJwt);
         AuthenticationManager gerenciador = new ProviderManager(provedor);
-        BearerTokenAuthenticationFilter filtroDoToken = new BearerTokenAuthenticationFilter(gerenciador);
-        filtroDoToken.setBearerTokenResolver(resolvedorDeToken);
+        // Forma atual da API: o resolvedor vai no conversor, que entra no construtor do filtro.
+        BearerTokenAuthenticationConverter conversorDeBearer = new BearerTokenAuthenticationConverter();
+        conversorDeBearer.setBearerTokenResolver(resolvedorDeToken);
+        BearerTokenAuthenticationFilter filtroDoToken = new BearerTokenAuthenticationFilter(gerenciador,
+                conversorDeBearer);
         filtroDoToken.setAuthenticationEntryPoint(entradaDeAutenticacao);
         http.addFilterBefore(filtroDoToken, UsernamePasswordAuthenticationFilter.class);
 

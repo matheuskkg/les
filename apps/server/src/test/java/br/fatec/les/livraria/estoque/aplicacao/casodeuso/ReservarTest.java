@@ -40,8 +40,8 @@ class ReservarTest {
     void rnVen001_acimaDoDisponivelInformaQuantoHa() {
         reservar.executar(LIVRO, 4, OrigemReserva.CARRINHO, 1L, PRAZO);
 
-        ExcecaoDeNegocio erro = catchThrowableOfType(
-                () -> reservar.executar(LIVRO, 3, OrigemReserva.CARRINHO, 2L, PRAZO), ExcecaoDeNegocio.class);
+        ExcecaoDeNegocio erro = catchThrowableOfType(ExcecaoDeNegocio.class,
+                () -> reservar.executar(LIVRO, 3, OrigemReserva.CARRINHO, 2L, PRAZO));
 
         assertThat(erro.getViolacoes()).singleElement()
                 .satisfies(violacao -> {

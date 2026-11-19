@@ -158,10 +158,18 @@
                             <version>${lombok-mapstruct-binding.version}</version>
                         </path>
                     </annotationProcessorPaths>
-                    <compilerArgs>
-                        <arg>-Amapstruct.defaultComponentModel=spring</arg>
-                    </compilerArgs>
                 </configuration>
+                <executions>
+                    <!-- A opção só é reconhecida quando há @Mapper no código; no testCompile ela geraria aviso. -->
+                    <execution>
+                        <id>default-compile</id>
+                        <configuration>
+                            <compilerArgs>
+                                <arg>-Amapstruct.defaultComponentModel=spring</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <!-- Inclui o build do web (apps/web/dist), se existir, em static/ (DEC-09) -->
             <plugin>

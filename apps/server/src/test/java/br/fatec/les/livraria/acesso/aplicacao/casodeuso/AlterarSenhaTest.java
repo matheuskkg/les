@@ -48,8 +48,8 @@ class AlterarSenhaTest {
     void rfCli008_senhaAtualIncorretaResponde422SemAlterar() {
         int salvosAntes = usuarios.salvos.size();
 
-        ExcecaoDeNegocio erro = catchThrowableOfType(
-                () -> caso.executar(2L, new TrocaDeSenha("Outra@123", NOVA, NOVA)), ExcecaoDeNegocio.class);
+        ExcecaoDeNegocio erro = catchThrowableOfType(ExcecaoDeNegocio.class,
+                () -> caso.executar(2L, new TrocaDeSenha("Outra@123", NOVA, NOVA)));
 
         assertThat(erro.getViolacoes()).singleElement().satisfies(violacao -> {
             assertThat(violacao.codigo()).isEqualTo("RF-CLI-008");
@@ -61,8 +61,8 @@ class AlterarSenhaTest {
 
     @Test
     void rnfCli001_novaSenhaFracaViolaARegra() {
-        ExcecaoDeNegocio erro = catchThrowableOfType(
-                () -> caso.executar(2L, new TrocaDeSenha(ATUAL, "fraca", "fraca")), ExcecaoDeNegocio.class);
+        ExcecaoDeNegocio erro = catchThrowableOfType(ExcecaoDeNegocio.class,
+                () -> caso.executar(2L, new TrocaDeSenha(ATUAL, "fraca", "fraca")));
 
         assertThat(erro.getViolacoes()).extracting(Violacao::codigo).contains("RNF-CLI-001");
         assertThat(senhas.codificadas).isEmpty();
@@ -70,8 +70,8 @@ class AlterarSenhaTest {
 
     @Test
     void rnfCli001_novaSenhaEmBrancoViolaARegra() {
-        ExcecaoDeNegocio erro = catchThrowableOfType(
-                () -> caso.executar(2L, new TrocaDeSenha(ATUAL, "   ", "   ")), ExcecaoDeNegocio.class);
+        ExcecaoDeNegocio erro = catchThrowableOfType(ExcecaoDeNegocio.class,
+                () -> caso.executar(2L, new TrocaDeSenha(ATUAL, "   ", "   ")));
 
         assertThat(erro.getViolacoes()).singleElement().satisfies(violacao -> {
             assertThat(violacao.codigo()).isEqualTo("RNF-CLI-001");
@@ -81,8 +81,8 @@ class AlterarSenhaTest {
 
     @Test
     void rnfCli002_confirmacaoDiferenteViolaARegra() {
-        ExcecaoDeNegocio erro = catchThrowableOfType(
-                () -> caso.executar(2L, new TrocaDeSenha(ATUAL, NOVA, "Outra@456")), ExcecaoDeNegocio.class);
+        ExcecaoDeNegocio erro = catchThrowableOfType(ExcecaoDeNegocio.class,
+                () -> caso.executar(2L, new TrocaDeSenha(ATUAL, NOVA, "Outra@456")));
 
         assertThat(erro.getViolacoes()).singleElement()
                 .extracting(Violacao::codigo)
@@ -92,8 +92,8 @@ class AlterarSenhaTest {
     @Test
     void rfCli008_violacoesDaSenhaAtualEDaNovaAcumulam() {
         ExcecaoDeNegocio erro = catchThrowableOfType(
-                () -> caso.executar(2L, new TrocaDeSenha("Outra@123", "fraca", "diferente")),
-                ExcecaoDeNegocio.class);
+                ExcecaoDeNegocio.class,
+                () -> caso.executar(2L, new TrocaDeSenha("Outra@123", "fraca", "diferente")));
 
         assertThat(erro.getViolacoes()).extracting(Violacao::codigo)
                 .contains("RF-CLI-008", "RNF-CLI-001", "RNF-CLI-002");
@@ -103,8 +103,8 @@ class AlterarSenhaTest {
     void rfCli008_usuarioSemCadastroNaoEhEncontrado() {
         usuarios.salvos.clear();
 
-        assertThat(catchThrowableOfType(
-                () -> caso.executar(2L, new TrocaDeSenha(ATUAL, NOVA, NOVA)), ExcecaoDeRecursoNaoEncontrado.class))
+        assertThat(catchThrowableOfType(ExcecaoDeRecursoNaoEncontrado.class,
+                () -> caso.executar(2L, new TrocaDeSenha(ATUAL, NOVA, NOVA))))
                 .hasMessage("Usuário não encontrado.");
     }
 }

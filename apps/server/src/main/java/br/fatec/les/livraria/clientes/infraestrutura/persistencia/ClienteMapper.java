@@ -17,6 +17,17 @@ public interface ClienteMapper {
 
     ClienteJpa paraJpa(Cliente cliente);
 
+    /**
+     * {@code comEndereco}, {@code semCartao} etc. são métodos de construção do agregado, não propriedades mapeadas
+     * (DEC-10). Sem os ignores abaixo o MapStruct os confunde com setters fluentes e avisa sobre alvos não mapeados.
+     */
+    @Mapping(target = "comEndereco", ignore = true)
+    @Mapping(target = "comEnderecoAtualizado", ignore = true)
+    @Mapping(target = "semEndereco", ignore = true)
+    @Mapping(target = "comCartao", ignore = true)
+    @Mapping(target = "comCartaoAtualizado", ignore = true)
+    @Mapping(target = "comCartaoPreferencial", ignore = true)
+    @Mapping(target = "semCartao", ignore = true)
     Cliente paraDominio(ClienteJpa cliente);
 
     @Mapping(target = "cliente", ignore = true)
