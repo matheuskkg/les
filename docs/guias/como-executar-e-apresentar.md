@@ -1,8 +1,9 @@
 # Como executar e apresentar a aplicação
 
 Este guia vale para qualquer módulo ou fluxo da Livraria: desenvolvimento, jar único, pacote para pendrive Windows e
-testes E2E. A análise de vendas aparece como exemplo concreto no fim, mas os comandos e a estrutura servem para
-vitrine, carrinho, checkout, pedidos, trocas, conta, assistente e o que mais for apresentado.
+testes E2E. Os comandos são os mesmos para todos; o que muda é o roteiro de apresentação escolhido na interface do
+Playwright. Há roteiros para cadastro de clientes, carrinho, checkout, pedidos, trocas e análise de vendas, e o mesmo
+padrão serve para qualquer outro fluxo.
 
 ## 1. Visão geral
 
@@ -103,8 +104,8 @@ cd apps/server
 mvn test
 ```
 
-O `TempoDeRespostaTest` mede as consultas com o seed completo e exige no máximo 1 segundo, incluindo a análise e a
-exportação. Para rodar só ele:
+O `TempoDeRespostaTest` mede as consultas com o seed completo — vitrine, clientes, pedidos, trocas e análise — e exige
+no máximo 1 segundo, incluindo a exportação em CSV. Para rodar só ele:
 
 ```bash
 mvn test -Dtest=TempoDeRespostaTest
@@ -137,12 +138,15 @@ cenário, também podem ser criados pela API.
 | O que abrir | Comando |
 |---|---|
 | Todos os roteiros | `npm run e2e` |
-| Um fluxo | `npm run e2e -- e2e/apresentacaoAnalise.spec.ts` |
+| Um fluxo | `npm run e2e -- e2e/apresentacao<Fluxo>.spec.ts` |
 | Cadastro de clientes | `npm run e2e -- e2e/apresentacaoClientes.spec.ts` |
 | Carrinho e estoque | `npm run e2e -- e2e/apresentacaoCarrinho.spec.ts` |
 | Compra e pagamento | `npm run e2e -- e2e/apresentacaoCheckout.spec.ts` |
 | Pedidos e trocas | `npm run e2e -- e2e/apresentacaoPedidosETrocas.spec.ts` |
-| Um cenário do fluxo | `npm run e2e -- e2e/apresentacaoAnalise.spec.ts -g "6\."` |
+| Análise de vendas | `npm run e2e -- e2e/apresentacaoAnalise.spec.ts` |
+| Um cenário do fluxo | `npm run e2e -- e2e/apresentacao<Fluxo>.spec.ts -g "3\."` (o número é o do título do `test`) |
+
+No pacote portátil, o mesmo filtro funciona com `rodar-testes.bat -g "3\."`.
 
 Na janela do Playwright UI, clique em **Run all** ou no botão de executar ao lado do cenário. O botão de repetir roda
 de novo, e a linha do tempo de cada passo permite voltar ao estado anterior.
@@ -158,30 +162,34 @@ npx playwright show-report
 
 Todo E2E do projeto é um roteiro de apresentação. O padrão de nomes é:
 
-| Tipo | Padrão | Exemplo |
+| Tipo | Padrão | Exemplos |
 |---|---|---|
-| Roteiro de apresentação | `apresentacao<Fluxo>.spec.ts` | `apresentacaoAnalise.spec.ts` |
+| Roteiro de apresentação | `apresentacao<Fluxo>.spec.ts` | `apresentacaoClientes.spec.ts`, `apresentacaoCarrinho.spec.ts`, `apresentacaoCheckout.spec.ts`, `apresentacaoPedidosETrocas.spec.ts`, `apresentacaoAnalise.spec.ts` |
 | Apoio compartilhado | `fixtures.ts` | `fixtures.ts` |
 
-Os testes de apresentação são specs que começam com `apresentacao`, por exemplo
-`apps/web/e2e/apresentacaoAnalise.spec.ts`. Eles seguem o `fixtures.ts` compartilhado, e o nome permite rodar todos
-ou escolher um fluxo:
+Os testes de apresentação são specs que começam com `apresentacao`, ficam em `apps/web/e2e/` e seguem o `fixtures.ts`
+compartilhado. O prefixo permite rodar todos ou escolher um fluxo:
 
 ```bash
 npm run e2e
-npm run e2e -- e2e/apresentacaoAnalise.spec.ts
+npm run e2e -- e2e/apresentacao<Fluxo>.spec.ts
 ```
 
-Para apresentar outro módulo, crie `apps/web/e2e/apresentacao<Fluxo>.spec.ts` seguindo o exemplo da análise. Escolha
-os passos que o professor vai ver, na ordem em que ele vê, e deixe cada `test` contar um cenário. Use as telas reais
-para o que o cenário demonstra. Quando o login ou o cadastro não é o assunto, o teste começa já autenticado pela API
-(`entrarNaApi`) e vai direto à tela do fluxo; dados de apoio também podem ser criados pela API, sem validar em tela.
-Escolha filtros e dados que deem ao professor uma cena representativa (uma tabela com várias linhas, um gráfico com
-evolução), não o mínimo que só faz a asserção passar.
+Para apresentar outro módulo, crie `apps/web/e2e/apresentacao<Fluxo>.spec.ts` seguindo um roteiro existente. Escolha
+os passos que o professor vai ver, na ordem em que ele vê, e deixe cada `test` contar um cenário, com o requisito no
+título. Use as telas reais para o que o cenário demonstra. Quando o login ou o cadastro não é o assunto, o teste começa
+já autenticado pela API (`entrarNaApi`) e vai direto à tela do fluxo; dados de apoio também podem ser criados pela API,
+sem validar em tela. Escolha filtros e dados que deem ao professor uma cena representativa (uma tabela com várias
+linhas, um gráfico com evolução, status variados), não o mínimo que só faz a asserção passar. Antes de validar conteúdo
+que pode ficar abaixo da dobra, role até o alvo com `rolarAte`, para o professor ver o que está sendo conferido.
 
-Não crie um script por fluxo no `package.json`: use `npm run e2e -- e2e/apresentacao<Fluxo>.spec.ts`. O pacote portátil copia a
-pasta `e2e` inteira; para continuar autossuficiente, o roteiro deve importar só `@playwright/test`, `./fixtures` e
-helpers que estejam dentro de `e2e/`; evite importar código da aplicação.
+Os cenários de cada fluxo estão documentados nos títulos dos `test` do respectivo spec e, quando houver, na matriz de
+rastreabilidade do requisito em [`docs/requisitos/`](../requisitos/README.md). A ordem dos cenários é definida pelo que
+faz sentido na apresentação de cada fluxo.
+
+Não crie um script por fluxo no `package.json`: use `npm run e2e -- e2e/apresentacao<Fluxo>.spec.ts`. O pacote
+portátil copia a pasta `e2e` inteira; para continuar autossuficiente, o roteiro deve importar só `@playwright/test`,
+`./fixtures` e helpers que estejam dentro de `e2e/`; evite importar código da aplicação.
 
 ### E2E contra o jar empacotado
 
@@ -293,101 +301,20 @@ A apresentação usa os provedores reais de IA; o `fake` fica inativo. Sem inter
 assistente fica indisponível. O restante do sistema continua funcionando, porque o banco é H2 em memória. Para
 ensaiar sem rede com os testes, acrescente o profile `dev` (`h2,e2e,dev`); ele ativa o `fake`.
 
-## 7. Exemplo: análise de vendas
-
-Esta seção é só um exemplo de roteiro. O mesmo formato vale para qualquer outro fluxo.
-
-A tela **Análise de vendas** implementa RF-ANA-001 a RF-ANA-004 e RNF-ANA-001 a RNF-ANA-004. O administrador escolhe
-um período em meses, marca uma ou mais categorias e vê um gráfico de linhas com uma série por categoria, além da
-tabela com os mesmos valores e da exportação em CSV.
-
-### 7.1 O que o DRS manda contar
-
-O texto original do DRS, registrado no DVP e no [DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md), manda somar
-pedidos **APROVADA**, **EM TRANSPORTE** e **ENTREGUE**. Pedidos **REPROVADA** e cancelados não entram. O sistema segue
-essa regra. A atividade da disciplina pede no critério (d) somente **ENTREGUE**, o que é uma divergência em relação ao
-DRS.
-
-Como a decisão do projeto foi manter o DRS, a demonstração deve explicar essa escolha. O cenário 5 do roteiro abaixo
-usa um pedido REPROVADA, que não entra nas duas leituras. O cenário 6 mostra o comportamento real do DRS: um pedido
-que já estava EM TRANSPORTE já contava e continua contando depois de ENTREGUE. Se o professor exigir o critério da
-atividade, mostre o texto do RN-ANA-004 e explique que o projeto priorizou o requisito original.
-
-Os valores seguem o mês da finalização do pedido, sem frete, sem rateio do desconto promocional e descontadas as
-trocas concluídas. O valor de cada item é o preço unitário multiplicado pela quantidade não trocada. Um livro com
-duas categorias entra com o valor cheio em cada uma. Por exemplo, o pedido 44 de março/2025 tem R$ 95,76 de itens,
-R$ 18,00 de frete e R$ 10,00 de desconto; o gráfico mostra R$ 95,76.
-
-### 7.2 Roteiro de demonstração
-
-Os oito cenários estão no arquivo `apps/web/e2e/apresentacaoAnalise.spec.ts`, junto com dois extras: o período
-inválido e a exportação CSV. Rodar o arquivo inteiro leva cerca de 30 segundos e mostra cada teste na interface do
-Playwright UI.
-
-| Cenário da atividade | Teste | O que aparece |
-|---|---|---|
-| 1. Uma categoria em um período válido | teste 1 | Romance de 01/2025 a 12/2025: R$ 95,76 em 03/2025, R$ 168,99 em 04/2025 e R$ 209,00 em 12/2025 |
-| 2. Comparação entre categorias | teste 2 | História e Romance de 01/2025 a 12/2025; em 03/2025, R$ 95,76 cada; em 04/2025, R$ 875,73 e R$ 168,99 |
-| 3. Gráfico de linhas em reais por mês | teste 3 | Fantasia e Romance de 11/2024 a 10/2026, o histórico completo no gráfico e na tabela; a captura do gráfico fica anexada ao relatório |
-| 4. Alteração da data de início ou fim | teste 4 | Início em 01/2025; o fim muda de 06/2025 para 12/2025 e Romance passa a R$ 209,00 |
-| 5. Compra com status diferente de ENTREGUE | teste 5 | Tecnologia de 01/2025 a 12/2025: R$ 0,00 em 03/2025 porque o único pedido é REPROVADA; em 04/2025, R$ 671,10. O teste de controller de 10/2026 fixa APROVADA, EM TRANSPORTE e ENTREGUE |
-| 6. Compra que passa a ENTREGUE | teste 6 | Pedido 242, EM TRANSPORTE (R$ 47,88 em Fantasia, R$ 47,88 em Ficção e R$ 56,28 em História), é entregue em 10/2026 e continua no gráfico; os valores não mudam |
-| 7. Acesso só do administrador | teste 7 | Cliente entra e recebe "Acesso negado" ao abrir `/admin/analise` |
-| 8. Resposta em até 1 segundo | teste 8 | A consulta de 01/2025 a 12/2025 responde em menos de 1 s; o backend também tem o `TempoDeRespostaTest` |
-
-| Extra | Teste | O que aparece |
-|---|---|---|
-| Período inválido (RF-ANA-002) | teste 9 | Mês final antes do inicial: a tela mostra a violação e não desenha o gráfico |
-| Exportação CSV (RF-ANA-004) | teste 10 | História e Romance de 03/2025 a 04/2025; baixa o CSV com BOM, `;` e vírgula decimal |
-
-O teste 3 anexa o gráfico com a legenda ao relatório. Para ver a imagem, rode `npx playwright test` e abra
-`npx playwright show-report`; no Playwright UI, o anexo aparece nos detalhes do teste.
-
-Para rodar só a apresentação da análise:
-
-```bash
-cd apps/web
-npm run e2e -- e2e/apresentacaoAnalise.spec.ts
-```
-
-Para rodar um cenário isolado:
-
-```bash
-npm run e2e -- e2e/apresentacaoAnalise.spec.ts -g "6\\."
-```
-
-No pacote portátil, o mesmo filtro funciona com:
-
-```bat
-rodar-testes.bat -g "6\."
-```
-
-## 8. Credenciais e dados de teste
-
-Credenciais:
+## 7. Credenciais e dados de teste
 
 | Perfil | Login | Senha |
 |---|---|---|
 | Administrador | `admin@livraria.test` | `Admin@123` |
 | Cliente (Ana Souza) | `ana.souza@livraria.test` | `Senha@123` |
 
-O seed histórico da análise vai de novembro de 2024 a outubro de 2026. Os cenários de 2025 usam o ano inteiro, e o
-teste 3 usa o histórico completo; março de 2025 é o mês de referência dos valores:
+O seed cria os livros, o estoque, as tabelas de domínio e um histórico de pedidos e trocas. Cada roteiro escolhe os
+dados que precisa; quando o cenário não depende deles, crie os dados de apoio pela API com `apiDaPagina` e `tokenCsrf`,
+sem validá-los em tela. Como o reset roda antes de cada teste, um roteiro nunca depende do que o anterior deixou no
+banco. Para entender os dados e as regras de um fluxo específico, veja a matriz de rastreabilidade correspondente em
+[`docs/requisitos/`](../requisitos/README.md).
 
-| Categoria | Valor em 03/2025 | Origem |
-|---|---:|---|
-| Romance | R$ 95,76 | 2 × Dom Casmurro |
-| História | R$ 95,76 | 2 × Dom Casmurro, que também é de História |
-| Ficção Científica | R$ 96,00 | 3 × Fundação menos 1 unidade em troca concluída |
-| Fantasia | R$ 80,00 | 2 × O Hobbit, com troca ainda autorizada |
-| Tecnologia | R$ 0,00 | o único pedido do mês é REPROVADA |
-
-Com períodos de 12 a 24 meses, o gráfico mostra a linha temporal e a tabela permite conferir o valor de cada mês.
-
-Em outubro de 2026 há pedidos ENTREGUE, EM TRANSPORTE, APROVADA e REPROVADA. O teste 6 usa o pedido 242, que está
-EM TRANSPORTE e tem itens de Fantasia, Ficção Científica e História.
-
-## 9. Problemas comuns
+## 8. Problemas comuns
 
 **A página abre só com a API ou dá 404 no navegador.** O `mvn package` rodou antes do `npm run build`. Gere o web e
 empacote de novo.
@@ -410,13 +337,15 @@ Um runtime Linux não roda no Windows. Baixe o JRE Windows x64 ou monte o pacote
 **Os testes apagaram os dados que eu tinha acabado de criar.** É o reset do E2E. Ele volta ao seed antes de cada
 teste. Reinicie o `iniciar-app.bat` se quiser começar de novo.
 
-**O comando `e2e` não encontra nenhum teste.** Crie um arquivo `e2e/apresentacao<Fluxo>.spec.ts` ou use
-`npm run e2e -- e2e/apresentacaoAnalise.spec.ts`.
+**O comando `e2e` não encontra nenhum teste.** Crie um arquivo `e2e/apresentacao<Fluxo>.spec.ts` ou rode um fluxo
+existente, como `npm run e2e -- e2e/apresentacaoAnalise.spec.ts`.
 
-## 10. Onde estão as decisões
+## 9. Onde estão as decisões
 
 - [DEC-09](../decisoes/DEC-09-topologia-de-execucao.md): topologia dos processos e rotas de apoio do E2E.
-- [DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md): exemplo de regra de negócio da análise.
-- [DEC-15.4](../decisoes/DEC-15.4-acesso-consultas-e-exportacao.md): exportação em CSV e autorização.
 - [DEC-02](../decisoes/DEC-02-framework-e2e.md): Playwright com o Chrome instalado.
-- [Requisitos da análise](../requisitos/analise.md): descrições originais e matriz de rastreabilidade.
+- [DEC-12](../decisoes/DEC-12-pedido-checkout-e-trocas.md): status de pedido e trocas, regra compartilhada por vários
+  fluxos.
+- [DEC-15.4](../decisoes/DEC-15.4-acesso-consultas-e-exportacao.md): acesso às consultas e exportação em CSV.
+- [Índice de decisões](../decisoes/README.md) e [índice de requisitos](../requisitos/README.md): decisões e requisitos
+  de todos os módulos.
