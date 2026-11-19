@@ -32,7 +32,9 @@ export default defineConfig({
       args: process.env.CI ? [] : ['--start-maximized'],
       slowMo: process.env.CI ? 0 : ESPERA_ENTRE_ACOES_MS,
     },
-    video: 'retain-on-failure',
+    // No CI não há o ffmpeg que o Playwright usa para gravar vídeo (o Chrome já vem no runner, mas o ffmpeg não).
+    // Trace e screenshot de falha continuam indo para o relatório enviado como artifact.
+    video: process.env.CI ? 'off' : 'retain-on-failure',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
