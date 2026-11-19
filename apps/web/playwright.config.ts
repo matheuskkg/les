@@ -7,7 +7,8 @@ declare const process: { env: { CI?: string } };
 const PORTA_DO_WEB = 5173;
 const URL_DO_WEB = `http://localhost:${PORTA_DO_WEB}`;
 
-// Apresentação: o Chrome fica visível e cada ação espera meio segundo. No CI, roda headless e sem atraso.
+// Cada ação espera meio segundo para o professor acompanhar na UI. A janela visível do Chrome fica na configuração
+// do jar (`playwright.apresentacao.config.ts`); aqui o navegador roda headless por padrão (ver `use.headless`).
 const ESPERA_ENTRE_ACOES_MS = 500;
 
 // DEC-02: Chrome instalado na máquina, sem baixar navegadores.
@@ -23,13 +24,14 @@ export default defineConfig({
   use: {
     baseURL: URL_DO_WEB,
     channel: 'chrome',
-    // Fora do CI, o professor acompanha o Chrome; no CI não há tela.
-    headless: Boolean(process.env.CI),
-    // Fora do CI, o Chrome abre maximizado na resolução da tela, para o alvo do teste aparecer inteiro.
-    // No CI, o viewport de desktop mantém o layout previsível e o teste headless.
-    viewport: process.env.CI ? { width: 1280, height: 720 } : null,
+    // Por padrão o teste roda headless e o acompanhamento acontece dentro da UI do Playwright (snapshots e timeline),
+    // sem abrir uma janela externa do Chrome. Quem quiser o navegador visível pode rodar `npm run e2e -- --headed`;
+    // a apresentação contra o jar usa `playwright.apresentacao.config.ts`, que continua headed.
+    headless: true,
+    // Viewport fixo mantém o layout previsível na UI e no CI.
+    viewport: { width: 1280, height: 720 },
     launchOptions: {
-      args: process.env.CI ? [] : ['--start-maximized'],
+      args: [],
       slowMo: process.env.CI ? 0 : ESPERA_ENTRE_ACOES_MS,
     },
     // No CI não há o ffmpeg que o Playwright usa para gravar vídeo (o Chrome já vem no runner, mas o ffmpeg não).
