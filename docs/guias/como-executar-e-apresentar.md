@@ -138,6 +138,10 @@ cenário, também podem ser criados pela API.
 |---|---|
 | Todos os roteiros | `npm run e2e` |
 | Um fluxo | `npm run e2e -- e2e/apresentacaoAnalise.spec.ts` |
+| Cadastro de clientes | `npm run e2e -- e2e/apresentacaoClientes.spec.ts` |
+| Carrinho e estoque | `npm run e2e -- e2e/apresentacaoCarrinho.spec.ts` |
+| Compra e pagamento | `npm run e2e -- e2e/apresentacaoCheckout.spec.ts` |
+| Pedidos e trocas | `npm run e2e -- e2e/apresentacaoPedidosETrocas.spec.ts` |
 | Um cenário do fluxo | `npm run e2e -- e2e/apresentacaoAnalise.spec.ts -g "6\."` |
 
 Na janela do Playwright UI, clique em **Run all** ou no botão de executar ao lado do cenário. O botão de repetir roda
