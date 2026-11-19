@@ -1,7 +1,5 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
-import java.util.List;
-
 import org.springframework.stereotype.Component;
 
 import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;

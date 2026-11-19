@@ -1,5 +1,6 @@
 package br.fatec.les.livraria.estoque.infraestrutura.persistencia;
 
+import jakarta.persistence.CheckConstraint;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,7 +13,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import org.hibernate.annotations.Check;
 import org.hibernate.envers.Audited;
 
 /**
@@ -24,8 +24,8 @@ import org.hibernate.envers.Audited;
 @NoArgsConstructor
 @Audited
 @Entity
-@Check(constraints = "quantidade >= 0")
-@Table(name = "estoque", indexes = @Index(name = "uk_estoque_livro", columnList = "livro_id", unique = true))
+@Table(name = "estoque", indexes = @Index(name = "uk_estoque_livro", columnList = "livro_id", unique = true),
+        check = @CheckConstraint(constraint = "quantidade >= 0"))
 public class EstoqueJpa {
 
     @Id

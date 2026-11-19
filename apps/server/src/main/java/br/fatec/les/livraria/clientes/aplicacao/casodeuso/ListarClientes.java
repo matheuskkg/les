@@ -1,7 +1,6 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;

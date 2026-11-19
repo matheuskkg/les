@@ -1,6 +1,5 @@
 package br.fatec.les.livraria.catalogo.infraestrutura.persistencia;
 
-import java.util.List;
 import java.util.Objects;
 
 import org.springframework.data.jpa.domain.Specification;

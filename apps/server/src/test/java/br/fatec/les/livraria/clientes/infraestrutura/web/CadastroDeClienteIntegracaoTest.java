@@ -92,7 +92,7 @@ class CadastroDeClienteIntegracaoTest {
     @Test
     void rfCli001_cadastroComVariasViolacoesResponde422ComAList() throws Exception {
         mvc.perform(comTokenCsrf(post("/api/clientes").contentType(MediaType.APPLICATION_JSON)
-                .content(corpoInvalido()))).andExpect(status().isUnprocessableEntity())
+                .content(corpoInvalido()))).andExpect(status().isUnprocessableContent())
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.detail").value("A operação viola regras de negócio."))
                 .andExpect(jsonPath("$.violacoes[*].codigo", hasItems("RN-CLI-001", "RN-CLI-005",
@@ -103,7 +103,7 @@ class CadastroDeClienteIntegracaoTest {
     void rfCli001_cadastroComDadosDeContaEmUsoResponde422() throws Exception {
         // Carla (usuário 4) foi inativada há 4 dias: ainda está em uso, então CPF, e-mail e telefone bloqueiam (DEC-10).
         mvc.perform(comTokenCsrf(post("/api/clientes").contentType(MediaType.APPLICATION_JSON)
-                .content(corpoDeCarla()))).andExpect(status().isUnprocessableEntity())
+                .content(corpoDeCarla()))).andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes[*].codigo", hasItems("RF-CLI-001")))
                 .andExpect(jsonPath("$.violacoes.length()").value(3));
     }
@@ -117,7 +117,7 @@ class CadastroDeClienteIntegracaoTest {
     @Test
     void rfCli001_enderecoNuloNaListaResponde422EmVezDeErro500() throws Exception {
         cadastrar(corpoDeNovoCliente("[null]", cartaoJson()))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes.length()").value(1))
                 .andExpect(jsonPath("$.violacoes[0].codigo").value("RN-CLI-003"))
                 .andExpect(jsonPath("$.violacoes[0].mensagem")
@@ -127,7 +127,7 @@ class CadastroDeClienteIntegracaoTest {
     @Test
     void rfCli001_cartaoNuloNaListaResponde422EmVezDeErro500() throws Exception {
         cadastrar(corpoDeNovoCliente(enderecoJson(), "[null]"))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes.length()").value(1))
                 .andExpect(jsonPath("$.violacoes[0].codigo").value("RN-CLI-004"))
                 .andExpect(jsonPath("$.violacoes[0].mensagem").value("Cartão 1: informe os dados do cartão."));
@@ -137,7 +137,7 @@ class CadastroDeClienteIntegracaoTest {
     void rfCli001_nomeAcimaDoTamanhoDaColunaResponde422() throws Exception {
         cadastrar(corpoComDados("a".repeat(121), "1991-05-20", "11122233396",
                 "nome.longo@livraria.test", "988880001", "11"))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes[*].mensagem",
                         hasItem("O nome do cliente deve ter no máximo 120 caracteres.")));
     }
@@ -146,7 +146,7 @@ class CadastroDeClienteIntegracaoTest {
     void rfCli006_dataDeNascimentoNoFuturoResponde422() throws Exception {
         cadastrar(corpoComDados("Novo Cliente", "2030-01-01", "11122233396",
                 "futuro@livraria.test", "988880001", "11"))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes[*].mensagem",
                         hasItem("A data de nascimento não pode estar no futuro.")));
     }

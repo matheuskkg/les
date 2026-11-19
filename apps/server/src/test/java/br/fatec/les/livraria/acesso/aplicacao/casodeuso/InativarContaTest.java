@@ -50,7 +50,7 @@ class InativarContaTest {
         usuarios.salvos.add(usuario(AGORA.minusDays(4)));
         int salvosAntes = usuarios.salvos.size();
 
-        assertThat(catchThrowableOfType(() -> caso.executar(2L), ExcecaoDeConflito.class))
+        assertThat(catchThrowableOfType(ExcecaoDeConflito.class, () -> caso.executar(2L)))
                 .hasMessage("A conta já está inativa.");
         assertThat(usuarios.salvos).hasSize(salvosAntes);
         assertThat(efeitos).isEmpty();
@@ -60,13 +60,13 @@ class InativarContaTest {
     void rfCli003_contaEncerradaNaoEhInativadaDeNovo() {
         usuarios.salvos.add(usuario(AGORA.minusDays(8)));
 
-        assertThat(catchThrowableOfType(() -> caso.executar(2L), ExcecaoDeConflito.class))
+        assertThat(catchThrowableOfType(ExcecaoDeConflito.class, () -> caso.executar(2L)))
                 .hasMessage("A conta já está inativa.");
     }
 
     @Test
     void rfCli003_usuarioSemCadastroNaoEhEncontrado() {
-        assertThat(catchThrowableOfType(() -> caso.executar(2L), ExcecaoDeRecursoNaoEncontrado.class))
+        assertThat(catchThrowableOfType(ExcecaoDeRecursoNaoEncontrado.class, () -> caso.executar(2L)))
                 .hasMessage("Usuário não encontrado.");
     }
 

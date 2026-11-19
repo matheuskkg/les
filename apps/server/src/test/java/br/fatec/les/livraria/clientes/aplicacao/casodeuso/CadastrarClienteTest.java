@@ -123,7 +123,7 @@ class CadastrarClienteTest {
         NovoCliente invalido = new NovoCliente(" ", null, null, "123", "sem-arroba",
                 null, "1", "12", "abc", "outra", List.of(), List.of());
 
-        ExcecaoDeNegocio erro = catchThrowableOfType(() -> caso.executar(invalido), ExcecaoDeNegocio.class);
+        ExcecaoDeNegocio erro = catchThrowableOfType(ExcecaoDeNegocio.class, () -> caso.executar(invalido));
 
         assertThat(erro.getViolacoes()).extracting(Violacao::codigo)
                 .contains("RN-CLI-006", "RN-CLI-001", "RNF-CLI-001");
@@ -139,7 +139,7 @@ class CadastrarClienteTest {
         usuarios.emailsEmUso.add(EMAIL);
         usuarios.telefonesEmUso.add("11988887001");
 
-        ExcecaoDeNegocio erro = catchThrowableOfType(() -> caso.executar(padrao()), ExcecaoDeNegocio.class);
+        ExcecaoDeNegocio erro = catchThrowableOfType(ExcecaoDeNegocio.class, () -> caso.executar(padrao()));
 
         assertThat(erro.getViolacoes()).extracting(Violacao::codigo)
                 .containsOnly("RF-CLI-001")
@@ -156,8 +156,8 @@ class CadastrarClienteTest {
 
     @Test
     void rfCli001_semEnderecoGeraUmaUnicaViolacao() {
-        ExcecaoDeNegocio erro = catchThrowableOfType(
-                () -> caso.executar(comEnderecos(List.of())), ExcecaoDeNegocio.class);
+        ExcecaoDeNegocio erro = catchThrowableOfType(ExcecaoDeNegocio.class,
+                () -> caso.executar(comEnderecos(List.of())));
 
         assertThat(erro.getViolacoes())
                 .singleElement()
@@ -169,8 +169,8 @@ class CadastrarClienteTest {
 
     @Test
     void rnfCli001_senhaEmBrancoEhReportadaUmaUnicaVez() {
-        ExcecaoDeNegocio erro = catchThrowableOfType(
-                () -> caso.executar(comSenha("   ")), ExcecaoDeNegocio.class);
+        ExcecaoDeNegocio erro = catchThrowableOfType(ExcecaoDeNegocio.class,
+                () -> caso.executar(comSenha("   ")));
 
         assertThat(erro.getViolacoes()).singleElement().satisfies(violacao -> {
             assertThat(violacao.codigo()).isEqualTo("RN-CLI-006");
@@ -182,8 +182,8 @@ class CadastrarClienteTest {
     void rnCli004_luhnInvalidoNoCadastroEhNumerado() {
         NovoCartao luhnInvalido = new NovoCartao("4111111111111112", "ANA SOUZA", cartao().validade());
 
-        ExcecaoDeNegocio erro = catchThrowableOfType(
-                () -> caso.executar(comCartoes(List.of(cartao(), luhnInvalido))), ExcecaoDeNegocio.class);
+        ExcecaoDeNegocio erro = catchThrowableOfType(ExcecaoDeNegocio.class,
+                () -> caso.executar(comCartoes(List.of(cartao(), luhnInvalido))));
 
         assertThat(erro.getViolacoes()).singleElement().satisfies(violacao -> {
             assertThat(violacao.codigo()).isEqualTo("RN-CLI-004");
