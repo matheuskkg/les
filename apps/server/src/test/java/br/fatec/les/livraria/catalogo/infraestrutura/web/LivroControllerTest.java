@@ -27,9 +27,9 @@ import br.fatec.les.livraria.estoque.infraestrutura.persistencia.ReservaJpaRepos
 /**
  * Vitrine pública de livros sobre o seed em H2 (RF-LIV-005, RNF-LIV-001, DEC-07, DEC-15.3).
  *
- * <p>O seed tem 26 livros, ids 1 a 26; o livro 19 está inativo e o 20 está ativo, sem entrada de estoque e sem
- * preço. Os livros 21 a 26 ampliam o catálogo e têm duas entradas de estoque cada. Os valores de preço saem das
- * margens e dos custos de {@code 001_dominios.sql} e {@code 003_estoque.sql}.
+ * <p>O seed tem 56 livros, ids 1 a 56; o livro 19 está inativo e o 20 está ativo, sem entrada de estoque e sem
+ * preço. Os livros 21 a 26 ampliam o catálogo e têm duas entradas de estoque cada; os 27 a 56 ampliam ainda mais os
+ * domínios e as categorias (ALT-02). Os valores de preço saem das margens e dos custos dos scripts de seed.
  */
 @SpringBootTest
 @Transactional
@@ -54,8 +54,8 @@ class LivroControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pagina").value(0))
                 .andExpect(jsonPath("$.tamanho").value(20))
-                .andExpect(jsonPath("$.totalItens").value(25))
-                .andExpect(jsonPath("$.totalPaginas").value(2))
+                .andExpect(jsonPath("$.totalItens").value(55))
+                .andExpect(jsonPath("$.totalPaginas").value(3))
                 .andExpect(jsonPath("$.itens.length()").value(20))
                 .andExpect(jsonPath("$.itens[0].titulo").value("21 Lições para o Século 21"))
                 .andExpect(jsonPath("$.itens[0].id").value(16))
@@ -71,8 +71,8 @@ class LivroControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pagina").value(1))
                 .andExpect(jsonPath("$.tamanho").value(5))
-                .andExpect(jsonPath("$.totalItens").value(25))
-                .andExpect(jsonPath("$.totalPaginas").value(5))
+                .andExpect(jsonPath("$.totalItens").value(55))
+                .andExpect(jsonPath("$.totalPaginas").value(11))
                 .andExpect(jsonPath("$.itens.length()").value(5));
     }
 
@@ -135,7 +135,7 @@ class LivroControllerTest {
                 .andExpect(jsonPath("$.totalItens").value(1));
         mvc.perform(get("/api/livros").param("q", "   "))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalItens").value(25));
+                .andExpect(jsonPath("$.totalItens").value(55));
     }
 
     @Test
@@ -209,7 +209,7 @@ class LivroControllerTest {
     void rfLiv005_ignoraParametrosEmBrancoEEspacos() throws Exception {
         mvc.perform(get("/api/livros").param("titulo", "   ").param("autor", ""))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalItens").value(25));
+                .andExpect(jsonPath("$.totalItens").value(55));
 
         mvc.perform(get("/api/livros").param("titulo", "  casmurro  "))
                 .andExpect(status().isOk())
@@ -338,12 +338,12 @@ class LivroControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pagina").value(0))
                 .andExpect(jsonPath("$.tamanho").value(20))
-                .andExpect(jsonPath("$.totalItens").value(5))
+                .andExpect(jsonPath("$.totalItens").value(17))
                 .andExpect(jsonPath("$.totalPaginas").value(1))
-                .andExpect(jsonPath("$.itens.length()").value(5))
-                .andExpect(jsonPath("$.itens[0].id").value(3))
-                .andExpect(jsonPath("$.itens[0].nome").value("Fantasia"))
-                .andExpect(jsonPath("$.itens[4].nome").value("Tecnologia"));
+                .andExpect(jsonPath("$.itens.length()").value(17))
+                .andExpect(jsonPath("$.itens[0].id").value(15))
+                .andExpect(jsonPath("$.itens[0].nome").value("Artes"))
+                .andExpect(jsonPath("$.itens[4].nome").value("Ciência"));
     }
 
     @Test
@@ -352,18 +352,18 @@ class LivroControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pagina").value(0))
                 .andExpect(jsonPath("$.tamanho").value(2))
-                .andExpect(jsonPath("$.totalItens").value(5))
-                .andExpect(jsonPath("$.totalPaginas").value(3))
+                .andExpect(jsonPath("$.totalItens").value(17))
+                .andExpect(jsonPath("$.totalPaginas").value(9))
                 .andExpect(jsonPath("$.itens.length()").value(2))
-                .andExpect(jsonPath("$.itens[0].nome").value("Fantasia"))
-                .andExpect(jsonPath("$.itens[1].nome").value("Ficção Científica"));
+                .andExpect(jsonPath("$.itens[0].nome").value("Artes"))
+                .andExpect(jsonPath("$.itens[1].nome").value("Autoajuda"));
 
         mvc.perform(get("/api/livros/categorias").param("pagina", "2").param("tamanho", "2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pagina").value(2))
-                .andExpect(jsonPath("$.totalPaginas").value(3))
-                .andExpect(jsonPath("$.itens.length()").value(1))
-                .andExpect(jsonPath("$.itens[0].nome").value("Tecnologia"));
+                .andExpect(jsonPath("$.totalPaginas").value(9))
+                .andExpect(jsonPath("$.itens.length()").value(2))
+                .andExpect(jsonPath("$.itens[0].nome").value("Ciência"));
     }
 
     @Test

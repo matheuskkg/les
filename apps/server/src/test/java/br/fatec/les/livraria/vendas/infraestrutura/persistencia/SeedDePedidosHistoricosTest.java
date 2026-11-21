@@ -3,6 +3,7 @@ package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -13,12 +14,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.vendas.aplicacao.porta.PedidosConsultas;
 import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
 
 /**
- * Seed 400_pedidos_historicos.sql do ANA-01 em H2 (RF-ANA-001, DEC-12, DEC-14, DEC-16, DEC-20). O banco guarda 36
+ * Seed 400_pedidos_historicos.sql do ANA-01 em H2 (RF-ANA-001, DEC-12, DEC-14, DEC-16, DEC-20, DEC-21). O banco guarda 36
  * meses, de nov/2023 a out/2026, com a Carla (3), a Elisa (5) e os cinco clientes novos do seed (6 a 10). A janela de
  * consulta da análise continua limitada a 24 meses (RN-ANA-002), mas isso não limita o histórico armazenado. Os
  * pedidos e as trocas da Carla e da Elisa, bem como os valores de março/2025 e outubro/2026, são preservados pelo
@@ -53,14 +56,14 @@ class SeedDePedidosHistoricosTest {
     }
 
     @Test
-    void massaAmpliadaTem847PedidosE98TrocasEm36Meses_RF_ANA_001() {
-        assertThat(jdbc.sql("select count(*) from pedido").query(Long.class).single()).isEqualTo(847L);
-        assertThat(jdbc.sql("select count(*) from item_pedido").query(Long.class).single()).isEqualTo(1524L);
-        assertThat(jdbc.sql("select count(*) from pagamento_cartao").query(Long.class).single()).isEqualTo(847L);
-        assertThat(jdbc.sql("select count(*) from troca").query(Long.class).single()).isEqualTo(98L);
+    void massaAmpliadaTem1180PedidosE147TrocasEm36Meses_RF_ANA_001() {
+        assertThat(jdbc.sql("select count(*) from pedido").query(Long.class).single()).isEqualTo(1180L);
+        assertThat(jdbc.sql("select count(*) from item_pedido").query(Long.class).single()).isEqualTo(2138L);
+        assertThat(jdbc.sql("select count(*) from pagamento_cartao").query(Long.class).single()).isEqualTo(1180L);
+        assertThat(jdbc.sql("select count(*) from troca").query(Long.class).single()).isEqualTo(147L);
         // Outros testes criam cupons TROCA-<n> no mesmo banco; os do gerador têm código TROCA-H<n>.
         assertThat(jdbc.sql("select count(*) from cupom where codigo like 'TROCA-H%'")
-                .query(Long.class).single()).isEqualTo(63L);
+                .query(Long.class).single()).isEqualTo(83L);
         assertThat(jdbc.sql("""
                 select count(distinct extract(year from realizado_em) * 100 + extract(month from realizado_em))
                 from pedido
@@ -71,6 +74,36 @@ class SeedDePedidosHistoricosTest {
                 .query(Long.class).single())
                 .as("clientes novos com histórico")
                 .isEqualTo(5L);
+    }
+
+    @Test
+    void alt02AcrescentaPedidosComStatusETrocasVariadosSobreOsLivrosNovos_RF_ANA_001() throws Exception {
+        // Os 847 pedidos e todos os seus IDs, valores e datas permanecem; os novos começam em 848 (ALT-02).
+        assertThat(jdbc.sql("select count(*) from pedido where id > 847").query(Long.class).single()).isEqualTo(333L);
+        assertThat(jdbc.sql("select count(*) from item_pedido where pedido_id > 847").query(Long.class).single())
+                .isEqualTo(614L);
+        assertThat(jdbc.sql("select distinct status from pedido where id > 847 order by status")
+                .query(String.class).list())
+                .containsExactly("APROVADA", "EM_TRANSPORTE", "ENTREGUE", "REPROVADA");
+        assertThat(jdbc.sql("""
+                select distinct t.status from troca t join pedido p on p.id = t.pedido_id
+                where p.id > 847 order by 1
+                """).query(String.class).list())
+                .containsExactly("TROCADO", "TROCA_AUTORIZADA", "TROCA_RECUSADA");
+
+        // Os itens novos usam somente os 19 livros novos cujas categorias são todas novas. Esta é a invariável que
+        // protege os valores de março/2025 e outubro/2026 conferidos pela análise e pelo E2E de apresentação.
+        ObjectMapper json = new ObjectMapper();
+        List<String> snapshots = jdbc.sql("select cast(livro as varchar) from item_pedido where pedido_id > 847")
+                .query(String.class).list();
+        assertThat(snapshots).hasSize(614);
+        for (String snapshot : snapshots) {
+            for (var categoria : json.readTree(snapshot).get("categorias")) {
+                assertThat(categoria.get("id").asInt())
+                        .as("categoria do livro em pedido novo (RF-ANA-001)")
+                        .isGreaterThanOrEqualTo(6);
+            }
+        }
     }
 
     @Test

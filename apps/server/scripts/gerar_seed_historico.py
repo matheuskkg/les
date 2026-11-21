@@ -8,9 +8,13 @@ o seed pode ir além dela. Os clientes do histórico são a Carla (3), a Elisa (
 
 O sorteio usa sementes fixas, então o arquivo gerado é sempre o mesmo. O laço original (nov/2024 a out/2026), a Carla
 e a Elisa foram mantidos sem alteração: os testes de controller e os roteiros E2E conferem valores exatos deles. A
-massa adicional entra em dois laços posteriores, cada um com a própria semente, só nos meses que nenhum teste fixa e
-só para os clientes novos: o primeiro densifica os 17 meses livres dos 24 finais; o segundo cobre os 12 meses novos
-(nov/2023 a out/2024). Nenhum valor ou ID já conferido muda.
+massa adicional entra em três laços posteriores, cada um com a própria semente, só para os clientes novos: o primeiro
+densifica os 17 meses livres dos 24 finais; o segundo cobre os 12 meses novos (nov/2023 a out/2024); o terceiro
+(ALT-02) dá mais volume aos meses de nov/2024 a set/2026, exceto mar/2025, usando os livros novos do catálogo.
+Nenhum valor ou ID já conferido muda.
+
+O laço da ALT-02 sortea só os livros cujas categorias são todas novas (6 a 17). Assim os totais das cinco categorias
+originais, conferidos valor a valor nos testes da análise e no E2E de apresentação, permanecem exatamente os mesmos.
 
 Março/2025 não é sorteado: os pedidos dele são escritos à mão para que os testes da análise tenham valores esperados
 independentes do código:
@@ -31,8 +35,14 @@ from pathlib import Path
 
 SAIDA = Path(__file__).resolve().parent.parent / 'src/main/resources/seed/400_pedidos_historicos.sql'
 ULTIMO_DIA = date(2026, 10, 20)
-EDITORAS = {1: 'Companhia das Letras', 2: 'Rocco', 3: 'HarperCollins Brasil', 4: 'Editora Sextante', 5: 'Novatec'}
-CATEGORIAS = {1: 'Romance', 2: 'Ficção Científica', 3: 'Fantasia', 4: 'Tecnologia', 5: 'História'}
+EDITORAS = {1: 'Companhia das Letras', 2: 'Rocco', 3: 'HarperCollins Brasil', 4: 'Editora Sextante', 5: 'Novatec',
+            6: 'Editora Record', 7: 'Leya', 8: 'Editora Claridade', 9: 'Editora Estrela', 10: 'Editora Horizonte',
+            11: 'Editora Mosaico', 12: 'Editora Nova Aurora', 13: 'Editora Pórtico', 14: 'Editora Tinta Viva',
+            15: 'Editora Veredas'}
+CATEGORIAS = {1: 'Romance', 2: 'Ficção Científica', 3: 'Fantasia', 4: 'Tecnologia', 5: 'História',
+              6: 'Biografia', 7: 'Mistério', 8: 'Suspense', 9: 'Poesia', 10: 'Literatura Infantil',
+              11: 'Literatura Juvenil', 12: 'Autoajuda', 13: 'Economia', 14: 'Filosofia', 15: 'Artes',
+              16: 'Ciência', 17: 'Aventura'}
 
 # id: (título, autores, editora, edição, ISBN, categorias, preço de venda histórico)
 LIVROS = {
@@ -54,7 +64,43 @@ LIVROS = {
     16: ('21 Lições para o Século 21', ['Yuval Noah Harari'], 1, '1ª edição', '9788500010163', [5, 4], '59.94'),
     17: ('A Mão Esquerda da Escuridão', ['Ursula K. Le Guin'], 2, '2ª edição', '9788500010170', [2, 3], '47.88'),
     18: ('Os Despossuídos', ['Ursula K. Le Guin'], 2, '1ª edição', '9788500010187', [2], '56.97'),
+    # Livros acrescentados pela ALT-02. O preço histórico sai de maior custo × (1 + margem) (RF-EST-002, RN-EST-002).
+    27: ('O Jardim das Horas', ['Ana Beatriz Ribeiro'], 8, '1ª edição', '9788500010279', [6, 14], '66.00'),
+    28: ('O Último Trem para Bruges', ['Caio Monteiro'], 9, '1ª edição', '9788500010286', [7, 1], '43.88'),
+    29: ('Cartas do Silêncio', ['Diana Prado'], 10, '2ª edição', '9788500010293', [9], '57.00'),
+    30: ('A Casa das Marés', ['Eduardo Lins'], 11, '1ª edição', '9788500010309', [8, 1], '48.47'),
+    31: ('Pequenos Astronautas', ['Fábio Vilhena'], 12, '1ª edição', '9788500010316', [10, 2], '33.60'),
+    32: ('O Mapa das Estrelas', ['Helena Marques'], 13, '2ª edição', '9788500010323', [17, 11], '55.35'),
+    33: ('A Arte de Recomeçar', ['Ivo Sampaio'], 14, '1ª edição', '9788500010330', [12], '25.30'),
+    34: ('Dinheiro e Liberdade', ['Juliana Freitas'], 14, '1ª edição', '9788500010347', [13, 12], '63.45'),
+    35: ('O Caminho das Ideias', ['Laura Mendes', 'Diana Prado'], 15, '1ª edição', '9788500010354', [14, 5], '82.50'),
+    36: ('Cores do Brasil', ['Marcelo Tavares'], 15, '1ª edição', '9788500010361', [15, 5], '151.30'),
+    37: ('O Enigma da Biblioteca', ['Nívia Andrade'], 9, '1ª edição', '9788500010378', [7, 11], '50.63'),
+    38: ('Sob o Céu de Marte', ['Otávio Bandeira'], 13, '1ª edição', '9788500010385', [2, 17], '62.10'),
+    39: ('Versos para a Chuva', ['Paula Renó'], 10, '2ª edição', '9788500010392', [9], '54.00'),
+    40: ('O Guardião do Farol', ['Rafael Coutinho'], 11, '1ª edição', '9788500010408', [8, 1], '52.65'),
+    41: ('Histórias da Vovó', ['Sérgio Arantes'], 12, '1ª edição', '9788500010415', [10], '27.60'),
+    42: ('A Fábrica de Sonhos', ['Ana Beatriz Ribeiro'], 13, '1ª edição', '9788500010422', [11, 17], '45.23'),
+    43: ('Viver com Propósito', ['Ivo Sampaio'], 14, '1ª edição', '9788500010439', [12], '29.90'),
+    44: ('Mercado em Movimento', ['Juliana Freitas'], 14, '2ª edição', '9788500010446', [13], '66.15'),
+    45: ('Pensar o Mundo', ['Laura Mendes', 'Sérgio Arantes'], 15, '1ª edição', '9788500010453', [14, 5], '87.00'),
+    46: ('Mestres da Pintura', ['Marcelo Tavares'], 15, '1ª edição', '9788500010460', [15], '156.40'),
+    47: ('O Caso da Rua Silenciosa', ['Caio Monteiro'], 9, '1ª edição', '9788500010477', [7, 8], '51.30'),
+    48: ('Diário de um Viajante', ['Diana Prado'], 8, '1ª edição', '9788500010484', [17, 6], '54.00'),
+    49: ('A Luz das Montanhas', ['Eduardo Lins'], 10, '1ª edição', '9788500010491', [1, 9], '63.00'),
+    50: ('Robôs e Humanos', ['Fábio Vilhena', 'Otávio Bandeira'], 13, '1ª edição', '9788500010507', [2, 14], '65.48'),
+    51: ('Primeiros Passos na Ciência', ['Helena Marques'], 12, '1ª edição', '9788500010514', [16, 10], '33.35'),
+    52: ('O Segredo da Flor Azul', ['Nívia Andrade'], 13, '2ª edição', '9788500010521', [11, 17], '46.58'),
+    53: ('Poemas do Amanhã', ['Paula Renó'], 10, '1ª edição', '9788500010538', [9], '55.50'),
+    54: ('A Cidade Invisível', ['Rafael Coutinho'], 11, '1ª edição', '9788500010545', [8, 7], '56.03'),
+    55: ('Tecnologia do Cotidiano', ['Otávio Bandeira', 'Fábio Vilhena'], 14, '1ª edição', '9788500010552',
+         [16, 13], '62.10'),
+    56: ('A Última Página', ['Sérgio Arantes'], 11, '1ª edição', '9788500010569', [1, 7], '59.25'),
 }
+
+# Os laços anteriores à ALT-02 devem sortear exatamente os mesmos livros de antes: usar LIVROS aqui deslocaria o
+# random.sample e mudaria pedidos, valores e datas que testes e E2E conferem.
+LIVROS_ORIGINAIS = {livro_id: livro for livro_id, livro in LIVROS.items() if livro_id <= 18}
 
 CLIENTES = {
     3: {
@@ -137,6 +183,14 @@ MESES_EXTRA = [(2024, 12), (2025, 2), (2025, 5), (2025, 7), (2025, 8), (2025, 9)
 # estes meses ampliam a janela do banco, não a da tela (DEC-20).
 MESES_ANTIGOS = [(2023, 11), (2023, 12)] + [(2024, mes) for mes in range(1, 11)]
 NOVOS_CLIENTES = [6, 7, 8, 9, 10]
+# Livros da ALT-02 cujas categorias são todas novas (6 a 17). Só eles entram no laço novo: testes da análise e o E2E
+# de apresentação conferem, valor a valor, os totais das categorias 1 a 5 em vários meses.
+LIVROS_NOVOS = [livro_id for livro_id, livro in LIVROS.items()
+                if livro_id >= 27 and all(categoria >= 6 for categoria in livro[5])]
+# nov/2024 a set/2026, sem mar/2025 (mês de referência da análise) e sem out/2026 (cuja data máxima e status são
+# conferidos). Mantém a data mínima, a máxima e a janela estendida antes de nov/2024 intactas.
+MESES_RECENTES = [(ano, mes) for ano in (2024, 2025, 2026) for mes in range(1, 13)
+                  if (2024, 11) <= (ano, mes) <= (2026, 9) and (ano, mes) != (2025, 3)]
 
 
 def js(valor):
@@ -240,7 +294,7 @@ class Seed:
             ('item_troca', 'id, troca_id, item_pedido_id, quantidade, volta_estoque', self.itens_troca),
         ]
         partes = [
-            '-- Pedidos históricos de nov/2024 a out/2026 para a análise de vendas (RF-ANA-001, DEC-12, DEC-14, DEC-16).',
+            '-- Pedidos históricos de nov/2023 a out/2026 para a análise de vendas (RF-ANA-001, DEC-12, DEC-14, DEC-16).',
             '-- Gerado por scripts/gerar_seed_historico.py, que explica o conteúdo; não edite à mão.',
             '',
         ]
@@ -279,7 +333,7 @@ def main():
             if realizado.date() > ULTIMO_DIA:
                 continue
             cliente = sorteio.choice([3, 5])
-            livros = sorteio.sample(sorted(LIVROS), sorteio.choice([1, 1, 2, 2, 3]))
+            livros = sorteio.sample(sorted(LIVROS_ORIGINAIS), sorteio.choice([1, 1, 2, 2, 3]))
             itens = [(livro, sorteio.choice([1, 1, 1, 2, 3]), LIVROS[livro][6]) for livro in livros]
             if sorteio.random() < 0.07:
                 status = 'REPROVADA'
@@ -310,7 +364,7 @@ def main():
             dia = extra.randint(1, 28)
             realizado = datetime(ano, mes, dia, extra.randint(8, 21), extra.choice([0, 15, 30, 45]))
             cliente = extra.choice(NOVOS_CLIENTES)
-            livros = extra.sample(sorted(LIVROS), extra.choice([1, 1, 2, 2, 3]))
+            livros = extra.sample(sorted(LIVROS_ORIGINAIS), extra.choice([1, 1, 2, 2, 3]))
             itens = [(livro, extra.choice([1, 1, 1, 2, 3]), LIVROS[livro][6]) for livro in livros]
             if extra.random() < 0.08:
                 status = 'REPROVADA'
@@ -341,7 +395,7 @@ def main():
             dia = antigos.randint(1, 28)
             realizado = datetime(ano, mes, dia, antigos.randint(8, 21), antigos.choice([0, 15, 30, 45]))
             cliente = antigos.choice(NOVOS_CLIENTES)
-            livros = antigos.sample(sorted(LIVROS), antigos.choice([1, 1, 2, 2, 3]))
+            livros = antigos.sample(sorted(LIVROS_ORIGINAIS), antigos.choice([1, 1, 2, 2, 3]))
             itens = [(livro, antigos.choice([1, 1, 1, 2, 3]), LIVROS[livro][6]) for livro in livros]
             status = 'REPROVADA' if antigos.random() < 0.08 else 'ENTREGUE'
             promocional = None
@@ -356,6 +410,38 @@ def main():
                 if escolhidos:
                     trocas = ['TROCADO', 'TROCADO', 'TROCA_RECUSADA', 'TROCA_AUTORIZADA']
                     troca = (antigos.choice(trocas), escolhidos)
+            seed.pedido(cliente, realizado, status, itens, promocional=promocional, troca=troca)
+
+    # ALT-02: mais volume de vendas sobre os livros novos, com APROVADA, EM_TRANSPORTE, REPROVADA e ENTREGUE,
+    # trocas em três status e cupons promocionais. Semente própria para não deslocar os laços anteriores: todos os
+    # IDs e valores já conferidos por testes e pelo E2E ficam exatamente iguais, e os novos pedidos começam em 848.
+    recentes = random.Random(2031)
+    for ano, mes in MESES_RECENTES:
+        for _ in range(recentes.randint(12, 18)):
+            dia = recentes.randint(1, 28)
+            realizado = datetime(ano, mes, dia, recentes.randint(8, 21), recentes.choice([0, 15, 30, 45]))
+            cliente = recentes.choice(NOVOS_CLIENTES)
+            livros = recentes.sample(sorted(LIVROS_NOVOS), recentes.choice([1, 1, 2, 2, 3]))
+            itens = [(livro, recentes.choice([1, 1, 1, 2, 3]), LIVROS[livro][6]) for livro in livros]
+            if recentes.random() < 0.10:
+                status = 'REPROVADA'
+            elif (ano, mes) == (2026, 9) and dia >= 22:
+                status = recentes.choice(['APROVADA', 'EM_TRANSPORTE'])
+            else:
+                status = 'ENTREGUE'
+            promocional = None
+            if status != 'REPROVADA':
+                disponiveis = [p for p in (4, 7) if (p, cliente) not in usos_promocionais]
+                if disponiveis and recentes.random() < 0.12:
+                    promocional = recentes.choice(disponiveis)
+                    usos_promocionais.add((promocional, cliente))
+            troca = None
+            if status == 'ENTREGUE' and recentes.random() < 0.22:
+                escolhidos = [(i, recentes.randint(1, itens[i][1])) for i in range(len(itens))
+                              if recentes.random() < 0.7]
+                if escolhidos:
+                    trocas = ['TROCADO', 'TROCADO', 'TROCA_RECUSADA', 'TROCA_AUTORIZADA']
+                    troca = (recentes.choice(trocas), escolhidos)
             seed.pedido(cliente, realizado, status, itens, promocional=promocional, troca=troca)
 
     SAIDA.write_text(seed.sql() + '\n', encoding='utf-8')
