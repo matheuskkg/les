@@ -21,8 +21,6 @@ import { entrarNaApi, expect, rolarAte, test } from './fixtures';
 const ADMIN = { login: 'admin@livraria.test', senha: 'Admin@123' };
 const CLIENTE = { login: 'ana.souza@livraria.test', senha: 'Senha@123' };
 
-const CATEGORIAS = ['Fantasia', 'Ficção Científica', 'História', 'Romance', 'Tecnologia'];
-
 /** Cores fixas das séries do teste 3, definidas pela paleta de `filtrosDaAnalise.ts`. */
 const CORES_DAS_SERIES = {
   Fantasia: '#1baf7a',
@@ -85,15 +83,20 @@ async function informarPeriodo(page: Page, inicio: string, fim: string): Promise
   await page.getByLabel('Data final').fill(fim);
 }
 
-/** Deixa marcadas só as categorias pedidas, como quem desmarca as caixas na tela. */
+/**
+ * Deixa marcadas só as categorias pedidas, como quem desmarca as caixas na tela.
+ * A lista vem do próprio formulário: o seed pode ganhar categorias novas e elas chegam marcadas por padrão, então
+ * percorrer só uma lista fixa deixaria séries estranhas na legenda e colunas extras na tabela.
+ */
 async function escolherCategorias(page: Page, desejadas: readonly string[]): Promise<void> {
-  for (const categoria of CATEGORIAS) {
-    const caixa = page.getByLabel(categoria, { exact: true });
-    if (desejadas.includes(categoria)) {
-      await caixa.check();
-    } else {
+  const caixas = page.getByRole('group', { name: 'Categorias' }).getByRole('checkbox');
+  for (const caixa of await caixas.all()) {
+    if (await caixa.isChecked()) {
       await caixa.uncheck();
     }
+  }
+  for (const categoria of desejadas) {
+    await page.getByLabel(categoria, { exact: true }).check();
   }
 }
 

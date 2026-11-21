@@ -42,7 +42,8 @@ Escopos:
 | [DEC-15.4](DEC-15.4-acesso-consultas-e-exportacao.md) | Ajustes de acesso, consultas e exportação | Aceita |
 | [DEC-18](DEC-18-bandeira-identificada-pelo-numero.md) | Bandeira do cartão identificada pelo número | Aceita |
 | [DEC-19](DEC-19-filtro-da-analise-por-datas.md) | Filtro da análise de vendas por datas exatas | Aceita |
-| [DEC-20](DEC-20-janela-e-densidade-do-seed.md) | Janela e densidade do histórico de seed | Aceita |
+| [DEC-20](DEC-20-janela-e-densidade-do-seed.md) | Janela e densidade do histórico de seed | Aceita (volume substituído por [DEC-21](DEC-21-ampliacao-do-seed-da-alt-02.md)) |
+| [DEC-21](DEC-21-ampliacao-do-seed-da-alt-02.md) | Ampliação do catálogo e do volume de vendas do seed | Aceita |
 
 ## Modelo
 
