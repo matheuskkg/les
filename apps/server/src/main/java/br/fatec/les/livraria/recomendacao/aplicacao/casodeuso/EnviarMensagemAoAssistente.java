@@ -15,6 +15,7 @@ import br.fatec.les.livraria.recomendacao.aplicacao.porta.RecomendacoesRepositor
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ResumoDeLivro;
 import br.fatec.les.livraria.recomendacao.aplicacao.regra.LivroAVenda;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.HigienizarIdsDoTexto;
+import br.fatec.les.livraria.recomendacao.dominio.calculo.LimitarTextoDaResposta;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.ReenvioSemResposta;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.RemoverLivrosCompradosDaRecomendacao;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.ValidarRespostaDoAssistente;
@@ -49,9 +50,11 @@ import java.util.stream.Collectors;
  *       de gravar a nova; sem conversa ativa, uma nova é aberta.
  *   <li>A mensagem do cliente é gravada antes da chamada. Se toda a cadeia falhar, ela fica gravada e a API responde
  *       503; o reenvio do mesmo texto não a grava de novo ({@link ReenvioSemResposta}).
- *   <li>A resposta passa por {@link HigienizarIdsDoTexto} e por {@link ValidarRespostaDoAssistente}, nesta ordem: um
- *       texto que a higiene reduz a vazio ganha o texto padrão da validação; quando é uma recomendação, passa ainda por
- *       {@link RemoverLivrosCompradosDaRecomendacao}; depois é gravada apontando para a chamada que a gerou.
+ *   <li>A resposta passa por {@link HigienizarIdsDoTexto}, por {@link LimitarTextoDaResposta} e por {@link
+ *       ValidarRespostaDoAssistente}, nesta ordem: um texto que a higiene reduz a vazio ganha o texto padrão da
+ *       validação; um texto acima do teto, como um despejo do catálogo, sai truncado com reticências; quando é uma
+ *       recomendação, passa ainda por {@link RemoverLivrosCompradosDaRecomendacao}; depois é gravada apontando para a
+ *       chamada que a gerou.
  * </ol>
  *
  * <p>A checagem do limite, a abertura da conversa e a gravação da mensagem do cliente ficam sob uma trava por cliente,
@@ -76,6 +79,7 @@ public class EnviarMensagemAoAssistente {
     private final CadeiaDeProvedores cadeia;
     private final ValidarRespostaDoAssistente validarResposta;
     private final HigienizarIdsDoTexto higienizarIds;
+    private final LimitarTextoDaResposta limitarTexto;
     private final RemoverLivrosCompradosDaRecomendacao removerComprados;
     private final ReenvioSemResposta reenvioSemResposta;
     private final TamanhoDaMensagem tamanhoDaMensagem;
@@ -129,6 +133,7 @@ public class EnviarMensagemAoAssistente {
                         .filter(LivroAVenda::aVenda)
                         .collect(Collectors.toMap(livro -> livro.livro().id(), Function.identity()));
         RespostaDoAssistente resposta = higienizarIds.higienizar(atendimento.resposta());
+        resposta = limitarTexto.limitar(resposta);
         resposta = validarResposta.validar(resposta, aVenda.keySet());
         resposta =
                 removerComprados.remover(resposta, perfil.livrosComprados().stream().map(LivroComprado::id).toList());
