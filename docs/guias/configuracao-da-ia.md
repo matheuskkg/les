@@ -76,9 +76,8 @@ flowchart LR
 
 - Defina só as chaves dos provedores que for usar. Um provedor sem chave é pulado.
 - O `application.yml` já traz um modelo gratuito para cada provedor: `gemini-3.5-flash-lite` no Gemini,
-  `qwen/qwen3.8-27b` no Groq, `google/gemma-4-31b-it:free` no OpenRouter e `nvidia/nemotron-3.5-super-vl-120b-a12b` no
-  NVIDIA NIM. A variável de modelo só é necessária
-  para trocá-lo.
+  `qwen/qwen3.8-27b` no Groq, `nvidia/nemotron-3.5-super-vl:free` no OpenRouter e
+  `nvidia/nemotron-3.5-super-vl-120b-a12b` no NVIDIA NIM. A variável de modelo só é necessária para trocá-lo.
 - Cada chamada tem tempo limite de 20 segundos (`livraria.ia.tempo-limite`). Passado esse tempo, a chamada falha
   como `TEMPO_ESGOTADO` e a cadeia passa ao próximo provedor.
 - O modelo escolhido precisa aceitar **tool calling** (chamada de funções) e **saída estruturada** (JSON). Sem isso,
@@ -106,7 +105,7 @@ livraria:
     provedores:
       openrouter:
         url-base: https://openrouter.ai/api/v1
-        modelo: ${IA_OPENROUTER_MODELO:google/gemma-4-31b-it:free}
+        modelo: ${IA_OPENROUTER_MODELO:nvidia/nemotron-3.5-super-vl:free}
         chave: ${IA_OPENROUTER_CHAVE:}
         tool-choice: auto
         formato: ferramenta
@@ -177,10 +176,16 @@ frequência, então confira nas páginas indicadas.
 
 - **Modelos:** os gratuitos terminam em `:free`. Para ver só os gratuitos que aceitam ferramentas, use o filtro da
   [lista de modelos](https://openrouter.ai/models?max_price=0&supported_parameters=tools).
-- **Limites:** a cota diária dos modelos gratuitos é pequena e sobe se a conta já tiver comprado créditos. Os
-  valores atuais estão em [limites](https://openrouter.ai/docs/api-reference/limits).
+- **Limites:** a conta sem créditos faz 20 chamadas por minuto e 50 por dia aos modelos gratuitos; a partir de
+  10 dólares de créditos comprados, a cota diária sobe para 1.000 chamadas. O contador do dia aparece em
+  `GET /api/v1/key`. Os valores atuais estão em [limites](https://openrouter.ai/docs/api-reference/limits).
 - **Atenção:** os modelos gratuitos podem sair do ar sem aviso. Se as chamadas começarem a falhar com
-  `ERRO_HTTP` 404, troque `IA_OPENROUTER_MODELO`.
+  `ERRO_HTTP` 404, troque `IA_OPENROUTER_MODELO`. Uma falha `COTA_ESGOTADA` (HTTP 429) com "Provider returned
+  error" e **sem** cabeçalhos `X-RateLimit-*` vem do pool gratuito do upstream **do modelo**, não da cota da
+  conta: o modelo está sendo recusado lá dentro e a troca de modelo resolve, com `IA_OPENROUTER_MODELO` apontando
+  para outro gratuito que aceite ferramentas (no teste pontual de 22/11 que motivou a troca,
+  `nvidia/nemotron-3.5-super-vl:free` respondeu, e `particle-ai/particle-1:free` também, como alternativa). O 429
+  da cota da conta, ao contrário, vem **com** cabeçalhos `X-RateLimit-*`; nesse caso, aguarde o prazo indicado.
 
 ### NVIDIA NIM (build.nvidia.com)
 
@@ -237,7 +242,7 @@ Na IDE, defina as mesmas variáveis em *Environment variables* da configuração
 | Todas as chamadas no `fake` | profile `dev` ativo ou `fake` ligado no admin | use o profile padrão e deixe o `fake` inativo para testar os provedores reais |
 | Assistente indisponível (503) | nenhuma chave real e `fake` inativo (padrão) | defina a chave de pelo menos um provedor ou use o profile `dev` |
 | `ERRO_HTTP` 401 ou 403 | chave inválida ou revogada | gere outra chave no painel do provedor |
-| `COTA_ESGOTADA` | limite gratuito atingido | aguarde o prazo indicado pelo provedor (até 5 min, ou até a meia-noite na cota diária), ou ponha outro provedor na frente da cadeia |
+| `COTA_ESGOTADA` | limite gratuito atingido | aguarde o prazo indicado pelo provedor (até 5 min, ou até a meia-noite na cota diária), ou ponha outro provedor na frente da cadeia; se a falha for do OpenRouter sem cabeçalhos `X-RateLimit-*`, troque o modelo (ver a seção do OpenRouter acima) |
 | `ERRO_HTTP` 404 | modelo inexistente ou retirado | troque a variável `IA_*_MODELO` |
 | `RESPOSTA_INVALIDA` | o modelo não segue o formato JSON ou não aceita ferramentas | escolha um modelo com tool calling e saída estruturada |
 | `LIMITE_DE_CHAMADAS` | o modelo passou de 3 voltas de tools, da correção ou de `max-chamadas` | escolha um modelo que siga as tools, aumente `max-chamadas` ou deixe outro provedor na cadeia |

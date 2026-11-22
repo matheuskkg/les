@@ -56,7 +56,11 @@ sem mudar o modelo.
   JSON; o Mistral foi descartado porque o plano gratuito não permite criar chave de API)
 
   O modelo é um dos gratuitos do provedor que aceita tool calling e saída estruturada. O `application.yml` traz um
-  padrão para cada um, e a variável o troca sem editar arquivos.
+  padrão para cada um, e a variável o troca sem editar arquivos (alterado em ALT-11, 2026-11-22: o padrão do
+  OpenRouter passou de `google/gemma-4-31b-it:free` — sistematicamente recusado pelo pool gratuito do upstream com
+  429 "Provider returned error" mesmo com a cota diária da conta zerada — para
+  `nvidia/nemotron-3.5-super-vl:free`, validado com tools e saída estruturada; o 429 do pool é independente da cota
+  de 50 chamadas free/dia da conta, e o contador diário aparece em `GET /api/v1/key`).
 - **Cadeia de provedores:** a chamada vai ao primeiro provedor ativo da cadeia que tenha chave. Se ele falhar (erro de rede,
   HTTP 429 ou 5xx, tempo esgotado ou resposta fora do formato), vai ao próximo. Um provedor que respondeu 429 sai da
   cadeia por 5 minutos. (Alterado no REC-09: a espera segue o `Retry-After` ou o tempo citado na mensagem, entre 10 s
