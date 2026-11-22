@@ -51,25 +51,38 @@ livraria:
     # Chave vazia significa provedor sem chave; a cadeia ignora o provedor (DEC-03).
     # Cada item vira um adapter; opções opcionais e seus padrões:
     #   tool-choice: auto|required (padrão auto), formato: ferramenta|json-schema|instrucoes (padrão ferramenta),
-    #   max-chamadas: inteiro >= 1 (padrão 5), cabecalhos: mapa de cabeçalhos HTTP extras.
+    #   max-chamadas: inteiro >= 1 (padrão 5), max-tokens: inteiro >= 1 ou 0 = sem teto (padrão 0),
+    #   cabecalhos: mapa de cabeçalhos HTTP extras.
     provedores:
       gemini:
         url-base: https://generativelanguage.googleapis.com/v1beta/openai
         modelo: ${IA_GEMINI_MODELO:gemini-3.5-flash-lite}
         chave: ${IA_GEMINI_CHAVE:}
+        # Teto de saída (ALT-08, DEC-03): corta despejos de catálogo sem tocar nas respostas normais, que ficam
+        # bem abaixo disso.
+        max-tokens: 800
       groq:
         url-base: https://api.groq.com/openai/v1
         modelo: ${IA_GROQ_MODELO:qwen/qwen3.8-27b}
         chave: ${IA_GROQ_CHAVE:}
+        # Teto de saída (ALT-08, DEC-03): sem teto, o pedido reserva mais saída que o OTPM de 1.000/min — 1.162 na
+        # rodada de 28/10; abaixo disso o Groq deixa a chamada passar em vez de responder 429.
+        max-tokens: 800
       openrouter:
         url-base: https://openrouter.ai/api/v1
         modelo: ${IA_OPENROUTER_MODELO:google/gemma-4-31b-it:free}
         chave: ${IA_OPENROUTER_CHAVE:}
         tool-choice: auto
         max-chamadas: 5
+        # Teto de saída (ALT-08, DEC-03): limita despejos de catálogo sem tocar nas respostas normais, que ficam
+        # bem abaixo disso.
+        max-tokens: 1200
         cabecalhos:
           X-Title: Livraria LES
       nvidia:
         url-base: https://integrate.api.nvidia.com/v1
         modelo: ${IA_NVIDIA_MODELO:nvidia/nemotron-3.5-super-vl-120b-a12b}
         chave: ${IA_NVIDIA_CHAVE:}
+        # Teto de saída (ALT-08, DEC-03): o despejo de catálogo do nvd-06 saiu daqui com 3.364 tokens; o teto corta
+        # esse despejo sem tocar nas respostas normais, que ficam bem abaixo disso.
+        max-tokens: 1200

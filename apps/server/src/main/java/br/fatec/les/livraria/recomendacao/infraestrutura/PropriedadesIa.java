@@ -37,6 +37,8 @@ public record PropriedadesIa(@DefaultValue("20s") Duration tempoLimite, Map<Stri
      *     chat
      * @param cabecalhos cabeçalhos HTTP extras enviados em toda chamada ao provedor
      * @param maxChamadas máximo de chamadas HTTP ao provedor por mensagem, por padrão 5
+     * @param maxTokens teto de tokens de saída por chamada, enviado ao provedor quando presente; {@code 0} (padrão)
+     *     significa sem teto
      */
     public record Provedor(
             String urlBase,
@@ -45,7 +47,8 @@ public record PropriedadesIa(@DefaultValue("20s") Duration tempoLimite, Map<Stri
             @DefaultValue("auto") String toolChoice,
             @DefaultValue("ferramenta") String formato,
             Map<String, String> cabecalhos,
-            @DefaultValue("5") int maxChamadas) {
+            @DefaultValue("5") int maxChamadas,
+            @DefaultValue("0") int maxTokens) {
 
         public static final String TOOL_CHOICE_AUTO = "auto";
         public static final String TOOL_CHOICE_REQUIRED = "required";
@@ -73,11 +76,20 @@ public record PropriedadesIa(@DefaultValue("20s") Duration tempoLimite, Map<Stri
             if (maxChamadas < 1) {
                 throw new IllegalArgumentException("livraria.ia.provedores.*.max-chamadas deve ser pelo menos 1.");
             }
+            if (maxTokens < 0) {
+                throw new IllegalArgumentException(
+                        "livraria.ia.provedores.*.max-tokens deve ser 0 (sem teto) ou pelo menos 1.");
+            }
         }
 
         /** Indica se o provedor tem chave configurada e pode entrar na cadeia (DEC-03). */
         public boolean temChave() {
             return chave != null && !chave.isBlank();
+        }
+
+        /** Indica se há teto de tokens de saída configurado ({@code 0} significa sem teto). */
+        public boolean temTetoDeSaida() {
+            return maxTokens > 0;
         }
 
         /** Indica se as tools do chat devem ser obrigatórias na chamada. */

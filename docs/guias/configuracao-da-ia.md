@@ -96,6 +96,7 @@ as opções abaixo são opcionais e têm padrão:
 | `formato` | `ferramenta`, `json-schema`, `instrucoes` | `ferramenta` | Com `ferramenta`, o chat anuncia a tool `responder`, que entrega o tipo, o texto e os livros citados e encerra o loop sem outra chamada. Com `json-schema`, a resposta final é o JSON do texto no `response_format` nativo da API OpenAI, sem a tool `responder` e sem as instruções de formato no prompt. Com `instrucoes`, o JSON esperado vai nas instruções do prompt, também sem a tool `responder`. A recomendação da vitrine usa `json-schema` quando configurado e instruções nos demais formatos. |
 | `cabecalhos` | mapa de textos | vazio | Cabeçalhos HTTP extras enviados em toda chamada, por exemplo `HTTP-Referer` e `X-Title` do OpenRouter. |
 | `max-chamadas` | inteiro ≥ 1 | `5` | Máximo de chamadas HTTP ao provedor por mensagem, contando as voltas que executam tools e a correção de formato. Passar do limite grava `LIMITE_DE_CHAMADAS` e a cadeia passa ao próximo provedor. |
+| `max-tokens` | inteiro ≥ 0; omitido fica sem teto (padrão 0) | `0` (sem teto) | Teto de tokens de saída por chamada, enviado como `max_tokens`. Sem teto, o plano gratuito do Groq nega o pedido inteiro contra o limite de saída por minuto (429 antes de qualquer texto), e pedidos como "liste tudo em JSON" podem despejar milhares de tokens. O `application.yml` define 800 no gemini e no groq e 1.200 no openrouter e no nvidia, acima das respostas normais e abaixo dos despejos observados. Uma resposta cortada no meio vira `RESPOSTA_INVALIDA`, e a correção de formato ou a cadeia cobrem. |
 
 Exemplo do `application.yml`:
 
@@ -110,13 +111,14 @@ livraria:
         tool-choice: auto
         formato: ferramenta
         max-chamadas: 5
+        max-tokens: 1200
         cabecalhos:
           X-Title: Livraria LES
 ```
 
 Um valor fora dos aceitos impede a subida com uma mensagem no formato
 `livraria.ia.provedores.*.formato deve ser ferramenta, json-schema ou instrucoes.`; `max-chamadas` menor que 1 é
-recusado do mesmo jeito.
+recusado do mesmo jeito, e `max-tokens` negativo também (0 significa sem teto).
 
 O chat tem até 3 voltas que executam tools de leitura, uma correção de formato e o total de chamadas HTTP dentro de
 `max-chamadas`. Passar de qualquer limite é falha do provedor, com o resultado `LIMITE_DE_CHAMADAS`, e a cadeia segue

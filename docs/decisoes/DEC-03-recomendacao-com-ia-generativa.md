@@ -37,7 +37,13 @@ sem mudar o modelo.
   (`instrucoes` ou `json-schema`), `cabecalhos` (cabeçalhos HTTP extras, como `X-Title` do OpenRouter) e
   `max-chamadas`, com mínimo 1 e padrão 5; alterado no REC-07: o `formato` padrão passa a ser `ferramenta`, com
   `json-schema` e `instrucoes` como alternativas, e `max-chamadas` limita todas as chamadas HTTP da mensagem, inclusive
-  as voltas de tools e a correção de formato):
+  as voltas de tools e a correção de formato; alterado em ALT-08: a conexão aceita também `max-tokens`, o teto de
+  tokens de saída por chamada, com 0 (o padrão) ou omitido significando sem teto, o negativo recusado e qualquer valor
+  a partir de 1 servindo de teto — sem o campo, o plano gratuito do Groq reserva a saída pedida contra o limite por
+  minuto (OTPM de 1.000) e responde 429 antes de escrever qualquer texto, e o despejo de catálogo da rodada de 22/11
+  chegou a 3.364 tokens de saída, então o `application.yml` define 800 no `gemini` e no `groq` e 1.200 no `openrouter`
+  e no `nvidia`; o trade-off é que uma resposta cortada no meio vira JSON inválido, o que a correção de formato e a
+  cadeia, que já existem, cobrem):
 
   | Provedor | `url-base` | Chave | Modelo |
   |---|---|---|---|

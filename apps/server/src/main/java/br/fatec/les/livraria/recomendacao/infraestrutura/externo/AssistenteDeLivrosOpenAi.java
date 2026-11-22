@@ -119,15 +119,18 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
     public AssistenteDeLivrosOpenAi(String nome, PropriedadesIa.Provedor provedor, Duration tempoLimite) {
         this.nome = Objects.requireNonNull(nome, "nome");
         this.provedor = Objects.requireNonNull(provedor, "provedor");
-        this.opcoesBase =
+        OpenAiChatOptions.Builder opcoes =
                 OpenAiChatOptions.builder()
                         .baseUrl(provedor.urlBase())
                         .apiKey(provedor.chave())
                         .model(provedor.modelo())
                         .timeout(tempoLimite)
                         .maxRetries(0)
-                        .customHeaders(provedor.cabecalhos())
-                        .build();
+                        .customHeaders(provedor.cabecalhos());
+        if (provedor.temTetoDeSaida()) {
+            opcoes.maxTokens(provedor.maxTokens());
+        }
+        this.opcoesBase = opcoes.build();
         this.modelo = provedor.temChave() ? OpenAiChatModel.builder().options(opcoesBase).build() : null;
     }
 

@@ -9,6 +9,7 @@ import br.fatec.les.livraria.recomendacao.aplicacao.porta.ChamadasIaRepositorio;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ProvedoresIaRepositorio;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ChamadaIa;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ProvedorIa;
+import br.fatec.les.livraria.recomendacao.infraestrutura.PropriedadesIa;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -80,6 +81,49 @@ class ConfiguracaoDosProvedoresIaTest {
                     assertThat(extra.nome()).isEqualTo("extra");
                     assertThat(extra.modelo()).isEqualTo("modelo-extra");
                     assertThat(extra.temChave()).isTrue();
+                });
+    }
+
+    @Test
+    void rnfRec001_maxTokensChegaConfiguradoAoAdapterEOmitidoFicaSemTeto() {
+        contexto.withPropertyValues(PROVEDORES)
+                .withPropertyValues(
+                        "livraria.ia.provedores.extra.url-base=http://127.0.0.1:1/v1",
+                        "livraria.ia.provedores.extra.modelo=modelo-extra",
+                        "livraria.ia.provedores.extra.chave=chave-extra",
+                        "livraria.ia.provedores.extra.max-tokens=800")
+                .run(gerenciador -> {
+                    PropriedadesIa.Provedor comTeto =
+                            (PropriedadesIa.Provedor)
+                                    ReflectionTestUtils.getField(
+                                            gerenciador.getBean("assistente-extra", AssistenteDeLivros.class),
+                                            "provedor");
+                    assertThat(comTeto.maxTokens()).isEqualTo(800);
+                    assertThat(comTeto.temTetoDeSaida()).isTrue();
+
+                    PropriedadesIa.Provedor semTeto =
+                            (PropriedadesIa.Provedor)
+                                    ReflectionTestUtils.getField(
+                                            gerenciador.getBean("assistente-nvidia", AssistenteDeLivros.class),
+                                            "provedor");
+                    assertThat(semTeto.maxTokens()).isZero();
+                    assertThat(semTeto.temTetoDeSaida()).isFalse();
+                });
+    }
+
+    @Test
+    void rnfRec001_maxTokensNegativoImpedeASubida() {
+        contexto.withPropertyValues(PROVEDORES)
+                .withPropertyValues(
+                        "livraria.ia.provedores.extra.url-base=http://127.0.0.1:1/v1",
+                        "livraria.ia.provedores.extra.modelo=modelo-extra",
+                        "livraria.ia.provedores.extra.max-tokens=-1")
+                .run(gerenciador -> {
+                    assertThat(gerenciador).hasFailed();
+                    assertThat(gerenciador.getStartupFailure())
+                            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+                            .hasRootCauseMessage(
+                                    "livraria.ia.provedores.*.max-tokens deve ser 0 (sem teto) ou pelo menos 1.");
                 });
     }
 
