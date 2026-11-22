@@ -746,14 +746,15 @@ select.campo__entrada--compacta:not([multiple]):not([size]) {
 }
 
 .avaliacao__botao {
+  display: inline-grid;
+  place-items: center;
   min-width: 2.25rem;
   min-height: 2.25rem;
-  padding: 0.25rem 0.5rem;
+  padding: 0.3rem;
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-pequeno);
   background: var(--cor-superficie);
   cursor: pointer;
-  font-size: 1rem;
   line-height: 1;
 }
 
@@ -764,6 +765,11 @@ select.campo__entrada--compacta:not([multiple]):not([size]) {
 .avaliacao__botao--marcado {
   border-color: var(--cor-primaria);
   background: var(--cor-primaria-clara);
+}
+
+/* O "não gostei" é o mesmo polegar, só invertido (ALT-01). */
+.avaliacao__icone--invertido {
+  transform: rotate(180deg);
 }
 
 .avaliacao__botao:disabled {

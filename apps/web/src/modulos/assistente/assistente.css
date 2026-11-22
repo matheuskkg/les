@@ -17,6 +17,8 @@
   cursor: pointer;
   font: inherit;
   font-weight: 600;
+  /* ALT-01: o botão remonta quando o painel fecha, e surge com o mesmo fade curto da abertura dele. */
+  animation: assistente-surge 0.2s ease-out;
 }
 
 .assistente__botao:hover {
@@ -37,6 +39,23 @@
   border-radius: var(--raio);
   background: var(--cor-superficie);
   box-shadow: var(--sombra-elevada);
+  /* ALT-01: só a abertura anima; fechar devolve o foco ao botão na hora, sem esperar animação de saída. */
+  animation: assistente-abre 0.2s ease-out;
+}
+
+/* O prefers-reduced-motion de base.css desliga as três animações: abre, surge e pulsa. */
+@keyframes assistente-abre {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.98);
+  }
+}
+
+@keyframes assistente-surge {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
 }
 
 .assistente__painel:focus {
@@ -59,6 +78,7 @@
   justify-content: space-between;
   gap: 0.25rem;
   padding: 0.5rem 0.5rem 0.5rem 1rem;
+  background: var(--cor-superficie-suave);
   border-bottom: 1px solid var(--cor-borda);
 }
 
@@ -77,9 +97,14 @@
   gap: 0.25rem;
 }
 
+/* ALT-01: fechar e limpar são botões só de ícone; o alvo de toque continua confortável. */
 .assistente__acoes .botao {
-  padding-inline: 0.5rem;
-  white-space: nowrap;
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0.35rem;
+  border-radius: var(--raio-pequeno);
 }
 
 .assistente__corpo {
@@ -88,11 +113,16 @@
   padding: 0.75rem 1rem;
 }
 
+/* Conversa vazia e convite do visitante (ALT-01): cartão suave, no espírito do `.cartao` de ui.css. */
 .assistente__convite,
 .assistente__sugestoes {
   display: grid;
   align-content: start;
   gap: 0.6rem;
+  padding: 1rem;
+  background: var(--cor-superficie-suave);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
 }
 
 .assistente__convite .botao {
@@ -125,15 +155,21 @@
   max-width: 88%;
   padding: 0.55rem 0.75rem;
   border-radius: var(--raio);
+  /* ALT-01: a conversa inteira surge junto com o painel na montagem, e cada bolha nova entra com o mesmo
+     fade curtinho; só opacity/transform, sem mexer no layout. */
+  animation: assistente-surge 0.16s ease-out;
 }
 
+/* O canto de baixo fecha, como a "cauda" de quem fala (ALT-01). */
 .assistente__mensagem--cliente {
   justify-self: end;
+  border-bottom-right-radius: var(--raio-pequeno);
   background: var(--cor-primaria-clara);
 }
 
 .assistente__mensagem--assistente {
   justify-self: start;
+  border-bottom-left-radius: var(--raio-pequeno);
   background: var(--cor-superficie-suave);
 }
 
@@ -143,9 +179,44 @@
   overflow-wrap: anywhere;
 }
 
+/* ALT-01: bolinhas no lugar do texto, que segue para o leitor de tela pelo role="status" do item. */
 .assistente__digitando {
-  color: var(--cor-texto-suave);
-  font-style: italic;
+  padding: 0.7rem 0.75rem;
+}
+
+.assistente__bolinhas {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.assistente__bolinha {
+  width: 0.4rem;
+  height: 0.4rem;
+  background: var(--cor-texto-suave);
+  border-radius: 50%;
+  animation: assistente-pulsa 1.2s ease-in-out infinite;
+}
+
+.assistente__bolinha:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.assistente__bolinha:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes assistente-pulsa {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-0.2rem);
+  }
 }
 
 .assistente__livros {

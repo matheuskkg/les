@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { useLocation } from 'preact-iso';
 import { BotaoLink } from '../../../ui/Botao';
+import { IconeBalao } from '../../../ui/icones';
 import { useSessao } from '../../sessao';
 import { assistenteNaRota, lerAberto, urlDoConvite } from '../regras/conversa';
 import { CabecalhoDoPainel } from './CabecalhoDoPainel';
@@ -84,7 +85,7 @@ export function Assistente() {
         aria-label="Abrir o assistente da livraria"
         onClick={() => definirAberto(true)}
       >
-        <span aria-hidden="true">💬</span>
+        <IconeBalao tamanho="1.35rem" />
         <span class="assistente__botao-rotulo">Assistente</span>
       </button>
     );
