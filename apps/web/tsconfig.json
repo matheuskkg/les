@@ -19,6 +19,5 @@
     "noEmit": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["src", "vite.config.ts"],
-  "exclude": ["src/**/*.test.ts"]
+  "include": ["src", "vite.config.ts"]
 }

@@ -30,6 +30,7 @@ function importacoes(): Importacao[] {
     const texto = readFileSync(caminho, 'utf8');
     return [...texto.matchAll(padrao)].map((encontrado) => {
       const especificador = encontrado[2] ?? encontrado[3];
+      assert.ok(especificador !== undefined);
       const alvo = especificador.startsWith('.')
         ? normalize(join(dirname(arquivo), especificador)).replace(/\.tsx?$/, '')
         : especificador;

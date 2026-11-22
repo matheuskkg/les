@@ -8,7 +8,7 @@ test('RF-VEN-005: endereço cadastrado vai só pelo id', () => {
 });
 
 test('RF-VEN-005: endereço novo vai inteiro, com o CEP só em dígitos', () => {
-  const novo = { ...enderecoVazio(), nomeCurto: ' Presente ', logradouro: 'Rua A', cep: '69005-040', uf: 'AM' };
+  const novo = { ...enderecoVazio(), nomeCurto: ' Presente ', logradouro: 'Rua A', cep: '69005-040', uf: 'AM' as const };
   const api = escolhaParaApi({ novo });
   assert.ok('novo' in api && api.novo);
   assert.equal(api.novo.cep, '69005040');
@@ -17,7 +17,21 @@ test('RF-VEN-005: endereço novo vai inteiro, com o CEP só em dígitos', () => 
 });
 
 test('RF-VEN-005: a escolha inicial é o primeiro endereço cadastrado', () => {
-  const enderecos = [{ id: 4 }, { id: 9 }] as Parameters<typeof escolhaInicial>[0];
+  const cadastrado = (id: number): Parameters<typeof escolhaInicial>[0][number] => ({
+    bairro: '',
+    cep: '',
+    cidade: '',
+    id,
+    logradouro: '',
+    nomeCurto: '',
+    numero: '',
+    observacoes: '',
+    pais: 'BR',
+    tipoEndereco: 'CASA',
+    tipoLogradouro: 'RUA',
+    uf: 'AM',
+  });
+  const enderecos = [cadastrado(4), cadastrado(9)];
   assert.deepEqual(escolhaInicial(enderecos), { enderecoId: 4 });
   assert.equal(escolhaInicial([]), null);
   assert.ok(ehCadastrado({ enderecoId: 4 }, 4));
