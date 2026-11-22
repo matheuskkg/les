@@ -136,7 +136,17 @@ Uma regra por arquivo, testável sem a IA:
    `livraria.ia.provedores.<nome>.max-chamadas`, porque os limites gratuitos variam por provedor. Passar do limite
    conta como falha do provedor, e a cadeia segue para o próximo. O classificador de assunto separado continua
    descartado; alterado no REC-07: o adapter controla o loop, com até 3 voltas de tools, 1 correção de formato e o
-   total em `max-chamadas`, e o excesso grava o resultado `LIMITE_DE_CHAMADAS`.)
+   total em `max-chamadas`, e o excesso grava o resultado `LIMITE_DE_CHAMADAS`.) (Alterado em ALT-12, pelo achado
+   3 da rodada de 22/11: o prompt passou a distinguir o assunto que não é da loja — política, receita, clima,
+   identidade do modelo —, que continua `FORA_DO_ESCOPO` e continua virando o texto fixo, do pedido que é sobre
+   livros ou sobre a loja mas que o assistente não pode ou não deve atender — impossibilidades como ler dirigindo
+   ou um livro que flutue, cupons, mexer em pedido ou carrinho —, que passa a virar `DUVIDA` com a recusa educada
+   no próprio texto do modelo, texto que o server mantém. Na rodada, `grq-02` ("ler dirigindo"), `nvd-02` ("livro
+   que flutue") e `opn-04` (cupom de 90%) tinham caído no aviso fixo "Posso ajudar só com livros…", estranho para
+   quem perguntou justamente sobre livros; o contraponto `gem-02` ("ler no banho") recusou sem inventar e ofereceu
+   outra leitura, o comportamento que a instrução nova generaliza. Como a classificação é probabilística, o efeito
+   real sobre os modelos só se confirma numa rodada de testes futura; o que os testes fixam é o contrato do
+   prompt.)
 3. **Depois da chamada:** um livro citado que não existe, está inativo ou sem estoque é removido da resposta. Na
    vitrine, só valem os ids que estavam entre os candidatos. (Alterado depois da rodada de testes de 2026-11-22: o
    prompt do chat passou a proibir ids e códigos internos no texto que o cliente lê, mandando deixar os ids só no

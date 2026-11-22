@@ -369,6 +369,24 @@ class AssistenteDeLivrosOpenAiTest {
     }
 
     @Test
+    void rnfRec001_conversarSeparaAssuntoForaDaLojaDeRecusaSobreLivros() {
+        respostas.add(new Resposta(200, chamadaDeResposta("DUVIDA", "Oi! Como posso ajudar?", "[]"), 0));
+
+        assistente("ferramenta", "auto", 5).conversar(PERFIL, List.of(), "Oi", new FerramentasFalsas(), CATALOGO);
+
+        // ALT-12, achado 3 da rodada de 22/11: assunto fora da loja é FORA_DO_ESCOPO; pedido sobre livros que o
+        // assistente não pode atender é DUVIDA, com a recusa educada no próprio texto, que o server mantém.
+        assertThat(corpos.getFirst())
+                .contains("Se o assunto nem é da loja")
+                .contains("responda com o tipo FORA_DO_ESCOPO")
+                .contains("Se o pedido é sobre livros ou sobre a loja, mas você não pode ou não deve atendê-lo")
+                .contains("responda com o tipo DUVIDA, recusando com cortesia no próprio texto")
+                .contains("explique o que não dá, sem inventar livros, condições nem promessas")
+                .contains("ofereça o que pode ajudar")
+                .contains("DUVIDA quando esclarece uma dúvida ou recusa um pedido que não pode atender");
+    }
+
+    @Test
     void rnfRec001_conversarComResponderEntregaARespostaSemOutraChamada() {
         respostas.add(new Resposta(200, chamadaDeResposta("BUSCA", "Encontrei Dom Casmurro.", "[1]"), 0));
         FerramentasFalsas ferramentas = new FerramentasFalsas();
