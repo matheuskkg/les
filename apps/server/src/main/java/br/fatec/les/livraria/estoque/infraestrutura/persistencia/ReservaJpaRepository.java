@@ -19,6 +19,14 @@ public interface ReservaJpaRepository extends JpaRepository<ReservaJpa, Long> {
     List<ReservaJpa> findByOrigemAndOrigemId(OrigemReserva origem, Long origemId);
 
     /**
+     * Reservas de um carrinho ou checkout cujo prazo ainda não venceu no instante informado. Pré-filtro de
+     * leitura, no padrão de {@link #somarReservasAtivasExceto}: a definição de reserva ativa continua no
+     * domínio ({@code Reserva.ativaEm}), aplicada por quem consulta (RN-VEN-002, RNF-GER-001).
+     */
+    List<ReservaJpa> findByOrigemAndOrigemIdAndExpiraEmAfter(OrigemReserva origem, Long origemId,
+            LocalDateTime expiraEmApos);
+
+    /**
      * Reservas ativas do livro, desconsiderando a reserva do próprio dono (RN-VEN-001). Reserva vencida não
      * conta como ativa, porque só o prazo no futuro consome o disponível (DEC-16).
      */

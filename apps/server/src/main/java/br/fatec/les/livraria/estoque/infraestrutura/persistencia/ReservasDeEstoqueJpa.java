@@ -36,6 +36,15 @@ public class ReservasDeEstoqueJpa implements ReservasDeEstoque {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<Reserva> listarPorOrigemVencendoDepoisDe(OrigemReserva origem, Long origemId,
+            LocalDateTime vencendoDepoisDe) {
+        return repositorio.findByOrigemAndOrigemIdAndExpiraEmAfter(origem, origemId, vencendoDepoisDe).stream()
+                .map(mapper::paraDominio)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public Reserva salvar(Reserva reserva) {
         return mapper.paraDominio(repositorio.save(mapper.paraJpa(reserva)));
