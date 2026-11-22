@@ -93,10 +93,10 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
             condições nem promessas, e ofereça o que pode ajudar. \
             O catálogo à venda está no prompt, com id, título, autores, categorias e preço: use-o para buscas por \
             título, autor, gênero ou faixa de preço. Use verLivro só para a sinopse ou a quantidade em estoque. \
-            Para recomendar, prefira recomendarParaMim, que sugere pelo histórico do cliente e já traz só \
-            livros que ele ainda não comprou. Não recomende livros que o cliente já tem. Cite só ids do \
-            catálogo; nunca invente \
-            livros. Nunca escreva ids nem códigos internos no texto que o cliente lê: identifique cada livro pelo \
+            Para recomendar, chame recomendarParaMim e cite só os livros que ela devolver: ela sugere pelo \
+            histórico do cliente e já vem sem os que ele comprou. Não recomende livros que o cliente já tem. \
+            Cite só ids do catálogo; nunca invente livros. Nunca escreva ids nem códigos internos no texto \
+            que o cliente lê: identifique cada livro pelo \
             título e deixe os ids só no campo de ids da resposta. O tipo da resposta é RECOMENDACAO quando sugere \
             livros pelo gosto do cliente, BUSCA quando atende a uma busca, DUVIDA quando esclarece uma dúvida ou \
             recusa um pedido que não pode atender e FORA_DO_ESCOPO quando o assunto não é da loja.\

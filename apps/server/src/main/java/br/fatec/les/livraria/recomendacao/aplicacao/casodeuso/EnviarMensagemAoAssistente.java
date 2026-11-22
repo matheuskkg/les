@@ -8,6 +8,7 @@ import br.fatec.les.livraria.recomendacao.aplicacao.AssistenteIndisponivel;
 import br.fatec.les.livraria.recomendacao.aplicacao.FerramentasDoCatalogo;
 import br.fatec.les.livraria.recomendacao.aplicacao.LerCatalogo;
 import br.fatec.les.livraria.recomendacao.aplicacao.MontarPerfilDoCliente;
+import br.fatec.les.livraria.recomendacao.aplicacao.RecuperarCandidatos;
 import br.fatec.les.livraria.recomendacao.aplicacao.consulta.Atendimento;
 import br.fatec.les.livraria.recomendacao.aplicacao.consulta.MensagemExibida;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ConversasRepositorio;
@@ -15,19 +16,24 @@ import br.fatec.les.livraria.recomendacao.aplicacao.porta.RecomendacoesRepositor
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ResumoDeLivro;
 import br.fatec.les.livraria.recomendacao.aplicacao.regra.LivroAVenda;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.HigienizarIdsDoTexto;
+import br.fatec.les.livraria.recomendacao.dominio.calculo.IndicarLivrosQueOClienteNaoTem;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.LimitarTextoDaResposta;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.ReenvioSemResposta;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.RemoverLivrosCompradosDaRecomendacao;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.ValidarRespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.EnvioDeMensagem;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.LivroCandidato;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.LivroComprado;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemAnterior;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.PerfilDoCliente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.TipoDeResposta;
 import br.fatec.les.livraria.recomendacao.dominio.regra.LimiteDeMensagensPorMinuto;
 import br.fatec.les.livraria.recomendacao.dominio.regra.TamanhoDaMensagem;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarComprasDoCliente;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarComprasRegistradas;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarUnidadesVendidas;
 
 import lombok.RequiredArgsConstructor;
 
@@ -53,8 +59,9 @@ import java.util.stream.Collectors;
  *   <li>A resposta passa por {@link HigienizarIdsDoTexto}, por {@link LimitarTextoDaResposta} e por {@link
  *       ValidarRespostaDoAssistente}, nesta ordem: um texto que a higiene reduz a vazio ganha o texto padrão da
  *       validação; um texto acima do teto, como um despejo do catálogo, sai truncado com reticências; quando é uma
- *       recomendação, passa ainda por {@link RemoverLivrosCompradosDaRecomendacao}; depois é gravada apontando para a
- *       chamada que a gerou.
+ *       recomendação, passa ainda por {@link RemoverLivrosCompradosDaRecomendacao} e, se perder todos os citados, por
+ *       {@link IndicarLivrosQueOClienteNaoTem}, que indica os livros que o cliente ainda não tem; depois é gravada
+ *       apontando para a chamada que a gerou.
  * </ol>
  *
  * <p>A checagem do limite, a abertura da conversa e a gravação da mensagem do cliente ficam sob uma trava por cliente,
@@ -73,14 +80,18 @@ public class EnviarMensagemAoAssistente {
     private final ConversasRepositorio conversas;
     private final RecomendacoesRepositorio recomendacoes;
     private final ConsultarComprasDoCliente consultarComprasDoCliente;
+    private final ConsultarComprasRegistradas consultarComprasRegistradas;
+    private final ConsultarUnidadesVendidas consultarUnidadesVendidas;
     private final LerCatalogo lerCatalogo;
     private final MontarPerfilDoCliente montarPerfil;
+    private final RecuperarCandidatos recuperarCandidatos;
     private final FerramentasDoCatalogo ferramentas;
     private final CadeiaDeProvedores cadeia;
     private final ValidarRespostaDoAssistente validarResposta;
     private final HigienizarIdsDoTexto higienizarIds;
     private final LimitarTextoDaResposta limitarTexto;
     private final RemoverLivrosCompradosDaRecomendacao removerComprados;
+    private final IndicarLivrosQueOClienteNaoTem indicarLivrosQueOClienteNaoTem;
     private final ReenvioSemResposta reenvioSemResposta;
     private final TamanhoDaMensagem tamanhoDaMensagem;
     private final LimiteDeMensagensPorMinuto limiteDeMensagens;
@@ -135,12 +146,47 @@ public class EnviarMensagemAoAssistente {
         RespostaDoAssistente resposta = higienizarIds.higienizar(atendimento.resposta());
         resposta = limitarTexto.limitar(resposta);
         resposta = validarResposta.validar(resposta, aVenda.keySet());
-        resposta =
+        RespostaDoAssistente semOsComprados =
                 removerComprados.remover(resposta, perfil.livrosComprados().stream().map(LivroComprado::id).toList());
+        // A recomendação que perde todos os citados indica os livros que o cliente ainda não tem (RNF-REC-001; caso
+        // gem-07a, achado 7 da rodada de testes de 22/11). As consultas agregadas só correm nesse caso (RNF-GER-001).
+        resposta =
+                perdeuTodosOsCitados(resposta, semOsComprados)
+                        ? indicarLivrosQueOClienteNaoTem.indicar(
+                                semOsComprados, candidatosDoCliente(clienteId, perfil, ativos))
+                        : semOsComprados;
         MensagemDaConversa gravada =
                 conversas.salvar(
                         MensagemDaConversa.doAssistente(
                                 conversaId, resposta, atendimento.chamadaIaId(), relogio.agora()));
         return new MensagemExibida(gravada, resposta.livrosCitados().stream().map(aVenda::get).toList());
+    }
+
+    /**
+     * A recomendação citava livros e todos eram do cliente — o modelo os citou, o server os removeu: o que resta é
+     * indicar os que ele ainda não tem.
+     */
+    private static boolean perdeuTodosOsCitados(RespostaDoAssistente antes, RespostaDoAssistente depois) {
+        return depois.tipo() == TipoDeResposta.RECOMENDACAO
+                && depois.livrosCitados().isEmpty()
+                && !antes.livrosCitados().isEmpty();
+    }
+
+    /**
+     * Ids dos candidatos da vitrine, do mais ao menos pontuado: livros à venda que o cliente não comprou e não avaliou
+     * negativamente, os mesmos da tool {@code recomendarParaMim} (RNF-REC-001, DEC-03). As compras registradas e as
+     * unidades vendidas só são consultadas aqui, quando a recomendação esvazia (RNF-GER-001).
+     */
+    private List<Long> candidatosDoCliente(Long clienteId, PerfilDoCliente perfil, List<LivroListado> ativos) {
+        return recuperarCandidatos
+                .recuperar(
+                        clienteId,
+                        perfil,
+                        consultarComprasRegistradas.executar(),
+                        consultarUnidadesVendidas.executar(),
+                        ativos)
+                .stream()
+                .map(LivroCandidato::id)
+                .toList();
     }
 }
