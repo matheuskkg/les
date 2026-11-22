@@ -144,8 +144,14 @@ Uma regra por arquivo, testável sem a IA:
    prompt, não da higiene.)
 4. (Acrescentado depois da rodada de testes do chat) **No chat, a recomendação usa os mesmos candidatos da vitrine:**
    a tool `recomendarParaMim` recupera e pontua os livros como a vitrine. Com o tipo `RECOMENDACAO`, os livros que o
-   cliente já comprou são removidos da resposta, e, se nenhum sobrar, o texto do modelo é trocado por um texto fixo; `BUSCA` e `DUVIDA` os mantêm, porque o cliente pode perguntar de um
-   livro que já tem.
+   cliente já comprou são removidos da resposta, e, se nenhum sobrar, o texto do modelo é trocado por um texto fixo;
+   `BUSCA` e `DUVIDA` os mantêm, porque o cliente pode perguntar de um livro que já tem. (Alterado em ALT-10: o texto
+   fixo deixou de afirmar que o cliente já tem tudo que seria indicado — a frase, nascida quando o catálogo tinha 20
+   livros, desinformava depois da ampliação da ALT-02, porque a loja podia ter novidades do gênero pedido, como no caso
+   `gem-07a`, achado 7 da rodada de 22/11 — e passou a dizer só que os primeiros livros que o assistente citaria o
+   cliente já tem, mantendo a oferta de outro gênero ou autor; o prompt da conversa passou a mandar preferir
+   `recomendarParaMim`, que já traz só livros que o cliente não comprou, e a não recomendar livros que o cliente já
+   tem.)
 5. A IA não executa ações: adicionar ao carrinho é um botão da UI sobre os livros devolvidos.
 
 ### Recomendação da vitrine

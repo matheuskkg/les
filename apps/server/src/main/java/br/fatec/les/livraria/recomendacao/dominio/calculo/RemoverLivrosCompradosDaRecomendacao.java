@@ -15,13 +15,16 @@ import java.util.Set;
  * (RNF-REC-001, DEC-03). Com {@link TipoDeResposta#BUSCA} e {@link TipoDeResposta#DUVIDA} os comprados ficam, porque o
  * cliente pode perguntar de um livro que já tem; com {@link TipoDeResposta#FORA_DO_ESCOPO} a resposta já vem sem
  * livros. Se, depois da remoção, não sobrar nenhum livro, o texto do modelo, que apresentava os livros removidos, vira
- * {@link #TEXTO_SO_COMPRADOS}.
+ * {@link #TEXTO_SO_COMPRADOS}: reconhece que os primeiros livros que o assistente citaria o cliente já tem — é fato,
+ * foram removidos por já comprados — e oferece outro gênero ou autor. O texto não afirma que o cliente já tem tudo o
+ * que seria indicado: a afirmação, nascida quando o catálogo tinha 20 livros, passou a desinformar com o catálogo
+ * ampliado da ALT-02 (caso gem-07a, achado 7 da rodada de testes de 22/11, revisado em ALT-10).
  */
 @Component
 public class RemoverLivrosCompradosDaRecomendacao {
 
     public static final String TEXTO_SO_COMPRADOS =
-            "Você já tem os livros que eu indicaria. Quer sugestões de outro gênero ou autor?";
+            "Os primeiros livros que eu indicaria você já tem. Quer sugestões de outro gênero ou autor?";
 
     /**
      * @param resposta resposta já validada pelo {@link ValidarRespostaDoAssistente}
