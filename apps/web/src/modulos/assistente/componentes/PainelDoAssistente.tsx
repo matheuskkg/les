@@ -4,6 +4,7 @@ import { useCarregamento } from '../../../compartilhado/useCarregamento';
 import { Botao } from '../../../ui/Botao';
 import { BotoesDeAvaliacao } from '../../../ui/BotoesDeAvaliacao';
 import { Erro } from '../../../ui/Erro';
+import { IconeLixeira } from '../../../ui/icones';
 import { Violacoes } from '../../../ui/Violacoes';
 import {
   SUGESTOES,
@@ -149,8 +150,14 @@ export function PainelDoAssistente({ tituloId, aoFechar }: { tituloId: string; a
     <>
       <CabecalhoDoPainel tituloId={tituloId} aoFechar={aoFechar}>
         {mensagens.length > 0 && (
-          <Botao variante="discreto" disabled={aguardando} onClick={() => void limpar()}>
-            Limpar conversa
+          <Botao
+            variante="discreto"
+            disabled={aguardando}
+            aria-label="Limpar conversa"
+            title="Limpar conversa"
+            onClick={() => void limpar()}
+          >
+            <IconeLixeira tamanho="1.25rem" />
           </Botao>
         )}
       </CabecalhoDoPainel>
@@ -199,7 +206,12 @@ export function PainelDoAssistente({ tituloId, aoFechar }: { tituloId: string; a
             ))}
             {aguardando && (
               <li class="assistente__mensagem assistente__mensagem--assistente assistente__digitando" role="status">
-                <span>Digitando…</span>
+                <span class="assistente__bolinhas" aria-hidden="true">
+                  <span class="assistente__bolinha" />
+                  <span class="assistente__bolinha" />
+                  <span class="assistente__bolinha" />
+                </span>
+                <span class="visualmente-oculto">Digitando…</span>
               </li>
             )}
           </ol>

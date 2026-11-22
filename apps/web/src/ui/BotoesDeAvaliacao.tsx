@@ -1,4 +1,5 @@
 import { classes } from './classes';
+import { IconePolegar } from './icones';
 
 export type Avaliacao = 'POSITIVA' | 'NEGATIVA';
 
@@ -24,7 +25,7 @@ export function BotoesDeAvaliacao({ avaliacao, sobre, desabilitado, aoAvaliar }:
         disabled={desabilitado}
         onClick={() => aoAvaliar('POSITIVA')}
       >
-        <span aria-hidden="true">👍</span>
+        <IconePolegar tamanho="1.25rem" />
       </button>
       <button
         type="button"
@@ -35,7 +36,7 @@ export function BotoesDeAvaliacao({ avaliacao, sobre, desabilitado, aoAvaliar }:
         disabled={desabilitado}
         onClick={() => aoAvaliar('NEGATIVA')}
       >
-        <span aria-hidden="true">👎</span>
+        <IconePolegar tamanho="1.25rem" class="avaliacao__icone--invertido" />
       </button>
     </div>
   );
