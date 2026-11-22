@@ -15,7 +15,7 @@ class PropriedadesIaTest {
 
     @Test
     void rnfRec001_opcoesAusentesUsamOsPadroes() {
-        PropriedadesIa.Provedor provedor = new PropriedadesIa.Provedor(URL, "modelo", "chave", null, null, null, 5);
+        PropriedadesIa.Provedor provedor = new PropriedadesIa.Provedor(URL, "modelo", "chave", null, null, null, 5, 0);
 
         assertThat(provedor.toolChoice()).isEqualTo(PropriedadesIa.Provedor.TOOL_CHOICE_AUTO);
         assertThat(provedor.exigeToolChoice()).isFalse();
@@ -24,13 +24,14 @@ class PropriedadesIaTest {
         assertThat(provedor.usaJsonSchema()).isFalse();
         assertThat(provedor.cabecalhos()).isEmpty();
         assertThat(provedor.maxChamadas()).isEqualTo(5);
+        assertThat(provedor.maxTokens()).isZero();
     }
 
     @Test
     void rnfRec001_opcoesValidasSaoAceitasSemDiferenciarMaiusculas() {
         PropriedadesIa.Provedor provedor =
                 new PropriedadesIa.Provedor(
-                        URL, "modelo", "chave", "REQUIRED", "JSON-SCHEMA", Map.of("X-Title", "Livraria LES"), 3);
+                        URL, "modelo", "chave", "REQUIRED", "JSON-SCHEMA", Map.of("X-Title", "Livraria LES"), 3, 0);
 
         assertThat(provedor.exigeToolChoice()).isTrue();
         assertThat(provedor.usaFerramenta()).isFalse();
@@ -42,9 +43,9 @@ class PropriedadesIaTest {
     @Test
     void rnfRec001_formatosDeTextoNaoUsamAFerramentaDeResposta() {
         PropriedadesIa.Provedor instrucoes =
-                new PropriedadesIa.Provedor(URL, "modelo", "chave", null, "INSTRUCOES", null, 5);
+                new PropriedadesIa.Provedor(URL, "modelo", "chave", null, "INSTRUCOES", null, 5, 0);
         PropriedadesIa.Provedor jsonSchema =
-                new PropriedadesIa.Provedor(URL, "modelo", "chave", null, "JSON-SCHEMA", null, 5);
+                new PropriedadesIa.Provedor(URL, "modelo", "chave", null, "JSON-SCHEMA", null, 5, 0);
 
         assertThat(instrucoes.formato()).isEqualTo(PropriedadesIa.Provedor.FORMATO_INSTRUCOES);
         assertThat(instrucoes.usaFerramenta()).isFalse();
@@ -55,31 +56,55 @@ class PropriedadesIaTest {
 
     @Test
     void rnfRec001_toolChoiceInvalidoEhRejeitado() {
-        assertThatThrownBy(() -> new PropriedadesIa.Provedor(URL, "modelo", "chave", "sempre", null, null, 5))
+        assertThatThrownBy(() -> new PropriedadesIa.Provedor(URL, "modelo", "chave", "sempre", null, null, 5, 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("livraria.ia.provedores.*.tool-choice deve ser auto ou required.");
     }
 
     @Test
     void rnfRec001_formatoInvalidoEhRejeitado() {
-        assertThatThrownBy(() -> new PropriedadesIa.Provedor(URL, "modelo", "chave", null, "xml", null, 5))
+        assertThatThrownBy(() -> new PropriedadesIa.Provedor(URL, "modelo", "chave", null, "xml", null, 5, 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("livraria.ia.provedores.*.formato deve ser ferramenta, json-schema ou instrucoes.");
     }
 
     @Test
     void rnfRec001_maxChamadasMenorQueUmEhRejeitado() {
-        assertThatThrownBy(() -> new PropriedadesIa.Provedor(URL, "modelo", "chave", null, null, null, 0))
+        assertThatThrownBy(() -> new PropriedadesIa.Provedor(URL, "modelo", "chave", null, null, null, 0, 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("livraria.ia.provedores.*.max-chamadas deve ser pelo menos 1.");
     }
 
     @Test
+    void rnfRec001_maxTokensAusenteOuZeroNaoLimitaASaida() {
+        PropriedadesIa.Provedor provedor = new PropriedadesIa.Provedor(URL, "modelo", "chave", null, null, null, 5, 0);
+
+        assertThat(provedor.maxTokens()).isZero();
+        assertThat(provedor.temTetoDeSaida()).isFalse();
+    }
+
+    @Test
+    void rnfRec001_maxTokensValidoDefineOTetoDeSaida() {
+        PropriedadesIa.Provedor provedor =
+                new PropriedadesIa.Provedor(URL, "modelo", "chave", null, null, null, 5, 800);
+
+        assertThat(provedor.maxTokens()).isEqualTo(800);
+        assertThat(provedor.temTetoDeSaida()).isTrue();
+    }
+
+    @Test
+    void rnfRec001_maxTokensNegativoEhRejeitado() {
+        assertThatThrownBy(() -> new PropriedadesIa.Provedor(URL, "modelo", "chave", null, null, null, 5, -1))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("livraria.ia.provedores.*.max-tokens deve ser 0 (sem teto) ou pelo menos 1.");
+    }
+
+    @Test
     void rnfRec001_urlBaseEModeloSaoObrigatorios() {
-        assertThatThrownBy(() -> new PropriedadesIa.Provedor(" ", "modelo", "chave", null, null, null, 5))
+        assertThatThrownBy(() -> new PropriedadesIa.Provedor(" ", "modelo", "chave", null, null, null, 5, 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("livraria.ia.provedores.*.url-base é obrigatório.");
-        assertThatThrownBy(() -> new PropriedadesIa.Provedor(URL, "", "chave", null, null, null, 5))
+        assertThatThrownBy(() -> new PropriedadesIa.Provedor(URL, "", "chave", null, null, null, 5, 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("livraria.ia.provedores.*.modelo é obrigatório.");
     }
@@ -93,7 +118,7 @@ class PropriedadesIaTest {
 
     @Test
     void rnfRec001_chaveVaziaMantemOProvedorForaDaCadeia() {
-        PropriedadesIa.Provedor provedor = new PropriedadesIa.Provedor(URL, "modelo", "", null, null, null, 5);
+        PropriedadesIa.Provedor provedor = new PropriedadesIa.Provedor(URL, "modelo", "", null, null, null, 5, 0);
 
         assertThat(provedor.temChave()).isFalse();
     }

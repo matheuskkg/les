@@ -168,7 +168,13 @@ class AssistenteDeLivrosOpenAiTest {
 
     private static PropriedadesIa.Provedor provedor(
             String urlBase, String formato, String toolChoice, int maxChamadas) {
-        return new PropriedadesIa.Provedor(urlBase, "modelo-teste", CHAVE, toolChoice, formato, Map.of(), maxChamadas);
+        return provedor(urlBase, formato, toolChoice, maxChamadas, 0);
+    }
+
+    private static PropriedadesIa.Provedor provedor(
+            String urlBase, String formato, String toolChoice, int maxChamadas, int maxTokens) {
+        return new PropriedadesIa.Provedor(
+                urlBase, "modelo-teste", CHAVE, toolChoice, formato, Map.of(), maxChamadas, maxTokens);
     }
 
     private static String conclusao(String conteudoJson) {
@@ -700,7 +706,7 @@ class AssistenteDeLivrosOpenAiTest {
                 new AssistenteDeLivrosOpenAi(
                         "gemini",
                         new PropriedadesIa.Provedor(
-                                "http://127.0.0.1:1/v1", "modelo-teste", "", "auto", "ferramenta", Map.of(), 5),
+                                "http://127.0.0.1:1/v1", "modelo-teste", "", "auto", "ferramenta", Map.of(), 5, 0),
                         Duration.ofSeconds(1));
 
         assertThat(assistente.temChave()).isFalse();
@@ -720,7 +726,8 @@ class AssistenteDeLivrosOpenAiTest {
                         "auto",
                         "instrucoes",
                         Map.of("X-Title", "Livraria LES", "HTTP-Referer", "https://livraria.test"),
-                        5);
+                        5,
+                        0);
 
         new AssistenteDeLivrosOpenAi("openrouter", provedor, Duration.ofSeconds(5)).recomendar(PERFIL, CANDIDATOS);
 
@@ -866,9 +873,39 @@ class AssistenteDeLivrosOpenAiTest {
     void rnfRec001_maxChamadasInvalidoEhRejeitado() {
         assertThatThrownBy(() ->
                         new PropriedadesIa.Provedor(
-                                "http://127.0.0.1:1/v1", "modelo-teste", CHAVE, "auto", "ferramenta", Map.of(), 0))
+                                "http://127.0.0.1:1/v1", "modelo-teste", CHAVE, "auto", "ferramenta", Map.of(), 0, 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("livraria.ia.provedores.*.max-chamadas deve ser pelo menos 1.");
+    }
+
+    @Test
+    void rnfRec001_maxTokensConfiguradoVaNoCorpoDeTodaChamada() {
+        respostas.add(new Resposta(200, chamadaDeFerramenta(), 0));
+        respostas.add(new Resposta(200, chamadaDeResposta("DUVIDA", "Oi!", "[]"), 0));
+        AssistenteDeLivrosOpenAi assistente =
+                new AssistenteDeLivrosOpenAi(
+                        "groq",
+                        provedor(
+                                "http://127.0.0.1:" + servidor.getAddress().getPort() + "/v1",
+                                "ferramenta",
+                                "auto",
+                                5,
+                                800),
+                        Duration.ofSeconds(5));
+
+        assistente.conversar(PERFIL, List.of(), "Oi", new FerramentasFalsas(), CATALOGO);
+
+        assertThat(corpos.get(0)).contains("\"max_tokens\":800");
+        assertThat(corpos.get(1)).contains("\"max_tokens\":800");
+    }
+
+    @Test
+    void rnfRec001_semMaxTokensOcorpoNaoLevaTetoDeSaida() {
+        respostas.add(new Resposta(200, conclusao("{\"itens\":[]}"), 0));
+
+        assistente().recomendar(PERFIL, CANDIDATOS);
+
+        assertThat(corpos.getFirst()).doesNotContain("\"max_tokens\"");
     }
 
     private static final class FerramentasFalsas implements FerramentasDoAssistente {
