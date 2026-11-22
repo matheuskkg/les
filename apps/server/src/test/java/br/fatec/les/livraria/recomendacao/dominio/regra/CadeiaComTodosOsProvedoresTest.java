@@ -3,23 +3,24 @@ package br.fatec.les.livraria.recomendacao.dominio.regra;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.AlteracaoDaCadeia;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.PosicaoNaCadeia;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ProvedorIa;
 
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
 class CadeiaComTodosOsProvedoresTest {
 
-    private static final List<ProvedorIa> ATUAIS = List.of(
-            new ProvedorIa(1L, "gemini", 1, true),
-            new ProvedorIa(2L, "groq", 2, true),
-            new ProvedorIa(3L, "fake", 3, true));
+    private static final List<ProvedorIa> ATUAIS =
+            List.of(
+                    new ProvedorIa(1L, "gemini", 1, true),
+                    new ProvedorIa(2L, "groq", 2, true),
+                    new ProvedorIa(3L, "fake", 3, true));
 
     private final CadeiaComTodosOsProvedores regra = new CadeiaComTodosOsProvedores();
 
@@ -40,13 +41,12 @@ class CadeiaComTodosOsProvedoresTest {
 
     @Test
     void rnfRec001_aplicarGravaAOrdemPelaPosicaoEAAtivacao() {
-        AlteracaoDaCadeia alteracao = new AlteracaoDaCadeia(ATUAIS,
-                List.of(ativo(3L), new PosicaoNaCadeia(1L, false), ativo(2L)));
+        AlteracaoDaCadeia alteracao =
+                new AlteracaoDaCadeia(ATUAIS, List.of(ativo(3L), new PosicaoNaCadeia(1L, false), ativo(2L)));
 
-        assertThat(alteracao.aplicar()).extracting(ProvedorIa::id, ProvedorIa::nome, ProvedorIa::ordem,
-                        ProvedorIa::ativo)
-                .containsExactly(tuple(3L, "fake", 1, true), tuple(1L, "gemini", 2, false),
-                        tuple(2L, "groq", 3, true));
+        assertThat(alteracao.aplicar())
+                .extracting(ProvedorIa::id, ProvedorIa::nome, ProvedorIa::ordem, ProvedorIa::ativo)
+                .containsExactly(tuple(3L, "fake", 1, true), tuple(1L, "gemini", 2, false), tuple(2L, "groq", 3, true));
     }
 
     @Test

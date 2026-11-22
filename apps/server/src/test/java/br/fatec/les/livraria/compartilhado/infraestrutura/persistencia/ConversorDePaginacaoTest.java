@@ -2,7 +2,9 @@ package br.fatec.les.livraria.compartilhado.infraestrutura.persistencia;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
+import br.fatec.les.livraria.compartilhado.aplicacao.Ordem;
+import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
+import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
@@ -10,25 +12,26 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import br.fatec.les.livraria.compartilhado.aplicacao.Ordem;
-import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
-import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
+import java.util.List;
 
 /** Conversão entre a paginação da aplicação e os tipos do Spring Data (DEC-07). */
 class ConversorDePaginacaoTest {
 
     @Test
     void acrescentaOIdComoUltimoDesempate() {
-        Paginacao paginacao = new Paginacao(1, 10,
-                List.of(new Ordem("nome", Ordem.Direcao.ASC), new Ordem("email", Ordem.Direcao.DESC)));
+        Paginacao paginacao =
+                new Paginacao(
+                        1, 10, List.of(new Ordem("nome", Ordem.Direcao.ASC), new Ordem("email", Ordem.Direcao.DESC)));
 
         Pageable pageable = ConversorDePaginacao.paraPageable(paginacao);
 
         assertThat(pageable.getPageNumber()).isEqualTo(1);
         assertThat(pageable.getPageSize()).isEqualTo(10);
-        assertThat(pageable.getSort().toList()).extracting(Sort.Order::getProperty)
+        assertThat(pageable.getSort().toList())
+                .extracting(Sort.Order::getProperty)
                 .containsExactly("nome", "email", "id");
-        assertThat(pageable.getSort().toList()).extracting(Sort.Order::getDirection)
+        assertThat(pageable.getSort().toList())
+                .extracting(Sort.Order::getDirection)
                 .containsExactly(Sort.Direction.ASC, Sort.Direction.DESC, Sort.Direction.ASC);
     }
 
@@ -46,7 +49,8 @@ class ConversorDePaginacaoTest {
         Pageable pageable = ConversorDePaginacao.paraPageable(paginacao);
 
         assertThat(pageable.getSort().toList()).extracting(Sort.Order::getProperty).containsExactly("id");
-        assertThat(pageable.getSort().toList()).extracting(Sort.Order::getDirection)
+        assertThat(pageable.getSort().toList())
+                .extracting(Sort.Order::getDirection)
                 .containsExactly(Sort.Direction.DESC);
     }
 

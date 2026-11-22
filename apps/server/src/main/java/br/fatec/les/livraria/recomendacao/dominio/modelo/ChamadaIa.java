@@ -1,14 +1,14 @@
 package br.fatec.les.livraria.recomendacao.dominio.modelo;
 
-import java.time.LocalDateTime;
-
 import org.jspecify.annotations.Nullable;
 
+import java.time.LocalDateTime;
+
 /**
- * Tentativa de chamada a um provedor, registrada em {@code chamada_ia} (RNF-REC-001, DEC-03). É um log só de
- * inserção: guarda o provedor, o modelo, a operação, o instante de início, a latência, a tentativa na cadeia, o
- * resultado, quantas chamadas HTTP a mensagem fez, os tokens de cada volta e os tokens somados. O prompt e a
- * resposta crus não são gravados.
+ * Tentativa de chamada a um provedor, registrada em {@code chamada_ia} (RNF-REC-001, DEC-03). É um log só de inserção:
+ * guarda o provedor, o modelo, a operação, o instante de início, a latência, a tentativa na cadeia, o resultado,
+ * quantas chamadas HTTP a mensagem fez, os tokens de cada volta e os tokens somados. O prompt e a resposta crus não são
+ * gravados.
  */
 public record ChamadaIa(
         Long provedorIaId,

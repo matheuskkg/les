@@ -1,19 +1,19 @@
 package br.fatec.les.livraria.clientes.aplicacao.consulta;
 
+import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
+import br.fatec.les.livraria.clientes.dominio.modelo.Uf;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
-import br.fatec.les.livraria.clientes.dominio.modelo.Uf;
-
 /**
  * Filtro da porta de consulta de clientes do admin (RF-CLI-004, DEC-07). Os campos da tabela {@code cliente} e dos
  * endereços se combinam com E; gênero e UF repetidos se combinam com OU. E-mail, telefone e situação vêm do módulo
- * {@code acesso} já resolvidos em ids de usuário (DEC-10): um {@link Optional} vazio não filtra, e um conjunto
- * vazio significa que nenhum usuário atendeu ao filtro.
+ * {@code acesso} já resolvidos em ids de usuário (DEC-10): um {@link Optional} vazio não filtra, e um conjunto vazio
+ * significa que nenhum usuário atendeu ao filtro.
  *
  * @param nome trecho do nome, sem diferenciar maiúsculas nem acentos
  * @param cpf CPF comparado só pelos dígitos

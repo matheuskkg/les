@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.acesso.aplicacao.consulta;
 
-import java.util.Objects;
+import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta;
+import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
 
 import org.jspecify.annotations.Nullable;
 
-import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta;
-import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
+import java.util.Objects;
 
 /**
  * E-mail, telefone e situação de um usuário, carregados em lote para a consulta de clientes do admin (RF-CLI-004,
@@ -16,11 +16,7 @@ import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
  * @param telefone telefone com DDD e número, ou nulo
  * @param situacao situação calculada da conta no instante da consulta
  */
-public record ContatoDoUsuario(
-        Long usuarioId,
-        String email,
-        @Nullable Telefone telefone,
-        SituacaoConta situacao) {
+public record ContatoDoUsuario(Long usuarioId, String email, @Nullable Telefone telefone, SituacaoConta situacao) {
 
     public ContatoDoUsuario {
         Objects.requireNonNull(usuarioId, "usuarioId");

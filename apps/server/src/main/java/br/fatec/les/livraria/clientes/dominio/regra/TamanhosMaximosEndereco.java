@@ -1,10 +1,10 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoEndereco;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
+import org.springframework.stereotype.Component;
 
 /**
  * Tamanhos máximos dos dados do endereço (RN-CLI-003). As constantes espelham as colunas JPA de {@code endereco}; sem

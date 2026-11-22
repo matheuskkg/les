@@ -1,14 +1,14 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 
+import org.springframework.stereotype.Component;
+
 /**
- * Tamanhos máximos dos dados do cartão (RN-CLI-004). As constantes espelham as colunas JPA de {@code cartao}; os
- * campos com formato próprio já têm regra que limita o tamanho: número (13 a 19 dígitos) e validade ({@code AAAA-MM}).
+ * Tamanhos máximos dos dados do cartão (RN-CLI-004). As constantes espelham as colunas JPA de {@code cartao}; os campos
+ * com formato próprio já têm regra que limita o tamanho: número (13 a 19 dígitos) e validade ({@code AAAA-MM}).
  */
 @Component
 public class TamanhosMaximosCartao implements Regra<NovoCartao> {
@@ -25,8 +25,7 @@ public class TamanhosMaximosCartao implements Regra<NovoCartao> {
             return;
         }
         if (cartao.nomeImpresso() != null && cartao.nomeImpresso().strip().length() > NOME_IMPRESSO) {
-            violacoes.adicionar(CODIGO,
-                    "O nome impresso deve ter no máximo " + NOME_IMPRESSO + " caracteres.");
+            violacoes.adicionar(CODIGO, "O nome impresso deve ter no máximo " + NOME_IMPRESSO + " caracteres.");
         }
     }
 }

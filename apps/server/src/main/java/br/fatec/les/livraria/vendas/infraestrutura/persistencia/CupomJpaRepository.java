@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
-import java.util.Collection;
-import java.util.List;
+import br.fatec.les.livraria.vendas.dominio.pagamento.SituacaoCupom;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import br.fatec.les.livraria.vendas.dominio.pagamento.SituacaoCupom;
+import java.util.Collection;
+import java.util.List;
 
 public interface CupomJpaRepository extends JpaRepository<CupomJpa, Long> {
 

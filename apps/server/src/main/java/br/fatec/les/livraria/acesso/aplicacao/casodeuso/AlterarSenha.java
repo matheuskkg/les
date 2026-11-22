@@ -1,8 +1,5 @@
 package br.fatec.les.livraria.acesso.aplicacao.casodeuso;
 
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
 import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
 import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
@@ -11,13 +8,17 @@ import br.fatec.les.livraria.acesso.dominio.regra.NovaSenhaObrigatoria;
 import br.fatec.les.livraria.acesso.dominio.regra.SenhaForte;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 /**
- * Alteração de senha do usuário autenticado (RF-CLI-008, RNF-CLI-001, RNF-CLI-002, RNF-CLI-003, DEC-08). A senha
- * atual incorreta é uma violação de negócio (422), não uma falha de autenticação, porque a sessão já está aberta. A
- * nova senha passa pelas mesmas regras do cadastro e é gravada só como hash BCrypt. A sessão atual continua válida:
- * o token leva apenas o id do usuário, e não é reemitido.
+ * Alteração de senha do usuário autenticado (RF-CLI-008, RNF-CLI-001, RNF-CLI-002, RNF-CLI-003, DEC-08). A senha atual
+ * incorreta é uma violação de negócio (422), não uma falha de autenticação, porque a sessão já está aberta. A nova
+ * senha passa pelas mesmas regras do cadastro e é gravada só como hash BCrypt. A sessão atual continua válida: o token
+ * leva apenas o id do usuário, e não é reemitido.
  */
 @Component
 @RequiredArgsConstructor
@@ -33,8 +34,9 @@ public class AlterarSenha {
 
     @Transactional
     public void executar(Long usuarioId, TrocaDeSenha comando) {
-        Usuario usuario = usuarios.buscarPorId(usuarioId)
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Usuário não encontrado."));
+        Usuario usuario =
+                usuarios.buscarPorId(usuarioId)
+                        .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Usuário não encontrado."));
 
         Violacoes violacoes = new Violacoes();
         novaSenhaObrigatoria.validar(comando, violacoes);
@@ -50,7 +52,8 @@ public class AlterarSenha {
     }
 
     private boolean senhaAtualConfere(TrocaDeSenha comando, Usuario usuario) {
-        return comando.senhaAtual() != null && !comando.senhaAtual().isBlank()
+        return comando.senhaAtual() != null
+                && !comando.senhaAtual().isBlank()
                 && senhas.confere(comando.senhaAtual(), usuario.getSenhaHash());
     }
 }

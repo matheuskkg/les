@@ -1,15 +1,15 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.seguranca;
 
-import java.util.Optional;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Autor;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.UsuarioAtual;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.UsuarioAutenticado;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Autor;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.UsuarioAtual;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.UsuarioAutenticado;
+import java.util.Optional;
 
 /** Implementação do autor das escritas (RNF-GER-002) sobre o contexto do Spring Security e da requisição. */
 @Component

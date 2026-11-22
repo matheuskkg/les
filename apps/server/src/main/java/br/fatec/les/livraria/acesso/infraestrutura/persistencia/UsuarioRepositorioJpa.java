@@ -1,5 +1,17 @@
 package br.fatec.les.livraria.acesso.infraestrutura.persistencia;
 
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
+import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta;
+import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoDaConta;
+import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
+import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -8,20 +20,9 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.stereotype.Component;
-
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
-import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta;
-import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoDaConta;
-import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
-import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import lombok.RequiredArgsConstructor;
-
 /**
- * Adapter da porta de usuários. O prazo de reativação aparece só aqui, ao calcular o limite das contas em uso
- * (DEC-10): uma conta encerrada não é encontrada pelo login nem entra na unicidade de e-mail e telefone.
+ * Adapter da porta de usuários. O prazo de reativação aparece só aqui, ao calcular o limite das contas em uso (DEC-10):
+ * uma conta encerrada não é encontrada pelo login nem entra na unicidade de e-mail e telefone.
  */
 @Component
 @RequiredArgsConstructor
@@ -91,9 +92,10 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
             return Optional.empty();
         }
         String identificador = login.strip();
-        List<UsuarioJpa> encontrados = identificador.contains("@")
-                ? repositorio.buscarPorEmailEmUso(identificador.toLowerCase(Locale.ROOT), limiteEmUso())
-                : buscarPorTelefone(identificador);
+        List<UsuarioJpa> encontrados =
+                identificador.contains("@")
+                        ? repositorio.buscarPorEmailEmUso(identificador.toLowerCase(Locale.ROOT), limiteEmUso())
+                        : buscarPorTelefone(identificador);
         return encontrados.stream().findFirst().map(mapper::paraDominio);
     }
 
@@ -164,8 +166,6 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
         return relogio.agora().minus(SituacaoDaConta.PRAZO_DE_REATIVACAO);
     }
 
-
-
     private static String ddd(String digitos) {
         return digitos.substring(0, 2);
     }
@@ -173,5 +173,4 @@ public class UsuarioRepositorioJpa implements UsuarioRepositorio {
     private static String numero(String digitos) {
         return digitos.substring(2);
     }
-
 }

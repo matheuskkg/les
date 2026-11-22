@@ -1,20 +1,21 @@
 package br.fatec.les.livraria.acesso.aplicacao.casodeuso;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Set;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Set;
 
 /**
- * Consulta pública do {@code acesso} que resolve os ids dos usuários nas situações informadas (RF-CLI-004, DEC-10).
- * A situação é derivada de {@code inativado_em} e do prazo de reativação: a comparação é feita em SQL, sem carregar
- * todos os usuários.
+ * Consulta pública do {@code acesso} que resolve os ids dos usuários nas situações informadas (RF-CLI-004, DEC-10). A
+ * situação é derivada de {@code inativado_em} e do prazo de reativação: a comparação é feita em SQL, sem carregar todos
+ * os usuários.
  */
 @Component
 @RequiredArgsConstructor

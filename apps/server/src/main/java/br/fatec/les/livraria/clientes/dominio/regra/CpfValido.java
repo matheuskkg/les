@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.clientes.dominio.modelo.DadosCadastraisCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Cpf;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
+import org.springframework.stereotype.Component;
 
 /**
  * CPF válido (RN-CLI-006), com os dígitos verificadores conferidos pelo value object {@link Cpf}. Na alteração o CPF

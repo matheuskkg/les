@@ -9,5 +9,4 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * @param cookieSeguro liga o atributo {@code Secure}; desligado no desenvolvimento, que usa HTTP
  */
 @ConfigurationProperties("livraria.sessao")
-public record PropriedadesSessao(@DefaultValue("false") boolean cookieSeguro) {
-}
+public record PropriedadesSessao(@DefaultValue("false") boolean cookieSeguro) {}

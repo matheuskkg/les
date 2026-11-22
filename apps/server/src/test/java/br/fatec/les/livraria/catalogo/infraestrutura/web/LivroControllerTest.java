@@ -7,8 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
+import br.fatec.les.livraria.estoque.infraestrutura.persistencia.ReservaJpa;
+import br.fatec.les.livraria.estoque.infraestrutura.persistencia.ReservaJpaRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,26 +21,23 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
-import br.fatec.les.livraria.estoque.infraestrutura.persistencia.ReservaJpa;
-import br.fatec.les.livraria.estoque.infraestrutura.persistencia.ReservaJpaRepository;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Vitrine pública de livros sobre o seed em H2 (RF-LIV-005, RNF-LIV-001, DEC-07, DEC-15.3).
  *
- * <p>O seed tem 56 livros, ids 1 a 56; o livro 19 está inativo e o 20 está ativo, sem entrada de estoque e sem
- * preço. Os livros 21 a 26 ampliam o catálogo e têm duas entradas de estoque cada; os 27 a 56 ampliam ainda mais os
- * domínios e as categorias (ALT-02). Os valores de preço saem das margens e dos custos dos scripts de seed.
+ * <p>O seed tem 56 livros, ids 1 a 56; o livro 19 está inativo e o 20 está ativo, sem entrada de estoque e sem preço.
+ * Os livros 21 a 26 ampliam o catálogo e têm duas entradas de estoque cada; os 27 a 56 ampliam ainda mais os domínios e
+ * as categorias (ALT-02). Os valores de preço saem das margens e dos custos dos scripts de seed.
  */
 @SpringBootTest
 @Transactional
 class LivroControllerTest {
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private ReservaJpaRepository reservas;
+    @Autowired private ReservaJpaRepository reservas;
 
     private MockMvc mvc;
 
@@ -196,10 +194,7 @@ class LivroControllerTest {
 
     @Test
     void rfLiv005_combinaFiltrosComE() throws Exception {
-        mvc.perform(get("/api/livros")
-                .param("autor", "asimov")
-                .param("anoDe", "1950")
-                .param("anoAte", "1955"))
+        mvc.perform(get("/api/livros").param("autor", "asimov").param("anoDe", "1950").param("anoAte", "1955"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalItens").value(3))
                 .andExpect(jsonPath("$.itens[*].id", hasItems(8, 9, 10)));
@@ -256,9 +251,7 @@ class LivroControllerTest {
                 .andExpect(jsonPath("$.totalItens").value(1))
                 .andExpect(jsonPath("$.itens[0].id").value(1));
 
-        mvc.perform(get("/api/livros/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1));
+        mvc.perform(get("/api/livros/1")).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1));
     }
 
     @Test
@@ -296,13 +289,10 @@ class LivroControllerTest {
     @Test
     void dec153_disponibilidadeDescontaReservaAtivaEIgnoraVencida() throws Exception {
         LocalDateTime agora = LocalDateTime.now();
-        reservas.saveAllAndFlush(List.of(
-                novaReserva(1L, 5, agora.plusDays(1)),
-                novaReserva(1L, 3, agora.minusDays(1))));
+        reservas.saveAllAndFlush(
+                List.of(novaReserva(1L, 5, agora.plusDays(1)), novaReserva(1L, 3, agora.minusDays(1))));
 
-        mvc.perform(get("/api/livros/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.disponivel").value(15));
+        mvc.perform(get("/api/livros/1")).andExpect(status().isOk()).andExpect(jsonPath("$.disponivel").value(15));
 
         mvc.perform(get("/api/livros").param("codigo", "1"))
                 .andExpect(status().isOk())
@@ -313,9 +303,7 @@ class LivroControllerTest {
     void dec153_disponibilidadeNuncaFicaNegativa() throws Exception {
         reservas.saveAndFlush(novaReserva(1L, 999, LocalDateTime.now().plusDays(1)));
 
-        mvc.perform(get("/api/livros/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.disponivel").value(0));
+        mvc.perform(get("/api/livros/1")).andExpect(status().isOk()).andExpect(jsonPath("$.disponivel").value(0));
     }
 
     @Test

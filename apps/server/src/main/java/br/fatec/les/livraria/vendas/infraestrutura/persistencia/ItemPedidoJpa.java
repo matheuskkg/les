@@ -1,12 +1,7 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
-import java.math.BigDecimal;
-
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.envers.Audited;
-import org.hibernate.type.SqlTypes;
-
 import br.fatec.les.livraria.vendas.dominio.pedido.LivroNoPedido;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,9 +13,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.envers.Audited;
+import org.hibernate.type.SqlTypes;
+
+import java.math.BigDecimal;
 
 /**
  * Tabela {@code item_pedido} do MER (DEC-12, DEC-16): o livro é snapshot em JSON com o id de origem e as categorias,
@@ -36,8 +38,11 @@ public class ItemPedidoJpa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "item_pedido_seq")
-    @SequenceGenerator(name = "item_pedido_seq", sequenceName = "item_pedido_seq",
-            initialValue = 10000, allocationSize = 50)
+    @SequenceGenerator(
+            name = "item_pedido_seq",
+            sequenceName = "item_pedido_seq",
+            initialValue = 10000,
+            allocationSize = 50)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

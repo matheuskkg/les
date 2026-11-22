@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.clientes.dominio.calculo;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
 import br.fatec.les.livraria.clientes.dominio.modelo.Bandeira;
+
+import org.springframework.stereotype.Component;
 
 /**
  * Tamanho do número conforme a bandeira identificada (RN-CLI-004, DEC-18): a coluna {@code tamanhos} da bandeira lista

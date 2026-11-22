@@ -9,8 +9,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-import java.util.concurrent.atomic.AtomicReference;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,15 +30,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Frete do checkout para o endereço de entrega escolhido (RF-VEN-004, RF-VEN-005, DEC-05.3, DEC-10) sobre o seed. Ana
- * é o usuário 2, com os endereços 1 e 2 (CEPs de SP); o endereço 3 é do Bruno. Dom Casmurro (livro 1) custa R$ 47,88
- * e pesa 0,32 kg, acima do peso cúbico.
+ * Frete do checkout para o endereço de entrega escolhido (RF-VEN-004, RF-VEN-005, DEC-05.3, DEC-10) sobre o seed. Ana é
+ * o usuário 2, com os endereços 1 e 2 (CEPs de SP); o endereço 3 é do Bruno. Dom Casmurro (livro 1) custa R$ 47,88 e
+ * pesa 0,32 kg, acima do peso cúbico.
  */
 @SpringBootTest
 @Transactional
@@ -55,14 +56,11 @@ class FreteIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
     private MockMvc mvc;
 
@@ -138,17 +136,19 @@ class FreteIntegracaoTest {
 
     private static String enderecoNovo(String cep) {
         return """
-                {"nomeCurto":"Presente","tipoEndereco":"CASA","tipoLogradouro":"RUA","logradouro":"Rua Ramos Ferreira",\
-                "numero":"10","bairro":"Centro","cep":"%s","cidade":"Manaus","uf":"AM"}""".formatted(cep);
+        {"nomeCurto":"Presente","tipoEndereco":"CASA","tipoLogradouro":"RUA","logradouro":"Rua Ramos Ferreira",\
+        "numero":"10","bairro":"Centro","cep":"%s","cidade":"Manaus","uf":"AM"}\
+        """
+                .formatted(cep);
     }
 
     private ResultActions escrever(MockHttpServletRequestBuilder requisicao, String corpo) throws Exception {
         Cookie csrf = mvc.perform(get("/api/sessao")).andReturn().getResponse().getCookie("XSRF-TOKEN");
         assertThat(csrf).isNotNull();
-        MockHttpServletRequestBuilder comSessao = requisicao.cookie(sessaoDe(ANA), csrf)
-                .header("X-XSRF-TOKEN", csrf.getValue());
-        return mvc.perform(corpo.isEmpty() ? comSessao
-                : comSessao.contentType(MediaType.APPLICATION_JSON).content(corpo));
+        MockHttpServletRequestBuilder comSessao =
+                requisicao.cookie(sessaoDe(ANA), csrf).header("X-XSRF-TOKEN", csrf.getValue());
+        return mvc.perform(
+                corpo.isEmpty() ? comSessao : comSessao.contentType(MediaType.APPLICATION_JSON).content(corpo));
     }
 
     private Cookie sessaoDe(long usuarioId) {

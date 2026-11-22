@@ -1,25 +1,20 @@
 package br.fatec.les.livraria.vendas.dominio.pagamento;
 
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
-
 /**
- * Cupom promocional, criado pelo seed (RF-VEN-007, DEC-11, DEC-15.2). Vale até o fim do dia da validade, pode exigir
- * um valor mínimo de compra (subtotal dos itens, sem frete) e cada cliente o usa uma vez.
+ * Cupom promocional, criado pelo seed (RF-VEN-007, DEC-11, DEC-15.2). Vale até o fim do dia da validade, pode exigir um
+ * valor mínimo de compra (subtotal dos itens, sem frete) e cada cliente o usa uma vez.
  *
- * @param valor        reais ou percentual, conforme o tipo; nulo em {@code FRETE_GRATIS}
- * @param valorMinimo  subtotal mínimo dos itens; nulo se não houver
+ * @param valor reais ou percentual, conforme o tipo; nulo em {@code FRETE_GRATIS}
+ * @param valorMinimo subtotal mínimo dos itens; nulo se não houver
  */
 public record CupomPromocional(
-        Long id,
-        String codigo,
-        TipoCupomPromocional tipo,
-        BigDecimal valor,
-        LocalDate validade,
-        Dinheiro valorMinimo) {
+        Long id, String codigo, TipoCupomPromocional tipo, BigDecimal valor, LocalDate validade, Dinheiro valorMinimo) {
 
     private static final BigDecimal CEM = new BigDecimal("100");
 

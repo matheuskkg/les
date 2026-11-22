@@ -1,8 +1,8 @@
 package br.fatec.les.livraria.vendas.dominio.pedido;
 
-import java.util.Objects;
-
 import org.jspecify.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * Cópia do cliente no momento da compra (DEC-12, DEC-16), com o id de origem.

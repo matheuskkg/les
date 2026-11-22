@@ -1,19 +1,20 @@
 package br.fatec.les.livraria.vendas.aplicacao;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.catalogo.aplicacao.casodeuso.ConsultarLivrosParaVenda;
 import br.fatec.les.livraria.catalogo.aplicacao.casodeuso.ConsultarPrecosDeVenda;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroParaVenda;
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.ItemComPreco;
 import br.fatec.les.livraria.vendas.dominio.modelo.ItemProposto;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Completa os itens do carrinho ou do checkout com título, autores e o preço de venda atual, consultados em lote no
@@ -48,12 +49,16 @@ public class PrecificarItens {
         return itens.stream().mapToInt(ItemComPreco::quantidade).sum();
     }
 
-    private static ItemComPreco paraItem(ItemProposto item, Map<Long, LivroParaVenda> livros,
-            Map<Long, Dinheiro> precos) {
+    private static ItemComPreco paraItem(
+            ItemProposto item, Map<Long, LivroParaVenda> livros, Map<Long, Dinheiro> precos) {
         LivroParaVenda livro = livros.get(item.livroId());
         Dinheiro preco = precos.get(item.livroId());
-        return new ItemComPreco(item.livroId(), livro == null ? null : livro.titulo(),
-                livro == null ? List.of() : livro.autores(), preco, item.quantidade(),
+        return new ItemComPreco(
+                item.livroId(),
+                livro == null ? null : livro.titulo(),
+                livro == null ? List.of() : livro.autores(),
+                preco,
+                item.quantidade(),
                 preco == null ? null : preco.multiplicar(item.quantidade()));
     }
 }

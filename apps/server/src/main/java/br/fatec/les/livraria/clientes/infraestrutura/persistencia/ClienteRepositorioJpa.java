@@ -1,18 +1,19 @@
 package br.fatec.les.livraria.clientes.infraestrutura.persistencia;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
 import br.fatec.les.livraria.compartilhado.dominio.Cpf;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Adapter JPA do cadastro do cliente com endereços e cartões (RF-CLI-001, RF-CLI-002, RF-CLI-006, RF-CLI-007, DEC-10,
@@ -50,8 +51,10 @@ public class ClienteRepositorioJpa implements ClienteRepositorio {
     @Override
     @Transactional
     public Cliente alterarDados(Long clienteId, String nome, Genero genero, LocalDate dataNascimento, Cpf cpf) {
-        ClienteJpa entidade = repositorio.findById(clienteId)
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));
+        ClienteJpa entidade =
+                repositorio
+                        .findById(clienteId)
+                        .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));
         entidade.setNome(nome);
         entidade.setGenero(genero);
         entidade.setDataNascimento(dataNascimento);

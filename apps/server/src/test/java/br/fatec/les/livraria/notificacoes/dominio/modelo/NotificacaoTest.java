@@ -3,9 +3,9 @@ package br.fatec.les.livraria.notificacoes.dominio.modelo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDateTime;
-
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
 
 /** Regras do modelo de notificação (DEC-13, DEC-16, RN-VEN-014, RN-VEN-016). */
 class NotificacaoTest {
@@ -16,8 +16,9 @@ class NotificacaoTest {
 
     @Test
     void dec13_notificacaoNovaNasceNaoLidaESemReferencia() {
-        Notificacao notificacao = Notificacao.nova(CLIENTE, TipoNotificacao.PEDIDO_APROVADO,
-                "Seu pedido foi aprovado.", null, null, CRIADA_EM);
+        Notificacao notificacao =
+                Notificacao.nova(
+                        CLIENTE, TipoNotificacao.PEDIDO_APROVADO, "Seu pedido foi aprovado.", null, null, CRIADA_EM);
 
         assertThat(notificacao.getId()).isNull();
         assertThat(notificacao.lida()).isFalse();
@@ -29,8 +30,14 @@ class NotificacaoTest {
 
     @Test
     void dec13_guardaATipoMensagemEOIdDoRecurso() {
-        Notificacao notificacao = Notificacao.nova(CLIENTE, TipoNotificacao.TROCA_AUTORIZADA,
-                "Sua troca foi autorizada.", "troca", 10042L, CRIADA_EM);
+        Notificacao notificacao =
+                Notificacao.nova(
+                        CLIENTE,
+                        TipoNotificacao.TROCA_AUTORIZADA,
+                        "Sua troca foi autorizada.",
+                        "troca",
+                        10042L,
+                        CRIADA_EM);
 
         assertThat(notificacao.getTipo()).isEqualTo(TipoNotificacao.TROCA_AUTORIZADA);
         assertThat(notificacao.getMensagem()).isEqualTo("Sua troca foi autorizada.");
@@ -40,35 +47,43 @@ class NotificacaoTest {
 
     @Test
     void dec13_referenciaExigeRecursoEIdJuntos() {
-        assertThatThrownBy(() -> Notificacao.nova(CLIENTE, TipoNotificacao.PEDIDO_APROVADO,
-                "Aprovado.", "pedido", null, CRIADA_EM))
+        assertThatThrownBy(() ->
+                        Notificacao.nova(
+                                CLIENTE, TipoNotificacao.PEDIDO_APROVADO, "Aprovado.", "pedido", null, CRIADA_EM))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("recurso e o id juntos");
 
-        assertThatThrownBy(() -> Notificacao.nova(CLIENTE, TipoNotificacao.PEDIDO_APROVADO,
-                "Aprovado.", null, 10042L, CRIADA_EM))
+        assertThatThrownBy(() ->
+                        Notificacao.nova(
+                                CLIENTE, TipoNotificacao.PEDIDO_APROVADO, "Aprovado.", null, 10042L, CRIADA_EM))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("recurso e o id juntos");
     }
 
     @Test
     void dec13_mensagemEhObrigatoriaELimitadaPeloMer() {
-        assertThatThrownBy(() -> Notificacao.nova(CLIENTE, TipoNotificacao.PEDIDO_APROVADO,
-                "  ", null, null, CRIADA_EM))
+        assertThatThrownBy(
+                        () -> Notificacao.nova(CLIENTE, TipoNotificacao.PEDIDO_APROVADO, "  ", null, null, CRIADA_EM))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("obrigatória");
 
         String longa = "a".repeat(Notificacao.TAMANHO_MAXIMO_DA_MENSAGEM + 1);
-        assertThatThrownBy(() -> Notificacao.nova(CLIENTE, TipoNotificacao.PEDIDO_APROVADO,
-                longa, null, null, CRIADA_EM))
+        assertThatThrownBy(
+                        () -> Notificacao.nova(CLIENTE, TipoNotificacao.PEDIDO_APROVADO, longa, null, null, CRIADA_EM))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("no máximo");
     }
 
     @Test
     void dec13_marcarComoLidaGuardaOInstanteE_NaoMudaNaSegundaVezParaORnVen016() {
-        Notificacao notificacao = Notificacao.nova(CLIENTE, TipoNotificacao.TROCA_AUTORIZADA,
-                "Sua troca foi autorizada.", "troca", 10042L, CRIADA_EM);
+        Notificacao notificacao =
+                Notificacao.nova(
+                        CLIENTE,
+                        TipoNotificacao.TROCA_AUTORIZADA,
+                        "Sua troca foi autorizada.",
+                        "troca",
+                        10042L,
+                        CRIADA_EM);
 
         notificacao.marcarComoLida(LIDA_EM);
         notificacao.marcarComoLida(LIDA_EM.plusHours(1));
@@ -79,8 +94,8 @@ class NotificacaoTest {
 
     @Test
     void dec07_notificacaoPertenceSomenteAoProprioUsuario() {
-        Notificacao notificacao = Notificacao.nova(CLIENTE, TipoNotificacao.PEDIDO_ENTREGUE,
-                "Pedido entregue.", null, null, CRIADA_EM);
+        Notificacao notificacao =
+                Notificacao.nova(CLIENTE, TipoNotificacao.PEDIDO_ENTREGUE, "Pedido entregue.", null, null, CRIADA_EM);
 
         assertThat(notificacao.pertenceA(CLIENTE)).isTrue();
         assertThat(notificacao.pertenceA(43L)).isFalse();
@@ -89,8 +104,8 @@ class NotificacaoTest {
 
     @Test
     void dec13_usuarioETipoSaoObrigatorios() {
-        assertThatThrownBy(() -> Notificacao.nova(null, TipoNotificacao.PEDIDO_APROVADO,
-                "Aprovado.", null, null, CRIADA_EM))
+        assertThatThrownBy(() ->
+                        Notificacao.nova(null, TipoNotificacao.PEDIDO_APROVADO, "Aprovado.", null, null, CRIADA_EM))
                 .isInstanceOf(NullPointerException.class);
         assertThatThrownBy(() -> Notificacao.nova(CLIENTE, null, "Aprovado.", null, null, CRIADA_EM))
                 .isInstanceOf(NullPointerException.class);
@@ -98,11 +113,9 @@ class NotificacaoTest {
 
     @Test
     void dec13_tipoDeAdminEhMarcadoComoDestinatarioAdmin() {
-        assertThat(TipoNotificacao.TROCA_SOLICITADA.destinatario())
-                .isEqualTo(TipoNotificacao.Destinatario.ADMIN);
+        assertThat(TipoNotificacao.TROCA_SOLICITADA.destinatario()).isEqualTo(TipoNotificacao.Destinatario.ADMIN);
         assertThat(TipoNotificacao.PEDIDO_AGUARDANDO_DESPACHO.destinatario())
                 .isEqualTo(TipoNotificacao.Destinatario.ADMIN);
-        assertThat(TipoNotificacao.TROCA_AUTORIZADA.destinatario())
-                .isEqualTo(TipoNotificacao.Destinatario.CLIENTE);
+        assertThat(TipoNotificacao.TROCA_AUTORIZADA.destinatario()).isEqualTo(TipoNotificacao.Destinatario.CLIENTE);
     }
 }

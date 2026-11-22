@@ -2,14 +2,14 @@ package br.fatec.les.livraria.clientes.dominio.ranking;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
+import org.junit.jupiter.api.Test;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
 class RankingTest {
 
@@ -35,8 +35,7 @@ class RankingTest {
 
     @Test
     void rnCli007_notaDeRecenciaPorFaixa() {
-        assertThat(List.of(0L, 30L, 31L, 90L, 91L, 180L, 181L, 270L, 271L, 365L, 366L).stream()
-                .map(NotaDeRecencia::de))
+        assertThat(List.of(0L, 30L, 31L, 90L, 91L, 180L, 181L, 270L, 271L, 365L, 366L).stream().map(NotaDeRecencia::de))
                 .containsExactly(100, 100, 80, 80, 60, 60, 40, 40, 20, 20, 0);
     }
 
@@ -67,7 +66,6 @@ class RankingTest {
     }
 
     private static CompraDoCliente compra(int diasAtras, String valor) {
-        return new CompraDoCliente(LocalDateTime.of(HOJE.minusDays(diasAtras), LocalTime.NOON),
-                Dinheiro.de(valor));
+        return new CompraDoCliente(LocalDateTime.of(HOJE.minusDays(diasAtras), LocalTime.NOON), Dinheiro.de(valor));
     }
 }

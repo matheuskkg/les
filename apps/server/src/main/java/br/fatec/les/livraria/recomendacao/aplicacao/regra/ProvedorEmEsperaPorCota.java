@@ -1,19 +1,19 @@
 package br.fatec.les.livraria.recomendacao.aplicacao.regra;
 
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.recomendacao.dominio.calculo.CalcularEsperaDeCota;
+
+import org.jspecify.annotations.Nullable;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jspecify.annotations.Nullable;
-
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.recomendacao.dominio.calculo.CalcularEsperaDeCota;
-
 /**
- * Espera em memória de um provedor que respondeu 429 (RNF-REC-001, DEC-03): ele sai da cadeia pelo tempo sugerido
- * pelo provedor, entre 10 s e 5 min, ou até a meia-noite quando a cota diária se esgotou (REC-09), e volta sozinho
- * depois. O estado não é persistido; um reinício libera todos os provedores.
+ * Espera em memória de um provedor que respondeu 429 (RNF-REC-001, DEC-03): ele sai da cadeia pelo tempo sugerido pelo
+ * provedor, entre 10 s e 5 min, ou até a meia-noite quando a cota diária se esgotou (REC-09), e volta sozinho depois. O
+ * estado não é persistido; um reinício libera todos os provedores.
  */
 public class ProvedorEmEsperaPorCota {
 

@@ -3,11 +3,12 @@ package br.fatec.les.livraria.vendas.dominio.pagamento;
 import static br.fatec.les.livraria.vendas.dominio.pagamento.Cupons.HOJE;
 import static br.fatec.les.livraria.vendas.dominio.pagamento.Cupons.promocional;
 import static br.fatec.les.livraria.vendas.dominio.pagamento.Cupons.reais;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.math.BigDecimal;
-
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
 
 /** RF-VEN-007, DEC-11: desconto de cada tipo, limitado à base, validade e valor mínimo. */
 class CupomPromocionalTest {
@@ -48,8 +49,9 @@ class CupomPromocionalTest {
 
     @Test
     void rnVen007_valorMinimoComparadoComOSubtotal() {
-        CupomPromocional cupom = new CupomPromocional(1L, "MIN", TipoCupomPromocional.PERCENTUAL,
-                new BigDecimal("15"), HOJE, reais("100.00"));
+        CupomPromocional cupom =
+                new CupomPromocional(
+                        1L, "MIN", TipoCupomPromocional.PERCENTUAL, new BigDecimal("15"), HOJE, reais("100.00"));
 
         assertThat(cupom.atendeValorMinimo(reais("100.00"))).isTrue();
         assertThat(cupom.atendeValorMinimo(reais("99.99"))).isFalse();

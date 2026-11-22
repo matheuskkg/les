@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.notificacoes.infraestrutura.sse;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import lombok.RequiredArgsConstructor;
 
 /** Comentário de heartbeat a cada 25 segundos nos canais SSE abertos (DEC-13). */
 @Component

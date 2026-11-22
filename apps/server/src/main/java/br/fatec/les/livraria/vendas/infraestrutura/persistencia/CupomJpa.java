@@ -1,12 +1,7 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
-import org.hibernate.envers.Audited;
-
 import br.fatec.les.livraria.vendas.dominio.pagamento.SituacaoCupom;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -18,9 +13,16 @@ import jakarta.persistence.Index;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.hibernate.envers.Audited;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Tabela {@code cupom} do MER (DEC-11, DEC-15.2): só cupons de troca, de um cliente, com {@code @Version} contra dois

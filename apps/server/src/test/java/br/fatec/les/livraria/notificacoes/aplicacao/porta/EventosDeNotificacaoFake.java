@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.notificacoes.aplicacao.porta;
 
+import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
 
 /** Porta de eventos em memória: registra o que seria entregue pelo SSE (DEC-13). */
 public class EventosDeNotificacaoFake implements EventosDeNotificacao {

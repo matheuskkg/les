@@ -1,12 +1,12 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 
-import java.io.IOException;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
+
+import java.io.IOException;
 
 /**
  * Serve o build do {@code web} copiado para {@code static/} (DEC-09). As rotas do {@code web} são do lado do cliente:
@@ -35,8 +35,11 @@ public class ConfiguracaoDoWeb implements WebMvcConfigurer {
         }
 
         private static boolean ehRotaDoWeb(String caminho) {
-            boolean daApi = caminho.equals("api") || caminho.startsWith("api/")
-                    || caminho.equals("v3") || caminho.startsWith("v3/");
+            boolean daApi =
+                    caminho.equals("api")
+                            || caminho.startsWith("api/")
+                            || caminho.equals("v3")
+                            || caminho.startsWith("v3/");
             boolean ehArquivo = caminho.substring(caminho.lastIndexOf('/') + 1).contains(".");
             return !daApi && !ehArquivo;
         }

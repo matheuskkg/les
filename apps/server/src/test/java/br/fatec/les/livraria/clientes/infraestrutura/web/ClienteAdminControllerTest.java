@@ -9,7 +9,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,21 +27,19 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
 
 /**
  * Consulta de clientes do administrador sobre o seed 201_clientes.sql (RF-CLI-004, DEC-07, DEC-10). Seed: Ana
- * (FEMININO, 1990, SP), Bruno (MASCULINO, 1985, RJ), Carla (FEMININO, 1992, MG, INATIVA), Diego (MASCULINO, 1978,
- * PR, ENCERRADA), Elisa (NAO_INFORMADO, 1995, RS e SP) e mais cinco clientes (Fernanda, Gustavo, Helena, Ivan e
- * Juliana), todos NAO_INFORMADO, nascidos antes de 1990 e em UFs novas, para não alterar os filtros existentes.
+ * (FEMININO, 1990, SP), Bruno (MASCULINO, 1985, RJ), Carla (FEMININO, 1992, MG, INATIVA), Diego (MASCULINO, 1978, PR,
+ * ENCERRADA), Elisa (NAO_INFORMADO, 1995, RS e SP) e mais cinco clientes (Fernanda, Gustavo, Helena, Ivan e Juliana),
+ * todos NAO_INFORMADO, nascidos antes de 1990 e em UFs novas, para não alterar os filtros existentes.
  */
 @SpringBootTest
 class ClienteAdminControllerTest {
 
     private static final String ROTA = "/api/admin/clientes";
+
     /** 2026-10-24T12:00 em America/Sao_Paulo, o instante citado no seed: Carla INATIVA e Diego ENCERRADO. */
     private static final LocalDateTime AGORA = LocalDateTime.of(2026, 10, 24, 12, 0);
 
@@ -51,14 +53,11 @@ class ClienteAdminControllerTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
     private MockMvc mvc;
 
@@ -72,9 +71,20 @@ class ClienteAdminControllerTest {
         mvc.perform(comoAdmin(get(ROTA)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalItens").value(10))
-                .andExpect(jsonPath("$.itens[*].nome", contains(
-                        "Ana Souza", "Bruno Lima", "Carla Mendes", "Diego Rocha", "Elisa Prado",
-                        "Fernanda Alves", "Gustavo Nunes", "Helena Castro", "Ivan Barbosa", "Juliana Dias")))
+                .andExpect(
+                        jsonPath(
+                                "$.itens[*].nome",
+                                contains(
+                                        "Ana Souza",
+                                        "Bruno Lima",
+                                        "Carla Mendes",
+                                        "Diego Rocha",
+                                        "Elisa Prado",
+                                        "Fernanda Alves",
+                                        "Gustavo Nunes",
+                                        "Helena Castro",
+                                        "Ivan Barbosa",
+                                        "Juliana Dias")))
                 .andExpect(jsonPath("$.itens[0].id").value(1))
                 .andExpect(jsonPath("$.itens[0].email").value("ana.souza@livraria.test"))
                 .andExpect(jsonPath("$.itens[0].situacao").value("ATIVA"));
@@ -137,17 +147,21 @@ class ClienteAdminControllerTest {
     @Test
     void rfCli004_valoresRepetidosSeCombinamComOu() throws Exception {
         mvc.perform(comoAdmin(get(ROTA).param("genero", "FEMININO").param("genero", "MASCULINO")))
-                .andExpect(jsonPath("$.itens[*].nome", containsInAnyOrder(
-                        "Ana Souza", "Bruno Lima", "Carla Mendes", "Diego Rocha")));
+                .andExpect(
+                        jsonPath(
+                                "$.itens[*].nome",
+                                containsInAnyOrder("Ana Souza", "Bruno Lima", "Carla Mendes", "Diego Rocha")));
     }
 
     @Test
     void rfCli004_camposDiferentesSeCombinamComE() throws Exception {
         mvc.perform(comoAdmin(get(ROTA).param("genero", "FEMININO").param("uf", "SP")))
                 .andExpect(jsonPath("$.itens[*].nome", contains("Ana Souza")));
-        mvc.perform(comoAdmin(get(ROTA)
-                        .param("dataNascimentoDe", "1990-01-01")
-                        .param("dataNascimentoAte", "1995-12-31")))
+        mvc.perform(
+                        comoAdmin(
+                                get(ROTA)
+                                        .param("dataNascimentoDe", "1990-01-01")
+                                        .param("dataNascimentoAte", "1995-12-31")))
                 .andExpect(jsonPath("$.itens[*].nome", contains("Ana Souza", "Carla Mendes", "Elisa Prado")));
     }
 
@@ -161,14 +175,14 @@ class ClienteAdminControllerTest {
 
     @Test
     void rfCli004_parametrosInvalidosRespondem400() throws Exception {
-        mvc.perform(comoAdmin(get(ROTA)
-                        .param("dataNascimentoDe", "1995-01-01")
-                        .param("dataNascimentoAte", "1990-01-01")))
+        mvc.perform(
+                        comoAdmin(
+                                get(ROTA)
+                                        .param("dataNascimentoDe", "1995-01-01")
+                                        .param("dataNascimentoAte", "1990-01-01")))
                 .andExpect(status().isBadRequest());
-        mvc.perform(comoAdmin(get(ROTA).param("ordem", "cpf,asc")))
-                .andExpect(status().isBadRequest());
-        mvc.perform(comoAdmin(get(ROTA).param("telefone", "abc")))
-                .andExpect(status().isBadRequest());
+        mvc.perform(comoAdmin(get(ROTA).param("ordem", "cpf,asc"))).andExpect(status().isBadRequest());
+        mvc.perform(comoAdmin(get(ROTA).param("telefone", "abc"))).andExpect(status().isBadRequest());
     }
 
     @Test

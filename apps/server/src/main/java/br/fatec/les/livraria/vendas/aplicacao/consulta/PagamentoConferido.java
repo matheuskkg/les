@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.vendas.aplicacao.consulta;
 
+import br.fatec.les.livraria.vendas.dominio.pagamento.DistribuicaoDoPagamento;
+
 import java.util.List;
 import java.util.Objects;
-
-import br.fatec.les.livraria.vendas.dominio.pagamento.DistribuicaoDoPagamento;
 
 /**
  * Pagamento conferido (RF-VEN-006, RF-VEN-007, DEC-11): a distribuição entre promocional, cupons de troca e cartões.

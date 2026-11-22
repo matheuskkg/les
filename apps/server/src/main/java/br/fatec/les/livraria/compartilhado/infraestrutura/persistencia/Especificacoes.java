@@ -1,14 +1,8 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.persistencia;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.Function;
-
-import org.springframework.data.jpa.domain.Specification;
-
 import br.fatec.les.livraria.compartilhado.aplicacao.Intervalo;
 import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
+
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
@@ -16,6 +10,13 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
+
+import org.springframework.data.jpa.domain.Specification;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * Fábrica de {@link Specification} reutilizáveis para os filtros combinados das listagens (DEC-07, RF-CLI-004,
@@ -25,15 +26,15 @@ public final class Especificacoes {
 
     /** Letras acentuadas trocadas pelo {@code translate}, que existe no H2 e no PostgreSQL. */
     private static final String ACENTUADAS = "áàâãäéèêëíìîïóòôõöúùûüçñÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ";
+
     private static final String SEM_ACENTO = "aaaaaeeeeiiiiooooouuuucnAAAAAEEEEIIIIOOOOOUUUUCN";
     private static final char ESCAPE = '\\';
 
-    private Especificacoes() {
-    }
+    private Especificacoes() {}
 
     /**
-     * Filtro que nunca casa. Usado quando um valor já resolvido em outro módulo não encontrou nenhum id: o
-     * resultado da consulta precisa ser vazio, e não "sem filtro" (RF-CLI-004, DEC-07).
+     * Filtro que nunca casa. Usado quando um valor já resolvido em outro módulo não encontrou nenhum id: o resultado da
+     * consulta precisa ser vazio, e não "sem filtro" (RF-CLI-004, DEC-07).
      */
     public static <T> Specification<T> nenhum() {
         return (raiz, consulta, cb) -> cb.disjunction();
@@ -45,9 +46,9 @@ public final class Especificacoes {
     }
 
     /**
-     * "Contém" em texto de um campo de um relacionamento muitos-para-um, sem diferenciar maiúsculas nem
-     * acentos. Diferente de {@link #existe(String, String, Collection)}, não filtra muitos-para-muitos: a
-     * navegação para um único registro não duplica linhas.
+     * "Contém" em texto de um campo de um relacionamento muitos-para-um, sem diferenciar maiúsculas nem acentos.
+     * Diferente de {@link #existe(String, String, Collection)}, não filtra muitos-para-muitos: a navegação para um
+     * único registro não duplica linhas.
      */
     public static <T> Specification<T> contem(String relacao, String campo, String termo) {
         return contem(raiz -> raiz.get(relacao).get(campo), termo);
@@ -80,8 +81,8 @@ public final class Especificacoes {
     }
 
     /**
-     * Intervalo inclusivo; {@code de} e {@code ate} podem ser nulos, mas {@code de} maior que {@code ate}
-     * causa HTTP 400.
+     * Intervalo inclusivo; {@code de} e {@code ate} podem ser nulos, mas {@code de} maior que {@code ate} causa HTTP
+     * 400.
      */
     public static <T, Y extends Comparable<? super Y>> Specification<T> entre(String campo, Y de, Y ate) {
         Y inicio = limparIntervalo(de);
@@ -112,8 +113,8 @@ public final class Especificacoes {
     }
 
     /**
-     * Filtra um relacionamento muitos-para-muitos por {@code exists}, para não duplicar linhas nem quebrar a
-     * contagem da paginação. Vários valores combinam com OU; a coleção vazia ou em branco não filtra.
+     * Filtra um relacionamento muitos-para-muitos por {@code exists}, para não duplicar linhas nem quebrar a contagem
+     * da paginação. Vários valores combinam com OU; a coleção vazia ou em branco não filtra.
      */
     public static <T> Specification<T> existe(String relacao, String campo, Collection<?> valores) {
         List<Object> limpos = valoresLimpos(valores);
@@ -130,8 +131,8 @@ public final class Especificacoes {
     }
 
     /**
-     * Filtra um relacionamento muitos-para-muitos por um único valor, por {@code exists}, para não duplicar linhas
-     * nem quebrar a contagem da paginação.
+     * Filtra um relacionamento muitos-para-muitos por um único valor, por {@code exists}, para não duplicar linhas nem
+     * quebrar a contagem da paginação.
      */
     public static <T> Specification<T> existe(String relacao, String campo, Object valor) {
         Object limpo = valorLimpo(valor);
@@ -142,9 +143,9 @@ public final class Especificacoes {
     }
 
     /**
-     * "Contém" em um campo de texto de um relacionamento muitos-para-muitos, por {@code exists}, para não
-     * duplicar linhas nem quebrar a contagem da paginação. Como {@link #contem(String, String)}, não diferencia
-     * maiúsculas nem acentos.
+     * "Contém" em um campo de texto de um relacionamento muitos-para-muitos, por {@code exists}, para não duplicar
+     * linhas nem quebrar a contagem da paginação. Como {@link #contem(String, String)}, não diferencia maiúsculas nem
+     * acentos.
      */
     public static <T> Specification<T> existeContem(String relacao, String campo, String termo) {
         String escapado = padraoContem(termo);
@@ -179,13 +180,12 @@ public final class Especificacoes {
     private static Predicate predicadoContem(CriteriaBuilder cb, Expression<String> coluna, String escapado) {
         Expression<String> colunaNormalizada = normalizada(cb, coluna);
         Expression<String> valor = normalizada(cb, cb.literal(escapado));
-        return cb.like(colunaNormalizada,
-                cb.concat(cb.concat(cb.literal("%"), valor), cb.literal("%")), ESCAPE);
+        return cb.like(colunaNormalizada, cb.concat(cb.concat(cb.literal("%"), valor), cb.literal("%")), ESCAPE);
     }
 
     private static Expression<String> normalizada(CriteriaBuilder cb, Expression<String> expressao) {
-        Expression<String> traduzida = cb.function("translate", String.class, expressao,
-                cb.literal(ACENTUADAS), cb.literal(SEM_ACENTO));
+        Expression<String> traduzida =
+                cb.function("translate", String.class, expressao, cb.literal(ACENTUADAS), cb.literal(SEM_ACENTO));
         return cb.lower(traduzida);
     }
 
@@ -214,8 +214,7 @@ public final class Especificacoes {
             }
         }
         if (digitos.isEmpty()) {
-            throw new ParametroInvalido(campo,
-                    "O parâmetro " + campo + " deve conter ao menos um número.");
+            throw new ParametroInvalido(campo, "O parâmetro " + campo + " deve conter ao menos um número.");
         }
         return digitos.toString();
     }

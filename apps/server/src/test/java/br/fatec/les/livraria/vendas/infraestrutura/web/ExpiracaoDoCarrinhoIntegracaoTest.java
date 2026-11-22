@@ -10,8 +10,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-import java.util.concurrent.atomic.AtomicReference;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.estoque.aplicacao.porta.ReservasDeEstoque;
+import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ExpirarReservas;
+import br.fatec.les.livraria.vendas.aplicacao.porta.CarrinhoRepositorio;
+import br.fatec.les.livraria.vendas.dominio.modelo.Carrinho;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,20 +36,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.estoque.aplicacao.porta.ReservasDeEstoque;
-import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ExpirarReservas;
-import br.fatec.les.livraria.vendas.aplicacao.porta.CarrinhoRepositorio;
-import br.fatec.les.livraria.vendas.dominio.modelo.Carrinho;
-import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Expiração do carrinho sobre o seed (RN-VEN-014, RN-VEN-015, RNF-VEN-001, DEC-10, DEC-13): prazo de 30 min e aviso
- * 5 min antes. Ana é o usuário 2 (cliente 1) e Bruno o 3. Livro 7 (O Silmarillion) tem 6 em estoque. A tarefa é
- * executada diretamente, com o relógio do teste.
+ * Expiração do carrinho sobre o seed (RN-VEN-014, RN-VEN-015, RNF-VEN-001, DEC-10, DEC-13): prazo de 30 min e aviso 5
+ * min antes. Ana é o usuário 2 (cliente 1) e Bruno o 3. Livro 7 (O Silmarillion) tem 6 em estoque. A tarefa é executada
+ * diretamente, com o relógio do teste.
  */
 @SpringBootTest
 @Transactional
@@ -64,23 +65,17 @@ class ExpiracaoDoCarrinhoIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private ExpirarReservas expirarReservas;
+    @Autowired private ExpirarReservas expirarReservas;
 
-    @Autowired
-    private CarrinhoRepositorio carrinhos;
+    @Autowired private CarrinhoRepositorio carrinhos;
 
-    @Autowired
-    private ReservasDeEstoque reservas;
+    @Autowired private ReservasDeEstoque reservas;
 
     private MockMvc mvc;
 
@@ -182,7 +177,9 @@ class ExpiracaoDoCarrinhoIntegracaoTest {
     }
 
     private ResultActions adicionar(long usuarioId, long livroId, int quantidade) throws Exception {
-        return escrever(post("/api/me/carrinho/itens"), usuarioId,
+        return escrever(
+                post("/api/me/carrinho/itens"),
+                usuarioId,
                 "{\"livroId\":%d,\"quantidade\":%d}".formatted(livroId, quantidade));
     }
 
@@ -194,10 +191,10 @@ class ExpiracaoDoCarrinhoIntegracaoTest {
             throws Exception {
         Cookie csrf = mvc.perform(get("/api/sessao")).andReturn().getResponse().getCookie("XSRF-TOKEN");
         assertThat(csrf).isNotNull();
-        MockHttpServletRequestBuilder comSessao = requisicao.cookie(sessaoDe(usuarioId), csrf)
-                .header("X-XSRF-TOKEN", csrf.getValue());
-        return mvc.perform(corpo.isEmpty() ? comSessao
-                : comSessao.contentType(MediaType.APPLICATION_JSON).content(corpo));
+        MockHttpServletRequestBuilder comSessao =
+                requisicao.cookie(sessaoDe(usuarioId), csrf).header("X-XSRF-TOKEN", csrf.getValue());
+        return mvc.perform(
+                corpo.isEmpty() ? comSessao : comSessao.contentType(MediaType.APPLICATION_JSON).content(corpo));
     }
 
     private Cookie sessaoDe(long usuarioId) {

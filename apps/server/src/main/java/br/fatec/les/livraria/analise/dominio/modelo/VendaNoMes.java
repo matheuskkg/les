@@ -1,10 +1,10 @@
 package br.fatec.les.livraria.analise.dominio.modelo;
 
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
 import java.time.YearMonth;
 import java.util.Objects;
 import java.util.Set;
-
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
 /**
  * Valor vendido de um item num mês, já sem a quantidade trocada (RN-ANA-001, RN-ANA-004, DEC-12).

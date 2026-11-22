@@ -5,10 +5,8 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.sql.DataSource;
+import br.fatec.les.livraria.compartilhado.aplicacao.TarefaPorTempo;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,13 +21,17 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.compartilhado.aplicacao.TarefaPorTempo;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import java.time.LocalDateTime;
+import java.util.concurrent.atomic.AtomicInteger;
 
-@SpringBootTest(properties = {
-        "spring.datasource.url=jdbc:h2:mem:e2e;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
-        "livraria.seed.local=classpath:seed-e2e/*.sql" })
-@ActiveProfiles({ "h2", "e2e" })
+import javax.sql.DataSource;
+
+@SpringBootTest(
+        properties = {
+            "spring.datasource.url=jdbc:h2:mem:e2e;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
+            "livraria.seed.local=classpath:seed-e2e/*.sql"
+        })
+@ActiveProfiles({"h2", "e2e"})
 class ApoioAosTestesControllerTest {
 
     static class TarefaContada implements TarefaPorTempo {
@@ -51,17 +53,13 @@ class ApoioAosTestesControllerTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private DataSource dataSource;
+    @Autowired private DataSource dataSource;
 
-    @Autowired
-    private Relogio relogio;
+    @Autowired private Relogio relogio;
 
-    @Autowired
-    private TarefaContada tarefa;
+    @Autowired private TarefaContada tarefa;
 
     private MockMvc mvc;
 
@@ -84,8 +82,10 @@ class ApoioAosTestesControllerTest {
     void relogioFixadoValeNoFusoDaLojaEExecutaAsTarefas() throws Exception {
         int antes = tarefa.execucoes.get();
 
-        mvc.perform(post("/api/teste/relogio").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"agora\":\"2026-10-21T14:30:00Z\"}"))
+        mvc.perform(
+                        post("/api/teste/relogio")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"agora\":\"2026-10-21T14:30:00Z\"}"))
                 .andExpect(status().isNoContent());
 
         assertThat(relogio.agora()).isEqualTo(LocalDateTime.of(2026, 10, 21, 11, 30));

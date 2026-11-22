@@ -1,8 +1,7 @@
 package br.fatec.les.livraria.clientes.infraestrutura.persistencia;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
+import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCliente;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -18,13 +17,15 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
-import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
-import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosCliente;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import org.hibernate.envers.Audited;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tabela {@code cliente} do MER (DEC-14, DEC-16). {@code usuario_id} é apenas a coluna de id: o usuário pertence ao
@@ -32,10 +33,12 @@ import org.hibernate.envers.Audited;
  */
 @Entity
 @Audited
-@Table(name = "cliente", indexes = {
-        @Index(name = "ix_cliente_cpf", columnList = "cpf"),
-        @Index(name = "ix_cliente_usuario_id", columnList = "usuario_id")
-})
+@Table(
+        name = "cliente",
+        indexes = {
+            @Index(name = "ix_cliente_cpf", columnList = "cpf"),
+            @Index(name = "ix_cliente_usuario_id", columnList = "usuario_id")
+        })
 @Getter
 @Setter
 @NoArgsConstructor
@@ -43,8 +46,7 @@ public class ClienteJpa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cliente_seq")
-    @SequenceGenerator(name = "cliente_seq", sequenceName = "cliente_seq", initialValue = 10000,
-            allocationSize = 1)
+    @SequenceGenerator(name = "cliente_seq", sequenceName = "cliente_seq", initialValue = 10000, allocationSize = 1)
     private Long id;
 
     @Column(name = "usuario_id", nullable = false, unique = true)

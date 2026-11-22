@@ -1,16 +1,17 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
-import java.util.Optional;
+import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
 
 /**
- * Usuário de login de um cliente (DEC-13). O {@code vendas} o usa para notificar o cliente fora de uma requisição,
- * como na tarefa de expiração do carrinho, em que não há sessão (RN-VEN-014).
+ * Usuário de login de um cliente (DEC-13). O {@code vendas} o usa para notificar o cliente fora de uma requisição, como
+ * na tarefa de expiração do carrinho, em que não há sessão (RN-VEN-014).
  */
 @Component
 @RequiredArgsConstructor

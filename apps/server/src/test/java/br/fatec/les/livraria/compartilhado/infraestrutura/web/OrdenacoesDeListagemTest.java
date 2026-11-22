@@ -3,33 +3,32 @@ package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.lang.reflect.Method;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.core.MethodParameter;
-
 import br.fatec.les.livraria.compartilhado.aplicacao.Ordem;
 import br.fatec.les.livraria.compartilhado.aplicacao.OrdenacaoPermitida;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.core.MethodParameter;
+
+import java.lang.reflect.Method;
 
 /** Configuração de {@link Listagem} validada como erro de programação (DEC-07). */
 class OrdenacoesDeListagemTest {
 
     static class ControllerDeTeste {
 
-        void valida(@Listagem(campos = { "nome", "cadastro=dataCadastro" }, padrao = "cadastro,desc")
-                Paginacao paginacao) {
-        }
+        void valida(
+                @Listagem(
+                                campos = {"nome", "cadastro=dataCadastro"},
+                                padrao = "cadastro,desc")
+                        Paginacao paginacao) {}
 
-        void padraoMalformado(@Listagem(campos = "nome", padrao = "nome") Paginacao paginacao) {
-        }
+        void padraoMalformado(@Listagem(campos = "nome", padrao = "nome") Paginacao paginacao) {}
 
-        void padraoNaoDeclarado(@Listagem(campos = "nome", padrao = "email,asc") Paginacao paginacao) {
-        }
+        void padraoNaoDeclarado(@Listagem(campos = "nome", padrao = "email,asc") Paginacao paginacao) {}
 
-        void campoMalformado(@Listagem(campos = "nome=") Paginacao paginacao) {
-        }
+        void campoMalformado(@Listagem(campos = "nome=") Paginacao paginacao) {}
     }
 
     private final OrdenacoesDeListagem ordenacoes = new OrdenacoesDeListagem();

@@ -1,15 +1,7 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 
-import java.lang.reflect.RecordComponent;
-import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import org.jspecify.annotations.Nullable;
-
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverter;
 import io.swagger.v3.core.converter.ModelConverterContext;
@@ -17,11 +9,21 @@ import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
+import org.jspecify.annotations.Nullable;
+
+import java.lang.reflect.RecordComponent;
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Ajusta os esquemas do OpenAPI ao formato real do JSON (DEC-07).
+ *
  * <ul>
- * <li>{@link Dinheiro} e {@link YearMonth} são strings.</li>
- * <li>Os componentes de um record são obrigatórios, exceto os anotados com {@link Nullable}.</li>
+ *   <li>{@link Dinheiro} e {@link YearMonth} são strings.
+ *   <li>Os componentes de um record são obrigatórios, exceto os anotados com {@link Nullable}.
  * </ul>
  */
 class ConversorDeEsquemas implements ModelConverter {

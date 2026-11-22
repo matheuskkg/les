@@ -2,11 +2,11 @@ package br.fatec.les.livraria.recomendacao.dominio.regra;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.EnvioDeMensagem;
+
+import org.junit.jupiter.api.Test;
 
 class TamanhoDaMensagemTest {
 

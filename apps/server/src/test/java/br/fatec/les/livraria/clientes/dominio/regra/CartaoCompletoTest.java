@@ -3,14 +3,15 @@ package br.fatec.les.livraria.clientes.dominio.regra;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.cartao;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.padrao;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.violacoes;
+
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 /** RN-CLI-004: composição do cartão (sem código de segurança, DEC-10). */
 class CartaoCompletoTest {
@@ -42,18 +43,38 @@ class CartaoCompletoTest {
     @Test
     void rnCli004_listaDeCartoesVaziaNaoTemViolacao() {
         NovoCliente padrao = padrao();
-        NovoCliente semCartoes = new NovoCliente(padrao.nome(), padrao.genero(),
-                padrao.dataNascimento(), padrao.cpf(), padrao.email(), padrao.tipoTelefone(),
-                padrao.ddd(), padrao.numero(), padrao.senha(), padrao.confirmacaoSenha(),
-                padrao.enderecos(), List.of());
+        NovoCliente semCartoes =
+                new NovoCliente(
+                        padrao.nome(),
+                        padrao.genero(),
+                        padrao.dataNascimento(),
+                        padrao.cpf(),
+                        padrao.email(),
+                        padrao.tipoTelefone(),
+                        padrao.ddd(),
+                        padrao.numero(),
+                        padrao.senha(),
+                        padrao.confirmacaoSenha(),
+                        padrao.enderecos(),
+                        List.of());
 
         assertThat(violacoes(semCartoes, regra)).isEmpty();
     }
 
     private static NovoCliente comCartao(NovoCartao cartao) {
         NovoCliente padrao = padrao();
-        return new NovoCliente(padrao.nome(), padrao.genero(), padrao.dataNascimento(), padrao.cpf(),
-                padrao.email(), padrao.tipoTelefone(), padrao.ddd(), padrao.numero(), padrao.senha(),
-                padrao.confirmacaoSenha(), padrao.enderecos(), List.of(cartao));
+        return new NovoCliente(
+                padrao.nome(),
+                padrao.genero(),
+                padrao.dataNascimento(),
+                padrao.cpf(),
+                padrao.email(),
+                padrao.tipoTelefone(),
+                padrao.ddd(),
+                padrao.numero(),
+                padrao.senha(),
+                padrao.confirmacaoSenha(),
+                padrao.enderecos(),
+                List.of(cartao));
     }
 }

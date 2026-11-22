@@ -2,37 +2,31 @@ package br.fatec.les.livraria.catalogo.infraestrutura.persistencia;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
+import br.fatec.les.livraria.estoque.infraestrutura.persistencia.FornecedorJpaRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.estoque.infraestrutura.persistencia.FornecedorJpaRepository;
+import java.util.List;
 
 /** Seed do catálogo em H2 (RNF-LIV-001, RNF-LIV-002, RN-LIV-001). */
 @SpringBootTest
 @Transactional
 class SeedDeCatalogoTest {
 
-    @Autowired
-    private LivroJpaRepository livros;
+    @Autowired private LivroJpaRepository livros;
 
-    @Autowired
-    private AutorJpaRepository autores;
+    @Autowired private AutorJpaRepository autores;
 
-    @Autowired
-    private EditoraJpaRepository editoras;
+    @Autowired private EditoraJpaRepository editoras;
 
-    @Autowired
-    private CategoriaJpaRepository categorias;
+    @Autowired private CategoriaJpaRepository categorias;
 
-    @Autowired
-    private GrupoPrecificacaoJpaRepository grupos;
+    @Autowired private GrupoPrecificacaoJpaRepository grupos;
 
-    @Autowired
-    private FornecedorJpaRepository fornecedores;
+    @Autowired private FornecedorJpaRepository fornecedores;
 
     @Test
     void seedCarregaOsLivrosDoCatalogo() {

@@ -1,16 +1,17 @@
 package br.fatec.les.livraria.recomendacao.aplicacao.casodeuso;
 
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.recomendacao.aplicacao.consulta.ProvedorConfigurado;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ProvedoresIaRepositorio;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.AlteracaoDaCadeia;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.PosicaoNaCadeia;
 import br.fatec.les.livraria.recomendacao.dominio.regra.CadeiaComTodosOsProvedores;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Reordena e ativa ou desativa os provedores da cadeia de IA (RNF-REC-001, DEC-03). A ordem é a posição na lista
@@ -29,8 +30,8 @@ public class AlterarCadeiaDeProvedores {
     /**
      * @param posicoes provedores na ordem desejada, com a ativação de cada um
      * @return a cadeia gravada, como em {@link ConsultarProvedoresIa}
-     * @throws br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio se a lista não trouxer cada provedor
-     *         uma única vez (HTTP 422)
+     * @throws br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio se a lista não trouxer cada provedor uma
+     *     única vez (HTTP 422)
      */
     public List<ProvedorConfigurado> executar(List<PosicaoNaCadeia> posicoes) {
         AlteracaoDaCadeia alteracao = new AlteracaoDaCadeia(provedores.listarEmOrdem(), posicoes);

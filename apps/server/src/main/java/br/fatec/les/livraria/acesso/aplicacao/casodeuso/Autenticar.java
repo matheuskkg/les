@@ -1,7 +1,5 @@
 package br.fatec.les.livraria.acesso.aplicacao.casodeuso;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.acesso.aplicacao.CredenciaisInvalidas;
 import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
 import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
@@ -9,7 +7,10 @@ import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta;
 import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoDaConta;
 import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
 
 /**
  * Login por e-mail ou telefone (DEC-08, DEC-10, DEC-15.4). Conta ativa com a senha correta entra; conta inativa nesse
@@ -55,6 +56,5 @@ public class Autenticar {
     }
 
     /** Credenciais de login (DEC-10): o identificador é o e-mail (com {@code @}) ou o telefone. */
-    public record Credenciais(String login, String senha) {
-    }
+    public record Credenciais(String login, String senha) {}
 }

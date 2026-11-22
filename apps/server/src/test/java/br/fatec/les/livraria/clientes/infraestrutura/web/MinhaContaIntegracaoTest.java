@@ -9,7 +9,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,15 +32,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
 
 /**
  * Área "minha conta" do cliente sobre o seed 201_clientes.sql: consulta e alteração dos dados (RF-CLI-002), troca de
- * senha (RF-CLI-008) e inativação com reativação no login em até 7 dias (RF-CLI-003, DEC-10). Ana é o usuário 2 e
- * Bruno o usuário 3; a senha de todos é {@code Senha@123}.
+ * senha (RF-CLI-008) e inativação com reativação no login em até 7 dias (RF-CLI-003, DEC-10). Ana é o usuário 2 e Bruno
+ * o usuário 3; a senha de todos é {@code Senha@123}.
  */
 @SpringBootTest
 @Transactional
@@ -57,14 +58,11 @@ class MinhaContaIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
     private MockMvc mvc;
 
@@ -133,8 +131,7 @@ class MinhaContaIntegracaoTest {
     @Test
     void rfCli008_trocaASenhaEMantemASessao() throws Exception {
         Cookie sessao = sessaoDe(ANA);
-        escrever(post("/api/me/senha"), sessao, senha(SENHA, NOVA_SENHA, NOVA_SENHA))
-                .andExpect(status().isNoContent());
+        escrever(post("/api/me/senha"), sessao, senha(SENHA, NOVA_SENHA, NOVA_SENHA)).andExpect(status().isNoContent());
 
         mvc.perform(get("/api/me").cookie(sessao)).andExpect(status().isOk());
         entrar("ana.souza@livraria.test", SENHA).andExpect(status().isUnauthorized());
@@ -144,19 +141,20 @@ class MinhaContaIntegracaoTest {
     @Test
     void rfCli003_inativarEncerraASessaoEOLoginEmAte7DiasReativa() throws Exception {
         Cookie sessao = sessaoDe(ANA);
-        MvcResult inativacao = escrever(post("/api/me/inativar"), sessao, "")
-                .andExpect(status().isNoContent())
-                .andReturn();
+        MvcResult inativacao =
+                escrever(post("/api/me/inativar"), sessao, "").andExpect(status().isNoContent()).andReturn();
         assertThat(inativacao.getResponse().getHeaders(HttpHeaders.SET_COOKIE))
-                .anySatisfy(cookie -> assertThat(cookie).startsWith(EmissorDeToken.COOKIE + "=")
-                        .contains("Max-Age=0"));
+                .anySatisfy(cookie -> assertThat(cookie).startsWith(EmissorDeToken.COOKIE + "=").contains("Max-Age=0"));
         assertThat(usuarios.buscarPorId(ANA).orElseThrow().getInativadoEm()).isEqualTo(AGORA);
 
         mvc.perform(get("/api/me").cookie(sessao)).andExpect(status().isUnauthorized());
 
-        Cookie novaSessao = entrar("ana.souza@livraria.test", SENHA)
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getCookie(EmissorDeToken.COOKIE);
+        Cookie novaSessao =
+                entrar("ana.souza@livraria.test", SENHA)
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getCookie(EmissorDeToken.COOKIE);
         assertThat(novaSessao).isNotNull();
         mvc.perform(get("/api/me").cookie(novaSessao)).andExpect(status().isOk());
         assertThat(usuarios.buscarPorId(ANA).orElseThrow().getInativadoEm()).isNull();
@@ -170,15 +168,22 @@ class MinhaContaIntegracaoTest {
     private ResultActions escrever(MockHttpServletRequestBuilder requisicao, Cookie sessao, String corpo)
             throws Exception {
         Cookie csrf = tokenCsrf();
-        return mvc.perform(requisicao.cookie(sessao, csrf).header("X-XSRF-TOKEN", csrf.getValue())
-                .contentType(MediaType.APPLICATION_JSON).content(corpo));
+        return mvc.perform(
+                requisicao
+                        .cookie(sessao, csrf)
+                        .header("X-XSRF-TOKEN", csrf.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(corpo));
     }
 
     private ResultActions entrar(String login, String senha) throws Exception {
         Cookie csrf = tokenCsrf();
-        return mvc.perform(post("/api/sessao").cookie(csrf).header("X-XSRF-TOKEN", csrf.getValue())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"login\":\"%s\",\"senha\":\"%s\"}".formatted(login, senha)));
+        return mvc.perform(
+                post("/api/sessao")
+                        .cookie(csrf)
+                        .header("X-XSRF-TOKEN", csrf.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"login\":\"%s\",\"senha\":\"%s\"}".formatted(login, senha)));
     }
 
     /** GET /api/sessao emite o cookie CSRF mesmo sem sessão (DEC-08). */
@@ -195,20 +200,22 @@ class MinhaContaIntegracaoTest {
 
     private static String dados(String nome, String email, String numero) {
         return """
-                {
-                  "nome": "%s",
-                  "genero": "FEMININO",
-                  "dataNascimento": "1990-03-14",
-                  "cpf": "52998224725",
-                  "email": "%s",
-                  "telefone": { "tipo": "CELULAR", "ddd": "11", "numero": "%s" }
-                }
-                """.formatted(nome, email, numero);
+        {
+          "nome": "%s",
+          "genero": "FEMININO",
+          "dataNascimento": "1990-03-14",
+          "cpf": "52998224725",
+          "email": "%s",
+          "telefone": { "tipo": "CELULAR", "ddd": "11", "numero": "%s" }
+        }
+        """
+                .formatted(nome, email, numero);
     }
 
     private static String senha(String atual, String nova, String confirmacao) {
         return """
-                { "senhaAtual": "%s", "novaSenha": "%s", "confirmacaoSenha": "%s" }
-                """.formatted(atual, nova, confirmacao);
+        { "senhaAtual": "%s", "novaSenha": "%s", "confirmacaoSenha": "%s" }
+        """
+                .formatted(atual, nova, confirmacao);
     }
 }

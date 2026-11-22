@@ -3,10 +3,10 @@ package br.fatec.les.livraria.compartilhado.aplicacao;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 /** Validação da entrada de paginação (DEC-07, RNF-GER-001). */
 class PaginacaoTest {

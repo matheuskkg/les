@@ -3,24 +3,6 @@ package br.fatec.les.livraria.recomendacao.aplicacao.casodeuso;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
-
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.recomendacao.aplicacao.AssistenteIndisponivel;
 import br.fatec.les.livraria.recomendacao.aplicacao.consulta.Atendimento;
@@ -46,16 +28,40 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.TipoDeResposta;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.VoltaDaChamada;
 import br.fatec.les.livraria.recomendacao.infraestrutura.externo.AssistenteDeLivrosFake;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+
+import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.List;
+import java.util.Optional;
+
 /**
- * Cadeia de provedores sem Spring (RNF-REC-001, DEC-03): ordem, filtros, falhas, espera de cota, cache e registro
- * em {@code chamada_ia}.
+ * Cadeia de provedores sem Spring (RNF-REC-001, DEC-03): ordem, filtros, falhas, espera de cota, cache e registro em
+ * {@code chamada_ia}.
  */
 class CadeiaDeProvedoresTest {
 
     private static final PerfilDoCliente PERFIL = new PerfilDoCliente(List.of(), List.of(), List.of(), List.of());
-    private static final List<LivroCandidato> CANDIDATOS = List.of(new LivroCandidato(
-            1L, "Dom Casmurro", List.of("Machado de Assis"), List.of("Romance"), Dinheiro.de("29.90"),
-            BigDecimal.ONE));
+    private static final List<LivroCandidato> CANDIDATOS =
+            List.of(
+                    new LivroCandidato(
+                            1L,
+                            "Dom Casmurro",
+                            List.of("Machado de Assis"),
+                            List.of("Romance"),
+                            Dinheiro.de("29.90"),
+                            BigDecimal.ONE));
     private static final FerramentasDoAssistente FERRAMENTAS = new FerramentasVazias();
 
     private final RelogioDeTeste relogio = new RelogioDeTeste();
@@ -91,9 +97,12 @@ class CadeiaDeProvedoresTest {
     @Test
     void rnfRec001_sucessoRegistraChamadasHttpETokensDasVoltas() {
         provedores.com(provedor(1L, "a", 1, true));
-        AssistenteFalso a = new AssistenteFalso("a").responderCom(RespostaDoProvedor.comVoltas(
-                new RespostaDeRecomendacao(List.of()),
-                List.of(new VoltaDaChamada(80, 10), new VoltaDaChamada(120, 30))));
+        AssistenteFalso a =
+                new AssistenteFalso("a")
+                        .responderCom(
+                                RespostaDoProvedor.comVoltas(
+                                        new RespostaDeRecomendacao(List.of()),
+                                        List.of(new VoltaDaChamada(80, 10), new VoltaDaChamada(120, 30))));
 
         cadeia(a).recomendar(PERFIL, CANDIDATOS);
 
@@ -108,9 +117,14 @@ class CadeiaDeProvedoresTest {
     @Test
     void rnfRec001_falhaRegistraAsChamadasHttpETokensDasVoltasJaFeitas() {
         provedores.com(provedor(1L, "a", 1, true), provedor(2L, "b", 2, true));
-        AssistenteFalso a = new AssistenteFalso("a")
-                .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_HTTP, 500, "indisponível",
-                        List.of(new VoltaDaChamada(80, 10), VoltaDaChamada.semTokens())));
+        AssistenteFalso a =
+                new AssistenteFalso("a")
+                        .falharCom(
+                                new FalhaNaChamadaDeIa(
+                                        ResultadoDaChamada.ERRO_HTTP,
+                                        500,
+                                        "indisponível",
+                                        List.of(new VoltaDaChamada(80, 10), VoltaDaChamada.semTokens())));
         AssistenteFalso b = new AssistenteFalso("b");
 
         cadeia(a, b).recomendar(PERFIL, CANDIDATOS);
@@ -164,8 +178,9 @@ class CadeiaDeProvedoresTest {
     @Test
     void rnfRec001_falhaPassaAoProximoERegistraAsDuasTentativas() {
         provedores.com(provedor(1L, "a", 1, true), provedor(2L, "b", 2, true));
-        AssistenteFalso a = new AssistenteFalso("a")
-                .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_HTTP, 500, "indisponível"));
+        AssistenteFalso a =
+                new AssistenteFalso("a")
+                        .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_HTTP, 500, "indisponível"));
         AssistenteFalso b = new AssistenteFalso("b");
 
         Atendimento<RespostaDeRecomendacao> atendimento = cadeia(a, b).recomendar(PERFIL, CANDIDATOS);
@@ -190,8 +205,9 @@ class CadeiaDeProvedoresTest {
     @Test
     void rnfRec001_erroDaFalhaEhTruncadoEm500Caracteres() {
         provedores.com(provedor(1L, "a", 1, true), provedor(2L, "b", 2, true));
-        AssistenteFalso a = new AssistenteFalso("a")
-                .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_HTTP, 500, "x".repeat(600)));
+        AssistenteFalso a =
+                new AssistenteFalso("a")
+                        .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_HTTP, 500, "x".repeat(600)));
         AssistenteFalso b = new AssistenteFalso("b");
 
         cadeia(a, b).recomendar(PERFIL, CANDIDATOS);
@@ -202,8 +218,9 @@ class CadeiaDeProvedoresTest {
     @Test
     void rnfRec001_falhaDoProvedorGeraWarnComDadosDaChamadaSemChaveNemPrompt() {
         provedores.com(provedor(1L, "a", 1, true), provedor(2L, "b", 2, true));
-        AssistenteFalso a = new AssistenteFalso("a")
-                .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_HTTP, 500, "x".repeat(600)));
+        AssistenteFalso a =
+                new AssistenteFalso("a")
+                        .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_HTTP, 500, "x".repeat(600)));
         AssistenteFalso b = new AssistenteFalso("b");
         ListAppender<ILoggingEvent> log = capturarLogDaCadeia();
 
@@ -213,13 +230,14 @@ class CadeiaDeProvedoresTest {
             loggerDaCadeia().detachAppender(log);
         }
 
-        assertThat(log.list).anySatisfy(evento -> {
-            assertThat(evento.getLevel()).isEqualTo(Level.WARN);
-            assertThat(evento.getFormattedMessage())
-                    .contains("provedor=a", "modelo=modelo-a", "resultado=ERRO_HTTP", "codigoHttp=500")
-                    .contains("x".repeat(ChamadaIa.LIMITE_DO_ERRO))
-                    .doesNotContain("x".repeat(ChamadaIa.LIMITE_DO_ERRO + 1));
-        });
+        assertThat(log.list)
+                .anySatisfy(evento -> {
+                    assertThat(evento.getLevel()).isEqualTo(Level.WARN);
+                    assertThat(evento.getFormattedMessage())
+                            .contains("provedor=a", "modelo=modelo-a", "resultado=ERRO_HTTP", "codigoHttp=500")
+                            .contains("x".repeat(ChamadaIa.LIMITE_DO_ERRO))
+                            .doesNotContain("x".repeat(ChamadaIa.LIMITE_DO_ERRO + 1));
+                });
     }
 
     @Test
@@ -235,12 +253,17 @@ class CadeiaDeProvedoresTest {
             loggerDaCadeia().detachAppender(log);
         }
 
-        assertThat(log.list).anySatisfy(evento -> {
-            assertThat(evento.getLevel()).isEqualTo(Level.WARN);
-            assertThat(evento.getFormattedMessage())
-                    .contains("provedor=a", "modelo=modelo-a", "resultado=ERRO_HTTP", "codigoHttp=null",
-                            "erro=quebrou");
-        });
+        assertThat(log.list)
+                .anySatisfy(evento -> {
+                    assertThat(evento.getLevel()).isEqualTo(Level.WARN);
+                    assertThat(evento.getFormattedMessage())
+                            .contains(
+                                    "provedor=a",
+                                    "modelo=modelo-a",
+                                    "resultado=ERRO_HTTP",
+                                    "codigoHttp=null",
+                                    "erro=quebrou");
+                });
     }
 
     private static ListAppender<ILoggingEvent> capturarLogDaCadeia() {
@@ -272,8 +295,9 @@ class CadeiaDeProvedoresTest {
     @Test
     void rnfRec001_cotaEsgotadaTiraOProvedorPorCincoMinutos() {
         provedores.com(provedor(1L, "a", 1, true), provedor(2L, "b", 2, true));
-        AssistenteFalso a = new AssistenteFalso("a")
-                .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.COTA_ESGOTADA, 429, "cota esgotada"));
+        AssistenteFalso a =
+                new AssistenteFalso("a")
+                        .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.COTA_ESGOTADA, 429, "cota esgotada"));
         AssistenteFalso b = new AssistenteFalso("b");
         CadeiaDeProvedores cadeia = cadeia(a, b);
 
@@ -285,17 +309,29 @@ class CadeiaDeProvedoresTest {
         relogio.avancar(Duration.ofSeconds(1));
         assertThat(cadeia.recomendar(PERFIL, CANDIDATOS).provedor()).isEqualTo("a");
 
-        assertThat(chamadas.todas()).extracting(ChamadaIa::resultado)
-                .containsExactly(ResultadoDaChamada.COTA_ESGOTADA, ResultadoDaChamada.SUCESSO,
-                        ResultadoDaChamada.SUCESSO, ResultadoDaChamada.SUCESSO);
+        assertThat(chamadas.todas())
+                .extracting(ChamadaIa::resultado)
+                .containsExactly(
+                        ResultadoDaChamada.COTA_ESGOTADA,
+                        ResultadoDaChamada.SUCESSO,
+                        ResultadoDaChamada.SUCESSO,
+                        ResultadoDaChamada.SUCESSO);
     }
 
     @Test
     void rnfRec001_cotaEsgotadaComEsperaSugeridaVoltaDepoisDoPrazoIndicado() {
         provedores.com(provedor(1L, "a", 1, true), provedor(2L, "b", 2, true));
-        AssistenteFalso a = new AssistenteFalso("a")
-                .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.COTA_ESGOTADA, 429, "cota esgotada",
-                        List.of(), null, Duration.ofSeconds(30), false));
+        AssistenteFalso a =
+                new AssistenteFalso("a")
+                        .falharCom(
+                                new FalhaNaChamadaDeIa(
+                                        ResultadoDaChamada.COTA_ESGOTADA,
+                                        429,
+                                        "cota esgotada",
+                                        List.of(),
+                                        null,
+                                        Duration.ofSeconds(30),
+                                        false));
         AssistenteFalso b = new AssistenteFalso("b");
         CadeiaDeProvedores cadeia = cadeia(a, b);
 
@@ -311,9 +347,17 @@ class CadeiaDeProvedoresTest {
     @Test
     void rnfRec001_cotaDiariaMantemOProvedorForaAteAMeiaNoite() {
         provedores.com(provedor(1L, "a", 1, true), provedor(2L, "b", 2, true));
-        AssistenteFalso a = new AssistenteFalso("a")
-                .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.COTA_ESGOTADA, 429, "cota diária",
-                        List.of(), null, Duration.ofSeconds(30), true));
+        AssistenteFalso a =
+                new AssistenteFalso("a")
+                        .falharCom(
+                                new FalhaNaChamadaDeIa(
+                                        ResultadoDaChamada.COTA_ESGOTADA,
+                                        429,
+                                        "cota diária",
+                                        List.of(),
+                                        null,
+                                        Duration.ofSeconds(30),
+                                        true));
         AssistenteFalso b = new AssistenteFalso("b");
         CadeiaDeProvedores cadeia = cadeia(a, b);
 
@@ -361,17 +405,20 @@ class CadeiaDeProvedoresTest {
     @Test
     void rnfRec001_todaACadeiaFalhandoLancaAssistenteIndisponivelComAsFalhasRegistradas() {
         provedores.com(provedor(1L, "a", 1, true), provedor(2L, "b", 2, true));
-        AssistenteFalso a = new AssistenteFalso("a")
-                .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_DE_REDE, null, "sem rede"));
-        AssistenteFalso b = new AssistenteFalso("b")
-                .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.TEMPO_ESGOTADO, null, "demorou"));
+        AssistenteFalso a =
+                new AssistenteFalso("a")
+                        .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_DE_REDE, null, "sem rede"));
+        AssistenteFalso b =
+                new AssistenteFalso("b")
+                        .falharCom(new FalhaNaChamadaDeIa(ResultadoDaChamada.TEMPO_ESGOTADO, null, "demorou"));
 
         assertThatThrownBy(() -> cadeia(a, b).recomendar(PERFIL, CANDIDATOS))
                 .isInstanceOf(AssistenteIndisponivel.class)
                 .hasMessage(AssistenteIndisponivel.MENSAGEM);
 
         assertThat(chamadas.todas()).extracting(ChamadaIa::tentativa).containsExactly(1, 2);
-        assertThat(chamadas.todas()).extracting(ChamadaIa::resultado)
+        assertThat(chamadas.todas())
+                .extracting(ChamadaIa::resultado)
                 .containsExactly(ResultadoDaChamada.ERRO_DE_REDE, ResultadoDaChamada.TEMPO_ESGOTADO);
     }
 
@@ -479,8 +526,9 @@ class CadeiaDeProvedoresTest {
         private final Deque<RuntimeException> falhas = new ArrayDeque<>();
         private RespostaDoProvedor<RespostaDeRecomendacao> respostaDeRecomendacao =
                 RespostaDoProvedor.semTokens(new RespostaDeRecomendacao(List.of()));
-        private RespostaDoProvedor<RespostaDoAssistente> respostaDoAssistente = RespostaDoProvedor.semTokens(
-                new RespostaDoAssistente(TipoDeResposta.DUVIDA, "resposta de a", List.of()));
+        private RespostaDoProvedor<RespostaDoAssistente> respostaDoAssistente =
+                RespostaDoProvedor.semTokens(
+                        new RespostaDoAssistente(TipoDeResposta.DUVIDA, "resposta de a", List.of()));
 
         AssistenteFalso(String nome) {
             this(nome, true);
@@ -546,8 +594,8 @@ class CadeiaDeProvedoresTest {
     private static final class FerramentasVazias implements FerramentasDoAssistente {
 
         @Override
-        public List<ResumoDeLivro> buscarLivros(String texto, String categoria, BigDecimal precoMinimo,
-                BigDecimal precoMaximo) {
+        public List<ResumoDeLivro> buscarLivros(
+                String texto, String categoria, BigDecimal precoMinimo, BigDecimal precoMaximo) {
             return List.of();
         }
 

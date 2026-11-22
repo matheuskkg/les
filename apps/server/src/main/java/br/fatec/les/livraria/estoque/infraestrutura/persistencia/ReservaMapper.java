@@ -1,8 +1,8 @@
 package br.fatec.les.livraria.estoque.infraestrutura.persistencia;
 
-import org.mapstruct.Mapper;
-
 import br.fatec.les.livraria.estoque.dominio.modelo.Reserva;
+
+import org.mapstruct.Mapper;
 
 /** Mapeamento entre a reserva de domínio e a tabela {@code reserva} (DEC-16). */
 @Mapper

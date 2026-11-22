@@ -10,11 +10,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.recomendacao.aplicacao.AssistenteIndisponivel;
+import br.fatec.les.livraria.recomendacao.aplicacao.casodeuso.CadeiaDeProvedores;
+import br.fatec.les.livraria.recomendacao.aplicacao.porta.ConversasRepositorio;
+import br.fatec.les.livraria.recomendacao.dominio.calculo.ValidarRespostaDoAssistente;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.PapelDaMensagem;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarComprasDoCliente;
 
-import javax.sql.DataSource;
+import com.jayway.jsonpath.JsonPath;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,29 +43,23 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.jayway.jsonpath.JsonPath;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.recomendacao.aplicacao.AssistenteIndisponivel;
-import br.fatec.les.livraria.recomendacao.aplicacao.casodeuso.CadeiaDeProvedores;
-import br.fatec.les.livraria.recomendacao.aplicacao.porta.ConversasRepositorio;
-import br.fatec.les.livraria.recomendacao.dominio.calculo.ValidarRespostaDoAssistente;
-import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
-import br.fatec.les.livraria.recomendacao.dominio.modelo.PapelDaMensagem;
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarComprasDoCliente;
-import jakarta.servlet.http.Cookie;
+import javax.sql.DataSource;
 
 /**
- * Chat do assistente sobre o seed, atendido pelo provedor {@code fake} (RNF-REC-001, DEC-03). Ana (usuário 2) e
- * Bruno (usuário 3) são clientes ativos.
+ * Chat do assistente sobre o seed, atendido pelo provedor {@code fake} (RNF-REC-001, DEC-03). Ana (usuário 2) e Bruno
+ * (usuário 3) são clientes ativos.
  */
-@SpringBootTest(properties = {
-        "livraria.ia.provedores.gemini.chave=",
-        "livraria.ia.provedores.groq.chave=",
-        "livraria.ia.provedores.openrouter.chave=",
-        "livraria.ia.provedores.nvidia.chave="})
+@SpringBootTest(
+        properties = {
+            "livraria.ia.provedores.gemini.chave=",
+            "livraria.ia.provedores.groq.chave=",
+            "livraria.ia.provedores.openrouter.chave=",
+            "livraria.ia.provedores.nvidia.chave="
+        })
 @Transactional
 class AssistenteIntegracaoTest {
 
@@ -76,26 +79,19 @@ class AssistenteIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private DataSource dataSource;
+    @Autowired private DataSource dataSource;
 
-    @Autowired
-    private CadeiaDeProvedores cadeia;
+    @Autowired private CadeiaDeProvedores cadeia;
 
-    @Autowired
-    private ConversasRepositorio conversas;
+    @Autowired private ConversasRepositorio conversas;
 
-    @Autowired
-    private ConsultarComprasDoCliente comprasDoCliente;
+    @Autowired private ConsultarComprasDoCliente comprasDoCliente;
 
     private MockMvc mvc;
 
@@ -118,39 +114,57 @@ class AssistenteIntegracaoTest {
     }
 
     private ResultActions enviar(Long usuarioId, String texto) throws Exception {
-        return mvc.perform(como(usuarioId, post("/api/me/assistente/mensagens"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"texto\":\"" + texto + "\"}"));
+        return mvc.perform(
+                como(usuarioId, post("/api/me/assistente/mensagens"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"texto\":\"" + texto + "\"}"));
     }
 
     private Integer idDaResposta(Long usuarioId, String texto) throws Exception {
-        String corpo = enviar(usuarioId, texto).andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String corpo =
+                enviar(usuarioId, texto).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         return JsonPath.read(corpo, "$.id");
     }
 
     private ResultActions avaliar(Long usuarioId, Object mensagemId, String avaliacao) throws Exception {
-        return mvc.perform(como(usuarioId, put("/api/me/assistente/mensagens/{id}/avaliacao", mensagemId))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"avaliacao\":\"" + avaliacao + "\"}"));
+        return mvc.perform(
+                como(usuarioId, put("/api/me/assistente/mensagens/{id}/avaliacao", mensagemId))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"avaliacao\":\"" + avaliacao + "\"}"));
     }
 
     /** Copia linhas de uma tabela trocando as colunas informadas por expressões SQL (pares coluna, expressão). */
     private void copiar(String tabela, String filtro, String... trocas) {
         JdbcClient jdbc = JdbcClient.create(dataSource);
-        List<String> colunas = jdbc.sql("select column_name from information_schema.columns "
-                + "where table_schema = 'public' and table_name = :tabela order by ordinal_position")
-                .param("tabela", tabela).query(String.class).list();
+        List<String> colunas =
+                jdbc.sql(
+                                "select column_name from information_schema.columns "
+                                        + "where table_schema = 'public' and table_name = :tabela order by ordinal_position")
+                        .param("tabela", tabela)
+                        .query(String.class)
+                        .list();
         java.util.Map<String, String> expressoes = new java.util.HashMap<>();
         for (int i = 0; i < trocas.length; i += 2) {
             expressoes.put(trocas[i], trocas[i + 1]);
         }
-        String destino = colunas.stream().map(coluna -> "\"" + coluna + "\"")
-                .collect(java.util.stream.Collectors.joining(", "));
-        String origem = colunas.stream().map(coluna -> expressoes.getOrDefault(coluna, "\"" + coluna + "\""))
-                .collect(java.util.stream.Collectors.joining(", "));
-        jdbc.sql("insert into \"" + tabela + "\" (" + destino + ") select " + origem + " from \"" + tabela
-                + "\" where " + filtro).update();
+        String destino =
+                colunas.stream().map(coluna -> "\"" + coluna + "\"").collect(java.util.stream.Collectors.joining(", "));
+        String origem =
+                colunas.stream()
+                        .map(coluna -> expressoes.getOrDefault(coluna, "\"" + coluna + "\""))
+                        .collect(java.util.stream.Collectors.joining(", "));
+        jdbc.sql(
+                        "insert into \""
+                                + tabela
+                                + "\" ("
+                                + destino
+                                + ") select "
+                                + origem
+                                + " from \""
+                                + tabela
+                                + "\" where "
+                                + filtro)
+                .update();
     }
 
     @Test
@@ -186,15 +200,19 @@ class AssistenteIntegracaoTest {
         // Ana não comprou no seed; o pedido 2, de outro cliente, entra como compra dela nesta transação.
         copiar("pedido", "id = 2", "id", "900000", "cliente_id", "1");
         copiar("item_pedido", "pedido_id = 2", "id", "id + 900000", "pedido_id", "900000");
-        List<Integer> comprados = comprasDoCliente.executar(CLIENTE_DA_ANA).stream()
-                .map(vendido -> Math.toIntExact(vendido.livroId()))
-                .distinct()
-                .toList();
+        List<Integer> comprados =
+                comprasDoCliente.executar(CLIENTE_DA_ANA).stream()
+                        .map(vendido -> Math.toIntExact(vendido.livroId()))
+                        .distinct()
+                        .toList();
 
-        String corpo = enviar(ANA, "Com base no que eu já comprei, me recomenda um livro")
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tipo").value("RECOMENDACAO"))
-                .andReturn().getResponse().getContentAsString();
+        String corpo =
+                enviar(ANA, "Com base no que eu já comprei, me recomenda um livro")
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.tipo").value("RECOMENDACAO"))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
 
         List<Integer> citados = JsonPath.read(corpo, "$.livros[*].id");
         assertThat(citados).isNotEmpty().doesNotContainAnyElementsOf(comprados);
@@ -263,8 +281,11 @@ class AssistenteIntegracaoTest {
     @Test
     void rnfRec001_naoAvaliaMensagemDoClienteNemRespostaDeOutroCliente() throws Exception {
         Integer resposta = idDaResposta(ANA, "Hobbit");
-        String conversa = mvc.perform(como(ANA, get("/api/me/assistente/conversa")))
-                .andReturn().getResponse().getContentAsString();
+        String conversa =
+                mvc.perform(como(ANA, get("/api/me/assistente/conversa")))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
         Integer daAna = JsonPath.read(conversa, "$[0].id");
 
         avaliar(ANA, daAna, "POSITIVA").andExpect(status().isNotFound());
@@ -291,8 +312,8 @@ class AssistenteIntegracaoTest {
     }
 
     /**
-     * Fora da transação do teste: a mensagem do cliente precisa estar de fato gravada (commit) depois do 503. Os
-     * dados gravados são apagados no fim.
+     * Fora da transação do teste: a mensagem do cliente precisa estar de fato gravada (commit) depois do 503. Os dados
+     * gravados são apagados no fim.
      */
     @Test
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -305,8 +326,13 @@ class AssistenteIntegracaoTest {
                     .andExpect(status().isServiceUnavailable())
                     .andExpect(jsonPath("$.detail").value(AssistenteIndisponivel.MENSAGEM));
 
-            assertThat(jdbc.sql("select m.texto from mensagem_conversa m join conversa c on c.id = m.conversa_id "
-                    + "where c.cliente_id = :cliente").param("cliente", CLIENTE_DA_ANA).query(String.class).list())
+            assertThat(
+                            jdbc.sql(
+                                            "select m.texto from mensagem_conversa m join conversa c on c.id = m.conversa_id "
+                                                    + "where c.cliente_id = :cliente")
+                                    .param("cliente", CLIENTE_DA_ANA)
+                                    .query(String.class)
+                                    .list())
                     .containsExactly("Hobbit");
 
             // "Tentar de novo" com os provedores de volta: a mensagem não é gravada outra vez.
@@ -320,8 +346,14 @@ class AssistenteIntegracaoTest {
         } finally {
             jdbc.sql("update provedor_ia set ativo = true").update();
             cadeia.limpar();
-            for (String tabela : List.of("mensagem_livro_aud", "mensagem_conversa_aud", "conversa_aud",
-                    "mensagem_livro", "mensagem_conversa", "conversa")) {
+            for (String tabela :
+                    List.of(
+                            "mensagem_livro_aud",
+                            "mensagem_conversa_aud",
+                            "conversa_aud",
+                            "mensagem_livro",
+                            "mensagem_conversa",
+                            "conversa")) {
                 jdbc.sql("delete from " + tabela).update();
             }
             jdbc.sql("delete from chamada_ia").update();

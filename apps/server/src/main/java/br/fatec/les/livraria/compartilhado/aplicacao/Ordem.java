@@ -12,7 +12,8 @@ import java.util.Objects;
 public record Ordem(String campo, Direcao direcao) {
 
     public enum Direcao {
-        ASC, DESC
+        ASC,
+        DESC
     }
 
     public Ordem {

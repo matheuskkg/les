@@ -1,12 +1,12 @@
 package br.fatec.les.livraria.acesso.dominio.regra;
 
-import java.util.Objects;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.acesso.dominio.modelo.SenhaInformada;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
+import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 /** Confirmação de senha (RNF-CLI-002): a mesma senha é digitada duas vezes no cadastro e na alteração. */
 @Component

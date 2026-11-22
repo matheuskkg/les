@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.recomendacao.dominio.calculo;
 
-import java.util.List;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.PapelDaMensagem;
 
 import org.springframework.stereotype.Component;
 
-import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
-import br.fatec.les.livraria.recomendacao.dominio.modelo.PapelDaMensagem;
+import java.util.List;
 
 /**
  * Reenvio da última mensagem que ficou sem resposta (RNF-REC-001, DEC-03): quando toda a cadeia falha, a mensagem do
@@ -17,7 +17,7 @@ public class ReenvioSemResposta {
 
     /**
      * @param ultimas mensagens da conversa ativa, da mais antiga à mais recente
-     * @param texto   texto enviado agora, sem espaços nas pontas
+     * @param texto texto enviado agora, sem espaços nas pontas
      */
     public boolean reenvio(List<MensagemDaConversa> ultimas, String texto) {
         if (ultimas.isEmpty()) {

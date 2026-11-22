@@ -1,7 +1,5 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.auditoria;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,19 +8,21 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
-import org.hibernate.envers.RevisionEntity;
-import org.hibernate.envers.RevisionNumber;
-import org.hibernate.envers.RevisionTimestamp;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.envers.RevisionEntity;
+import org.hibernate.envers.RevisionNumber;
+import org.hibernate.envers.RevisionTimestamp;
+
+import java.time.LocalDateTime;
+
 /**
- * Revisão do Hibernate Envers com o autor e a data/hora da escrita (RNF-GER-002, DEC-08). As tabelas
- * {@code _aud} apontam para cá pela coluna {@code revisao} (DEC-14).
+ * Revisão do Hibernate Envers com o autor e a data/hora da escrita (RNF-GER-002, DEC-08). As tabelas {@code _aud}
+ * apontam para cá pela coluna {@code revisao} (DEC-14).
  *
- * <p>O id usa a sequence {@code revisao_seq} a partir de 10000, como as demais entidades (DEC-14).</p>
+ * <p>O id usa a sequence {@code revisao_seq} a partir de 10000, como as demais entidades (DEC-14).
  */
 @Getter
 @Setter
@@ -35,8 +35,7 @@ public class RevisaoJpa {
     @Id
     @RevisionNumber
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "revisao_seq")
-    @SequenceGenerator(name = "revisao_seq", sequenceName = "revisao_seq", initialValue = 10000,
-            allocationSize = 50)
+    @SequenceGenerator(name = "revisao_seq", sequenceName = "revisao_seq", initialValue = 10000, allocationSize = 50)
     private Long id;
 
     @RevisionTimestamp

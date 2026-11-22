@@ -6,9 +6,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.clientes.dominio.ranking.CompraDoCliente;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+import br.fatec.les.livraria.vendas.aplicacao.porta.VendasConsultas;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,20 +28,16 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.clientes.dominio.ranking.CompraDoCliente;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
-import br.fatec.les.livraria.vendas.aplicacao.porta.VendasConsultas;
-import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Ranking sobre o seed histórico (RN-CLI-007, DEC-04, DEC-12, DEC-14). Os valores esperados vêm do seed
- * {@code 400_pedidos_historicos.sql}: em 2026-10-24, dentro do período do seed, Carla (cliente 3) e Elisa
- * (cliente 5) têm mais de R$ 1.000,00, mais de 8 pedidos e compra nos últimos 30 dias, então 100. Em 2027-10-01 a
- * janela só pega o fim do seed: Carla com 3 pedidos (R$ 380,33, o último há 347 dias) tem 52, e Elisa com 5
- * (R$ 685,69, há 346 dias), 68. Diego não comprou e tem 0.
+ * Ranking sobre o seed histórico (RN-CLI-007, DEC-04, DEC-12, DEC-14). Os valores esperados vêm do seed {@code
+ * 400_pedidos_historicos.sql}: em 2026-10-24, dentro do período do seed, Carla (cliente 3) e Elisa (cliente 5) têm mais
+ * de R$ 1.000,00, mais de 8 pedidos e compra nos últimos 30 dias, então 100. Em 2027-10-01 a janela só pega o fim do
+ * seed: Carla com 3 pedidos (R$ 380,33, o último há 347 dias) tem 52, e Elisa com 5 (R$ 685,69, há 346 dias), 68. Diego
+ * não comprou e tem 0.
  */
 @SpringBootTest
 @Transactional
@@ -54,17 +55,13 @@ class RankingIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private VendasConsultas vendas;
+    @Autowired private VendasConsultas vendas;
 
     private MockMvc mvc;
 
@@ -80,10 +77,8 @@ class RankingIntegracaoTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.itens[0].nome").value("Carla Mendes"))
                 .andExpect(jsonPath("$.itens[0].ranking").value(100));
-        mvc.perform(como(1L, get("/api/admin/clientes/5")))
-                .andExpect(jsonPath("$.ranking").value(100));
-        mvc.perform(como(6L, get("/api/me")))
-                .andExpect(jsonPath("$.ranking").value(100));
+        mvc.perform(como(1L, get("/api/admin/clientes/5"))).andExpect(jsonPath("$.ranking").value(100));
+        mvc.perform(como(6L, get("/api/me"))).andExpect(jsonPath("$.ranking").value(100));
     }
 
     @Test

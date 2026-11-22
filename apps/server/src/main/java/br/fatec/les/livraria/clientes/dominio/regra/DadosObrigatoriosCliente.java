@@ -1,15 +1,15 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 
+import org.springframework.stereotype.Component;
+
 /**
- * Dados obrigatórios do cadastro do cliente (RN-CLI-006): gênero, nome, data de nascimento, CPF, telefone (tipo, DDD
- * e número), e-mail e senha. Em DEC-10 o endereço residencial do DRS vira "ao menos um endereço", de qualquer tipo,
+ * Dados obrigatórios do cadastro do cliente (RN-CLI-006): gênero, nome, data de nascimento, CPF, telefone (tipo, DDD e
+ * número), e-mail e senha. Em DEC-10 o endereço residencial do DRS vira "ao menos um endereço", de qualquer tipo,
  * verificado por {@link EnderecoDoCliente}.
  */
 @Component

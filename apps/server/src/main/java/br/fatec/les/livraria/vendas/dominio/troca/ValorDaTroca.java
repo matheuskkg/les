@@ -5,14 +5,13 @@ import br.fatec.les.livraria.vendas.dominio.pedido.ItemPedido;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
 
 /**
- * Valor do cupom gerado no recebimento da troca (RF-VEN-015, DEC-11, DEC-12): a soma do preço unitário de venda de
- * cada item × a quantidade trocada, sem frete e sem ratear o desconto do promocional. Vale também para os itens que
- * não voltam ao estoque.
+ * Valor do cupom gerado no recebimento da troca (RF-VEN-015, DEC-11, DEC-12): a soma do preço unitário de venda de cada
+ * item × a quantidade trocada, sem frete e sem ratear o desconto do promocional. Vale também para os itens que não
+ * voltam ao estoque.
  */
 public final class ValorDaTroca {
 
-    private ValorDaTroca() {
-    }
+    private ValorDaTroca() {}
 
     /**
      * @throws IllegalArgumentException se um item da troca não for do pedido

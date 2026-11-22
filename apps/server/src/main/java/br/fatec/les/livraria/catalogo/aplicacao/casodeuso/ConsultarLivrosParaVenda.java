@@ -1,21 +1,22 @@
 package br.fatec.les.livraria.catalogo.aplicacao.casodeuso;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroParaVenda;
+import br.fatec.les.livraria.catalogo.aplicacao.porta.CatalogoConsultas;
+import br.fatec.les.livraria.compartilhado.aplicacao.Ids;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroParaVenda;
-import br.fatec.les.livraria.catalogo.aplicacao.porta.CatalogoConsultas;
-import br.fatec.les.livraria.compartilhado.aplicacao.Ids;
-import lombok.RequiredArgsConstructor;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Expõe ao {@code vendas} o título e os autores dos livros de um carrinho, inclusive os inativos (RF-VEN-001,
- * DEC-07). É a porta de entrada pública do catálogo para a leitura do carrinho; o preço continua vindo de
- * {@link ConsultarPrecosDeVenda}.
+ * Expõe ao {@code vendas} o título e os autores dos livros de um carrinho, inclusive os inativos (RF-VEN-001, DEC-07).
+ * É a porta de entrada pública do catálogo para a leitura do carrinho; o preço continua vindo de {@link
+ * ConsultarPrecosDeVenda}.
  */
 @Component
 @RequiredArgsConstructor

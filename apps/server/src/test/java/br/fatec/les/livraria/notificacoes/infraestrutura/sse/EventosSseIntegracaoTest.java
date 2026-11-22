@@ -8,7 +8,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.nio.charset.StandardCharsets;
+import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
+import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.notificacoes.aplicacao.casodeuso.EncerrarCanais;
+import br.fatec.les.livraria.notificacoes.aplicacao.casodeuso.Notificar;
+import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
+import br.fatec.les.livraria.notificacoes.dominio.modelo.TipoNotificacao;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,46 +31,30 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
-import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.notificacoes.aplicacao.casodeuso.EncerrarCanais;
-import br.fatec.les.livraria.notificacoes.aplicacao.casodeuso.Notificar;
-import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
-import br.fatec.les.livraria.notificacoes.dominio.modelo.TipoNotificacao;
-import jakarta.servlet.http.Cookie;
+import java.nio.charset.StandardCharsets;
 
 /**
- * Stream SSE das notificações (DEC-13): {@code text/event-stream}, entrega só depois do commit, reenvio pelo
- * {@code Last-Event-ID} e fechamento do canal no logout.
+ * Stream SSE das notificações (DEC-13): {@code text/event-stream}, entrega só depois do commit, reenvio pelo {@code
+ * Last-Event-ID} e fechamento do canal no logout.
  */
 @SpringBootTest
 class EventosSseIntegracaoTest {
 
     private static final String SENHA = "Senha@123";
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private CodificadorDeSenha senhas;
+    @Autowired private CodificadorDeSenha senhas;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private Notificar notificar;
+    @Autowired private Notificar notificar;
 
-    @Autowired
-    private EncerrarCanais encerrarCanais;
+    @Autowired private EncerrarCanais encerrarCanais;
 
-    @Autowired
-    private RegistroDeEmissores registro;
+    @Autowired private RegistroDeEmissores registro;
 
     private MockMvc mvc;
     private Usuario cliente;
@@ -68,8 +62,15 @@ class EventosSseIntegracaoTest {
     @BeforeEach
     void configurar() {
         mvc = MockMvcBuilders.webAppContextSetup(contexto).apply(springSecurity()).build();
-        cliente = usuarios.salvar(new Usuario(null, "sse." + System.nanoTime() + "@livraria.test", null,
-                senhas.codificar(SENHA), Papel.CLIENTE, null));
+        cliente =
+                usuarios.salvar(
+                        new Usuario(
+                                null,
+                                "sse." + System.nanoTime() + "@livraria.test",
+                                null,
+                                senhas.codificar(SENHA),
+                                Papel.CLIENTE,
+                                null));
     }
 
     @AfterEach
@@ -81,8 +82,7 @@ class EventosSseIntegracaoTest {
     void dec13_abreOStreamComoTextEventStream() throws Exception {
         MvcResult resultado = abrirStream(null);
 
-        assertThat(resultado.getResponse().getContentType())
-                .startsWith(MediaType.TEXT_EVENT_STREAM_VALUE);
+        assertThat(resultado.getResponse().getContentType()).startsWith(MediaType.TEXT_EVENT_STREAM_VALUE);
         assertThat(registro.contar(cliente.getId())).isEqualTo(1);
     }
 
@@ -90,8 +90,14 @@ class EventosSseIntegracaoTest {
     void dec13_entregaANotificacaoPublicadaDepoisDoCommitComIdTipoEData() throws Exception {
         MvcResult resultado = abrirStream(null);
 
-        Notificacao notificacao = notificar.executar(Notificar.Comando.sobre(cliente.getId(),
-                TipoNotificacao.PEDIDO_APROVADO, "Seu pedido foi aprovado.", "pedido", 10042L));
+        Notificacao notificacao =
+                notificar.executar(
+                        Notificar.Comando.sobre(
+                                cliente.getId(),
+                                TipoNotificacao.PEDIDO_APROVADO,
+                                "Seu pedido foi aprovado.",
+                                "pedido",
+                                10042L));
 
         String corpo = corpo(resultado);
         assertThat(corpo)
@@ -107,10 +113,18 @@ class EventosSseIntegracaoTest {
 
     @Test
     void dec13_ultimoEventoReenviaAsNotificacoesPersistidasPosteriores() throws Exception {
-        Notificacao primeira = notificar.executar(Notificar.Comando.semReferencia(cliente.getId(),
-                TipoNotificacao.CARRINHO_EXPIRANDO, "Seu carrinho expira em 5 minutos."));
-        Notificacao segunda = notificar.executar(Notificar.Comando.semReferencia(cliente.getId(),
-                TipoNotificacao.CARRINHO_EXPIRADO, "Os itens do seu carrinho foram removidos."));
+        Notificacao primeira =
+                notificar.executar(
+                        Notificar.Comando.semReferencia(
+                                cliente.getId(),
+                                TipoNotificacao.CARRINHO_EXPIRANDO,
+                                "Seu carrinho expira em 5 minutos."));
+        Notificacao segunda =
+                notificar.executar(
+                        Notificar.Comando.semReferencia(
+                                cliente.getId(),
+                                TipoNotificacao.CARRINHO_EXPIRADO,
+                                "Os itens do seu carrinho foram removidos."));
 
         MvcResult resultado = abrirStream(primeira.getId());
 
@@ -124,12 +138,13 @@ class EventosSseIntegracaoTest {
         MvcResult resultado = abrirStream(null);
         assertThat(registro.contar(cliente.getId())).isEqualTo(1);
 
-        mvc.perform(delete("/api/sessao").cookie(cookieDe(cliente)).with(csrf()))
-                .andExpect(status().isNoContent());
+        mvc.perform(delete("/api/sessao").cookie(cookieDe(cliente)).with(csrf())).andExpect(status().isNoContent());
 
         assertThat(registro.contar(cliente.getId())).isZero();
-        Notificacao depoisDoLogout = notificar.executar(Notificar.Comando.semReferencia(cliente.getId(),
-                TipoNotificacao.PEDIDO_ENTREGUE, "Pedido entregue."));
+        Notificacao depoisDoLogout =
+                notificar.executar(
+                        Notificar.Comando.semReferencia(
+                                cliente.getId(), TipoNotificacao.PEDIDO_ENTREGUE, "Pedido entregue."));
         assertThat(corpo(resultado)).doesNotContain("id:" + depoisDoLogout.getId());
     }
 
@@ -137,13 +152,16 @@ class EventosSseIntegracaoTest {
     void dec13_rotaDeAdminAbreOProprioStream() throws Exception {
         Usuario admin = usuarios.buscarPorId(1L).orElseThrow();
 
-        MvcResult resultado = mvc.perform(get("/api/admin/eventos").cookie(cookieDe(admin)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM))
-                .andReturn();
+        MvcResult resultado =
+                mvc.perform(get("/api/admin/eventos").cookie(cookieDe(admin)))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM))
+                        .andReturn();
 
-        Notificacao notificacao = notificar.executar(Notificar.Comando.semReferencia(admin.getId(),
-                TipoNotificacao.TROCA_SOLICITADA, "Nova troca para autorizar."));
+        Notificacao notificacao =
+                notificar.executar(
+                        Notificar.Comando.semReferencia(
+                                admin.getId(), TipoNotificacao.TROCA_SOLICITADA, "Nova troca para autorizar."));
 
         String corpo = corpo(resultado);
         assertThat(corpo)
@@ -156,8 +174,7 @@ class EventosSseIntegracaoTest {
 
     @Test
     void dec08_streamSemSessaoResponde401() throws Exception {
-        mvc.perform(get("/api/me/eventos"))
-                .andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/me/eventos")).andExpect(status().isUnauthorized());
     }
 
     private MvcResult abrirStream(Long ultimoEvento) throws Exception {

@@ -1,13 +1,13 @@
 package br.fatec.les.livraria.acesso.aplicacao.porta;
 
+import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta;
+import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta;
-import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
 
 /**
  * Acesso aos usuários. As consultas de login e de unicidade só encontram contas em uso, ou seja, fora da situação
@@ -33,8 +33,7 @@ public interface UsuarioRepositorio {
 
     /**
      * Ids dos usuários cujo e-mail contém o termo, sem diferenciar maiúsculas, e/ou cujo telefone (DDD + número) é
-     * igual aos dígitos informados. E-mail e telefone se combinam com E; um valor nulo não filtra (RF-CLI-004,
-     * DEC-07).
+     * igual aos dígitos informados. E-mail e telefone se combinam com E; um valor nulo não filtra (RF-CLI-004, DEC-07).
      *
      * @param termoDoEmail trecho do e-mail já em minúsculas, ou nulo
      * @param digitosDoTelefone DDD + número já validados, ou nulo
@@ -63,8 +62,8 @@ public interface UsuarioRepositorio {
     boolean existeTelefoneEmUsoExceto(String telefone, Long usuarioId);
 
     /**
-     * {@code true} se algum dos usuários informados pertence a uma conta em uso. Usada pela unicidade de CPF do
-     * módulo {@code clientes}, que pergunta ao {@code acesso} antes de liberar um CPF de conta encerrada (DEC-10).
+     * {@code true} se algum dos usuários informados pertence a uma conta em uso. Usada pela unicidade de CPF do módulo
+     * {@code clientes}, que pergunta ao {@code acesso} antes de liberar um CPF de conta encerrada (DEC-10).
      */
     boolean existeAlgumaEmUso(Collection<Long> ids);
 

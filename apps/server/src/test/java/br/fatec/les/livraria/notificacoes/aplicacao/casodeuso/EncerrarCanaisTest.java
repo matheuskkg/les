@@ -2,12 +2,12 @@ package br.fatec.les.livraria.notificacoes.aplicacao.casodeuso;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.ArrayList;
-import java.util.List;
+import br.fatec.les.livraria.notificacoes.aplicacao.porta.CanaisDeEventos;
 
 import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.notificacoes.aplicacao.porta.CanaisDeEventos;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Encerramento dos canais SSE no logout (DEC-13). */
 class EncerrarCanaisTest {

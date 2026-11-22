@@ -1,17 +1,18 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.ConsultarContato;
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.DadosDeContato;
 import br.fatec.les.livraria.clientes.aplicacao.CalcularRanking;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Dados do próprio cliente logado (RF-CLI-002, DEC-07). O cliente é resolvido pelo id do usuário da sessão, nunca por
@@ -27,9 +28,11 @@ public class ConsultarMeusDados {
 
     @Transactional(readOnly = true)
     public DadosDoCliente executar(Long usuarioId) {
-        Cliente cliente = clientes.buscarPorUsuarioId(usuarioId)
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));
+        Cliente cliente =
+                clientes.buscarPorUsuarioId(usuarioId)
+                        .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));
         DadosDeContato contato = consultarContato.executar(usuarioId);
-        return DadosDoCliente.de(cliente, contato, calcularRanking.executar(List.of(cliente.getId())).get(cliente.getId()));
+        return DadosDoCliente.de(
+                cliente, contato, calcularRanking.executar(List.of(cliente.getId())).get(cliente.getId()));
     }
 }

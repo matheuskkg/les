@@ -1,21 +1,20 @@
 package br.fatec.les.livraria.catalogo.infraestrutura.persistencia;
 
-import java.util.Objects;
-
-import org.springframework.data.jpa.domain.Specification;
-
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.FiltroLivro;
 import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.Especificacoes;
 
+import org.springframework.data.jpa.domain.Specification;
+
+import java.util.Objects;
+
 /**
- * Traduz o {@link FiltroLivro} para as {@link Specification} do catálogo (RF-LIV-005, DEC-07). Os campos se
- * combinam com E; autor e categoria usam subconsulta {@code exists}, e a vitrine só enxerga livro ativo. A busca
- * livre ({@code q}) casa título, autor, editora ou ISBN, com OU entre eles.
+ * Traduz o {@link FiltroLivro} para as {@link Specification} do catálogo (RF-LIV-005, DEC-07). Os campos se combinam
+ * com E; autor e categoria usam subconsulta {@code exists}, e a vitrine só enxerga livro ativo. A busca livre ({@code
+ * q}) casa título, autor, editora ou ISBN, com OU entre eles.
  */
 final class EspecificacoesDeLivro {
 
-    private EspecificacoesDeLivro() {
-    }
+    private EspecificacoesDeLivro() {}
 
     static Specification<LivroJpa> de(FiltroLivro filtro) {
         Objects.requireNonNull(filtro, "filtro");

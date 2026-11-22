@@ -24,7 +24,12 @@ public record Cpf(String numero) {
     }
 
     public String formatado() {
-        return numero.substring(0, 3) + "." + numero.substring(3, 6) + "." + numero.substring(6, 9) + "-"
+        return numero.substring(0, 3)
+                + "."
+                + numero.substring(3, 6)
+                + "."
+                + numero.substring(6, 9)
+                + "-"
                 + numero.substring(9);
     }
 

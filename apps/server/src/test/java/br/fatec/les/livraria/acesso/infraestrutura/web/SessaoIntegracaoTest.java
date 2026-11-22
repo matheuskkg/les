@@ -9,8 +9,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
+import br.fatec.les.livraria.acesso.aplicacao.CredenciaisInvalidas;
+import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
+import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.TokenDeSessao;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,15 +36,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.CredenciaisInvalidas;
-import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
-import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.TokenDeSessao;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
+import java.util.Collection;
 
 /** Rotas de sessão de ponta a ponta (DEC-08, DEC-10, DEC-15.4). */
 @SpringBootTest
@@ -66,20 +67,15 @@ class SessaoIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private CodificadorDeSenha senhas;
+    @Autowired private CodificadorDeSenha senhas;
 
-    @Autowired
-    private Relogio relogio;
+    @Autowired private Relogio relogio;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
     private MockMvc mvc;
 
@@ -90,14 +86,16 @@ class SessaoIntegracaoTest {
 
     @Test
     void loginDoAdminGravaOCookieDoDec08ERetornaOsDadosDaSessao() throws Exception {
-        MockHttpServletResponse resposta = entrar(ADMIN, SENHA_DO_ADMIN)
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.usuarioId").value(1))
-                .andExpect(jsonPath("$.email").value(ADMIN))
-                .andExpect(jsonPath("$.papel").value("ADMIN"))
-                .andExpect(jsonPath("$.nome").value("Administração"))
-                .andReturn().getResponse();
+        MockHttpServletResponse resposta =
+                entrar(ADMIN, SENHA_DO_ADMIN)
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.usuarioId").value(1))
+                        .andExpect(jsonPath("$.email").value(ADMIN))
+                        .andExpect(jsonPath("$.papel").value("ADMIN"))
+                        .andExpect(jsonPath("$.nome").value("Administração"))
+                        .andReturn()
+                        .getResponse();
 
         String cookie = setCookieDaSessao(resposta);
         assertThat(cookie).contains("HttpOnly", "SameSite=Strict", "Path=/api");
@@ -106,9 +104,8 @@ class SessaoIntegracaoTest {
 
     @Test
     void cookieDoLoginAbreAGetDaSessaoEAUmaRotaDeAdmin() throws Exception {
-        Cookie sessao = cookieDaSessao(entrar(ADMIN, SENHA_DO_ADMIN)
-                .andExpect(status().isOk())
-                .andReturn().getResponse());
+        Cookie sessao =
+                cookieDaSessao(entrar(ADMIN, SENHA_DO_ADMIN).andExpect(status().isOk()).andReturn().getResponse());
 
         mvc.perform(get("/api/sessao").cookie(sessao))
                 .andExpect(status().isOk())
@@ -129,10 +126,13 @@ class SessaoIntegracaoTest {
 
     @Test
     void sessaoDoClienteTrazONomeDoCliente() throws Exception {
-        Cookie sessao = cookieDaSessao(entrar("ana.souza@livraria.test", SENHA_DE_TESTE)
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nome").value("Ana Souza"))
-                .andReturn().getResponse());
+        Cookie sessao =
+                cookieDaSessao(
+                        entrar("ana.souza@livraria.test", SENHA_DE_TESTE)
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.nome").value("Ana Souza"))
+                                .andReturn()
+                                .getResponse());
 
         mvc.perform(get("/api/sessao").cookie(sessao))
                 .andExpect(status().isOk())
@@ -159,9 +159,10 @@ class SessaoIntegracaoTest {
 
     @Test
     void loginSemTokenCsrfResponde403() throws Exception {
-        mvc.perform(post("/api/sessao")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(corpoDeLogin(ADMIN, SENHA_DO_ADMIN)))
+        mvc.perform(
+                        post("/api/sessao")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(corpoDeLogin(ADMIN, SENHA_DO_ADMIN)))
                 .andExpect(status().isForbidden())
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.detail").value("Token CSRF ausente ou inválido."));
@@ -169,9 +170,7 @@ class SessaoIntegracaoTest {
 
     @Test
     void loginComCamposEmBrancoResponde400() throws Exception {
-        comTokenCsrf(post("/api/sessao")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(corpoDeLogin("  ", "")))
+        comTokenCsrf(post("/api/sessao").contentType(MediaType.APPLICATION_JSON).content(corpoDeLogin("  ", "")))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
     }
@@ -184,10 +183,7 @@ class SessaoIntegracaoTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.papel").value("CLIENTE"));
 
-        assertThat(usuarios.buscarPorId(inativa.getId()))
-                .get()
-                .extracting(Usuario::getInativadoEm)
-                .isNull();
+        assertThat(usuarios.buscarPorId(inativa.getId())).get().extracting(Usuario::getInativadoEm).isNull();
     }
 
     @Test
@@ -203,15 +199,15 @@ class SessaoIntegracaoTest {
     @Test
     void logoutApagaOCookieDeSessao() throws Exception {
         Cookie csrf = tokenCsrf();
-        Cookie sessao = cookieDaSessao(entrar(ADMIN, SENHA_DO_ADMIN, csrf)
-                .andExpect(status().isOk())
-                .andReturn().getResponse());
+        Cookie sessao =
+                cookieDaSessao(
+                        entrar(ADMIN, SENHA_DO_ADMIN, csrf).andExpect(status().isOk()).andReturn().getResponse());
 
-        MockHttpServletResponse resposta = mvc.perform(delete("/api/sessao")
-                .cookie(sessao, csrf)
-                .header(CABECALHO_CSRF, csrf.getValue()))
-                .andExpect(status().isNoContent())
-                .andReturn().getResponse();
+        MockHttpServletResponse resposta =
+                mvc.perform(delete("/api/sessao").cookie(sessao, csrf).header(CABECALHO_CSRF, csrf.getValue()))
+                        .andExpect(status().isNoContent())
+                        .andReturn()
+                        .getResponse();
 
         assertThat(setCookieDaSessao(resposta)).contains("Max-Age=0", "Path=/api");
     }
@@ -220,9 +216,8 @@ class SessaoIntegracaoTest {
     void loginRotacionaOTokenCsrf() throws Exception {
         Cookie csrfAntes = tokenCsrf();
 
-        MockHttpServletResponse resposta = entrar(ADMIN, SENHA_DO_ADMIN, csrfAntes)
-                .andExpect(status().isOk())
-                .andReturn().getResponse();
+        MockHttpServletResponse resposta =
+                entrar(ADMIN, SENHA_DO_ADMIN, csrfAntes).andExpect(status().isOk()).andReturn().getResponse();
 
         String csrfDepois = valorDoCookie(resposta, COOKIE_CSRF);
         assertThat(csrfDepois).isNotBlank().isNotEqualTo(csrfAntes.getValue());
@@ -230,17 +225,19 @@ class SessaoIntegracaoTest {
 
     @Test
     void logoutRotacionaOTokenCsrf() throws Exception {
-        MockHttpServletResponse login = entrar(ADMIN, SENHA_DO_ADMIN, tokenCsrf())
-                .andExpect(status().isOk())
-                .andReturn().getResponse();
+        MockHttpServletResponse login =
+                entrar(ADMIN, SENHA_DO_ADMIN, tokenCsrf()).andExpect(status().isOk()).andReturn().getResponse();
         Cookie sessao = cookieDaSessao(login);
         String csrfAntes = valorDoCookie(login, COOKIE_CSRF);
 
-        MockHttpServletResponse resposta = mvc.perform(delete("/api/sessao")
-                .cookie(sessao, new Cookie(COOKIE_CSRF, csrfAntes))
-                .header(CABECALHO_CSRF, csrfAntes))
-                .andExpect(status().isNoContent())
-                .andReturn().getResponse();
+        MockHttpServletResponse resposta =
+                mvc.perform(
+                                delete("/api/sessao")
+                                        .cookie(sessao, new Cookie(COOKIE_CSRF, csrfAntes))
+                                        .header(CABECALHO_CSRF, csrfAntes))
+                        .andExpect(status().isNoContent())
+                        .andReturn()
+                        .getResponse();
 
         assertThat(valorDoCookie(resposta, COOKIE_CSRF)).isNotBlank().isNotEqualTo(csrfAntes);
     }
@@ -251,18 +248,16 @@ class SessaoIntegracaoTest {
         Cookie cookieAntigo = cookieDe(inativa);
         Cookie csrf = tokenCsrf();
 
-        mvc.perform(post("/api/sessao")
-                .cookie(cookieAntigo, csrf)
-                .header(CABECALHO_CSRF, csrf.getValue())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(corpoDeLogin("reativa.cookie@livraria.test", SENHA_DE_TESTE)))
+        mvc.perform(
+                        post("/api/sessao")
+                                .cookie(cookieAntigo, csrf)
+                                .header(CABECALHO_CSRF, csrf.getValue())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(corpoDeLogin("reativa.cookie@livraria.test", SENHA_DE_TESTE)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.papel").value("CLIENTE"));
 
-        assertThat(usuarios.buscarPorId(inativa.getId()))
-                .get()
-                .extracting(Usuario::getInativadoEm)
-                .isNull();
+        assertThat(usuarios.buscarPorId(inativa.getId())).get().extracting(Usuario::getInativadoEm).isNull();
     }
 
     @Test
@@ -270,11 +265,14 @@ class SessaoIntegracaoTest {
         Usuario inativa = criarUsuario("inativa.cookie@livraria.test", relogio.agora().minusDays(1));
         Cookie csrf = tokenCsrf();
 
-        MockHttpServletResponse resposta = mvc.perform(delete("/api/sessao")
-                .cookie(cookieDe(inativa), csrf)
-                .header(CABECALHO_CSRF, csrf.getValue()))
-                .andExpect(status().isNoContent())
-                .andReturn().getResponse();
+        MockHttpServletResponse resposta =
+                mvc.perform(
+                                delete("/api/sessao")
+                                        .cookie(cookieDe(inativa), csrf)
+                                        .header(CABECALHO_CSRF, csrf.getValue()))
+                        .andExpect(status().isNoContent())
+                        .andReturn()
+                        .getResponse();
 
         assertThat(setCookieDaSessao(resposta)).contains("Max-Age=0");
     }
@@ -283,10 +281,12 @@ class SessaoIntegracaoTest {
     void getDaSessaoComCookieInvalidoResponde401EApagaOCookie() throws Exception {
         Usuario inativa = criarUsuario("inativa.consulta@livraria.test", relogio.agora().minusDays(1));
 
-        MockHttpServletResponse resposta = mvc.perform(get("/api/sessao").cookie(cookieDe(inativa)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.detail").value("Autenticação necessária."))
-                .andReturn().getResponse();
+        MockHttpServletResponse resposta =
+                mvc.perform(get("/api/sessao").cookie(cookieDe(inativa)))
+                        .andExpect(status().isUnauthorized())
+                        .andExpect(jsonPath("$.detail").value("Autenticação necessária."))
+                        .andReturn()
+                        .getResponse();
 
         assertThat(setCookieDaSessao(resposta)).contains("Max-Age=0");
     }
@@ -306,15 +306,16 @@ class SessaoIntegracaoTest {
     }
 
     private ResultActions entrar(String login, String senha, Cookie csrf) throws Exception {
-        return mvc.perform(post("/api/sessao")
-                .cookie(csrf)
-                .header(CABECALHO_CSRF, csrf.getValue())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(corpoDeLogin(login, senha)));
+        return mvc.perform(
+                post("/api/sessao")
+                        .cookie(csrf)
+                        .header(CABECALHO_CSRF, csrf.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(corpoDeLogin(login, senha)));
     }
 
-    private ResultActions comTokenCsrf(org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder requisicao)
-            throws Exception {
+    private ResultActions comTokenCsrf(
+            org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder requisicao) throws Exception {
         Cookie csrf = tokenCsrf();
         return mvc.perform(requisicao.cookie(csrf).header(CABECALHO_CSRF, csrf.getValue()));
     }
@@ -342,8 +343,8 @@ class SessaoIntegracaoTest {
     }
 
     private Usuario criarUsuario(String email, LocalDateTime inativadoEm) {
-        return usuarios.salvar(new Usuario(null, email, null, senhas.codificar(SENHA_DE_TESTE), Papel.CLIENTE,
-                inativadoEm));
+        return usuarios.salvar(
+                new Usuario(null, email, null, senhas.codificar(SENHA_DE_TESTE), Papel.CLIENTE, inativadoEm));
     }
 
     private static Cookie cookieDaSessao(MockHttpServletResponse resposta) {

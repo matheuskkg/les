@@ -3,14 +3,14 @@ package br.fatec.les.livraria.estoque.aplicacao.casodeuso;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
+import br.fatec.les.livraria.estoque.dominio.modelo.Reserva;
 
 import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
-import br.fatec.les.livraria.estoque.dominio.modelo.Reserva;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 /** RF-EST-003, RN-EST-006, DEC-15.3: baixa da venda aprovada consumindo as reservas do checkout. */
 class BaixarEstoqueTest {

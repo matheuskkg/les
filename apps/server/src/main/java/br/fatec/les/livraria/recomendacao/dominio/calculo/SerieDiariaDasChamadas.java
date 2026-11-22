@@ -1,20 +1,20 @@
 package br.fatec.les.livraria.recomendacao.dominio.calculo;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ChamadaIa;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ChamadasNoDia;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.PeriodoDasMetricas;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ResultadoDaChamada;
 
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
- * Chamadas e falhas por dia para o gráfico das métricas (RNF-REC-001, DEC-03), somando todos os provedores. Todo dia
- * do período tem um ponto, com zero quando não houve chamada, para o eixo do gráfico ser contínuo.
+ * Chamadas e falhas por dia para o gráfico das métricas (RNF-REC-001, DEC-03), somando todos os provedores. Todo dia do
+ * período tem um ponto, com zero quando não houve chamada, para o eixo do gráfico ser contínuo.
  */
 @Component
 public class SerieDiariaDasChamadas {

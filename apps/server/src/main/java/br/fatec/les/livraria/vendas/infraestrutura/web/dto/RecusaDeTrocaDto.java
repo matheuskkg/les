@@ -7,5 +7,4 @@ import org.jspecify.annotations.Nullable;
  *
  * @param motivo motivo enviado ao cliente na notificação
  */
-public record RecusaDeTrocaDto(@Nullable String motivo) {
-}
+public record RecusaDeTrocaDto(@Nullable String motivo) {}

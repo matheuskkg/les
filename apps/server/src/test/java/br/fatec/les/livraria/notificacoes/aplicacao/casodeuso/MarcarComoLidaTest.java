@@ -3,14 +3,14 @@ package br.fatec.les.livraria.notificacoes.aplicacao.casodeuso;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDateTime;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
 import br.fatec.les.livraria.notificacoes.aplicacao.porta.NotificacaoRepositorioFake;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.TipoNotificacao;
+
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
 
 /** Leitura de uma notificação do próprio usuário (DEC-07, DEC-13). */
 class MarcarComoLidaTest {
@@ -42,10 +42,7 @@ class MarcarComoLidaTest {
         assertThatThrownBy(() -> caso.executar(CLIENTE, notificacao.getId()))
                 .isInstanceOf(ExcecaoDeRecursoNaoEncontrado.class)
                 .hasMessage("Notificação não encontrada.");
-        assertThat(notificacoes.buscarPorId(notificacao.getId()))
-                .get()
-                .extracting(Notificacao::getLidaEm)
-                .isNull();
+        assertThat(notificacoes.buscarPorId(notificacao.getId())).get().extracting(Notificacao::getLidaEm).isNull();
     }
 
     @Test
@@ -70,7 +67,13 @@ class MarcarComoLidaTest {
     }
 
     private Notificacao criar(Long usuarioId) {
-        return notificacoes.salvar(Notificacao.nova(usuarioId, TipoNotificacao.PEDIDO_APROVADO,
-                "Seu pedido foi aprovado.", "pedido", 10042L, CRIADA_EM));
+        return notificacoes.salvar(
+                Notificacao.nova(
+                        usuarioId,
+                        TipoNotificacao.PEDIDO_APROVADO,
+                        "Seu pedido foi aprovado.",
+                        "pedido",
+                        10042L,
+                        CRIADA_EM));
     }
 }

@@ -2,15 +2,15 @@ package br.fatec.les.livraria.vendas.dominio.regra;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.dominio.modelo.ItemCheckout;
 import br.fatec.les.livraria.vendas.dominio.pagamento.ReservasDoCheckout;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Map;
 
 class ItensAindaReservadosTest {
 

@@ -1,15 +1,16 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Cartões do cadastro do cliente (RN-CLI-004): percorre a lista e aplica {@link CartaoCompleto} a cada item, numerando

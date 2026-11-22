@@ -1,14 +1,14 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.clientes.dominio.modelo.EscolhaDeEndereco;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 
+import org.springframework.stereotype.Component;
+
 /**
- * Escolha do endereço da compra (RF-VEN-005, DEC-10): um endereço cadastrado ou um novo, nunca os dois nem nenhum.
- * Os dados do novo são validados pelas regras do próprio endereço (RN-CLI-003).
+ * Escolha do endereço da compra (RF-VEN-005, DEC-10): um endereço cadastrado ou um novo, nunca os dois nem nenhum. Os
+ * dados do novo são validados pelas regras do próprio endereço (RN-CLI-003).
  */
 @Component
 public class EscolhaDeEnderecoValida implements Regra<EscolhaDeEndereco> {

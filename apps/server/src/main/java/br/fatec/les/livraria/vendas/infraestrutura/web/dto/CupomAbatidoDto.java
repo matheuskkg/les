@@ -7,7 +7,6 @@ import br.fatec.les.livraria.vendas.dominio.pagamento.CupomAbatido;
 public record CupomAbatidoDto(Long id, String codigo, Dinheiro valor, Dinheiro abatido) {
 
     public static CupomAbatidoDto de(CupomAbatido cupom) {
-        return new CupomAbatidoDto(cupom.cupom().id(), cupom.cupom().codigo(), cupom.cupom().valor(),
-                cupom.abatido());
+        return new CupomAbatidoDto(cupom.cupom().id(), cupom.cupom().codigo(), cupom.cupom().valor(), cupom.abatido());
     }
 }

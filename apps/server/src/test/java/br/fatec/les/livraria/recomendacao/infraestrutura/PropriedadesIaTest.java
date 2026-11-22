@@ -3,14 +3,12 @@ package br.fatec.les.livraria.recomendacao.infraestrutura;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.junit.jupiter.api.Test;
+
 import java.time.Duration;
 import java.util.Map;
 
-import org.junit.jupiter.api.Test;
-
-/**
- * Validação e padrões das opções de cada provedor de IA (RNF-REC-001, DEC-03).
- */
+/** Validação e padrões das opções de cada provedor de IA (RNF-REC-001, DEC-03). */
 class PropriedadesIaTest {
 
     private static final String URL = "http://127.0.0.1:1/v1";
@@ -30,8 +28,9 @@ class PropriedadesIaTest {
 
     @Test
     void rnfRec001_opcoesValidasSaoAceitasSemDiferenciarMaiusculas() {
-        PropriedadesIa.Provedor provedor = new PropriedadesIa.Provedor(
-                URL, "modelo", "chave", "REQUIRED", "JSON-SCHEMA", Map.of("X-Title", "Livraria LES"), 3);
+        PropriedadesIa.Provedor provedor =
+                new PropriedadesIa.Provedor(
+                        URL, "modelo", "chave", "REQUIRED", "JSON-SCHEMA", Map.of("X-Title", "Livraria LES"), 3);
 
         assertThat(provedor.exigeToolChoice()).isTrue();
         assertThat(provedor.usaFerramenta()).isFalse();
@@ -42,10 +41,10 @@ class PropriedadesIaTest {
 
     @Test
     void rnfRec001_formatosDeTextoNaoUsamAFerramentaDeResposta() {
-        PropriedadesIa.Provedor instrucoes = new PropriedadesIa.Provedor(
-                URL, "modelo", "chave", null, "INSTRUCOES", null, 5);
-        PropriedadesIa.Provedor jsonSchema = new PropriedadesIa.Provedor(
-                URL, "modelo", "chave", null, "JSON-SCHEMA", null, 5);
+        PropriedadesIa.Provedor instrucoes =
+                new PropriedadesIa.Provedor(URL, "modelo", "chave", null, "INSTRUCOES", null, 5);
+        PropriedadesIa.Provedor jsonSchema =
+                new PropriedadesIa.Provedor(URL, "modelo", "chave", null, "JSON-SCHEMA", null, 5);
 
         assertThat(instrucoes.formato()).isEqualTo(PropriedadesIa.Provedor.FORMATO_INSTRUCOES);
         assertThat(instrucoes.usaFerramenta()).isFalse();

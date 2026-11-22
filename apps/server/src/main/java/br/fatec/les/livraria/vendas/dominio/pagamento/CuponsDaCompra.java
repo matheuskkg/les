@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.vendas.dominio.pagamento;
 
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
 import java.util.List;
 import java.util.Objects;
-
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
 /**
  * Valores e cupons de uma compra, antes dos cartões (RF-VEN-007, DEC-11).
@@ -11,10 +11,7 @@ import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
  * @param promocional nulo se a compra não usar promocional
  */
 public record CuponsDaCompra(
-        Dinheiro subtotal,
-        Dinheiro frete,
-        CupomPromocional promocional,
-        List<CupomTroca> cuponsDeTroca) {
+        Dinheiro subtotal, Dinheiro frete, CupomPromocional promocional, List<CupomTroca> cuponsDeTroca) {
 
     public CuponsDaCompra {
         Objects.requireNonNull(subtotal, "subtotal");

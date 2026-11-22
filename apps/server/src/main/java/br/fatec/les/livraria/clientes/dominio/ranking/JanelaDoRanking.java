@@ -10,8 +10,7 @@ public final class JanelaDoRanking {
 
     public static final int DIAS = 365;
 
-    private JanelaDoRanking() {
-    }
+    private JanelaDoRanking() {}
 
     public static LocalDate inicio(LocalDate hoje) {
         return hoje.minusDays(DIAS);

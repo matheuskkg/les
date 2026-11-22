@@ -3,9 +3,8 @@ package br.fatec.les.livraria.recomendacao.dominio.modelo;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Uma chamada HTTP feita a um provedor de IA dentro de uma mensagem (RNF-REC-001, DEC-03). Guarda os tokens de
- * entrada e de saída informados naquela volta; os dois ficam nulos quando o provedor não os informou, inclusive nas
- * falhas.
+ * Uma chamada HTTP feita a um provedor de IA dentro de uma mensagem (RNF-REC-001, DEC-03). Guarda os tokens de entrada
+ * e de saída informados naquela volta; os dois ficam nulos quando o provedor não os informou, inclusive nas falhas.
  */
 public record VoltaDaChamada(@Nullable Integer tokensEntrada, @Nullable Integer tokensSaida) {
 

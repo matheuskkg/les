@@ -2,9 +2,9 @@ package br.fatec.les.livraria.compartilhado.dominio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.math.BigDecimal;
-
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
 
 class DinheiroTest {
 

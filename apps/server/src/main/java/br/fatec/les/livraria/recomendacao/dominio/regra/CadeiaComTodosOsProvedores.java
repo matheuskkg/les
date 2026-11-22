@@ -1,20 +1,20 @@
 package br.fatec.les.livraria.recomendacao.dominio.regra;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.AlteracaoDaCadeia;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.PosicaoNaCadeia;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ProvedorIa;
 
+import org.springframework.stereotype.Component;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
- * A alteração da cadeia traz cada provedor existente exatamente uma vez (RNF-REC-001, DEC-03): o ADMIN reordena e
- * ativa ou desativa, mas não cria nem remove provedores, que dependem de um adapter no server.
+ * A alteração da cadeia traz cada provedor existente exatamente uma vez (RNF-REC-001, DEC-03): o ADMIN reordena e ativa
+ * ou desativa, mas não cria nem remove provedores, que dependem de um adapter no server.
  */
 @Component
 public class CadeiaComTodosOsProvedores implements Regra<AlteracaoDaCadeia> {

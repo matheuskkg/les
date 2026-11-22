@@ -1,11 +1,12 @@
 package br.fatec.les.livraria.recomendacao.aplicacao.casodeuso;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.IdentificarCliente;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ConversasRepositorio;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
 
 /**
  * "Limpar conversa" (RNF-REC-001, DEC-03): arquiva a conversa ativa do cliente, que fica no banco e não é exibida a

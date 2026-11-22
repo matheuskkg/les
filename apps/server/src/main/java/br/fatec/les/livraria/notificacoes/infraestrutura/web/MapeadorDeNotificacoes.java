@@ -1,13 +1,13 @@
 package br.fatec.les.livraria.notificacoes.infraestrutura.web;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.infraestrutura.tempo.RelogioDoSistema;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
 import br.fatec.les.livraria.notificacoes.infraestrutura.web.dto.NotificacaoDto;
+
+import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
 
 /**
  * Converte a notificação de domínio no DTO da listagem e do evento SSE (DEC-07, DEC-13). A API expõe data e hora em
@@ -17,8 +17,13 @@ import br.fatec.les.livraria.notificacoes.infraestrutura.web.dto.NotificacaoDto;
 public class MapeadorDeNotificacoes {
 
     public NotificacaoDto paraDto(Notificacao notificacao) {
-        return new NotificacaoDto(notificacao.getId(), notificacao.getTipo(), notificacao.getMensagem(),
-                notificacao.getRecurso(), notificacao.getRecursoId(), paraInstant(notificacao.getCriadaEm()),
+        return new NotificacaoDto(
+                notificacao.getId(),
+                notificacao.getTipo(),
+                notificacao.getMensagem(),
+                notificacao.getRecurso(),
+                notificacao.getRecursoId(),
+                paraInstant(notificacao.getCriadaEm()),
                 paraInstant(notificacao.getLidaEm()));
     }
 

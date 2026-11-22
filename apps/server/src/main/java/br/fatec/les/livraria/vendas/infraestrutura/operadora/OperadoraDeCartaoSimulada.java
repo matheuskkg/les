@@ -1,13 +1,13 @@
 package br.fatec.les.livraria.vendas.infraestrutura.operadora;
 
-import java.time.LocalDate;
-import java.time.YearMonth;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.vendas.aplicacao.porta.OperadoraDeCartao;
 import br.fatec.les.livraria.vendas.dominio.pagamento.CobrancaNoCartao;
 import br.fatec.les.livraria.vendas.dominio.pagamento.RespostaDaOperadora;
+
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.time.YearMonth;
 
 /**
  * Operadora simulada (RN-VEN-007, DEC-05.2), com as condições avaliadas nesta ordem: cartão vencido na data da

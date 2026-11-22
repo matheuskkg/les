@@ -2,13 +2,11 @@ package br.fatec.les.livraria.recomendacao.dominio.modelo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
-
 import org.junit.jupiter.api.Test;
 
-/**
- * Truncamento de {@code chamada_ia.tokens_das_voltas} sem partir uma volta (RNF-REC-001, DEC-03).
- */
+import java.time.LocalDateTime;
+
+/** Truncamento de {@code chamada_ia.tokens_das_voltas} sem partir uma volta (RNF-REC-001, DEC-03). */
 class ChamadaIaTest {
 
     @Test
@@ -28,7 +26,19 @@ class ChamadaIaTest {
     }
 
     private static ChamadaIa chamada(String tokensDasVoltas) {
-        return new ChamadaIa(1L, "modelo", OperacaoIa.CONVERSAR, LocalDateTime.now(), 10, 1,
-                ResultadoDaChamada.SUCESSO, null, null, null, null, 1, tokensDasVoltas);
+        return new ChamadaIa(
+                1L,
+                "modelo",
+                OperacaoIa.CONVERSAR,
+                LocalDateTime.now(),
+                10,
+                1,
+                ResultadoDaChamada.SUCESSO,
+                null,
+                null,
+                null,
+                null,
+                1,
+                tokensDasVoltas);
     }
 }

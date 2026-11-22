@@ -1,10 +1,5 @@
 package br.fatec.les.livraria.vendas.aplicacao.casodeuso;
 
-import java.util.Objects;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.ConsultarUsuarioDoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
 import br.fatec.les.livraria.notificacoes.aplicacao.casodeuso.Notificar;
@@ -13,7 +8,13 @@ import br.fatec.les.livraria.vendas.aplicacao.DetalharPedido;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.PedidoDetalhado;
 import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 /**
  * O administrador despacha um pedido aprovado: {@code APROVADA} → {@code EM TRANSPORTE} (RF-VEN-009, RN-VEN-009,
@@ -38,14 +39,21 @@ public class DespacharPedido {
     @Transactional
     public PedidoDetalhado executar(Long id) {
         Objects.requireNonNull(id, "id");
-        Pedido pedido = pedidos.buscarParaAlterar(id)
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Pedido não encontrado."));
+        Pedido pedido =
+                pedidos.buscarParaAlterar(id)
+                        .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Pedido não encontrado."));
         pedido.despachar();
         Pedido despachado = pedidos.salvar(pedido);
-        consultarUsuario.executar(despachado.getClienteId()).ifPresent(usuarioId -> notificar.executar(
-                Notificar.Comando.sobre(usuarioId, TipoNotificacao.PEDIDO_DESPACHADO,
-                        "O pedido nº %d saiu para entrega.".formatted(despachado.getId()), "pedido",
-                        despachado.getId())));
+        consultarUsuario
+                .executar(despachado.getClienteId())
+                .ifPresent(usuarioId ->
+                        notificar.executar(
+                                Notificar.Comando.sobre(
+                                        usuarioId,
+                                        TipoNotificacao.PEDIDO_DESPACHADO,
+                                        "O pedido nº %d saiu para entrega.".formatted(despachado.getId()),
+                                        "pedido",
+                                        despachado.getId())));
         return detalharPedido.executar(despachado);
     }
 }

@@ -3,13 +3,13 @@ package br.fatec.les.livraria.vendas.dominio.frete;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.math.BigDecimal;
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+import java.math.BigDecimal;
 
 /** RF-VEN-004, DEC-05.3: peso considerado, blocos de 0,5 kg e base pela região do CEP. */
 class RegrasDoFreteTest {
@@ -37,15 +37,16 @@ class RegrasDoFreteTest {
     }
 
     @ParameterizedTest
-    @CsvSource({ "0.001, 1", "0.5, 1", "0.501, 2", "1.0, 2", "1.01, 3", "0, 1" })
+    @CsvSource({"0.001, 1", "0.5, 1", "0.501, 2", "1.0, 2", "1.01, 3", "0, 1"})
     void rfVen004_blocosIniciadosDeMeioQuiloNoMinimoUm(String peso, int blocos) {
         assertThat(BlocosDePeso.de(new BigDecimal(peso))).isEqualTo(blocos);
     }
 
     @ParameterizedTest
     @CsvSource({
-            "01310-100, 12.00", "13000000, 12.00", "20000000, 15.00", "30160010, 15.00", "40000000, 25.00",
-            "50000000, 25.00", "60000000, 30.00", "70000000, 22.00", "80020310, 18.00", "90020120, 18.00" })
+        "01310-100, 12.00", "13000000, 12.00", "20000000, 15.00", "30160010, 15.00", "40000000, 25.00",
+        "50000000, 25.00", "60000000, 30.00", "70000000, 22.00", "80020310, 18.00", "90020120, 18.00"
+    })
     void rfVen004_basePeloPrimeiroDigitoDoCep(String cep, String base) {
         assertThat(BaseDaRegiao.de(cep)).isEqualTo(Dinheiro.de(base));
     }
@@ -55,9 +56,13 @@ class RegrasDoFreteTest {
         assertThatThrownBy(() -> BaseDaRegiao.de("-")).isInstanceOf(IllegalArgumentException.class);
     }
 
-    private static VolumeDoFrete volume(String peso, String altura, String largura, String profundidade,
-            int quantidade) {
-        return new VolumeDoFrete(new BigDecimal(peso), new BigDecimal(altura), new BigDecimal(largura),
-                new BigDecimal(profundidade), quantidade);
+    private static VolumeDoFrete volume(
+            String peso, String altura, String largura, String profundidade, int quantidade) {
+        return new VolumeDoFrete(
+                new BigDecimal(peso),
+                new BigDecimal(altura),
+                new BigDecimal(largura),
+                new BigDecimal(profundidade),
+                quantidade);
     }
 }

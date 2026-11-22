@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.compartilhado.dominio;
 
+import lombok.Getter;
+
 import java.util.List;
 import java.util.stream.Collectors;
-
-import lombok.Getter;
 
 /** Uma ou mais regras de negócio foram violadas. Respondida pela API com HTTP 422. */
 @Getter

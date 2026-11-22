@@ -6,7 +6,7 @@ import java.util.Optional;
  * Usuário responsável por uma escrita, usado pela auditoria do Envers (RNF-GER-002, DEC-08).
  *
  * <p>Dentro de uma requisição autenticada devolve o id e o e-mail do usuário; sem login devolve {@code anonimo}; fora
- * de uma requisição HTTP devolve {@code sistema}.</p>
+ * de uma requisição HTTP devolve {@code sistema}.
  */
 public interface UsuarioAtual {
 

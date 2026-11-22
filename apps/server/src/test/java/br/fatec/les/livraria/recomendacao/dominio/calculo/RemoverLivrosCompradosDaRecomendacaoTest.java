@@ -2,13 +2,13 @@ package br.fatec.les.livraria.recomendacao.dominio.calculo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-import java.util.Set;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.TipoDeResposta;
 
 import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
-import br.fatec.les.livraria.recomendacao.dominio.modelo.TipoDeResposta;
+import java.util.List;
+import java.util.Set;
 
 class RemoverLivrosCompradosDaRecomendacaoTest {
 
@@ -18,10 +18,11 @@ class RemoverLivrosCompradosDaRecomendacaoTest {
 
     @Test
     void rnfRec001_recomendacaoRemoveOsLivrosComprados() {
-        RespostaDoAssistente resposta = remover.remover(
-                new RespostaDoAssistente(TipoDeResposta.RECOMENDACAO, "Separei estes para você.",
-                        List.of(1L, 2L, 3L, 4L)),
-                COMPRADOS);
+        RespostaDoAssistente resposta =
+                remover.remover(
+                        new RespostaDoAssistente(
+                                TipoDeResposta.RECOMENDACAO, "Separei estes para você.", List.of(1L, 2L, 3L, 4L)),
+                        COMPRADOS);
 
         assertThat(resposta.tipo()).isEqualTo(TipoDeResposta.RECOMENDACAO);
         assertThat(resposta.texto()).isEqualTo("Separei estes para você.");
@@ -30,29 +31,34 @@ class RemoverLivrosCompradosDaRecomendacaoTest {
 
     @Test
     void rnfRec001_buscaMantemOsLivrosComprados() {
-        RespostaDoAssistente resposta = remover.remover(
-                new RespostaDoAssistente(TipoDeResposta.BUSCA, "Encontrei estes livros.", List.of(1L, 2L)),
-                COMPRADOS);
+        RespostaDoAssistente resposta =
+                remover.remover(
+                        new RespostaDoAssistente(TipoDeResposta.BUSCA, "Encontrei estes livros.", List.of(1L, 2L)),
+                        COMPRADOS);
 
         assertThat(resposta.livrosCitados()).containsExactly(1L, 2L);
     }
 
     @Test
     void rnfRec001_duvidaMantemOsLivrosComprados() {
-        RespostaDoAssistente resposta = remover.remover(
-                new RespostaDoAssistente(TipoDeResposta.DUVIDA, "O livro que você tem custa R$ 29,90.",
-                        List.of(3L)),
-                COMPRADOS);
+        RespostaDoAssistente resposta =
+                remover.remover(
+                        new RespostaDoAssistente(
+                                TipoDeResposta.DUVIDA, "O livro que você tem custa R$ 29,90.", List.of(3L)),
+                        COMPRADOS);
 
         assertThat(resposta.livrosCitados()).containsExactly(3L);
     }
 
     @Test
     void rnfRec001_foraDoEscopoSemLivros() {
-        RespostaDoAssistente resposta = remover.remover(
-                new RespostaDoAssistente(TipoDeResposta.FORA_DO_ESCOPO,
-                        ValidarRespostaDoAssistente.TEXTO_FORA_DO_ESCOPO, List.of()),
-                COMPRADOS);
+        RespostaDoAssistente resposta =
+                remover.remover(
+                        new RespostaDoAssistente(
+                                TipoDeResposta.FORA_DO_ESCOPO,
+                                ValidarRespostaDoAssistente.TEXTO_FORA_DO_ESCOPO,
+                                List.of()),
+                        COMPRADOS);
 
         assertThat(resposta.livrosCitados()).isEmpty();
         assertThat(resposta.texto()).isEqualTo(ValidarRespostaDoAssistente.TEXTO_FORA_DO_ESCOPO);
@@ -60,10 +66,11 @@ class RemoverLivrosCompradosDaRecomendacaoTest {
 
     @Test
     void rnfRec001_semLivrosRestantesTrocaOTextoQueApresentavaOsComprados() {
-        RespostaDoAssistente resposta = remover.remover(
-                new RespostaDoAssistente(TipoDeResposta.RECOMENDACAO, "Recomendo estes dois livros.",
-                        List.of(1L, 3L)),
-                COMPRADOS);
+        RespostaDoAssistente resposta =
+                remover.remover(
+                        new RespostaDoAssistente(
+                                TipoDeResposta.RECOMENDACAO, "Recomendo estes dois livros.", List.of(1L, 3L)),
+                        COMPRADOS);
 
         assertThat(resposta.livrosCitados()).isEmpty();
         assertThat(resposta.texto()).isEqualTo(RemoverLivrosCompradosDaRecomendacao.TEXTO_SO_COMPRADOS);

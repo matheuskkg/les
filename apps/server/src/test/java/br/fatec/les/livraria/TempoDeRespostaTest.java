@@ -5,7 +5,10 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.Duration;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,9 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import jakarta.servlet.http.Cookie;
+import java.time.Duration;
 
 /**
  * Consultas de usuário respondem em até 1 segundo com o seed completo, inclusive os pedidos históricos do ANA-01
@@ -33,14 +34,11 @@ class TempoDeRespostaTest {
 
     private static final int MEDICOES = 3;
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
     private MockMvc mvc;
 
@@ -52,28 +50,32 @@ class TempoDeRespostaTest {
     // Usuário 1 é o admin; o 6 é a Elisa, com os pedidos históricos; o 3 é o Bruno, sem compras, cuja recomendação
     // depois de aquecida é o caminho só de cache (ALT-03).
     @ParameterizedTest(name = "{1}")
-    @CsvSource(delimiter = '|', value = {
-            "1 | /api/livros?tamanho=100",
-            "1 | /api/livros?titulo=a&tamanho=100",
-            "1 | /api/livros?q=a&tamanho=100",
-            "1 | /api/admin/clientes?tamanho=100",
-            "1 | /api/admin/clientes?nome=a&situacao=ATIVA&situacao=INATIVA",
-            "1 | /api/admin/clientes/5",
-            "1 | /api/admin/pedidos?tamanho=100",
-            "1 | /api/admin/pedidos?status=ENTREGUE&tamanho=100&pagina=2",
-            "1 | /api/admin/pedidos/1",
-            "1 | /api/admin/pedidos/contagem",
-            "1 | /api/admin/trocas?tamanho=100",
-            "1 | /api/admin/trocas?status=TROCADO&tamanho=100",
-            "1 | /api/admin/analise?inicio=2024-11-01&fim=2026-10-31&categoria=1&categoria=2&categoria=3&categoria=4&categoria=5",
-            "1 | /api/admin/analise/exportacao?inicio=2024-11-01&fim=2026-10-31&categoria=1&categoria=2&categoria=3&categoria=4&categoria=5",
-            "6 | /api/me",
-            "6 | /api/me/pedidos?tamanho=100",
-            "6 | /api/me/notificacoes?tamanho=100",
-            "3 | /api/me/recomendacoes" })
+    @CsvSource(
+            delimiter = '|',
+            value = {
+                "1 | /api/livros?tamanho=100",
+                "1 | /api/livros?titulo=a&tamanho=100",
+                "1 | /api/livros?q=a&tamanho=100",
+                "1 | /api/admin/clientes?tamanho=100",
+                "1 | /api/admin/clientes?nome=a&situacao=ATIVA&situacao=INATIVA",
+                "1 | /api/admin/clientes/5",
+                "1 | /api/admin/pedidos?tamanho=100",
+                "1 | /api/admin/pedidos?status=ENTREGUE&tamanho=100&pagina=2",
+                "1 | /api/admin/pedidos/1",
+                "1 | /api/admin/pedidos/contagem",
+                "1 | /api/admin/trocas?tamanho=100",
+                "1 | /api/admin/trocas?status=TROCADO&tamanho=100",
+                "1 | /api/admin/analise?inicio=2024-11-01&fim=2026-10-31&categoria=1&categoria=2&categoria=3&categoria=4&categoria=5",
+                "1 | /api/admin/analise/exportacao?inicio=2024-11-01&fim=2026-10-31&categoria=1&categoria=2&categoria=3&categoria=4&categoria=5",
+                "6 | /api/me",
+                "6 | /api/me/pedidos?tamanho=100",
+                "6 | /api/me/notificacoes?tamanho=100",
+                "3 | /api/me/recomendacoes"
+            })
     void rnfGer001_consultaRespondeEmAteUmSegundo(Long usuarioId, String rota) throws Exception {
-        Cookie sessao = new Cookie(EmissorDeToken.COOKIE,
-                emissor.emitir(usuarios.buscarPorId(usuarioId).orElseThrow()).valor());
+        Cookie sessao =
+                new Cookie(
+                        EmissorDeToken.COOKIE, emissor.emitir(usuarios.buscarPorId(usuarioId).orElseThrow()).valor());
         mvc.perform(get(rota).cookie(sessao)).andExpect(status().isOk());
 
         Duration melhor = null;

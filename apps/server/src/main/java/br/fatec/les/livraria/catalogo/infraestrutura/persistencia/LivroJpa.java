@@ -1,9 +1,5 @@
 package br.fatec.les.livraria.catalogo.infraestrutura.persistencia;
 
-import java.math.BigDecimal;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,27 +14,34 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
-import org.hibernate.envers.Audited;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.envers.Audited;
+
+import java.math.BigDecimal;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
- * Livro do catálogo (RN-LIV-001, RN-LIV-002). As dimensões e o peso alimentam o cálculo de frete
- * (DEC-05.3), e o grupo de precificação guarda a margem usada em RF-EST-002/RN-EST-002.
+ * Livro do catálogo (RN-LIV-001, RN-LIV-002). As dimensões e o peso alimentam o cálculo de frete (DEC-05.3), e o grupo
+ * de precificação guarda a margem usada em RF-EST-002/RN-EST-002.
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @Audited
 @Entity
-@Table(name = "livro", indexes = {
-        @Index(name = "ix_livro_titulo", columnList = "titulo"),
-        @Index(name = "ux_livro_isbn", columnList = "isbn", unique = true),
-        @Index(name = "ux_livro_codigo_barras", columnList = "codigo_barras", unique = true),
-        @Index(name = "ix_livro_editora", columnList = "editora_id"),
-        @Index(name = "ix_livro_grupo_precificacao", columnList = "grupo_precificacao_id") })
+@Table(
+        name = "livro",
+        indexes = {
+            @Index(name = "ix_livro_titulo", columnList = "titulo"),
+            @Index(name = "ux_livro_isbn", columnList = "isbn", unique = true),
+            @Index(name = "ux_livro_codigo_barras", columnList = "codigo_barras", unique = true),
+            @Index(name = "ix_livro_editora", columnList = "editora_id"),
+            @Index(name = "ix_livro_grupo_precificacao", columnList = "grupo_precificacao_id")
+        })
 public class LivroJpa {
 
     @Id
@@ -91,14 +94,16 @@ public class LivroJpa {
     private boolean ativo;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "livro_autor",
+    @JoinTable(
+            name = "livro_autor",
             joinColumns = @JoinColumn(name = "livro_id"),
             inverseJoinColumns = @JoinColumn(name = "autor_id"),
             indexes = @Index(name = "ix_livro_autor_autor_id", columnList = "autor_id"))
     private Set<AutorJpa> autores = new LinkedHashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "livro_categoria",
+    @JoinTable(
+            name = "livro_categoria",
             joinColumns = @JoinColumn(name = "livro_id"),
             inverseJoinColumns = @JoinColumn(name = "categoria_id"),
             indexes = @Index(name = "ix_livro_categoria_categoria_id", columnList = "categoria_id"))

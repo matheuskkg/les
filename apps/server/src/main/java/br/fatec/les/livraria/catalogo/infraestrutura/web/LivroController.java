@@ -1,13 +1,5 @@
 package br.fatec.les.livraria.catalogo.infraestrutura.web;
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import br.fatec.les.livraria.catalogo.aplicacao.casodeuso.ConsultarLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.casodeuso.ListarLivros;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.FiltroLivro;
@@ -16,11 +8,20 @@ import br.fatec.les.livraria.catalogo.infraestrutura.web.dto.LivroListadoDto;
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 import br.fatec.les.livraria.compartilhado.infraestrutura.web.Listagem;
+
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
 /**
- * Vitrine de livros: listagem com filtros combinados e detalhe (RF-LIV-005, RNF-LIV-001, DEC-07). Só
- * livros ativos aparecem; livro inativo ou inexistente responde 404.
+ * Vitrine de livros: listagem com filtros combinados e detalhe (RF-LIV-005, RNF-LIV-001, DEC-07). Só livros ativos
+ * aparecem; livro inativo ou inexistente responde 404.
  */
 @RestController
 @RequestMapping("/api/livros")
@@ -46,9 +47,25 @@ public class LivroController {
             @RequestParam(required = false) Integer paginasAte,
             @RequestParam(required = false) Long codigo,
             @RequestParam(required = false) String q,
-            @Listagem(campos = { "titulo", "ano", "editora=editora.nome" }, padrao = "titulo,asc") Paginacao paginacao) {
-        FiltroLivro filtro = new FiltroLivro(titulo, autor, categoria, editora, isbn, codigoBarras,
-                anoDe, anoAte, edicao, paginasDe, paginasAte, codigo, q);
+            @Listagem(
+                            campos = {"titulo", "ano", "editora=editora.nome"},
+                            padrao = "titulo,asc")
+                    Paginacao paginacao) {
+        FiltroLivro filtro =
+                new FiltroLivro(
+                        titulo,
+                        autor,
+                        categoria,
+                        editora,
+                        isbn,
+                        codigoBarras,
+                        anoDe,
+                        anoAte,
+                        edicao,
+                        paginasDe,
+                        paginasAte,
+                        codigo,
+                        q);
         return listarLivros.executar(filtro, paginacao).map(mapeador::paraDto);
     }
 

@@ -3,12 +3,12 @@ package br.fatec.les.livraria.vendas.aplicacao.consulta;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
 
 import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 class PeriodoDoPedidoTest {
 

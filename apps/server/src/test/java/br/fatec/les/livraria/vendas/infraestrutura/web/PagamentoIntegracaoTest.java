@@ -13,8 +13,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-import java.util.concurrent.atomic.AtomicReference;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
+import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
+import br.fatec.les.livraria.vendas.infraestrutura.persistencia.CupomPromocionalJpaRepository;
+import br.fatec.les.livraria.vendas.infraestrutura.persistencia.PedidoJpa;
+import br.fatec.les.livraria.vendas.infraestrutura.persistencia.PedidoJpaRepository;
+import br.fatec.les.livraria.vendas.infraestrutura.persistencia.UsoCupomPromocionalJpa;
+import br.fatec.les.livraria.vendas.infraestrutura.persistencia.UsoCupomPromocionalJpaRepository;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,22 +41,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
-import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
-import br.fatec.les.livraria.vendas.infraestrutura.persistencia.CupomPromocionalJpaRepository;
-import br.fatec.les.livraria.vendas.infraestrutura.persistencia.PedidoJpa;
-import br.fatec.les.livraria.vendas.infraestrutura.persistencia.PedidoJpaRepository;
-import br.fatec.les.livraria.vendas.infraestrutura.persistencia.UsoCupomPromocionalJpa;
-import br.fatec.les.livraria.vendas.infraestrutura.persistencia.UsoCupomPromocionalJpaRepository;
-import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Conferência do pagamento sobre o seed (RF-VEN-006, RF-VEN-007, RN-VEN-003 a RN-VEN-007, DEC-11, DEC-15.2). Ana é o
- * usuário 2 (cliente 1), com o cartão Visa 1 e os cupons de troca 1 (R$ 20), 2 (R$ 40) e 3 (R$ 35); o 4 está usado e
- * o 5, vencido. Bruno é o usuário 3. Um Dom Casmurro (R$ 47,88) para o endereço 1 (SP, frete R$ 12,00) dá R$ 59,88.
+ * usuário 2 (cliente 1), com o cartão Visa 1 e os cupons de troca 1 (R$ 20), 2 (R$ 40) e 3 (R$ 35); o 4 está usado e o
+ * 5, vencido. Bruno é o usuário 3. Um Dom Casmurro (R$ 47,88) para o endereço 1 (SP, frete R$ 12,00) dá R$ 59,88.
  */
 @SpringBootTest
 @Transactional
@@ -68,26 +69,19 @@ class PagamentoIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private CupomPromocionalJpaRepository promocionais;
+    @Autowired private CupomPromocionalJpaRepository promocionais;
 
-    @Autowired
-    private UsoCupomPromocionalJpaRepository usos;
+    @Autowired private UsoCupomPromocionalJpaRepository usos;
 
-    @Autowired
-    private PedidoRepositorio pedidos;
+    @Autowired private PedidoRepositorio pedidos;
 
-    @Autowired
-    private PedidoJpaRepository pedidosJpa;
+    @Autowired private PedidoJpaRepository pedidosJpa;
 
     private MockMvc mvc;
 
@@ -149,14 +143,24 @@ class PagamentoIntegracaoTest {
                 .andExpect(jsonPath("$.cartoes[0].bandeira").value("Visa"))
                 .andExpect(jsonPath("$.cartoes[0].numero").value("**** **** **** 1111"))
                 .andExpect(jsonPath("$.cartoes[0].valor").value("59.88"));
-        conferir(ANA, "{" + ENTREGA + ",\"cartoes\":[{\"cartaoId\":1,\"valor\":9.88},"
-                + "{\"novo\":" + cartaoNovo("2030-12") + ",\"valor\":50.00}]}")
+        conferir(
+                        ANA,
+                        "{"
+                                + ENTREGA
+                                + ",\"cartoes\":[{\"cartaoId\":1,\"valor\":9.88},"
+                                + "{\"novo\":"
+                                + cartaoNovo("2030-12")
+                                + ",\"valor\":50.00}]}")
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes[*].codigo", contains("RN-VEN-004")));
         conferir(ANA, "{" + ENTREGA + ",\"cartoes\":[{\"cartaoId\":1,\"valor\":50.00}]}")
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes[0].mensagem").value("A soma dos cartões deve ser R$ 59,88."));
-        conferir(ANA, "{" + ENTREGA + ",\"cartoes\":[{\"cartaoId\":1,\"valor\":29.94},{\"cartaoId\":1,\"valor\":29.94}]}")
+        conferir(
+                        ANA,
+                        "{"
+                                + ENTREGA
+                                + ",\"cartoes\":[{\"cartaoId\":1,\"valor\":29.94},{\"cartaoId\":1,\"valor\":29.94}]}")
                 .andExpect(status().isUnprocessableContent());
     }
 
@@ -165,8 +169,13 @@ class PagamentoIntegracaoTest {
         iniciarCheckout(ANA);
 
         // R$ 59,88 − R$ 20 − R$ 35 = R$ 4,88 no cartão novo
-        conferir(ANA, "{" + ENTREGA + ",\"cuponsDeTroca\":[1,3],\"cartoes\":[{\"novo\":" + cartaoNovo("2030-12")
-                + ",\"valor\":4.88}]}")
+        conferir(
+                        ANA,
+                        "{"
+                                + ENTREGA
+                                + ",\"cuponsDeTroca\":[1,3],\"cartoes\":[{\"novo\":"
+                                + cartaoNovo("2030-12")
+                                + ",\"valor\":4.88}]}")
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.restante").value("4.88"))
                 .andExpect(jsonPath("$.cartoes[0].cartaoId").doesNotExist())
@@ -262,7 +271,8 @@ class PagamentoIntegracaoTest {
 
     private static String cartaoNovo(String validade) {
         return """
-                {"numero":"5555 5555 5555 4444","nomeImpresso":"ANA SOUZA","validade":"%s"}"""
+        {"numero":"5555 5555 5555 4444","nomeImpresso":"ANA SOUZA","validade":"%s"}\
+        """
                 .formatted(validade);
     }
 
@@ -270,10 +280,10 @@ class PagamentoIntegracaoTest {
             throws Exception {
         Cookie csrf = mvc.perform(get("/api/sessao")).andReturn().getResponse().getCookie("XSRF-TOKEN");
         assertThat(csrf).isNotNull();
-        MockHttpServletRequestBuilder comSessao = requisicao.cookie(sessaoDe(usuarioId), csrf)
-                .header("X-XSRF-TOKEN", csrf.getValue());
-        return mvc.perform(corpo.isEmpty() ? comSessao
-                : comSessao.contentType(MediaType.APPLICATION_JSON).content(corpo));
+        MockHttpServletRequestBuilder comSessao =
+                requisicao.cookie(sessaoDe(usuarioId), csrf).header("X-XSRF-TOKEN", csrf.getValue());
+        return mvc.perform(
+                corpo.isEmpty() ? comSessao : comSessao.contentType(MediaType.APPLICATION_JSON).content(corpo));
     }
 
     private Cookie sessaoDe(long usuarioId) {

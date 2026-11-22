@@ -7,9 +7,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.infraestrutura.tempo.RelogioDoSistema;
+import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
+import br.fatec.les.livraria.vendas.aplicacao.porta.TrocaRepositorio;
+import br.fatec.les.livraria.vendas.dominio.pedido.ClienteNoPedido;
+import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
+import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
+import br.fatec.les.livraria.vendas.dominio.troca.ItemTroca;
+import br.fatec.les.livraria.vendas.dominio.troca.Troca;
+
+import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,18 +33,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.infraestrutura.tempo.RelogioDoSistema;
-import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
-import br.fatec.les.livraria.vendas.aplicacao.porta.TrocaRepositorio;
-import br.fatec.les.livraria.vendas.dominio.pedido.ClienteNoPedido;
-import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
-import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
-import br.fatec.les.livraria.vendas.dominio.troca.ItemTroca;
-import br.fatec.les.livraria.vendas.dominio.troca.Troca;
-import jakarta.persistence.EntityManager;
-import jakarta.servlet.http.Cookie;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Recebimento dos itens da troca pelo admin, com reentrada no estoque e cupom de troca (RF-VEN-014, RF-VEN-015,
@@ -45,29 +46,22 @@ import jakarta.servlet.http.Cookie;
 @Transactional
 class RecebimentoDeTrocaIntegracaoTest {
 
-    private static final ClienteNoPedido ANA = new ClienteNoPedido(1L, "Ana Souza", "52998224725",
-            "ana.souza@livraria.test", "(11) 98888-7001");
+    private static final ClienteNoPedido ANA =
+            new ClienteNoPedido(1L, "Ana Souza", "52998224725", "ana.souza@livraria.test", "(11) 98888-7001");
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private PedidoRepositorio pedidos;
+    @Autowired private PedidoRepositorio pedidos;
 
-    @Autowired
-    private TrocaRepositorio trocas;
+    @Autowired private TrocaRepositorio trocas;
 
-    @Autowired
-    private JdbcTemplate jdbc;
+    @Autowired private JdbcTemplate jdbc;
 
-    @Autowired
-    private EntityManager entityManager;
+    @Autowired private EntityManager entityManager;
 
     private MockMvc mvc;
     private Pedido pedido;
@@ -101,11 +95,21 @@ class RecebimentoDeTrocaIntegracaoTest {
         entityManager.flush();
 
         assertThat(estoqueDoDomCasmurro()).isEqualTo(antes + 2);
-        assertThat(jdbc.queryForObject("select valor from cupom where codigo = ? and cliente_id = 1 "
-                + "and situacao = 'DISPONIVEL'", BigDecimal.class, "TROCA-" + troca)).isEqualByComparingTo("95.76");
-        assertThat(jdbc.queryForObject("select mensagem from notificacao where usuario_id = 2 and tipo = "
-                + "'TROCA_CONCLUIDA' and recurso = 'pedido' and recurso_id = ?", String.class, pedido.getId()))
-                .contains("TROCA-" + troca).contains("R$ 95,76");
+        assertThat(
+                        jdbc.queryForObject(
+                                "select valor from cupom where codigo = ? and cliente_id = 1 "
+                                        + "and situacao = 'DISPONIVEL'",
+                                BigDecimal.class,
+                                "TROCA-" + troca))
+                .isEqualByComparingTo("95.76");
+        assertThat(
+                        jdbc.queryForObject(
+                                "select mensagem from notificacao where usuario_id = 2 and tipo = "
+                                        + "'TROCA_CONCLUIDA' and recurso = 'pedido' and recurso_id = ?",
+                                String.class,
+                                pedido.getId()))
+                .contains("TROCA-" + troca)
+                .contains("R$ 95,76");
 
         receber(troca, "{\"itens\":[{\"itemPedidoId\":%d,\"voltaEstoque\":true}]}".formatted(item))
                 .andExpect(status().isConflict());
@@ -122,8 +126,8 @@ class RecebimentoDeTrocaIntegracaoTest {
         entityManager.flush();
 
         assertThat(estoqueDoDomCasmurro()).isEqualTo(antes);
-        assertThat(jdbc.queryForObject("select count(*) from cupom where codigo = ?", Integer.class,
-                "TROCA-" + troca)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("select count(*) from cupom where codigo = ?", Integer.class, "TROCA-" + troca))
+                .isEqualTo(1);
     }
 
     @Test
@@ -149,8 +153,12 @@ class RecebimentoDeTrocaIntegracaoTest {
     }
 
     private ResultActions receber(long troca, String corpo) throws Exception {
-        return mvc.perform(post("/api/admin/trocas/" + troca + "/confirmar-recebimento").with(csrf())
-                .cookie(cookieDoUsuario(1L)).contentType(MediaType.APPLICATION_JSON).content(corpo));
+        return mvc.perform(
+                post("/api/admin/trocas/" + troca + "/confirmar-recebimento")
+                        .with(csrf())
+                        .cookie(cookieDoUsuario(1L))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(corpo));
     }
 
     private int estoqueDoDomCasmurro() {
@@ -159,8 +167,12 @@ class RecebimentoDeTrocaIntegracaoTest {
     }
 
     private long solicitar(int quantidade) {
-        return trocas.salvar(Troca.solicitar(pedido.getId(), List.of(new ItemTroca(null, item, quantidade, null)),
-                LocalDateTime.now(RelogioDoSistema.FUSO))).getId();
+        return trocas.salvar(
+                        Troca.solicitar(
+                                pedido.getId(),
+                                List.of(new ItemTroca(null, item, quantidade, null)),
+                                LocalDateTime.now(RelogioDoSistema.FUSO)))
+                .getId();
     }
 
     private Cookie cookieDoUsuario(Long id) {

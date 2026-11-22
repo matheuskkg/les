@@ -8,16 +8,18 @@ import org.junit.jupiter.api.Test;
 
 class ViolacoesTest {
 
-    private final Regra<String> naoVazio = (texto, v) -> {
-        if (texto.isBlank()) {
-            v.adicionar("RN-TESTE-001", "Não pode ser vazio.");
-        }
-    };
-    private final Regra<String> curto = (texto, v) -> {
-        if (texto.length() < 3) {
-            v.adicionar("RN-TESTE-002", "Mínimo de 3 caracteres.");
-        }
-    };
+    private final Regra<String> naoVazio =
+            (texto, v) -> {
+                if (texto.isBlank()) {
+                    v.adicionar("RN-TESTE-001", "Não pode ser vazio.");
+                }
+            };
+    private final Regra<String> curto =
+            (texto, v) -> {
+                if (texto.length() < 3) {
+                    v.adicionar("RN-TESTE-002", "Mínimo de 3 caracteres.");
+                }
+            };
 
     @Test
     void semViolacoesNaoLanca() {
@@ -28,9 +30,10 @@ class ViolacoesTest {
     void executaTodasAsRegrasEAcumulaAsViolacoes() {
         assertThatThrownBy(() -> Violacoes.verificar(" ", naoVazio, curto))
                 .isInstanceOf(ExcecaoDeNegocio.class)
-                .satisfies(e -> assertThat(((ExcecaoDeNegocio) e).getViolacoes())
-                        .extracting(Violacao::codigo)
-                        .containsExactly("RN-TESTE-001", "RN-TESTE-002"));
+                .satisfies(e ->
+                        assertThat(((ExcecaoDeNegocio) e).getViolacoes())
+                                .extracting(Violacao::codigo)
+                                .containsExactly("RN-TESTE-001", "RN-TESTE-002"));
     }
 
     @Test

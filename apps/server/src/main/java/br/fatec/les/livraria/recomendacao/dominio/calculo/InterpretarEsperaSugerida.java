@@ -1,5 +1,7 @@
 package br.fatec.les.livraria.recomendacao.dominio.calculo;
 
+import org.jspecify.annotations.Nullable;
+
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
@@ -11,22 +13,20 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jspecify.annotations.Nullable;
-
 /**
- * Interpreta o tempo sugerido por um provedor que respondeu 429 (RNF-REC-001, DEC-03, REC-09): o cabeçalho
- * {@code Retry-After}, em segundos ou data HTTP, e o texto da mensagem, como "try again in 7.5s",
- * "Please try again in 1m30s" ou "retry in 13s".
+ * Interpreta o tempo sugerido por um provedor que respondeu 429 (RNF-REC-001, DEC-03, REC-09): o cabeçalho {@code
+ * Retry-After}, em segundos ou data HTTP, e o texto da mensagem, como "try again in 7.5s", "Please try again in 1m30s"
+ * ou "retry in 13s".
  */
 public final class InterpretarEsperaSugerida {
 
     private static final Pattern SEGUNDOS = Pattern.compile("\\d+(?:[.,]\\d+)?");
-    private static final Pattern TRECHO_DA_MENSAGEM = Pattern.compile(
-            "(?i)(?:try again|retry)\\s+in\\s+([0-9.,]+\\s*(?:ms|h|m|s)(?:\\s*[0-9.,]+\\s*(?:ms|h|m|s))*)");
+    private static final Pattern TRECHO_DA_MENSAGEM =
+            Pattern.compile(
+                    "(?i)(?:try again|retry)\\s+in\\s+([0-9.,]+\\s*(?:ms|h|m|s)(?:\\s*[0-9.,]+\\s*(?:ms|h|m|s))*)");
     private static final Pattern PARTE = Pattern.compile("(?i)([0-9]+(?:[.,][0-9]+)?)\\s*(ms|h|m|s)");
 
-    private InterpretarEsperaSugerida() {
-    }
+    private InterpretarEsperaSugerida() {}
 
     /** Tempo do cabeçalho {@code Retry-After}: segundos ou data HTTP, relativa a {@code agora}. */
     public static Optional<Duration> deCabecalho(@Nullable String valor, Instant agora) {
@@ -65,19 +65,20 @@ public final class InterpretarEsperaSugerida {
     }
 
     private static Duration emSegundos(String valor) {
-        return Duration.ofMillis(new BigDecimal(valor.replace(',', '.')).multiply(BigDecimal.valueOf(1000))
-                .longValue());
+        return Duration.ofMillis(
+                new BigDecimal(valor.replace(',', '.')).multiply(BigDecimal.valueOf(1000)).longValue());
     }
 
     private static long emMilissegundos(String valor, String unidade) {
         BigDecimal quantidade = new BigDecimal(valor.replace(',', '.'));
-        BigDecimal fator = switch (unidade.toLowerCase(Locale.ROOT)) {
-            case "ms" -> BigDecimal.ONE;
-            case "s" -> BigDecimal.valueOf(1000);
-            case "m" -> BigDecimal.valueOf(60_000);
-            case "h" -> BigDecimal.valueOf(3_600_000);
-            default -> BigDecimal.ZERO;
-        };
+        BigDecimal fator =
+                switch (unidade.toLowerCase(Locale.ROOT)) {
+                    case "ms" -> BigDecimal.ONE;
+                    case "s" -> BigDecimal.valueOf(1000);
+                    case "m" -> BigDecimal.valueOf(60_000);
+                    case "h" -> BigDecimal.valueOf(3_600_000);
+                    default -> BigDecimal.ZERO;
+                };
         return quantidade.multiply(fator).longValue();
     }
 }

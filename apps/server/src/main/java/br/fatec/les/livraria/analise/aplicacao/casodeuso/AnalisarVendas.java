@@ -1,16 +1,5 @@
 package br.fatec.les.livraria.analise.aplicacao.casodeuso;
 
-import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.analise.dominio.modelo.AnaliseDeVendas;
 import br.fatec.les.livraria.analise.dominio.modelo.CategoriaAnalisada;
 import br.fatec.les.livraria.analise.dominio.modelo.PeriodoDeAnalise;
@@ -26,7 +15,19 @@ import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarItensVendidos;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.ItemVendido;
 import br.fatec.les.livraria.vendas.dominio.pedido.CategoriaNoPedido;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Histórico de vendas por categoria e mês para o gráfico e a exportação (RF-ANA-001 a RF-ANA-004, RN-ANA-001 a
@@ -45,8 +46,8 @@ public class AnalisarVendas {
     /**
      * @param solicitacao datas e categorias pedidas
      * @return uma linha por categoria, na ordem informada, com um valor por mês tocado pelo período
-     * @throws br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio se o período ou a seleção violarem as
-     *         regras (HTTP 422)
+     * @throws br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio se o período ou a seleção violarem as regras
+     *     (HTTP 422)
      * @throws ParametroInvalido se alguma categoria não existir (HTTP 400)
      */
     @Transactional(readOnly = true)
@@ -56,17 +57,18 @@ public class AnalisarVendas {
         List<CategoriaAnalisada> categorias = categoriasSelecionadas(solicitacao.categorias());
         PeriodoDeAnalise periodo = new PeriodoDeAnalise(solicitacao.inicio(), solicitacao.fim());
         Set<Long> selecionadas = Set.copyOf(solicitacao.categorias());
-        List<VendaNoMes> vendas = consultarItensVendidos
-                .executar(periodo.primeiroInstante(), periodo.fimExclusivo()).stream()
-                .map(AnalisarVendas::vendaNoMes)
-                .filter(venda -> venda.categorias().stream().anyMatch(selecionadas::contains))
-                .toList();
+        List<VendaNoMes> vendas =
+                consultarItensVendidos.executar(periodo.primeiroInstante(), periodo.fimExclusivo()).stream()
+                        .map(AnalisarVendas::vendaNoMes)
+                        .filter(venda -> venda.categorias().stream().anyMatch(selecionadas::contains))
+                        .toList();
         return AnaliseDeVendas.calcular(periodo, categorias, vendas);
     }
 
     private List<CategoriaAnalisada> categoriasSelecionadas(List<Long> ids) {
-        Map<Long, String> nomes = consultarCategorias.executar(ids).stream()
-                .collect(Collectors.toMap(CategoriaDoLivro::id, CategoriaDoLivro::nome));
+        Map<Long, String> nomes =
+                consultarCategorias.executar(ids).stream()
+                        .collect(Collectors.toMap(CategoriaDoLivro::id, CategoriaDoLivro::nome));
         List<CategoriaAnalisada> categorias = new ArrayList<>();
         for (Long id : ids) {
             String nome = nomes.get(id);
@@ -79,7 +81,9 @@ public class AnalisarVendas {
     }
 
     private static VendaNoMes vendaNoMes(ItemVendido item) {
-        return new VendaNoMes(YearMonth.from(item.realizadoEm()),
-                item.categorias().stream().map(CategoriaNoPedido::id).collect(Collectors.toSet()), item.valor());
+        return new VendaNoMes(
+                YearMonth.from(item.realizadoEm()),
+                item.categorias().stream().map(CategoriaNoPedido::id).collect(Collectors.toSet()),
+                item.valor());
     }
 }

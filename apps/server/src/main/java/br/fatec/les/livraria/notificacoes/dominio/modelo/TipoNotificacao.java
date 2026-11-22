@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.notificacoes.dominio.modelo;
 
 /**
- * Tipos de notificação do {@code vendas} (DEC-13, RN-VEN-014, RN-VEN-016). O tipo identifica o evento para o
- * {@code web}, que recarrega a tela afetada; ele também é o nome do evento no stream SSE.
+ * Tipos de notificação do {@code vendas} (DEC-13, RN-VEN-014, RN-VEN-016). O tipo identifica o evento para o {@code
+ * web}, que recarrega a tela afetada; ele também é o nome do evento no stream SSE.
  *
- * <p>Um tipo pertence a um destinatário: os de cliente são criados pelo {@code Notificar} e os de admin pelo
- * {@code NotificarAdministradores}, que os replica para cada usuário {@code ADMIN}.
+ * <p>Um tipo pertence a um destinatário: os de cliente são criados pelo {@code Notificar} e os de admin pelo {@code
+ * NotificarAdministradores}, que os replica para cada usuário {@code ADMIN}.
  */
 public enum TipoNotificacao {
 
@@ -38,7 +38,8 @@ public enum TipoNotificacao {
 
     /** Quem recebe o tipo de notificação (DEC-13). */
     public enum Destinatario {
-        CLIENTE, ADMIN
+        CLIENTE,
+        ADMIN
     }
 
     private final Destinatario destinatario;

@@ -9,7 +9,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.infraestrutura.tempo.RelogioDoSistema;
+import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
+import br.fatec.les.livraria.vendas.dominio.pedido.ClienteNoPedido;
+import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
+import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
+
+import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,15 +32,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.infraestrutura.tempo.RelogioDoSistema;
-import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
-import br.fatec.les.livraria.vendas.dominio.pedido.ClienteNoPedido;
-import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
-import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
-import jakarta.persistence.EntityManager;
-import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
 
 /**
  * Solicitação de troca pelo cliente logado (RF-VEN-011, RN-VEN-011, RN-VEN-013, DEC-12, DEC-13). Os pedidos gravados
@@ -41,28 +42,22 @@ import jakarta.servlet.http.Cookie;
 @Transactional
 class SolicitacaoDeTrocaIntegracaoTest {
 
-    private static final ClienteNoPedido ANA = new ClienteNoPedido(1L, "Ana Souza", "52998224725",
-            "ana.souza@livraria.test", "(11) 98888-7001");
-    private static final ClienteNoPedido BRUNO = new ClienteNoPedido(2L, "Bruno Lima", "11144477735",
-            "bruno.lima@livraria.test", "(21) 98888-7002");
+    private static final ClienteNoPedido ANA =
+            new ClienteNoPedido(1L, "Ana Souza", "52998224725", "ana.souza@livraria.test", "(11) 98888-7001");
+    private static final ClienteNoPedido BRUNO =
+            new ClienteNoPedido(2L, "Bruno Lima", "11144477735", "bruno.lima@livraria.test", "(21) 98888-7002");
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private PedidoRepositorio pedidos;
+    @Autowired private PedidoRepositorio pedidos;
 
-    @Autowired
-    private JdbcTemplate jdbc;
+    @Autowired private JdbcTemplate jdbc;
 
-    @Autowired
-    private EntityManager entityManager;
+    @Autowired private EntityManager entityManager;
 
     private MockMvc mvc;
 
@@ -94,8 +89,12 @@ class SolicitacaoDeTrocaIntegracaoTest {
                 .andExpect(jsonPath("$.itens[0].disponivelParaTroca").value(1))
                 .andExpect(jsonPath("$.itens[0].statusDaTroca").value("EM_TROCA"))
                 .andExpect(jsonPath("$.trocas.length()").value(1));
-        assertThat(jdbc.queryForObject("select count(*) from notificacao where usuario_id = 1 and tipo = "
-                + "'TROCA_SOLICITADA' and recurso = 'pedido' and recurso_id = ?", Integer.class, pedido.getId()))
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from notificacao where usuario_id = 1 and tipo = "
+                                        + "'TROCA_SOLICITADA' and recurso = 'pedido' and recurso_id = ?",
+                                Integer.class,
+                                pedido.getId()))
                 .isEqualTo(1);
     }
 
@@ -117,8 +116,7 @@ class SolicitacaoDeTrocaIntegracaoTest {
     void rfVen011_quantidadeAcimaDaCompradaResponde422() throws Exception {
         Pedido pedido = entregue(ANA, 1);
 
-        solicitar(pedido.getId(), pedido.getItens().getFirst().id(), 3)
-                .andExpect(status().isUnprocessableContent());
+        solicitar(pedido.getId(), pedido.getItens().getFirst().id(), 3).andExpect(status().isUnprocessableContent());
     }
 
     @Test
@@ -155,9 +153,14 @@ class SolicitacaoDeTrocaIntegracaoTest {
     }
 
     private ResultActions solicitar(long pedidoId, long itemPedidoId, int quantidade) throws Exception {
-        return mvc.perform(post("/api/me/pedidos/" + pedidoId + "/trocas").with(csrf()).cookie(cookieDoUsuario(2L))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"itens\":[{\"itemPedidoId\":%d,\"quantidade\":%d}]}".formatted(itemPedidoId, quantidade)));
+        return mvc.perform(
+                post("/api/me/pedidos/" + pedidoId + "/trocas")
+                        .with(csrf())
+                        .cookie(cookieDoUsuario(2L))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                                "{\"itens\":[{\"itemPedidoId\":%d,\"quantidade\":%d}]}"
+                                        .formatted(itemPedidoId, quantidade)));
     }
 
     private Cookie cookieDoUsuario(Long id) {

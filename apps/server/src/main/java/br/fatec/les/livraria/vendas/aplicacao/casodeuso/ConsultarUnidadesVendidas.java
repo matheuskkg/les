@@ -1,17 +1,18 @@
 package br.fatec.les.livraria.vendas.aplicacao.casodeuso;
 
-import java.util.Map;
+import br.fatec.les.livraria.vendas.aplicacao.porta.VendasConsultas;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.vendas.aplicacao.porta.VendasConsultas;
-import lombok.RequiredArgsConstructor;
+import java.util.Map;
 
 /**
- * Expõe ao {@code recomendacao} as unidades vendidas por livro nos pedidos que contam como venda, já somadas no
- * banco com desconto das trocas concluídas (RNF-REC-001, DEC-03, DEC-12, RNF-GER-001): é a base da ordenação pelos
- * mais vendidos.
+ * Expõe ao {@code recomendacao} as unidades vendidas por livro nos pedidos que contam como venda, já somadas no banco
+ * com desconto das trocas concluídas (RNF-REC-001, DEC-03, DEC-12, RNF-GER-001): é a base da ordenação pelos mais
+ * vendidos.
  */
 @Component
 @RequiredArgsConstructor

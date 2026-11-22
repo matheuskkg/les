@@ -10,8 +10,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.infraestrutura.tempo.RelogioDoSistema;
+import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
+import br.fatec.les.livraria.vendas.aplicacao.porta.TrocaRepositorio;
+import br.fatec.les.livraria.vendas.dominio.pedido.ClienteNoPedido;
+import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
+import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
+import br.fatec.les.livraria.vendas.dominio.troca.ItemTroca;
+import br.fatec.les.livraria.vendas.dominio.troca.Troca;
+
+import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,50 +37,33 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.infraestrutura.tempo.RelogioDoSistema;
-import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
-import br.fatec.les.livraria.vendas.aplicacao.porta.TrocaRepositorio;
-import br.fatec.les.livraria.vendas.dominio.pedido.ClienteNoPedido;
-import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
-import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
-import br.fatec.les.livraria.vendas.dominio.troca.ItemTroca;
-import br.fatec.les.livraria.vendas.dominio.troca.Troca;
-import jakarta.persistence.EntityManager;
-import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
- * Autorização, recusa e consulta de trocas pelo admin (RF-VEN-012, RF-VEN-013, RN-VEN-016, DEC-12, DEC-13). Os
- * pedidos da Ana gravados aqui têm dois exemplares de Dom Casmurro e são desfeitos no fim.
+ * Autorização, recusa e consulta de trocas pelo admin (RF-VEN-012, RF-VEN-013, RN-VEN-016, DEC-12, DEC-13). Os pedidos
+ * da Ana gravados aqui têm dois exemplares de Dom Casmurro e são desfeitos no fim.
  */
 @SpringBootTest
 @Transactional
 class TrocaAdminIntegracaoTest {
 
-    private static final ClienteNoPedido ANA = new ClienteNoPedido(1L, "Ana Souza", "52998224725",
-            "ana.souza@livraria.test", "(11) 98888-7001");
+    private static final ClienteNoPedido ANA =
+            new ClienteNoPedido(1L, "Ana Souza", "52998224725", "ana.souza@livraria.test", "(11) 98888-7001");
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private PedidoRepositorio pedidos;
+    @Autowired private PedidoRepositorio pedidos;
 
-    @Autowired
-    private TrocaRepositorio trocas;
+    @Autowired private TrocaRepositorio trocas;
 
-    @Autowired
-    private JdbcTemplate jdbc;
+    @Autowired private JdbcTemplate jdbc;
 
-    @Autowired
-    private EntityManager entityManager;
+    @Autowired private EntityManager entityManager;
 
     private MockMvc mvc;
     private Pedido pedido;
@@ -112,8 +106,7 @@ class TrocaAdminIntegracaoTest {
         acao(troca, "recusar", "{}")
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes[0].codigo").value("RF-VEN-012"));
-        acao(troca, "recusar", "{\"motivo\":\"" + "a".repeat(301) + "\"}")
-                .andExpect(status().isUnprocessableContent());
+        acao(troca, "recusar", "{\"motivo\":\"" + "a".repeat(301) + "\"}").andExpect(status().isUnprocessableContent());
         String motivo = "b".repeat(300);
         acao(troca, "recusar", "{\"motivo\":\"" + motivo + "\"}")
                 .andExpect(status().isOk())
@@ -122,13 +115,20 @@ class TrocaAdminIntegracaoTest {
                 .andExpect(jsonPath("$.troca.situacao").value("TROCA_RECUSADA"))
                 .andExpect(jsonPath("$.itens[0].disponivelParaTroca").value(0));
         entityManager.flush();
-        assertThat(jdbc.queryForObject("select mensagem from notificacao where usuario_id = 2 and tipo = "
-                + "'TROCA_RECUSADA' and recurso = 'pedido' and recurso_id = ?", String.class, pedido.getId()))
+        assertThat(
+                        jdbc.queryForObject(
+                                "select mensagem from notificacao where usuario_id = 2 and tipo = "
+                                        + "'TROCA_RECUSADA' and recurso = 'pedido' and recurso_id = ?",
+                                String.class,
+                                pedido.getId()))
                 .endsWith("Motivo: " + motivo);
 
-        mvc.perform(post("/api/me/pedidos/" + pedido.getId() + "/trocas").with(csrf()).cookie(cookieDoUsuario(2L))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"itens\":[{\"itemPedidoId\":%d,\"quantidade\":1}]}".formatted(item)))
+        mvc.perform(
+                        post("/api/me/pedidos/" + pedido.getId() + "/trocas")
+                                .with(csrf())
+                                .cookie(cookieDoUsuario(2L))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"itens\":[{\"itemPedidoId\":%d,\"quantidade\":1}]}".formatted(item)))
                 .andExpect(status().isUnprocessableContent());
     }
 
@@ -143,10 +143,11 @@ class TrocaAdminIntegracaoTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.itens[*].id", hasItem((int) pendente)))
                 .andExpect(jsonPath("$.itens[*].id", not(hasItem((int) autorizada))))
-                .andExpect(jsonPath("$.itens[?(@.id == %d)].pedidoId".formatted(pendente)).value(
-                        hasItem(pedido.getId().intValue())))
-                .andExpect(jsonPath("$.itens[?(@.id == %d)].clienteNome".formatted(pendente)).value(
-                        hasItem("Ana Souza")))
+                .andExpect(
+                        jsonPath("$.itens[?(@.id == %d)].pedidoId".formatted(pendente))
+                                .value(hasItem(pedido.getId().intValue())))
+                .andExpect(
+                        jsonPath("$.itens[?(@.id == %d)].clienteNome".formatted(pendente)).value(hasItem("Ana Souza")))
                 .andExpect(jsonPath("$.itens[?(@.id == %d)].unidades".formatted(pendente)).value(hasItem(1)));
 
         mvc.perform(comoAdmin(get("/api/admin/pedidos").param("situacao", "EM_TROCA").param("tamanho", "100")))
@@ -166,12 +167,17 @@ class TrocaAdminIntegracaoTest {
     }
 
     private long solicitar(int quantidade) {
-        return trocas.salvar(Troca.solicitar(pedido.getId(), List.of(new ItemTroca(null, item, quantidade, null)),
-                LocalDateTime.now(RelogioDoSistema.FUSO))).getId();
+        return trocas.salvar(
+                        Troca.solicitar(
+                                pedido.getId(),
+                                List.of(new ItemTroca(null, item, quantidade, null)),
+                                LocalDateTime.now(RelogioDoSistema.FUSO)))
+                .getId();
     }
 
     private ResultActions acao(long troca, String acao, String corpo) throws Exception {
-        MockHttpServletRequestBuilder requisicao = post("/api/admin/trocas/" + troca + "/" + acao).with(csrf()).cookie(cookieDoUsuario(1L));
+        MockHttpServletRequestBuilder requisicao =
+                post("/api/admin/trocas/" + troca + "/" + acao).with(csrf()).cookie(cookieDoUsuario(1L));
         if (corpo != null) {
             requisicao = requisicao.contentType(MediaType.APPLICATION_JSON).content(corpo);
         }
@@ -179,8 +185,12 @@ class TrocaAdminIntegracaoTest {
     }
 
     private int notificacoes(String tipo) {
-        return jdbc.queryForObject("select count(*) from notificacao where usuario_id = 2 and tipo = ? "
-                + "and recurso = 'pedido' and recurso_id = ?", Integer.class, tipo, pedido.getId());
+        return jdbc.queryForObject(
+                "select count(*) from notificacao where usuario_id = 2 and tipo = ? "
+                        + "and recurso = 'pedido' and recurso_id = ?",
+                Integer.class,
+                tipo,
+                pedido.getId());
     }
 
     private MockHttpServletRequestBuilder comoAdmin(MockHttpServletRequestBuilder requisicao) {

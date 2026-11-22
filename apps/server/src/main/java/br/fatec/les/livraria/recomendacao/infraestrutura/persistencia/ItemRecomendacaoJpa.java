@@ -1,10 +1,7 @@
 package br.fatec.les.livraria.recomendacao.infraestrutura.persistencia;
 
-import java.time.LocalDateTime;
-
-import org.hibernate.envers.Audited;
-
 import br.fatec.les.livraria.recomendacao.dominio.modelo.Avaliacao;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -18,9 +15,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.hibernate.envers.Audited;
+
+import java.time.LocalDateTime;
 
 /**
  * Tabela {@code item_recomendacao} do MER (RNF-REC-001, DEC-03, DEC-14): livro, posição, justificativa e a última
@@ -31,14 +33,18 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Audited
-@Table(name = "item_recomendacao",
+@Table(
+        name = "item_recomendacao",
         indexes = @Index(name = "ix_item_recomendacao_recomendacao", columnList = "recomendacao_id"))
 public class ItemRecomendacaoJpa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "item_recomendacao_seq")
-    @SequenceGenerator(name = "item_recomendacao_seq", sequenceName = "item_recomendacao_seq",
-            initialValue = 10000, allocationSize = 50)
+    @SequenceGenerator(
+            name = "item_recomendacao_seq",
+            sequenceName = "item_recomendacao_seq",
+            initialValue = 10000,
+            allocationSize = 50)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

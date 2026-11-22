@@ -1,12 +1,13 @@
 package br.fatec.les.livraria.acesso.aplicacao.casodeuso;
 
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
 import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Consulta pública do contato do usuário (RF-CLI-002, DEC-08, DEC-10). O módulo {@code clientes} usa esta porta de
@@ -20,8 +21,9 @@ public class ConsultarContato {
 
     @Transactional(readOnly = true)
     public DadosDeContato executar(Long usuarioId) {
-        Usuario usuario = usuarios.buscarPorId(usuarioId)
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Usuário não encontrado."));
+        Usuario usuario =
+                usuarios.buscarPorId(usuarioId)
+                        .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Usuário não encontrado."));
         return DadosDeContato.de(usuario);
     }
 }

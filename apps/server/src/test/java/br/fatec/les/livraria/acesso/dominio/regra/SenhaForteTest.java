@@ -2,6 +2,7 @@ package br.fatec.les.livraria.acesso.dominio.regra;
 
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.comSenha;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.violacoes;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
@@ -48,8 +49,7 @@ class SenhaForteTest {
         String senha = "Ab@" + "a".repeat(70);
 
         assertThat(senha.getBytes(java.nio.charset.StandardCharsets.UTF_8).length).isGreaterThan(72);
-        assertThat(violacoes(comSenha(senha), regra))
-                .anyMatch(violacao -> violacao.mensagem().contains("72 bytes"));
+        assertThat(violacoes(comSenha(senha), regra)).anyMatch(violacao -> violacao.mensagem().contains("72 bytes"));
     }
 
     @Test

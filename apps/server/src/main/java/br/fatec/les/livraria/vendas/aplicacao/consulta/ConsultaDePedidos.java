@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.vendas.aplicacao.consulta;
 
+import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
+import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-
-import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
-import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
 
 /**
  * Filtros da consulta de pedidos do admin como chegam da API (RF-VEN-009, DEC-07, DEC-12). Todos são opcionais e se
@@ -32,7 +32,9 @@ public record ConsultaDePedidos(
 
     public ConsultaDePedidos {
         status = status == null ? List.of() : status.stream().filter(Objects::nonNull).distinct().toList();
-        situacaoDaTroca = situacaoDaTroca == null ? List.of()
-                : situacaoDaTroca.stream().filter(Objects::nonNull).distinct().toList();
+        situacaoDaTroca =
+                situacaoDaTroca == null
+                        ? List.of()
+                        : situacaoDaTroca.stream().filter(Objects::nonNull).distinct().toList();
     }
 }

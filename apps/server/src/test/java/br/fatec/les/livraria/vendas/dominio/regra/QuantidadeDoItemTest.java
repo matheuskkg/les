@@ -2,10 +2,10 @@ package br.fatec.les.livraria.vendas.dominio.regra;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.dominio.modelo.ItemProposto;
+
+import org.junit.jupiter.api.Test;
 
 /** RF-VEN-002: a quantidade pedida para um item é no mínimo 1. */
 class QuantidadeDoItemTest {

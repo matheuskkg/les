@@ -1,11 +1,12 @@
 package br.fatec.les.livraria.acesso.infraestrutura.persistencia;
 
+import br.fatec.les.livraria.acesso.dominio.modelo.TipoTelefone;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 
-import br.fatec.les.livraria.acesso.dominio.modelo.TipoTelefone;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

@@ -1,18 +1,18 @@
 package br.fatec.les.livraria.clientes.aplicacao.porta;
 
-import java.util.Optional;
-import java.util.Set;
-
 import br.fatec.les.livraria.clientes.aplicacao.consulta.ClienteResumo;
 import br.fatec.les.livraria.clientes.aplicacao.consulta.FiltroCliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 
+import java.util.Optional;
+import java.util.Set;
+
 /**
- * Porta de saída das consultas de leitura de clientes do admin (RF-CLI-004, DEC-07). A implementação traduz o
- * filtro para especificações JPA; endereços e cartões só são carregados no detalhe, e a listagem não faz uma
- * consulta por item.
+ * Porta de saída das consultas de leitura de clientes do admin (RF-CLI-004, DEC-07). A implementação traduz o filtro
+ * para especificações JPA; endereços e cartões só são carregados no detalhe, e a listagem não faz uma consulta por
+ * item.
  */
 public interface ClientesConsultas {
 

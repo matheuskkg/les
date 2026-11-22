@@ -1,10 +1,10 @@
 package br.fatec.les.livraria.vendas.aplicacao.porta;
 
+import br.fatec.les.livraria.vendas.dominio.modelo.Checkout;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import br.fatec.les.livraria.vendas.dominio.modelo.Checkout;
 
 /** Persistência da sessão de compra e dos seus itens (RF-VEN-003, DEC-12, DEC-16). */
 public interface CheckoutRepositorio {

@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.vendas.dominio.pagamento;
 
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
 import java.time.YearMonth;
 import java.util.Objects;
-
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
 /**
  * Cobrança enviada à operadora para um cartão do pedido (RN-VEN-007, DEC-05.2, DEC-11). Número completo e código de

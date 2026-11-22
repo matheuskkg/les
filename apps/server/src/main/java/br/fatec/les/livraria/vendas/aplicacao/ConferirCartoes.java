@@ -1,12 +1,5 @@
 package br.fatec.les.livraria.vendas.aplicacao;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.IntStream;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.ResolverCartaoDaCompra;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cartao;
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
@@ -20,11 +13,19 @@ import br.fatec.les.livraria.vendas.dominio.regra.CartaoRepetido;
 import br.fatec.les.livraria.vendas.dominio.regra.SomaDosCartoes;
 import br.fatec.les.livraria.vendas.dominio.regra.ValorInformadoDoCartao;
 import br.fatec.les.livraria.vendas.dominio.regra.ValorMinimoPorCartao;
+
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
+
 /**
- * Confere os cartões que pagam o restante depois dos cupons (RF-VEN-006, RN-VEN-004, RN-VEN-005, DEC-10, DEC-11):
- * cada um cadastrado ou novo, com valor em centavos inteiros, sem repetir, de ao menos R$ 10,00 (salvo a exceção do
+ * Confere os cartões que pagam o restante depois dos cupons (RF-VEN-006, RN-VEN-004, RN-VEN-005, DEC-10, DEC-11): cada
+ * um cadastrado ou novo, com valor em centavos inteiros, sem repetir, de ao menos R$ 10,00 (salvo a exceção do
  * RN-VEN-005) e somando exatamente o restante.
  */
 @Component
@@ -39,13 +40,12 @@ public class ConferirCartoes {
 
     /**
      * @throws br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio com as violações dos cartões
-     * @throws br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado se um cartão não for do
-     *         cliente
+     * @throws br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado se um cartão não for do cliente
      */
     @Transactional(readOnly = true)
     public List<CartaoNoPagamento> conferir(DistribuicaoDoPagamento distribuicao, List<CartaoInformado> informados) {
-        List<Cartao> cartoes = informados.stream().map(informado -> resolverCartao.executar(informado.escolha()))
-                .toList();
+        List<Cartao> cartoes =
+                informados.stream().map(informado -> resolverCartao.executar(informado.escolha())).toList();
         List<PagamentoEmCartao> pagamentos = new ArrayList<>();
         for (int i = 0; i < cartoes.size(); i++) {
             pagamentos.add(new PagamentoEmCartao(cartoes.get(i).numero(), informados.get(i).valor()));

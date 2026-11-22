@@ -8,11 +8,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
-import org.hibernate.envers.Audited;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.hibernate.envers.Audited;
 
 /** Categoria de livro (DEC-14, DEC-16). */
 @Getter
@@ -25,7 +25,10 @@ public class CategoriaJpa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "categoria_seq")
-    @SequenceGenerator(name = "categoria_seq", sequenceName = "categoria_seq", initialValue = 10000,
+    @SequenceGenerator(
+            name = "categoria_seq",
+            sequenceName = "categoria_seq",
+            initialValue = 10000,
             allocationSize = 50)
     private Long id;
 

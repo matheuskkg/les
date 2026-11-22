@@ -1,13 +1,13 @@
 package br.fatec.les.livraria.clientes.dominio.calculo;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
 import br.fatec.les.livraria.clientes.dominio.modelo.Bandeira;
 import br.fatec.les.livraria.clientes.dominio.modelo.PrefixoDeCartao;
+
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Identifica a bandeira de um cartão pelo número (RN-CLI-005, DEC-18). Aceita o número com ou sem máscara e, havendo
@@ -17,7 +17,7 @@ import br.fatec.les.livraria.clientes.dominio.modelo.PrefixoDeCartao;
 public class IdentificarBandeira {
 
     /**
-     * @param numero    número do cartão, com ou sem máscara
+     * @param numero número do cartão, com ou sem máscara
      * @param bandeiras bandeiras registradas no seed
      * @return a bandeira cujo prefixo mais longo casa com o número, se houver
      */

@@ -2,11 +2,11 @@ package br.fatec.les.livraria.acesso.dominio.regra;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.TrocaDeSenha;
 import br.fatec.les.livraria.acesso.dominio.modelo.SenhaInformada;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
+import org.junit.jupiter.api.Test;
 
 /** RNF-CLI-001, RF-CLI-008: a nova senha é obrigatória na alteração de senha. */
 class NovaSenhaObrigatoriaTest {

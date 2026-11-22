@@ -4,17 +4,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio;
 import br.fatec.les.livraria.estoque.aplicacao.regra.DisponivelParaReservar;
 import br.fatec.les.livraria.estoque.dominio.calculo.CalcularDisponivel;
 import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
 import br.fatec.les.livraria.estoque.dominio.modelo.Reserva;
+
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 /** RN-VEN-001, RN-VEN-014, DEC-15.3: reserva com conferência do disponível e prazo. */
 class ReservarTest {
@@ -25,25 +25,32 @@ class ReservarTest {
 
     private final Map<Long, Integer> estoque = new HashMap<>(Map.of(LIVRO, 6));
     private final ReservasEmMemoria reservas = new ReservasEmMemoria();
-    private final Reservar reservar = new Reservar(reservas, new DisponivelParaReservar(
-            new EstoqueEmMemoria(estoque), reservas, new CalcularDisponivel()), () -> AGORA);
+    private final Reservar reservar =
+            new Reservar(
+                    reservas,
+                    new DisponivelParaReservar(new EstoqueEmMemoria(estoque), reservas, new CalcularDisponivel()),
+                    () -> AGORA);
 
     @Test
     void rnVen001_reservaDentroDoDisponivel() {
         reservar.executar(LIVRO, 4, OrigemReserva.CARRINHO, 1L, PRAZO);
 
-        assertThat(reservas.buscar(LIVRO, OrigemReserva.CARRINHO, 1L)).get()
-                .extracting(Reserva::getQuantidade).isEqualTo(4);
+        assertThat(reservas.buscar(LIVRO, OrigemReserva.CARRINHO, 1L))
+                .get()
+                .extracting(Reserva::getQuantidade)
+                .isEqualTo(4);
     }
 
     @Test
     void rnVen001_acimaDoDisponivelInformaQuantoHa() {
         reservar.executar(LIVRO, 4, OrigemReserva.CARRINHO, 1L, PRAZO);
 
-        ExcecaoDeNegocio erro = catchThrowableOfType(ExcecaoDeNegocio.class,
-                () -> reservar.executar(LIVRO, 3, OrigemReserva.CARRINHO, 2L, PRAZO));
+        ExcecaoDeNegocio erro =
+                catchThrowableOfType(
+                        ExcecaoDeNegocio.class, () -> reservar.executar(LIVRO, 3, OrigemReserva.CARRINHO, 2L, PRAZO));
 
-        assertThat(erro.getViolacoes()).singleElement()
+        assertThat(erro.getViolacoes())
+                .singleElement()
                 .satisfies(violacao -> {
                     assertThat(violacao.codigo()).isEqualTo("RN-VEN-001");
                     assertThat(violacao.mensagem()).contains("Disponível: 2");

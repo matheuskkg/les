@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.estoque.aplicacao.casodeuso;
 
+import br.fatec.les.livraria.estoque.aplicacao.porta.EstoqueTravado;
+
 import java.util.Map;
 import java.util.Optional;
-
-import br.fatec.les.livraria.estoque.aplicacao.porta.EstoqueTravado;
 
 /** Saldo em memória para os testes dos casos de uso do estoque; o lock não tem efeito aqui. */
 final class EstoqueEmMemoria implements EstoqueTravado {

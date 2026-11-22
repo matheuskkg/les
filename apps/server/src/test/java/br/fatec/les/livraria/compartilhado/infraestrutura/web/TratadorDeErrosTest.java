@@ -6,9 +6,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.List;
+import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio;
+import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.ConstraintViolationException.ConstraintKind;
@@ -24,24 +25,23 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
-import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
-import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio;
-import br.fatec.les.livraria.compartilhado.dominio.Violacao;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.List;
 
 class TratadorDeErrosTest {
 
-    record Corpo(int quantidade) {
-    }
+    record Corpo(int quantidade) {}
 
     @RestController
     static class ControllerDeTeste {
 
         @GetMapping("/regras")
         String violarRegras() {
-            throw new ExcecaoDeNegocio(List.of(
-                    new Violacao("RN-VEN-003", "Apenas um cupom promocional por compra."),
-                    new Violacao("RN-VEN-004", "Valor mínimo de R$ 10,00 por cartão.")));
+            throw new ExcecaoDeNegocio(
+                    List.of(
+                            new Violacao("RN-VEN-003", "Apenas um cupom promocional por compra."),
+                            new Violacao("RN-VEN-004", "Valor mínimo de R$ 10,00 por cartão.")));
         }
 
         @GetMapping("/parametro")
@@ -61,8 +61,10 @@ class TratadorDeErrosTest {
 
         @GetMapping("/conflito-unico")
         String conflitarUnicidade() {
-            throw new DataIntegrityViolationException("falha",
-                    new SQLIntegrityConstraintViolationException("duplicate key value violates unique constraint", "23505"));
+            throw new DataIntegrityViolationException(
+                    "falha",
+                    new SQLIntegrityConstraintViolationException(
+                            "duplicate key value violates unique constraint", "23505"));
         }
 
         @GetMapping("/conflito-unico-spring")
@@ -72,8 +74,10 @@ class TratadorDeErrosTest {
 
         @GetMapping("/conflito-unico-hibernate")
         String conflitarUnicidadeDoHibernate() {
-            throw new DataIntegrityViolationException("falha", new ConstraintViolationException("já existe",
-                    new SQLException("unique constraint"), ConstraintKind.UNIQUE, "uk_exemplo"));
+            throw new DataIntegrityViolationException(
+                    "falha",
+                    new ConstraintViolationException(
+                            "já existe", new SQLException("unique constraint"), ConstraintKind.UNIQUE, "uk_exemplo"));
         }
 
         @GetMapping("/integridade")
@@ -92,9 +96,8 @@ class TratadorDeErrosTest {
         }
     }
 
-    private final MockMvc mvc = MockMvcBuilders.standaloneSetup(new ControllerDeTeste())
-            .setControllerAdvice(new TratadorDeErros())
-            .build();
+    private final MockMvc mvc =
+            MockMvcBuilders.standaloneSetup(new ControllerDeTeste()).setControllerAdvice(new TratadorDeErros()).build();
 
     @Test
     void respondeComStatus422ETodasAsViolacoes() throws Exception {

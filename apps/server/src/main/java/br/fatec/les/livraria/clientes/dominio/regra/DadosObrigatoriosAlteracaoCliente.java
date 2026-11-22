@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
 import br.fatec.les.livraria.clientes.dominio.modelo.DadosCadastraisCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
+import org.springframework.stereotype.Component;
 
 /**
  * Dados obrigatórios da alteração dos dados do cliente (RF-CLI-002, RN-CLI-006, DEC-10): nome, gênero, data de

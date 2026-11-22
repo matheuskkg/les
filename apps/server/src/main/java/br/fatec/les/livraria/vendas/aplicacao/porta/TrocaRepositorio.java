@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.vendas.aplicacao.porta;
 
+import br.fatec.les.livraria.vendas.dominio.troca.Troca;
+
 import java.util.List;
 import java.util.Optional;
-
-import br.fatec.les.livraria.vendas.dominio.troca.Troca;
 
 /** Persistência das trocas e dos seus itens (RF-VEN-011, DEC-12, DEC-16). */
 public interface TrocaRepositorio {

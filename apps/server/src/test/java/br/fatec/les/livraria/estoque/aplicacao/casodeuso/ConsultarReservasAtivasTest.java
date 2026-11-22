@@ -2,18 +2,18 @@ package br.fatec.les.livraria.estoque.aplicacao.casodeuso;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
 import br.fatec.les.livraria.estoque.dominio.modelo.Reserva;
 
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.util.Map;
+
 /**
- * O que ainda está reservado para um dono, por livro, para a finalização revalidar o estoque (RN-VEN-002,
- * DEC-12). A consulta pré-filtra no banco as reservas cujo prazo já venceu, e a definição de "ativa" continua
- * no domínio: {@code Reserva.ativaEm} é aplicada ao resultado (RN-EST-006, RNF-GER-001).
+ * O que ainda está reservado para um dono, por livro, para a finalização revalidar o estoque (RN-VEN-002, DEC-12). A
+ * consulta pré-filtra no banco as reservas cujo prazo já venceu, e a definição de "ativa" continua no domínio: {@code
+ * Reserva.ativaEm} é aplicada ao resultado (RN-EST-006, RNF-GER-001).
  */
 class ConsultarReservasAtivasTest {
 
@@ -28,8 +28,7 @@ class ConsultarReservasAtivasTest {
         reservas.salvar(Reserva.nova(1L, OrigemReserva.CHECKOUT, 10L, 3, AGORA.plusMinutes(10)));
         reservas.salvar(Reserva.nova(2L, OrigemReserva.CHECKOUT, 10L, 1, AGORA.plusHours(1)));
 
-        assertThat(consultar.executar(OrigemReserva.CHECKOUT, 10L))
-                .containsOnly(Map.entry(1L, 5), Map.entry(2L, 1));
+        assertThat(consultar.executar(OrigemReserva.CHECKOUT, 10L)).containsOnly(Map.entry(1L, 5), Map.entry(2L, 1));
     }
 
     @Test

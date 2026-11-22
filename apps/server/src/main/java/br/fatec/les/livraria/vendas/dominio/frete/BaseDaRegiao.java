@@ -3,14 +3,13 @@ package br.fatec.les.livraria.vendas.dominio.frete;
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
 /**
- * Valor base do frete pela região do CEP de entrega (RF-VEN-004, DEC-05.3), pelo primeiro dígito: 0 e 1 (SP)
- * R$ 12,00; 2 e 3 (RJ, ES, MG) R$ 15,00; 8 e 9 (Sul) R$ 18,00; 7 (Centro-Oeste, TO e RO) R$ 22,00; 4 e 5 (BA, SE, PE,
- * AL, PB, RN) R$ 25,00; 6 (CE, PI, MA e Norte) R$ 30,00.
+ * Valor base do frete pela região do CEP de entrega (RF-VEN-004, DEC-05.3), pelo primeiro dígito: 0 e 1 (SP) R$ 12,00;
+ * 2 e 3 (RJ, ES, MG) R$ 15,00; 8 e 9 (Sul) R$ 18,00; 7 (Centro-Oeste, TO e RO) R$ 22,00; 4 e 5 (BA, SE, PE, AL, PB, RN)
+ * R$ 25,00; 6 (CE, PI, MA e Norte) R$ 30,00.
  */
 public final class BaseDaRegiao {
 
-    private BaseDaRegiao() {
-    }
+    private BaseDaRegiao() {}
 
     /**
      * @param cep CEP de 8 dígitos, com ou sem máscara

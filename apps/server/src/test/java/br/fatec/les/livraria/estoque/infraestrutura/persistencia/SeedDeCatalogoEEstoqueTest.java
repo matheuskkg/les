@@ -2,23 +2,21 @@ package br.fatec.les.livraria.estoque.infraestrutura.persistencia;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /** Seed de estoque em H2 (RNF-LIV-002, RN-LIV-001, DEC-15.3). */
 @SpringBootTest
 @Transactional
 class SeedDeCatalogoEEstoqueTest {
 
-    @Autowired
-    private EstoqueJpaRepository estoques;
+    @Autowired private EstoqueJpaRepository estoques;
 
-    @Autowired
-    private EntradaEstoqueJpaRepository entradas;
+    @Autowired private EntradaEstoqueJpaRepository entradas;
 
     @Test
     void livroSemEntradasTemSaldoZero() {
@@ -32,9 +30,7 @@ class SeedDeCatalogoEEstoqueTest {
     @Test
     void estoqueEhASomaDasEntradasDoLivro() {
         List<EntradaEstoqueJpa> entradasDoLivro = entradas.findByLivroId(2L);
-        int somaDasEntradas = entradasDoLivro.stream()
-                .mapToInt(EntradaEstoqueJpa::getQuantidade)
-                .sum();
+        int somaDasEntradas = entradasDoLivro.stream().mapToInt(EntradaEstoqueJpa::getQuantidade).sum();
 
         EstoqueJpa saldo = estoques.findByLivroId(2L).orElseThrow();
 

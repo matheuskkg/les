@@ -1,8 +1,8 @@
 package br.fatec.les.livraria.vendas.dominio.pedido;
 
-import java.util.Objects;
-
 import org.jspecify.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * Cópia de um endereço de entrega ou de cobrança no momento da compra (DEC-10, DEC-12, DEC-16). Os tipos e a UF vêm

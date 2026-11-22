@@ -1,11 +1,12 @@
 package br.fatec.les.livraria.acesso.aplicacao.casodeuso;
 
-import java.util.List;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 /** Lista os ids dos usuários {@code ADMIN}, usados pelo {@code NotificarAdministradores} (DEC-13). */
 @Component

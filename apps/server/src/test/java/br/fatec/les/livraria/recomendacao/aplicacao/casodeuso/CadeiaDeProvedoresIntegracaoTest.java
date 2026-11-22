@@ -3,18 +3,6 @@ package br.fatec.les.livraria.recomendacao.aplicacao.casodeuso;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-import java.math.BigDecimal;
-import java.util.List;
-
-import javax.sql.DataSource;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.simple.JdbcClient;
-
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.recomendacao.aplicacao.consulta.Atendimento;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ProvedoresIaRepositorio;
@@ -27,34 +15,50 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.ResultadoDaChamada;
 import br.fatec.les.livraria.recomendacao.infraestrutura.persistencia.ChamadaIaJpa;
 import br.fatec.les.livraria.recomendacao.infraestrutura.persistencia.ChamadaIaJpaRepository;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.simple.JdbcClient;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import javax.sql.DataSource;
+
 /**
  * Cadeia sobre o seed em H2 (RNF-REC-001, DEC-03): a ordem padrão de {@code provedor_ia} e o atendimento pelo fake
  * quando nenhum provedor real tem chave, com a tentativa gravada em {@code chamada_ia}.
  */
 // Sem rede nem cota, mesmo com IA_*_CHAVE exportada no terminal (DEC-03).
-@SpringBootTest(properties = {
-        "livraria.ia.provedores.gemini.chave=",
-        "livraria.ia.provedores.groq.chave=",
-        "livraria.ia.provedores.openrouter.chave=",
-        "livraria.ia.provedores.nvidia.chave="})
+@SpringBootTest(
+        properties = {
+            "livraria.ia.provedores.gemini.chave=",
+            "livraria.ia.provedores.groq.chave=",
+            "livraria.ia.provedores.openrouter.chave=",
+            "livraria.ia.provedores.nvidia.chave="
+        })
 class CadeiaDeProvedoresIntegracaoTest {
 
     private static final PerfilDoCliente PERFIL = new PerfilDoCliente(List.of(), List.of(), List.of(), List.of());
-    private static final List<LivroCandidato> CANDIDATOS = List.of(new LivroCandidato(
-            1L, "Dom Casmurro", List.of("Machado de Assis"), List.of("Romance"), Dinheiro.de("29.90"),
-            BigDecimal.ONE));
+    private static final List<LivroCandidato> CANDIDATOS =
+            List.of(
+                    new LivroCandidato(
+                            1L,
+                            "Dom Casmurro",
+                            List.of("Machado de Assis"),
+                            List.of("Romance"),
+                            Dinheiro.de("29.90"),
+                            BigDecimal.ONE));
 
-    @Autowired
-    private CadeiaDeProvedores cadeia;
+    @Autowired private CadeiaDeProvedores cadeia;
 
-    @Autowired
-    private ProvedoresIaRepositorio provedores;
+    @Autowired private ProvedoresIaRepositorio provedores;
 
-    @Autowired
-    private ChamadaIaJpaRepository chamadas;
+    @Autowired private ChamadaIaJpaRepository chamadas;
 
-    @Autowired
-    private DataSource dataSource;
+    @Autowired private DataSource dataSource;
 
     @BeforeEach
     void limparAntes() {

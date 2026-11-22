@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.vendas.dominio.troca;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import org.jspecify.annotations.Nullable;
 
 /**
  * O que o admin informa ao confirmar o recebimento da troca: se cada item volta ao estoque (RF-VEN-014, DEC-12). Alvo
@@ -21,9 +21,7 @@ public record RecebimentoDeTroca(Troca troca, List<ItemRecebido> itens) {
         itens = List.copyOf(Objects.requireNonNull(itens, "itens"));
     }
 
-    /**
-     * Decisão de cada item informado; chamado depois das regras, que garantem uma decisão por item da troca.
-     */
+    /** Decisão de cada item informado; chamado depois das regras, que garantem uma decisão por item da troca. */
     public Map<Long, Boolean> voltaEstoquePorItem() {
         Map<Long, Boolean> porItem = new HashMap<>();
         itens.forEach(item -> porItem.put(item.itemPedidoId(), item.voltaEstoque()));
@@ -34,6 +32,5 @@ public record RecebimentoDeTroca(Troca troca, List<ItemRecebido> itens) {
      * @param itemPedidoId item do pedido que está na troca
      * @param voltaEstoque se o item volta a ser vendável; nulo quando não informado
      */
-    public record ItemRecebido(@Nullable Long itemPedidoId, @Nullable Boolean voltaEstoque) {
-    }
+    public record ItemRecebido(@Nullable Long itemPedidoId, @Nullable Boolean voltaEstoque) {}
 }

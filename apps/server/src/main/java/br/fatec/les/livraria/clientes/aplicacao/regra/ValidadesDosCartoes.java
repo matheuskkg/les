@@ -1,15 +1,16 @@
 package br.fatec.les.livraria.clientes.aplicacao.regra;
 
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Validades dos cartões do cadastro (DEC-06, RN-CLI-004): percorre a lista e aplica {@link ValidadeDoCartao} a cada
@@ -32,8 +33,8 @@ public class ValidadesDosCartoes implements Regra<NovoCliente> {
             Violacoes doCartao = new Violacoes();
             validadeDoCartao.validar(cartao, doCartao);
             for (Violacao violacao : doCartao.lista()) {
-                violacoes.adicionar(violacao.codigo(),
-                        "Cartão " + (i + 1) + ": " + minusculaInicial(violacao.mensagem()));
+                violacoes.adicionar(
+                        violacao.codigo(), "Cartão " + (i + 1) + ": " + minusculaInicial(violacao.mensagem()));
             }
         }
     }

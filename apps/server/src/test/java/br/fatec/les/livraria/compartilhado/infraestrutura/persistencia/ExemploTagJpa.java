@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
 import lombok.Getter;
 
 /** Entidade auxiliar dos testes de filtro por relacionamento muitos-para-muitos. */
@@ -23,8 +24,7 @@ public class ExemploTagJpa {
     @Column(nullable = false, unique = true)
     private String nome;
 
-    protected ExemploTagJpa() {
-    }
+    protected ExemploTagJpa() {}
 
     public ExemploTagJpa(String nome) {
         this.nome = nome;

@@ -2,10 +2,10 @@ package br.fatec.les.livraria.recomendacao.dominio.calculo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.Test;
+
 import java.time.Duration;
 import java.time.Instant;
-
-import org.junit.jupiter.api.Test;
 
 /**
  * Leitura do tempo sugerido no 429 (RNF-REC-001, DEC-03, REC-09): cabeçalho {@code Retry-After} em segundos ou data
@@ -36,14 +36,12 @@ class InterpretarEsperaSugeridaTest {
 
     @Test
     void rnfRec001_mensagemComMinutosESegundosSomaAsPartes() {
-        assertThat(InterpretarEsperaSugerida.daMensagem("Please try again in 1m30s."))
-                .contains(Duration.ofSeconds(90));
+        assertThat(InterpretarEsperaSugerida.daMensagem("Please try again in 1m30s.")).contains(Duration.ofSeconds(90));
     }
 
     @Test
     void rnfRec001_mensagemComSegundosDecimais() {
-        assertThat(InterpretarEsperaSugerida.daMensagem("try again in 7.5s"))
-                .contains(Duration.ofMillis(7_500));
+        assertThat(InterpretarEsperaSugerida.daMensagem("try again in 7.5s")).contains(Duration.ofMillis(7_500));
     }
 
     @Test

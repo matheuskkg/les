@@ -7,8 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
+import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.ExemploListagemJpa;
+import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.ExemploListagemRepositorio;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,8 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.http.MediaType;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -26,13 +27,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
-import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.ExemploListagemJpa;
-import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.ExemploListagemRepositorio;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 /** Conflitos de escrita respondem 409 com a configuração real da aplicação (DEC-07, DEC-15.2). */
-@SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:conflito;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;"
-        + "DB_CLOSE_DELAY=-1")
+@SpringBootTest(
+        properties =
+                "spring.datasource.url=jdbc:h2:mem:conflito;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;"
+                        + "DB_CLOSE_DELAY=-1")
 @ActiveProfiles("h2")
 @Transactional
 class ConflitoDeEscritaTest {
@@ -76,8 +78,7 @@ class ConflitoDeEscritaTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
     private MockMvc mvc;
 

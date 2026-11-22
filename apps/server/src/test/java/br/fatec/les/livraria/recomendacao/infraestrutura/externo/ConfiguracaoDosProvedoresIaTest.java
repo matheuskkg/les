@@ -2,14 +2,6 @@ package br.fatec.les.livraria.recomendacao.infraestrutura.externo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.recomendacao.aplicacao.casodeuso.CadeiaDeProvedores;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.AssistenteDeLivros;
@@ -18,6 +10,14 @@ import br.fatec.les.livraria.recomendacao.aplicacao.porta.ProvedoresIaRepositori
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ChamadaIa;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ProvedorIa;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Configuração dos adapters por item de {@code livraria.ia.provedores} (RNF-REC-001, DEC-03): cada provedor vira um
  * bean e a cadeia recebe todos eles junto com o {@code fake}.
@@ -25,38 +25,44 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.ProvedorIa;
 class ConfiguracaoDosProvedoresIaTest {
 
     private static final String[] PROVEDORES = {
-            "livraria.ia.provedores.gemini.url-base=http://127.0.0.1:1/v1",
-            "livraria.ia.provedores.gemini.modelo=modelo-gemini",
-            "livraria.ia.provedores.groq.url-base=http://127.0.0.1:1/v1",
-            "livraria.ia.provedores.groq.modelo=modelo-groq",
-            "livraria.ia.provedores.openrouter.url-base=http://127.0.0.1:1/v1",
-            "livraria.ia.provedores.openrouter.modelo=modelo-openrouter",
-            "livraria.ia.provedores.nvidia.url-base=http://127.0.0.1:1/v1",
-            "livraria.ia.provedores.nvidia.modelo=modelo-nvidia"};
+        "livraria.ia.provedores.gemini.url-base=http://127.0.0.1:1/v1",
+        "livraria.ia.provedores.gemini.modelo=modelo-gemini",
+        "livraria.ia.provedores.groq.url-base=http://127.0.0.1:1/v1",
+        "livraria.ia.provedores.groq.modelo=modelo-groq",
+        "livraria.ia.provedores.openrouter.url-base=http://127.0.0.1:1/v1",
+        "livraria.ia.provedores.openrouter.modelo=modelo-openrouter",
+        "livraria.ia.provedores.nvidia.url-base=http://127.0.0.1:1/v1",
+        "livraria.ia.provedores.nvidia.modelo=modelo-nvidia"
+    };
 
-    private final ApplicationContextRunner contexto = new ApplicationContextRunner()
-            .withUserConfiguration(ConfiguracaoDosProvedoresIa.class)
-            .withBean(AssistenteDeLivrosFake.class)
-            .withBean(CadeiaDeProvedores.class)
-            .withBean(ProvedoresIaRepositorio.class, ProvedoresVazios::new)
-            .withBean(ChamadasIaRepositorio.class, ChamadasVazias::new)
-            .withBean(Relogio.class, RelogioDeTeste::new);
+    private final ApplicationContextRunner contexto =
+            new ApplicationContextRunner()
+                    .withUserConfiguration(ConfiguracaoDosProvedoresIa.class)
+                    .withBean(AssistenteDeLivrosFake.class)
+                    .withBean(CadeiaDeProvedores.class)
+                    .withBean(ProvedoresIaRepositorio.class, ProvedoresVazios::new)
+                    .withBean(ChamadasIaRepositorio.class, ChamadasVazias::new)
+                    .withBean(Relogio.class, RelogioDeTeste::new);
 
     @Test
     void rnfRec001_todosOsProvedoresConfiguradosMaisOFakeChegamACadeia() {
-        contexto.withPropertyValues(PROVEDORES).run(gerenciador -> {
-            Map<String, AssistenteDeLivros> assistentes = gerenciador.getBeansOfType(AssistenteDeLivros.class);
+        contexto.withPropertyValues(PROVEDORES)
+                .run(gerenciador -> {
+                    Map<String, AssistenteDeLivros> assistentes = gerenciador.getBeansOfType(AssistenteDeLivros.class);
 
-            assertThat(assistentes.values()).extracting(AssistenteDeLivros::nome)
-                    .containsExactlyInAnyOrder("gemini", "groq", "openrouter", "nvidia", "fake");
-            assertThat(gerenciador).hasBean("assistente-gemini")
-                    .hasBean("assistente-groq")
-                    .hasBean("assistente-openrouter")
-                    .hasBean("assistente-nvidia");
+                    assertThat(assistentes.values())
+                            .extracting(AssistenteDeLivros::nome)
+                            .containsExactlyInAnyOrder("gemini", "groq", "openrouter", "nvidia", "fake");
+                    assertThat(gerenciador)
+                            .hasBean("assistente-gemini")
+                            .hasBean("assistente-groq")
+                            .hasBean("assistente-openrouter")
+                            .hasBean("assistente-nvidia");
 
-            CadeiaDeProvedores cadeia = gerenciador.getBean(CadeiaDeProvedores.class);
-            assertThat(assistentesNaCadeia(cadeia)).containsKeys("gemini", "groq", "openrouter", "nvidia", "fake");
-        });
+                    CadeiaDeProvedores cadeia = gerenciador.getBean(CadeiaDeProvedores.class);
+                    assertThat(assistentesNaCadeia(cadeia))
+                            .containsKeys("gemini", "groq", "openrouter", "nvidia", "fake");
+                });
     }
 
     @Test

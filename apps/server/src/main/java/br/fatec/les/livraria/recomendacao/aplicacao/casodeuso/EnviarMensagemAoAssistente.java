@@ -1,15 +1,5 @@
 package br.fatec.les.livraria.recomendacao.aplicacao.casodeuso;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroListado;
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.IdentificarCliente;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
@@ -36,26 +26,37 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.regra.LimiteDeMensagensPorMinuto;
 import br.fatec.les.livraria.recomendacao.dominio.regra.TamanhoDaMensagem;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarComprasDoCliente;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Envia a mensagem do cliente ao assistente e grava a resposta (RNF-REC-001, DEC-03).
  *
  * <ol>
- *   <li>Antes da chamada: {@link TamanhoDaMensagem} e {@link LimiteDeMensagensPorMinuto}; violação responde 422.</li>
+ *   <li>Antes da chamada: {@link TamanhoDaMensagem} e {@link LimiteDeMensagensPorMinuto}; violação responde 422.
  *   <li>O histórico enviado à IA são as {@value #HISTORICO} últimas mensagens da conversa ativa, lidas do banco antes
- *       de gravar a nova; sem conversa ativa, uma nova é aberta.</li>
+ *       de gravar a nova; sem conversa ativa, uma nova é aberta.
  *   <li>A mensagem do cliente é gravada antes da chamada. Se toda a cadeia falhar, ela fica gravada e a API responde
- *       503; o reenvio do mesmo texto não a grava de novo ({@link ReenvioSemResposta}).</li>
- *   <li>A resposta passa por {@link ValidarRespostaDoAssistente} e, quando é uma recomendação, por
- *       {@link RemoverLivrosCompradosDaRecomendacao}; depois é gravada apontando para a chamada que a gerou.</li>
+ *       503; o reenvio do mesmo texto não a grava de novo ({@link ReenvioSemResposta}).
+ *   <li>A resposta passa por {@link ValidarRespostaDoAssistente} e, quando é uma recomendação, por {@link
+ *       RemoverLivrosCompradosDaRecomendacao}; depois é gravada apontando para a chamada que a gerou.
  * </ol>
  *
- * <p>A checagem do limite, a abertura da conversa e a gravação da mensagem do cliente ficam sob uma trava por
- * cliente, em memória (a aplicação roda em uma instância só); a chamada à IA fica fora dela.</p>
+ * <p>A checagem do limite, a abertura da conversa e a gravação da mensagem do cliente ficam sob uma trava por cliente,
+ * em memória (a aplicação roda em uma instância só); a chamada à IA fica fora dela.
  *
  * <p>Não há transação em volta do caso de uso: cada gravação usa a do repositório, e nenhuma fica aberta durante a
- * chamada à IA, que pode levar segundos.</p>
+ * chamada à IA, que pode levar segundos.
  */
 @Component
 @RequiredArgsConstructor
@@ -94,7 +95,8 @@ public class EnviarMensagemAoAssistente {
             LocalDateTime agora = relogio.agora();
             Violacoes.verificar(
                     new EnvioDeMensagem(texto, conversas.enviadasPeloClienteDesde(clienteId, agora.minusMinutes(1))),
-                    tamanhoDaMensagem, limiteDeMensagens);
+                    tamanhoDaMensagem,
+                    limiteDeMensagens);
             mensagem = texto.strip();
             conversaId = conversas.conversaAtiva(clienteId).orElseGet(() -> conversas.abrir(clienteId, agora));
             List<MensagemDaConversa> ultimas = conversas.ultimas(conversaId, HISTORICO + 1);
@@ -104,31 +106,32 @@ public class EnviarMensagemAoAssistente {
             } else {
                 conversas.salvar(MensagemDaConversa.doCliente(conversaId, mensagem, agora));
             }
-            historico = ultimas.stream()
-                    .skip(Math.max(0, ultimas.size() - HISTORICO))
-                    .map(MensagemDaConversa::comoHistorico)
-                    .toList();
+            historico =
+                    ultimas.stream()
+                            .skip(Math.max(0, ultimas.size() - HISTORICO))
+                            .map(MensagemDaConversa::comoHistorico)
+                            .toList();
         }
 
-        PerfilDoCliente perfil = montarPerfil.montar(consultarComprasDoCliente.executar(clienteId),
-                recomendacoes.avaliacoesDoCliente(clienteId));
+        PerfilDoCliente perfil =
+                montarPerfil.montar(
+                        consultarComprasDoCliente.executar(clienteId), recomendacoes.avaliacoesDoCliente(clienteId));
         List<LivroListado> ativos = lerCatalogo.ativos();
-        List<ResumoDeLivro> catalogo = ativos.stream()
-                .filter(LivroAVenda::aVenda)
-                .map(ResumoDeLivro::de)
-                .toList();
-        Atendimento<RespostaDoAssistente> atendimento = cadeia.conversar(perfil, historico, mensagem,
-                ferramentas.doCliente(clienteId), catalogo);
+        List<ResumoDeLivro> catalogo = ativos.stream().filter(LivroAVenda::aVenda).map(ResumoDeLivro::de).toList();
+        Atendimento<RespostaDoAssistente> atendimento =
+                cadeia.conversar(perfil, historico, mensagem, ferramentas.doCliente(clienteId), catalogo);
 
-        Map<Long, LivroListado> aVenda = ativos.stream()
-                .filter(LivroAVenda::aVenda)
-                .collect(Collectors.toMap(livro -> livro.livro().id(), Function.identity()));
+        Map<Long, LivroListado> aVenda =
+                ativos.stream()
+                        .filter(LivroAVenda::aVenda)
+                        .collect(Collectors.toMap(livro -> livro.livro().id(), Function.identity()));
         RespostaDoAssistente resposta = validarResposta.validar(atendimento.resposta(), aVenda.keySet());
-        resposta = removerComprados.remover(resposta, perfil.livrosComprados().stream()
-                .map(LivroComprado::id)
-                .toList());
-        MensagemDaConversa gravada = conversas.salvar(MensagemDaConversa.doAssistente(conversaId, resposta,
-                atendimento.chamadaIaId(), relogio.agora()));
+        resposta =
+                removerComprados.remover(resposta, perfil.livrosComprados().stream().map(LivroComprado::id).toList());
+        MensagemDaConversa gravada =
+                conversas.salvar(
+                        MensagemDaConversa.doAssistente(
+                                conversaId, resposta, atendimento.chamadaIaId(), relogio.agora()));
         return new MensagemExibida(gravada, resposta.livrosCitados().stream().map(aVenda::get).toList());
     }
 }

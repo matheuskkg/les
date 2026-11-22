@@ -1,10 +1,10 @@
 package br.fatec.les.livraria.acesso.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.acesso.dominio.modelo.SenhaInformada;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
+import org.springframework.stereotype.Component;
 
 /**
  * Exige a nova senha na alteração de senha (RF-CLI-008, RNF-CLI-001). {@link SenhaForte} ignora uma senha em branco

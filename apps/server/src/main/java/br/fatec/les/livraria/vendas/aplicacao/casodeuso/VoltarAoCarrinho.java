@@ -1,10 +1,5 @@
 package br.fatec.les.livraria.vendas.aplicacao.casodeuso;
 
-import java.time.LocalDateTime;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.IdentificarCliente;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio;
@@ -19,15 +14,21 @@ import br.fatec.les.livraria.vendas.aplicacao.porta.CheckoutRepositorio;
 import br.fatec.les.livraria.vendas.dominio.modelo.Carrinho;
 import br.fatec.les.livraria.vendas.dominio.modelo.Checkout;
 import br.fatec.les.livraria.vendas.dominio.modelo.ItemCheckout;
+
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+
 /**
- * "Voltar ao carrinho" (DEC-12): encerra o checkout aberto e devolve os itens ao carrinho, somados aos que já
- * estiverem lá. O bloqueio do carrinho recomeça (DEC-05.1) e todos os itens são reservados de novo, com a conferência
- * do estoque (RN-VEN-001).
+ * "Voltar ao carrinho" (DEC-12): encerra o checkout aberto e devolve os itens ao carrinho, somados aos que já estiverem
+ * lá. O bloqueio do carrinho recomeça (DEC-05.1) e todos os itens são reservados de novo, com a conferência do estoque
+ * (RN-VEN-001).
  *
  * <p>Trava o carrinho antes do checkout, na mesma ordem do {@link IniciarCheckout} e da expiração. O pedido que ficou
- * em processamento é reprovado (DEC-13).</p>
+ * em processamento é reprovado (DEC-13).
  */
 @Component
 @RequiredArgsConstructor
@@ -46,15 +47,19 @@ public class VoltarAoCarrinho {
     /**
      * @return o carrinho com os itens devolvidos
      * @throws ExcecaoDeRecursoNaoEncontrado se não houver checkout aberto
-     * @throws ExcecaoDeNegocio              com {@code RN-VEN-001} se faltar estoque para a soma dos itens
+     * @throws ExcecaoDeNegocio com {@code RN-VEN-001} se faltar estoque para a soma dos itens
      */
     @Transactional
     public CarrinhoConsultado executar() {
         Long clienteId = identificarCliente.executar();
-        Carrinho carrinho = carrinhos.buscarPorClienteParaAlterar(clienteId)
-                .orElseGet(() -> carrinhos.salvar(Carrinho.vazio(clienteId)));
-        Checkout checkout = checkouts.buscarAbertoPorClienteParaAlterar(clienteId)
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Nenhuma compra em andamento."));
+        Carrinho carrinho =
+                carrinhos
+                        .buscarPorClienteParaAlterar(clienteId)
+                        .orElseGet(() -> carrinhos.salvar(Carrinho.vazio(clienteId)));
+        Checkout checkout =
+                checkouts
+                        .buscarAbertoPorClienteParaAlterar(clienteId)
+                        .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Nenhuma compra em andamento."));
 
         reprovarPedido.executarPendenteDoCheckout(checkout.getId());
         liberarItensDoCheckout.executar(checkout);
@@ -70,8 +75,10 @@ public class VoltarAoCarrinho {
         try {
             reservarItens.executar(carrinho, expiraEm);
         } catch (ExcecaoDeNegocio excecao) {
-            throw new ExcecaoDeNegocio("RN-VEN-001", "Não há estoque para somar os itens da compra aos do carrinho. "
-                    + "Diminua ou remova no carrinho os livros repetidos e tente de novo.");
+            throw new ExcecaoDeNegocio(
+                    "RN-VEN-001",
+                    "Não há estoque para somar os itens da compra aos do carrinho. "
+                            + "Diminua ou remova no carrinho os livros repetidos e tente de novo.");
         }
         checkout.encerrar();
         checkouts.salvar(checkout);

@@ -3,14 +3,14 @@ package br.fatec.les.livraria.vendas.dominio.troca;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
+
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 class ValorDaTrocaTest {
 

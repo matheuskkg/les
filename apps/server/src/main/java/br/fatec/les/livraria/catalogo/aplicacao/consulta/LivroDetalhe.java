@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 /**
- * Livro completo como a consulta o devolve, sem preço nem disponibilidade, que são enriquecidos pelo caso
- * de uso (RF-LIV-005, RN-LIV-001). Só livros ativos chegam aqui. Os dados comuns à vitrine ficam em
- * {@link LivroResumo}, reutilizado no lugar de repetir os campos.
+ * Livro completo como a consulta o devolve, sem preço nem disponibilidade, que são enriquecidos pelo caso de uso
+ * (RF-LIV-005, RN-LIV-001). Só livros ativos chegam aqui. Os dados comuns à vitrine ficam em {@link LivroResumo},
+ * reutilizado no lugar de repetir os campos.
  */
 public record LivroDetalhe(
         LivroResumo livro,

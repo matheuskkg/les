@@ -10,7 +10,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
+import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
+import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.notificacoes.aplicacao.porta.NotificacaoRepositorio;
+import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
+import br.fatec.les.livraria.notificacoes.dominio.modelo.TipoNotificacao;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,15 +30,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
-import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.notificacoes.aplicacao.porta.NotificacaoRepositorio;
-import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
-import br.fatec.les.livraria.notificacoes.dominio.modelo.TipoNotificacao;
-import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
 
 /**
  * Rotas de notificação do cliente e do administrador (DEC-13, DEC-07, DEC-08, RN-VEN-016). O id do usuário vem da
@@ -42,20 +43,15 @@ class NotificacaoControllerTest {
     private static final String SENHA = "Senha@123";
     private static final LocalDateTime CRIADA_EM = LocalDateTime.of(2026, 10, 24, 8, 0);
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private CodificadorDeSenha senhas;
+    @Autowired private CodificadorDeSenha senhas;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private NotificacaoRepositorio notificacoes;
+    @Autowired private NotificacaoRepositorio notificacoes;
 
     private MockMvc mvc;
 
@@ -77,8 +73,12 @@ class NotificacaoControllerTest {
                 .andExpect(jsonPath("$.tamanho").value(20))
                 .andExpect(jsonPath("$.totalItens").value(2))
                 .andExpect(jsonPath("$.itens", hasSize(2)))
-                .andExpect(jsonPath("$.itens[*].tipo", contains(
-                        TipoNotificacao.PEDIDO_ENTREGUE.name(), TipoNotificacao.PEDIDO_APROVADO.name())));
+                .andExpect(
+                        jsonPath(
+                                "$.itens[*].tipo",
+                                contains(
+                                        TipoNotificacao.PEDIDO_ENTREGUE.name(),
+                                        TipoNotificacao.PEDIDO_APROVADO.name())));
     }
 
     @Test
@@ -133,8 +133,7 @@ class NotificacaoControllerTest {
         Usuario cliente = criarCliente("notificacoes.ler.uma@livraria.test");
         Notificacao notificacao = criar(cliente.getId(), TipoNotificacao.PEDIDO_DESPACHADO);
 
-        mvc.perform(post("/api/me/notificacoes/{id}/ler", notificacao.getId())
-                .cookie(cookieDe(cliente)).with(csrf()))
+        mvc.perform(post("/api/me/notificacoes/{id}/ler", notificacao.getId()).cookie(cookieDe(cliente)).with(csrf()))
                 .andExpect(status().isNoContent());
 
         mvc.perform(get("/api/me/notificacoes/nao-lidas").cookie(cookieDe(cliente)))
@@ -170,8 +169,7 @@ class NotificacaoControllerTest {
         Usuario cliente = criarCliente("notificacoes.dono@livraria.test");
         Notificacao deOutro = criar(999_999L, TipoNotificacao.PEDIDO_APROVADO);
 
-        mvc.perform(post("/api/me/notificacoes/{id}/ler", deOutro.getId())
-                .cookie(cookieDe(cliente)).with(csrf()))
+        mvc.perform(post("/api/me/notificacoes/{id}/ler", deOutro.getId()).cookie(cookieDe(cliente)).with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
@@ -179,28 +177,23 @@ class NotificacaoControllerTest {
     void dec07_marcarNotificacaoInexistenteResponde404() throws Exception {
         Usuario cliente = criarCliente("notificacoes.inexistente@livraria.test");
 
-        mvc.perform(post("/api/me/notificacoes/{id}/ler", 999_999L)
-                .cookie(cookieDe(cliente)).with(csrf()))
+        mvc.perform(post("/api/me/notificacoes/{id}/ler", 999_999L).cookie(cookieDe(cliente)).with(csrf()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.detail").value("Notificação não encontrada."));
     }
 
     @Test
     void dec08_rotasDoClienteSemSessaoRespondem401() throws Exception {
-        mvc.perform(get("/api/me/notificacoes"))
-                .andExpect(status().isUnauthorized());
-        mvc.perform(get("/api/me/notificacoes/nao-lidas"))
-                .andExpect(status().isUnauthorized());
-        mvc.perform(post("/api/me/notificacoes/ler-todas").with(csrf()))
-                .andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/me/notificacoes")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/me/notificacoes/nao-lidas")).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/me/notificacoes/ler-todas").with(csrf())).andExpect(status().isUnauthorized());
     }
 
     @Test
     void dec08_rotasDeAdminExigemPapelAdmin() throws Exception {
         Usuario cliente = criarCliente("notificacoes.admin.403@livraria.test");
 
-        mvc.perform(get("/api/admin/notificacoes").cookie(cookieDe(cliente)))
-                .andExpect(status().isForbidden());
+        mvc.perform(get("/api/admin/notificacoes").cookie(cookieDe(cliente))).andExpect(status().isForbidden());
         mvc.perform(post("/api/admin/notificacoes/ler-todas").cookie(cookieDe(cliente)).with(csrf()))
                 .andExpect(status().isForbidden());
     }
@@ -216,8 +209,7 @@ class NotificacaoControllerTest {
         mvc.perform(get("/api/admin/notificacoes/nao-lidas").cookie(cookieDe(admin)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.quantidade").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
-        mvc.perform(post("/api/admin/notificacoes/{id}/ler", notificacao.getId())
-                .cookie(cookieDe(admin)).with(csrf()))
+        mvc.perform(post("/api/admin/notificacoes/{id}/ler", notificacao.getId()).cookie(cookieDe(admin)).with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
@@ -238,8 +230,8 @@ class NotificacaoControllerTest {
     }
 
     private Notificacao criar(Long usuarioId, TipoNotificacao tipo, LocalDateTime criadaEm) {
-        return notificacoes.salvar(Notificacao.nova(usuarioId, tipo, "Notificação de teste.", "pedido", 10042L,
-                criadaEm));
+        return notificacoes.salvar(
+                Notificacao.nova(usuarioId, tipo, "Notificação de teste.", "pedido", 10042L, criadaEm));
     }
 
     private Cookie cookieDe(Usuario usuario) {

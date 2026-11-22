@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.vendas.dominio.pagamento;
 
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
 import java.util.List;
 import java.util.Objects;
-
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
 /**
  * Cartões informados para pagar o restante da compra, depois dos cupons (RN-VEN-004, RN-VEN-005, DEC-11).

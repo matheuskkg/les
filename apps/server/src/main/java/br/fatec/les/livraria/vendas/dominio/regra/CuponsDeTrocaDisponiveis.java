@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.vendas.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.dominio.pagamento.CupomTroca;
 import br.fatec.les.livraria.vendas.dominio.pagamento.CuponsDeTrocaNaCompra;
+
+import org.springframework.stereotype.Component;
 
 /** Cupons de troca disponíveis (RN-VEN-007, DEC-11): nem usados, nem vencidos. */
 @Component

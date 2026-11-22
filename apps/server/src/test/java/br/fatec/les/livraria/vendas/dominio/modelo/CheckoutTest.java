@@ -3,13 +3,13 @@ package br.fatec.les.livraria.vendas.dominio.modelo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.List;
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
 
 import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /** RF-VEN-003, RN-VEN-014, RNF-VEN-001, DEC-12: regras da sessão de compra. */
 class CheckoutTest {

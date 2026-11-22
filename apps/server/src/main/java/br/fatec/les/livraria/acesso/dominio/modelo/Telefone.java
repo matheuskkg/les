@@ -3,8 +3,8 @@ package br.fatec.les.livraria.acesso.dominio.modelo;
 import java.util.Objects;
 
 /**
- * Telefone do usuário, guardado como DDD e número (RN-CLI-006, DEC-10). O login compara só os dígitos, sem o tipo.
- * Os helpers de dígitos também são usados pelas regras de cadastro dos módulos que recebem telefone, CEP ou número de
+ * Telefone do usuário, guardado como DDD e número (RN-CLI-006, DEC-10). O login compara só os dígitos, sem o tipo. Os
+ * helpers de dígitos também são usados pelas regras de cadastro dos módulos que recebem telefone, CEP ou número de
  * cartão com máscara.
  */
 public record Telefone(TipoTelefone tipo, String ddd, String numero) {
@@ -31,8 +31,8 @@ public record Telefone(TipoTelefone tipo, String ddd, String numero) {
     }
 
     /**
-     * Dígitos de um telefone digitado, sem o código do país quando informado: {@code +55 (11) 98888-7777} vira
-     * {@code 11988887777}.
+     * Dígitos de um telefone digitado, sem o código do país quando informado: {@code +55 (11) 98888-7777} vira {@code
+     * 11988887777}.
      */
     public static String digitosNacionais(String valor) {
         String digitos = somenteDigitos(valor);

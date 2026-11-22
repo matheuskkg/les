@@ -1,15 +1,17 @@
 package br.fatec.les.livraria.vendas.infraestrutura.web;
 
-import java.util.List;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ListarCuponsDeTroca;
+import br.fatec.les.livraria.vendas.infraestrutura.web.dto.CupomDeTrocaDto;
+
+import io.swagger.v3.oas.annotations.Operation;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ListarCuponsDeTroca;
-import br.fatec.les.livraria.vendas.infraestrutura.web.dto.CupomDeTrocaDto;
-import io.swagger.v3.oas.annotations.Operation;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 /** Cupons de troca do cliente logado (RF-VEN-007, DEC-07, DEC-11). O cliente vem da sessão. */
 @RestController

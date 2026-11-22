@@ -3,19 +3,19 @@ package br.fatec.les.livraria.estoque.aplicacao.casodeuso;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.estoque.aplicacao.porta.SaldoDeEstoque;
+import br.fatec.les.livraria.estoque.aplicacao.porta.SaldoDoLivro;
+import br.fatec.les.livraria.estoque.dominio.calculo.CalcularDisponivel;
+
+import org.junit.jupiter.api.Test;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import org.junit.jupiter.api.Test;
-
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.estoque.aplicacao.porta.SaldoDeEstoque;
-import br.fatec.les.livraria.estoque.aplicacao.porta.SaldoDoLivro;
-import br.fatec.les.livraria.estoque.dominio.calculo.CalcularDisponivel;
 
 /** Disponibilidade calculada em lote sobre um único retrato de saldos e reservas (DEC-15.3, RF-LIV-005). */
 class ConsultarDisponibilidadeTest {
@@ -32,21 +32,23 @@ class ConsultarDisponibilidadeTest {
 
     @Test
     void descontaAsReservasAtivasDoSaldo() {
-        SaldoDeEstoqueFake saldo = new SaldoDeEstoqueFake(Map.of(
-                1L, new SaldoDoLivro(20, 5),
-                2L, new SaldoDoLivro(5, 8)));
+        SaldoDeEstoqueFake saldo =
+                new SaldoDeEstoqueFake(
+                        Map.of(
+                                1L, new SaldoDoLivro(20, 5),
+                                2L, new SaldoDoLivro(5, 8)));
         ConsultarDisponibilidade consulta = consulta(saldo);
 
-        assertThat(consulta.executar(List.of(1L, 2L)))
-                .containsEntry(1L, 15)
-                .containsEntry(2L, 0);
+        assertThat(consulta.executar(List.of(1L, 2L))).containsEntry(1L, 15).containsEntry(2L, 0);
     }
 
     @Test
     void consultaSaldosComOInstanteDoRelogioEmUmaUnicaChamada() {
-        SaldoDeEstoqueFake saldo = new SaldoDeEstoqueFake(Map.of(
-                1L, new SaldoDoLivro(10, 2),
-                2L, new SaldoDoLivro(4, 0)));
+        SaldoDeEstoqueFake saldo =
+                new SaldoDeEstoqueFake(
+                        Map.of(
+                                1L, new SaldoDoLivro(10, 2),
+                                2L, new SaldoDoLivro(4, 0)));
         ConsultarDisponibilidade consulta = consulta(saldo);
 
         consulta.executar(List.of(1L, 2L));

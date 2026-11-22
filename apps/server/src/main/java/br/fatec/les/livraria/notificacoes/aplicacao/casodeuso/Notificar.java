@@ -1,16 +1,17 @@
 package br.fatec.les.livraria.notificacoes.aplicacao.casodeuso;
 
-import java.util.Objects;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.notificacoes.aplicacao.EntregaDepoisDoCommit;
 import br.fatec.les.livraria.notificacoes.aplicacao.porta.NotificacaoRepositorio;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.TipoNotificacao;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 /**
  * Notifica um usuário (DEC-13, RN-VEN-014, RN-VEN-016). É o caso de uso público que os outros módulos chamam
@@ -32,8 +33,14 @@ public class Notificar {
     @Transactional
     public Notificacao executar(Comando comando) {
         Objects.requireNonNull(comando, "comando");
-        Notificacao notificacao = Notificacao.nova(comando.usuarioId(), comando.tipo(), comando.mensagem(),
-                comando.recurso(), comando.recursoId(), relogio.agora());
+        Notificacao notificacao =
+                Notificacao.nova(
+                        comando.usuarioId(),
+                        comando.tipo(),
+                        comando.mensagem(),
+                        comando.recurso(),
+                        comando.recursoId(),
+                        relogio.agora());
         Notificacao salva = notificacoes.salvar(notificacao);
         entrega.agendar(salva);
         return salva;
@@ -43,9 +50,9 @@ public class Notificar {
      * Dados de uma notificação (DEC-13).
      *
      * @param usuarioId destinatário
-     * @param tipo      evento de origem
-     * @param mensagem  texto exibido ao usuário
-     * @param recurso   recurso referenciado (por exemplo {@code pedido}), ou nulo
+     * @param tipo evento de origem
+     * @param mensagem texto exibido ao usuário
+     * @param recurso recurso referenciado (por exemplo {@code pedido}), ou nulo
      * @param recursoId id do recurso referenciado, ou nulo
      */
     public record Comando(Long usuarioId, TipoNotificacao tipo, String mensagem, String recurso, Long recursoId) {
@@ -56,8 +63,8 @@ public class Notificar {
         }
 
         /** Notificação que aponta para um recurso, como o pedido ou a troca que a originou (DEC-13). */
-        public static Comando sobre(Long usuarioId, TipoNotificacao tipo, String mensagem,
-                String recurso, Long recursoId) {
+        public static Comando sobre(
+                Long usuarioId, TipoNotificacao tipo, String mensagem, String recurso, Long recursoId) {
             return new Comando(usuarioId, tipo, mensagem, recurso, recursoId);
         }
     }

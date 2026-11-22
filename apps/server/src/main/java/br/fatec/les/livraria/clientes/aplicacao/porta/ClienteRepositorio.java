@@ -1,12 +1,12 @@
 package br.fatec.les.livraria.clientes.aplicacao.porta;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
 import br.fatec.les.livraria.compartilhado.dominio.Cpf;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Persistência do cliente e dos seus endereços e cartões (RF-CLI-001, RF-CLI-002, RF-CLI-006, RF-CLI-007, DEC-10,
@@ -26,14 +26,14 @@ public interface ClienteRepositorio {
     Optional<Cliente> buscarPorUsuarioIdParaAlterar(Long usuarioId);
 
     /**
-     * Altera os dados cadastrais que ficam no {@code Cliente} (RF-CLI-002). E-mail e telefone são alterados no
-     * {@code acesso}, pelo caso de uso público {@code AlterarContato} (DEC-08, DEC-10).
+     * Altera os dados cadastrais que ficam no {@code Cliente} (RF-CLI-002). E-mail e telefone são alterados no {@code
+     * acesso}, pelo caso de uso público {@code AlterarContato} (DEC-08, DEC-10).
      */
     Cliente alterarDados(Long clienteId, String nome, Genero genero, LocalDate dataNascimento, Cpf cpf);
 
     /**
-     * Id do cliente do usuário de login, para as rotas {@code /api/me} (RF-VEN-001, DEC-07, DEC-15.4). O
-     * cliente nunca informa o próprio id: ele vem do usuário autenticado.
+     * Id do cliente do usuário de login, para as rotas {@code /api/me} (RF-VEN-001, DEC-07, DEC-15.4). O cliente nunca
+     * informa o próprio id: ele vem do usuário autenticado.
      */
     Optional<Long> buscarIdPorUsuarioId(Long usuarioId);
 

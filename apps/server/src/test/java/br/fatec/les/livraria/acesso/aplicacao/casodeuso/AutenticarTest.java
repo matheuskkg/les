@@ -3,15 +3,6 @@ package br.fatec.les.livraria.acesso.aplicacao.casodeuso;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.acesso.aplicacao.CredenciaisInvalidas;
 import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
 import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
@@ -21,6 +12,15 @@ import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
 import br.fatec.les.livraria.acesso.dominio.modelo.TipoTelefone;
 import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /** Tabela de login do DEC-15.4, com reativação de até 7 dias (DEC-10) e login por e-mail ou telefone. */
 class AutenticarTest {
@@ -241,23 +241,24 @@ class AutenticarTest {
 
         @Override
         public boolean existeEmailEmUso(String email) {
-            return email != null && porId.values().stream()
-                    .anyMatch(usuario -> usuario.getEmail().equalsIgnoreCase(email.strip()));
+            return email != null
+                    && porId.values().stream().anyMatch(usuario -> usuario.getEmail().equalsIgnoreCase(email.strip()));
         }
 
         @Override
         public boolean existeEmailEmUsoExceto(String email, Long usuarioId) {
-            return email != null && porId.values().stream()
-                    .filter(usuario -> !usuario.getId().equals(usuarioId))
-                    .anyMatch(usuario -> usuario.getEmail().equalsIgnoreCase(email.strip()));
+            return email != null
+                    && porId.values().stream()
+                            .filter(usuario -> !usuario.getId().equals(usuarioId))
+                            .anyMatch(usuario -> usuario.getEmail().equalsIgnoreCase(email.strip()));
         }
 
         @Override
         public boolean existeTelefoneEmUso(String telefone) {
             String digitos = somenteDigitos(telefone);
             return porId.values().stream()
-                    .anyMatch(usuario -> usuario.getTelefone() != null
-                            && usuario.getTelefone().digitos().equals(digitos));
+                    .anyMatch(usuario ->
+                            usuario.getTelefone() != null && usuario.getTelefone().digitos().equals(digitos));
         }
 
         @Override
@@ -265,8 +266,8 @@ class AutenticarTest {
             String digitos = somenteDigitos(telefone);
             return porId.values().stream()
                     .filter(usuario -> !usuario.getId().equals(usuarioId))
-                    .anyMatch(usuario -> usuario.getTelefone() != null
-                            && usuario.getTelefone().digitos().equals(digitos));
+                    .anyMatch(usuario ->
+                            usuario.getTelefone() != null && usuario.getTelefone().digitos().equals(digitos));
         }
 
         @Override

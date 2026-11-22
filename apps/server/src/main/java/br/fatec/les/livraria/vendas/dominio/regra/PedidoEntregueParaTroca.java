@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.vendas.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
 import br.fatec.les.livraria.vendas.dominio.troca.SolicitacaoDeTroca;
+
+import org.springframework.stereotype.Component;
 
 /** Só itens de pedidos {@code ENTREGUE} podem ser trocados (RN-VEN-013). */
 @Component

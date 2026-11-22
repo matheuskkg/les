@@ -7,14 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.catalogo.aplicacao.casodeuso.ConsultarSinopses;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.CategoriaDoLivro;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroListado;
@@ -32,10 +24,18 @@ import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarUnidadesVendida
 import br.fatec.les.livraria.vendas.aplicacao.consulta.CompraDeLivro;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.LivroVendido;
 
+import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Tools {@code verMeuHistorico} e {@code recomendarParaMim} com a recuperação da vitrine (RNF-REC-001, DEC-03): o
- * histórico sai direto das compras do cliente e a recomendação das compras agregadas por cliente e livro, ambas
- * lidas de {@code vendas} em uma consulta (RNF-GER-001).
+ * histórico sai direto das compras do cliente e a recomendação das compras agregadas por cliente e livro, ambas lidas
+ * de {@code vendas} em uma consulta (RNF-GER-001).
  */
 class FerramentasDoCatalogoTest {
 
@@ -48,10 +48,16 @@ class FerramentasDoCatalogoTest {
     private final ConsultarComprasRegistradas consultarComprasRegistradas = mock(ConsultarComprasRegistradas.class);
     private final ConsultarUnidadesVendidas consultarUnidadesVendidas = mock(ConsultarUnidadesVendidas.class);
     private final RecomendacoesRepositorio recomendacoes = mock(RecomendacoesRepositorio.class);
-    private final FerramentasDoCatalogo ferramentas = new FerramentasDoCatalogo(lerCatalogo, consultarSinopses,
-            consultarComprasDoCliente, consultarComprasRegistradas, consultarUnidadesVendidas,
-            new MontarPerfilDoCliente(),
-            new RecuperarCandidatos(new ContarCoCompras(), new PontuarCandidatos()), recomendacoes);
+    private final FerramentasDoCatalogo ferramentas =
+            new FerramentasDoCatalogo(
+                    lerCatalogo,
+                    consultarSinopses,
+                    consultarComprasDoCliente,
+                    consultarComprasRegistradas,
+                    consultarUnidadesVendidas,
+                    new MontarPerfilDoCliente(),
+                    new RecuperarCandidatos(new ContarCoCompras(), new PontuarCandidatos()),
+                    recomendacoes);
 
     @Test
     void rnfRec001_recomendarParaMimExcluiCompradosEAvaliadosNegativamente() {
@@ -60,10 +66,9 @@ class FerramentasDoCatalogoTest {
         LivroListado recusado = livro(3L, "O Cortiço", List.of("Aluísio Azevedo"), List.of("Naturalismo"));
         LivroListado outro = livro(4L, "Capitães da Areia", List.of("Jorge Amado"), List.of("Modernismo"));
         when(lerCatalogo.ativos()).thenReturn(List.of(comprado, doGosto, recusado, outro));
-        when(consultarComprasDoCliente.executar(CLIENTE_ID)).thenReturn(List.of(
-                venda(1L, CLIENTE_ID, comprado, 1)));
-        when(consultarComprasRegistradas.executar()).thenReturn(List.of(
-                new CompraDeLivro(OUTRO_CLIENTE_ID, outro.livro().id(), 1)));
+        when(consultarComprasDoCliente.executar(CLIENTE_ID)).thenReturn(List.of(venda(1L, CLIENTE_ID, comprado, 1)));
+        when(consultarComprasRegistradas.executar())
+                .thenReturn(List.of(new CompraDeLivro(OUTRO_CLIENTE_ID, outro.livro().id(), 1)));
         when(consultarUnidadesVendidas.executar()).thenReturn(Map.of());
         when(recomendacoes.avaliacoesDoCliente(CLIENTE_ID)).thenReturn(List.of(new AvaliacaoDada(3L, false)));
 
@@ -79,12 +84,14 @@ class FerramentasDoCatalogoTest {
         LivroListado terceiro = livro(3L, "O Cortiço", List.of("Aluísio Azevedo"), List.of("Naturalismo"));
         when(lerCatalogo.ativos()).thenReturn(List.of(segundo, terceiro, maisVendido));
         when(consultarComprasDoCliente.executar(CLIENTE_ID)).thenReturn(List.of());
-        when(consultarComprasRegistradas.executar()).thenReturn(List.of(
-                new CompraDeLivro(OUTRO_CLIENTE_ID, maisVendido.livro().id(), 10),
-                new CompraDeLivro(OUTRO_CLIENTE_ID, segundo.livro().id(), 3),
-                new CompraDeLivro(OUTRO_CLIENTE_ID, terceiro.livro().id(), 1)));
-        when(consultarUnidadesVendidas.executar()).thenReturn(Map.of(
-                maisVendido.livro().id(), 10, segundo.livro().id(), 3, terceiro.livro().id(), 1));
+        when(consultarComprasRegistradas.executar())
+                .thenReturn(
+                        List.of(
+                                new CompraDeLivro(OUTRO_CLIENTE_ID, maisVendido.livro().id(), 10),
+                                new CompraDeLivro(OUTRO_CLIENTE_ID, segundo.livro().id(), 3),
+                                new CompraDeLivro(OUTRO_CLIENTE_ID, terceiro.livro().id(), 1)));
+        when(consultarUnidadesVendidas.executar())
+                .thenReturn(Map.of(maisVendido.livro().id(), 10, segundo.livro().id(), 3, terceiro.livro().id(), 1));
         when(recomendacoes.avaliacoesDoCliente(CLIENTE_ID)).thenReturn(List.of());
 
         List<ResumoDeLivro> recomendados = ferramentas.doCliente(CLIENTE_ID).recomendarParaMim();
@@ -96,16 +103,19 @@ class FerramentasDoCatalogoTest {
     void rnfRec001_verMeuHistoricoDevolveOsLivrosCompradosUmaVezCada() {
         LivroListado comprado = livro(1L, "Dom Casmurro", List.of("Machado de Assis"), List.of("Romance"));
         LivroListado outro = livro(4L, "Capitães da Areia", List.of("Jorge Amado"), List.of("Modernismo"));
-        when(consultarComprasDoCliente.executar(CLIENTE_ID)).thenReturn(List.of(
-                venda(1L, CLIENTE_ID, comprado, 1),
-                venda(2L, CLIENTE_ID, comprado, 2),
-                venda(3L, CLIENTE_ID, outro, 1)));
+        when(consultarComprasDoCliente.executar(CLIENTE_ID))
+                .thenReturn(
+                        List.of(
+                                venda(1L, CLIENTE_ID, comprado, 1),
+                                venda(2L, CLIENTE_ID, comprado, 2),
+                                venda(3L, CLIENTE_ID, outro, 1)));
 
         List<LivroDoHistorico> historico = ferramentas.doCliente(CLIENTE_ID).verMeuHistorico();
 
-        assertThat(historico).containsExactly(
-                new LivroDoHistorico(comprado.livro().id(), comprado.livro().titulo()),
-                new LivroDoHistorico(outro.livro().id(), outro.livro().titulo()));
+        assertThat(historico)
+                .containsExactly(
+                        new LivroDoHistorico(comprado.livro().id(), comprado.livro().titulo()),
+                        new LivroDoHistorico(outro.livro().id(), outro.livro().titulo()));
     }
 
     @Test
@@ -142,13 +152,21 @@ class FerramentasDoCatalogoTest {
         for (int i = 0; i < categorias.size(); i++) {
             categoriasDoLivro.add(new CategoriaDoLivro((long) i + 1, categorias.get(i)));
         }
-        return new LivroListado(new LivroResumo(id, titulo, autores, categoriasDoLivro, "Editora de teste", 2020),
-                Dinheiro.de(new BigDecimal("29.90")), 5);
+        return new LivroListado(
+                new LivroResumo(id, titulo, autores, categoriasDoLivro, "Editora de teste", 2020),
+                Dinheiro.de(new BigDecimal("29.90")),
+                5);
     }
 
     private static LivroVendido venda(Long pedidoId, Long clienteId, LivroListado livro, int quantidade) {
-        return new LivroVendido(pedidoId, clienteId, livro.livro().id(), livro.livro().titulo(),
-                livro.livro().autores(), livro.livro().categorias().stream().map(CategoriaDoLivro::nome).toList(),
-                quantidade, LocalDateTime.of(2026, 1, 1, 12, 0).plusDays(pedidoId));
+        return new LivroVendido(
+                pedidoId,
+                clienteId,
+                livro.livro().id(),
+                livro.livro().titulo(),
+                livro.livro().autores(),
+                livro.livro().categorias().stream().map(CategoriaDoLivro::nome).toList(),
+                quantidade,
+                LocalDateTime.of(2026, 1, 1, 12, 0).plusDays(pedidoId));
     }
 }

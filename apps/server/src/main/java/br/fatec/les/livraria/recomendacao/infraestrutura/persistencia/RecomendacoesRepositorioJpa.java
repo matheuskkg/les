@@ -1,22 +1,23 @@
 package br.fatec.les.livraria.recomendacao.infraestrutura.persistencia;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.RecomendacoesRepositorio;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.Avaliacao;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.AvaliacaoDada;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ItemDaRecomendacao;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.Recomendacao;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Adapter JPA das recomendações da vitrine (RNF-REC-001, DEC-03, DEC-14). Uma recomendação nova é inserida com os
@@ -54,8 +55,8 @@ public class RecomendacoesRepositorioJpa implements RecomendacoesRepositorio {
         Map<Long, AvaliacaoDada> ultimas = new LinkedHashMap<>();
         for (ItemRecomendacaoJpa item : repositorio.avaliadosDoCliente(clienteId)) {
             ultimas.remove(item.getLivroId());
-            ultimas.put(item.getLivroId(), new AvaliacaoDada(item.getLivroId(),
-                    item.getAvaliacao() == Avaliacao.POSITIVA));
+            ultimas.put(
+                    item.getLivroId(), new AvaliacaoDada(item.getLivroId(), item.getAvaliacao() == Avaliacao.POSITIVA));
         }
         return List.copyOf(ultimas.values());
     }
@@ -80,11 +81,14 @@ public class RecomendacoesRepositorioJpa implements RecomendacoesRepositorio {
     }
 
     private RecomendacaoJpa avaliada(Recomendacao recomendacao) {
-        RecomendacaoJpa entidade = repositorio.findById(recomendacao.id())
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Recomendação não encontrada."));
-        Map<Long, ItemDaRecomendacao> porId = recomendacao.itens().stream()
-                .filter(item -> item.id() != null)
-                .collect(Collectors.toMap(ItemDaRecomendacao::id, Function.identity()));
+        RecomendacaoJpa entidade =
+                repositorio
+                        .findById(recomendacao.id())
+                        .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Recomendação não encontrada."));
+        Map<Long, ItemDaRecomendacao> porId =
+                recomendacao.itens().stream()
+                        .filter(item -> item.id() != null)
+                        .collect(Collectors.toMap(ItemDaRecomendacao::id, Function.identity()));
         for (ItemRecomendacaoJpa itemJpa : entidade.getItens()) {
             ItemDaRecomendacao item = porId.get(itemJpa.getId());
             if (item != null) {
@@ -96,12 +100,21 @@ public class RecomendacoesRepositorioJpa implements RecomendacoesRepositorio {
     }
 
     private Recomendacao paraDominio(RecomendacaoJpa entidade) {
-        return new Recomendacao(entidade.getId(), entidade.getClienteId(),
-                entidade.getChamadaIa() == null ? null : entidade.getChamadaIa().getId(), entidade.getGeradaEm(),
+        return new Recomendacao(
+                entidade.getId(),
+                entidade.getClienteId(),
+                entidade.getChamadaIa() == null ? null : entidade.getChamadaIa().getId(),
+                entidade.getGeradaEm(),
                 entidade.getComprasConsideradas(),
                 entidade.getItens().stream()
-                        .map(item -> new ItemDaRecomendacao(item.getId(), item.getLivroId(), item.getPosicao(),
-                                item.getJustificativa(), item.getAvaliacao(), item.getAvaliadaEm()))
+                        .map(item ->
+                                new ItemDaRecomendacao(
+                                        item.getId(),
+                                        item.getLivroId(),
+                                        item.getPosicao(),
+                                        item.getJustificativa(),
+                                        item.getAvaliacao(),
+                                        item.getAvaliadaEm()))
                         .toList());
     }
 }

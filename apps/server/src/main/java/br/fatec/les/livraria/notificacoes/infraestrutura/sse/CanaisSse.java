@@ -1,27 +1,28 @@
 package br.fatec.les.livraria.notificacoes.infraestrutura.sse;
 
+import br.fatec.les.livraria.notificacoes.aplicacao.porta.CanaisDeEventos;
+import br.fatec.les.livraria.notificacoes.aplicacao.porta.EventosDeNotificacao;
+import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
+import br.fatec.les.livraria.notificacoes.infraestrutura.web.MapeadorDeNotificacoes;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import br.fatec.les.livraria.notificacoes.aplicacao.porta.CanaisDeEventos;
-import br.fatec.les.livraria.notificacoes.aplicacao.porta.EventosDeNotificacao;
-import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
-import br.fatec.les.livraria.notificacoes.infraestrutura.web.MapeadorDeNotificacoes;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 /**
- * Canais SSE das notificações (DEC-13). Cada evento se chama {@code notificacao}, leva o id da notificação em
- * {@code id} e o mesmo DTO da listagem em {@code data}; os emissores ficam por usuário, com timeout de 30 minutos e
- * batimento a cada 25 segundos, e são removidos ao completar, dar erro ou expirar. Cada emissor guarda os ids já
- * enviados, para que a reconexão com {@code Last-Event-ID} não repita o que chegou ao vivo.
+ * Canais SSE das notificações (DEC-13). Cada evento se chama {@code notificacao}, leva o id da notificação em {@code
+ * id} e o mesmo DTO da listagem em {@code data}; os emissores ficam por usuário, com timeout de 30 minutos e batimento
+ * a cada 25 segundos, e são removidos ao completar, dar erro ou expirar. Cada emissor guarda os ids já enviados, para
+ * que a reconexão com {@code Last-Event-ID} não repita o que chegou ao vivo.
  */
 @Slf4j
 @Component
@@ -57,9 +58,9 @@ public class CanaisSse implements EventosDeNotificacao, CanaisDeEventos {
     }
 
     /**
-     * Envia uma notificação persistida a um emissor, no formato {@code id}/{@code event}/{@code data} do DEC-13.
-     * Falha de escrita remove o canal, sem interromper a entrega aos outros; uma notificação já enviada a este
-     * emissor não é repetida.
+     * Envia uma notificação persistida a um emissor, no formato {@code id}/{@code event}/{@code data} do DEC-13. Falha
+     * de escrita remove o canal, sem interromper a entrega aos outros; uma notificação já enviada a este emissor não é
+     * repetida.
      */
     public void enviar(Long usuarioId, SseEmitter emissor, Notificacao notificacao) {
         Set<Long> jaEnviados = enviados.get(emissor);
@@ -67,10 +68,11 @@ public class CanaisSse implements EventosDeNotificacao, CanaisDeEventos {
             return;
         }
         try {
-            emissor.send(SseEmitter.event()
-                    .id(String.valueOf(notificacao.getId()))
-                    .name(EVENTO)
-                    .data(mapeador.paraDto(notificacao), MediaType.APPLICATION_JSON));
+            emissor.send(
+                    SseEmitter.event()
+                            .id(String.valueOf(notificacao.getId()))
+                            .name(EVENTO)
+                            .data(mapeador.paraDto(notificacao), MediaType.APPLICATION_JSON));
         } catch (IOException | IllegalStateException excecao) {
             log.debug("Canal SSE do usuário {} encerrado durante o envio", usuarioId, excecao);
             descartar(usuarioId, emissor, excecao);

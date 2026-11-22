@@ -1,17 +1,18 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
-import java.util.List;
+import br.fatec.les.livraria.clientes.aplicacao.ClienteDoUsuario;
+import br.fatec.les.livraria.clientes.dominio.modelo.Cartao;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.clientes.aplicacao.ClienteDoUsuario;
-import br.fatec.les.livraria.clientes.dominio.modelo.Cartao;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 /**
- * Lista os cartões do cliente autenticado (RF-CLI-007, DEC-07). A API devolve o número mascarado (DEC-10). A resposta
- * é uma lista simples: a quantidade é limitada pelos cartões do próprio cliente.
+ * Lista os cartões do cliente autenticado (RF-CLI-007, DEC-07). A API devolve o número mascarado (DEC-10). A resposta é
+ * uma lista simples: a quantidade é limitada pelos cartões do próprio cliente.
  */
 @Component
 @RequiredArgsConstructor

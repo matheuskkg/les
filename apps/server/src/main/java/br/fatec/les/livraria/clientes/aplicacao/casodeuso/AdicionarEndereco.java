@@ -1,11 +1,5 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.clientes.aplicacao.ClienteDoUsuario;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
@@ -14,12 +8,19 @@ import br.fatec.les.livraria.clientes.dominio.modelo.NovoEndereco;
 import br.fatec.les.livraria.clientes.dominio.regra.EnderecoCompleto;
 import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosEndereco;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Adiciona um endereço ao cadastro do cliente autenticado (RF-CLI-006, RNF-CLI-004). Não altera os demais dados do
- * cadastro; o endereço é incluído no agregado {@link Cliente}, que mantém ao menos um endereço (RN-CLI-001,
- * RN-CLI-002, DEC-10). As regras de composição e tamanho são as do próprio endereço (RN-CLI-003).
+ * cadastro; o endereço é incluído no agregado {@link Cliente}, que mantém ao menos um endereço (RN-CLI-001, RN-CLI-002,
+ * DEC-10). As regras de composição e tamanho são as do próprio endereço (RN-CLI-003).
  */
 @Component
 @RequiredArgsConstructor

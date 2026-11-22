@@ -1,14 +1,14 @@
 package br.fatec.les.livraria.vendas.dominio.regra;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.dominio.pagamento.CartoesDaCompra;
 import br.fatec.les.livraria.vendas.dominio.pagamento.PagamentoEmCartao;
+
+import org.springframework.stereotype.Component;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /** Um mesmo cartão não aparece duas vezes no pagamento (RN-VEN-004, DEC-11), salvo ou informado de novo. */
 @Component

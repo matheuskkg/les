@@ -3,11 +3,8 @@ package br.fatec.les.livraria.clientes.aplicacao.regra;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.CPF;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.alteracao;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.contasEmUso;
+
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 import br.fatec.les.livraria.acesso.dominio.modelo.TipoTelefone;
 import br.fatec.les.livraria.clientes.ClientesDeTeste.FakeClienteRepositorio;
@@ -15,6 +12,10 @@ import br.fatec.les.livraria.clientes.ClientesDeTeste.FakeUsuarioRepositorio;
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.DadosAlteradosDoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 /** RF-CLI-002, DEC-10: unicidade do CPF na alteração, ignorando a própria conta. */
 class CpfUnicoNaAlteracaoTest {
@@ -36,10 +37,7 @@ class CpfUnicoNaAlteracaoTest {
         clientes.usuariosPorCpf.put(CPF, List.of(3L));
         usuarios.idsEmUso.add(3L);
 
-        assertThat(violacoes(comCpf(2L, CPF)))
-                .singleElement()
-                .extracting(Violacao::codigo)
-                .isEqualTo("RF-CLI-002");
+        assertThat(violacoes(comCpf(2L, CPF))).singleElement().extracting(Violacao::codigo).isEqualTo("RF-CLI-002");
     }
 
     @Test
@@ -68,8 +66,16 @@ class CpfUnicoNaAlteracaoTest {
 
     private static DadosAlteradosDoCliente comCpf(Long usuarioId, String cpf) {
         DadosAlteradosDoCliente padrao = alteracao();
-        return new DadosAlteradosDoCliente(usuarioId, padrao.nome(), padrao.genero(), padrao.dataNascimento(),
-                cpf, padrao.email(), TipoTelefone.CELULAR, padrao.ddd(), padrao.numero());
+        return new DadosAlteradosDoCliente(
+                usuarioId,
+                padrao.nome(),
+                padrao.genero(),
+                padrao.dataNascimento(),
+                cpf,
+                padrao.email(),
+                TipoTelefone.CELULAR,
+                padrao.ddd(),
+                padrao.numero());
     }
 
     private List<Violacao> violacoes(DadosAlteradosDoCliente alvo) {

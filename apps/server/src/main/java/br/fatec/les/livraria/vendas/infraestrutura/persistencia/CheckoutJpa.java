@@ -1,12 +1,7 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hibernate.envers.Audited;
-
 import br.fatec.les.livraria.vendas.dominio.modelo.SituacaoCheckout;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,9 +16,16 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.hibernate.envers.Audited;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tabela {@code checkout} do MER (DEC-12, DEC-16): a sessão de compra, com {@code @Version} contra duas finalizações
@@ -35,15 +37,17 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Audited
-@Table(name = "checkout", indexes = {
-        @Index(name = "ix_checkout_cliente_situacao", columnList = "cliente_id, situacao"),
-        @Index(name = "ix_checkout_situacao_expira_em", columnList = "situacao, expira_em") })
+@Table(
+        name = "checkout",
+        indexes = {
+            @Index(name = "ix_checkout_cliente_situacao", columnList = "cliente_id, situacao"),
+            @Index(name = "ix_checkout_situacao_expira_em", columnList = "situacao, expira_em")
+        })
 public class CheckoutJpa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "checkout_seq")
-    @SequenceGenerator(name = "checkout_seq", sequenceName = "checkout_seq", initialValue = 10000,
-            allocationSize = 50)
+    @SequenceGenerator(name = "checkout_seq", sequenceName = "checkout_seq", initialValue = 10000, allocationSize = 50)
     private Long id;
 
     @Column(name = "cliente_id", nullable = false)

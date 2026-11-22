@@ -2,14 +2,15 @@ package br.fatec.les.livraria.clientes.dominio.modelo;
 
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.cliente;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.violacoes;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.YearMonth;
+import br.fatec.les.livraria.clientes.dominio.regra.RemocaoDoUltimoEndereco;
 
 import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.clientes.dominio.regra.RemocaoDoUltimoEndereco;
+import java.time.YearMonth;
 
 /** RF-CLI-006, RF-CLI-007, DEC-10: invariantes de endereços e do cartão preferencial no agregado do cliente. */
 class ClienteCartoesEEnderecosTest {
@@ -26,10 +27,10 @@ class ClienteCartoesEEnderecosTest {
 
     @Test
     void rfCli007_marcarPreferencialDeixaUmSo() {
-        Cliente cliente = cliente(1L, 2L).comCartao(cartao(10L)).comCartao(cartao(11L))
-                .comCartaoPreferencial(11L);
+        Cliente cliente = cliente(1L, 2L).comCartao(cartao(10L)).comCartao(cartao(11L)).comCartaoPreferencial(11L);
 
-        assertThat(cliente.getCartoes()).filteredOn(Cartao::preferencial)
+        assertThat(cliente.getCartoes())
+                .filteredOn(Cartao::preferencial)
                 .singleElement()
                 .extracting(Cartao::id)
                 .isEqualTo(11L);
@@ -37,10 +38,11 @@ class ClienteCartoesEEnderecosTest {
 
     @Test
     void rfCli007_excluirOPreferencialPromoveOMaisRecente() {
-        Cliente cliente = cliente(1L, 2L).comCartao(cartao(10L)).comCartao(cartao(12L)).comCartao(cartao(11L))
-                .semCartao(10L);
+        Cliente cliente =
+                cliente(1L, 2L).comCartao(cartao(10L)).comCartao(cartao(12L)).comCartao(cartao(11L)).semCartao(10L);
 
-        assertThat(cliente.getCartoes()).filteredOn(Cartao::preferencial)
+        assertThat(cliente.getCartoes())
+                .filteredOn(Cartao::preferencial)
                 .singleElement()
                 .extracting(Cartao::id)
                 .isEqualTo(12L);
@@ -49,8 +51,12 @@ class ClienteCartoesEEnderecosTest {
     @Test
     void dec06_excluirOPreferencialPromoveOMaisRecenteAindaValido() {
         Cartao vencido = new Cartao(12L, "4111111111111111", "ANA SOUZA", VISA, YearMonth.of(2026, 9), false);
-        Cliente cliente = cliente(1L, 2L).comCartao(cartao(10L)).comCartao(cartao(11L)).comCartao(vencido)
-                .semCartao(10L, YearMonth.of(2026, 10));
+        Cliente cliente =
+                cliente(1L, 2L)
+                        .comCartao(cartao(10L))
+                        .comCartao(cartao(11L))
+                        .comCartao(vencido)
+                        .semCartao(10L, YearMonth.of(2026, 10));
 
         assertThat(cliente.cartao(11L).orElseThrow().preferencial()).isTrue();
         assertThat(cliente.cartao(12L).orElseThrow().preferencial()).isFalse();

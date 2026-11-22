@@ -1,10 +1,5 @@
 package br.fatec.les.livraria.vendas.aplicacao.casodeuso;
 
-import java.time.LocalDateTime;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.IdentificarCliente;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio;
@@ -18,14 +13,20 @@ import br.fatec.les.livraria.vendas.aplicacao.regra.LivroDoCarrinho;
 import br.fatec.les.livraria.vendas.dominio.modelo.Carrinho;
 import br.fatec.les.livraria.vendas.dominio.modelo.ItemProposto;
 import br.fatec.les.livraria.vendas.dominio.regra.QuantidadeDoItem;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 /**
  * Adiciona um livro ao carrinho do cliente, somando à linha existente (RF-VEN-001, RF-VEN-002, RN-VEN-001).
  *
  * <p>Valida a quantidade e o livro, trava o carrinho, renova o prazo do bloqueio, contado do último item incluído
  * (DEC-05.1, RN-VEN-014), e reserva de novo todos os itens no {@code estoque} na mesma transação (DEC-13). Se faltar
- * estoque para algum item, a transação é desfeita e nada é alterado.</p>
+ * estoque para algum item, a transação é desfeita e nada é alterado.
  */
 @Component
 @RequiredArgsConstructor
@@ -43,8 +44,8 @@ public class AdicionarAoCarrinho {
     /**
      * @param comando livro e quantidade a adicionar
      * @return o carrinho atualizado
-     * @throws br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio com as violações de quantidade,
-     *                                                                  livro não vendável ou estoque insuficiente
+     * @throws br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio com as violações de quantidade, livro não
+     *     vendável ou estoque insuficiente
      */
     @Transactional
     public CarrinhoConsultado executar(AdicaoDeItem comando) {
@@ -52,8 +53,10 @@ public class AdicionarAoCarrinho {
         ItemProposto proposta = new ItemProposto(comando.livroId(), comando.quantidade());
         Violacoes.verificar(proposta, quantidadeDoItem, livroDoCarrinho);
 
-        Carrinho carrinho = carrinhos.buscarPorClienteParaAlterar(clienteId)
-                .orElseGet(() -> carrinhos.salvar(Carrinho.vazio(clienteId)));
+        Carrinho carrinho =
+                carrinhos
+                        .buscarPorClienteParaAlterar(clienteId)
+                        .orElseGet(() -> carrinhos.salvar(Carrinho.vazio(clienteId)));
         try {
             carrinho.adicionar(proposta.livroId(), proposta.quantidade());
         } catch (ArithmeticException excecao) {
@@ -66,5 +69,4 @@ public class AdicionarAoCarrinho {
         reservarItens.executar(carrinho, expiraEm);
         return montarCarrinho.montar(carrinhos.salvar(carrinho));
     }
-
 }

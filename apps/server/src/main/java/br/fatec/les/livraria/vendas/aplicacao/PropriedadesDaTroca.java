@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.vendas.aplicacao;
 
-import java.time.Period;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
+
+import java.time.Period;
 
 /**
  * Parâmetros da troca (RN-VEN-013, DEC-12).

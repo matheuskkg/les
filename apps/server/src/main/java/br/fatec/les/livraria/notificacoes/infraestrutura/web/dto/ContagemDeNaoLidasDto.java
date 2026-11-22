@@ -5,5 +5,4 @@ package br.fatec.les.livraria.notificacoes.infraestrutura.web.dto;
  *
  * @param quantidade notificações não lidas do usuário autenticado
  */
-public record ContagemDeNaoLidasDto(long quantidade) {
-}
+public record ContagemDeNaoLidasDto(long quantidade) {}

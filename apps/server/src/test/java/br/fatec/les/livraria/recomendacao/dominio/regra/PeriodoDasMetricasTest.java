@@ -2,13 +2,13 @@ package br.fatec.les.livraria.recomendacao.dominio.regra;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.PeriodoDasMetricas;
+
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
 
 /** Regras do período das métricas da IA: {@link FimDasMetricasNaoAnteriorAoInicio} e o máximo de 366 dias. */
 class PeriodoDasMetricasTest {
@@ -31,13 +31,15 @@ class PeriodoDasMetricasTest {
 
     @Test
     void rnfRec001_recusaMaisDe366Dias() {
-        assertThat(validar(INICIO, INICIO.plusDays(366)).lista()).extracting(Violacao::mensagem)
+        assertThat(validar(INICIO, INICIO.plusDays(366)).lista())
+                .extracting(Violacao::mensagem)
                 .containsExactly("O período das métricas pode ter até 366 dias.");
     }
 
     @Test
     void rnfRec001_recusaFimAnteriorAoInicio() {
-        assertThat(validar(INICIO, INICIO.minusDays(1)).lista()).extracting(Violacao::mensagem)
+        assertThat(validar(INICIO, INICIO.minusDays(1)).lista())
+                .extracting(Violacao::mensagem)
                 .containsExactly("O dia final não pode ser anterior ao inicial.");
     }
 }

@@ -1,8 +1,8 @@
 package br.fatec.les.livraria.vendas.infraestrutura.web.dto;
 
-import org.jspecify.annotations.Nullable;
-
 import br.fatec.les.livraria.clientes.dominio.modelo.EscolhaDeEndereco;
+
+import org.jspecify.annotations.Nullable;
 
 /**
  * Endereço escolhido na compra (RF-VEN-005, DEC-10): {@code enderecoId} de um endereço cadastrado ou {@code novo},

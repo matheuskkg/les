@@ -13,7 +13,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+
+import com.jayway.jsonpath.JsonPath;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,17 +36,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.jayway.jsonpath.JsonPath;
-
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
 
 /**
- * Endereços (RF-CLI-006, RNF-CLI-004) e cartões (RF-CLI-007, RN-CLI-004, RN-CLI-005, DEC-06, DEC-10) do cliente
- * logado, sobre o seed 201_clientes.sql: Ana (usuário 2) tem os endereços 1 e 2 e o cartão 1; Bruno (usuário 3) tem
- * só o endereço 3 e o cartão 2; Elisa (usuário 6) tem o cartão 4 (preferencial) e o 5.
+ * Endereços (RF-CLI-006, RNF-CLI-004) e cartões (RF-CLI-007, RN-CLI-004, RN-CLI-005, DEC-06, DEC-10) do cliente logado,
+ * sobre o seed 201_clientes.sql: Ana (usuário 2) tem os endereços 1 e 2 e o cartão 1; Bruno (usuário 3) tem só o
+ * endereço 3 e o cartão 2; Elisa (usuário 6) tem o cartão 4 (preferencial) e o 5.
  */
 @SpringBootTest
 @Transactional
@@ -61,14 +62,11 @@ class EnderecosECartoesIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
     private MockMvc mvc;
 
@@ -133,10 +131,13 @@ class EnderecosECartoesIntegracaoTest {
 
     @Test
     void rfCli007_novoCartaoEntraNaoPreferencialEPodeVirarOPreferencial() throws Exception {
-        String resposta = escrever(post("/api/me/cartoes"), ANA, cartao("2030-01"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.preferencial").value(false))
-                .andReturn().getResponse().getContentAsString();
+        String resposta =
+                escrever(post("/api/me/cartoes"), ANA, cartao("2030-01"))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.preferencial").value(false))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
         Integer novo = JsonPath.read(resposta, "$.id");
 
         escrever(post("/api/me/cartoes/" + novo + "/preferencial"), ANA, "").andExpect(status().isNoContent());
@@ -148,15 +149,14 @@ class EnderecosECartoesIntegracaoTest {
 
     @Test
     void dec06_cartaoVencidoNoMesCorrenteResponde422() throws Exception {
-        escrever(post("/api/me/cartoes"), ANA, cartao("2026-09"))
-                .andExpect(status().isUnprocessableContent());
-        escrever(post("/api/me/cartoes"), ANA, cartao("2026-10"))
-                .andExpect(status().isCreated());
+        escrever(post("/api/me/cartoes"), ANA, cartao("2026-09")).andExpect(status().isUnprocessableContent());
+        escrever(post("/api/me/cartoes"), ANA, cartao("2026-10")).andExpect(status().isCreated());
     }
 
     @Test
     void rnCli004_mesmoCartaoDuasVezesResponde422() throws Exception {
-        String visaDaAna = """
+        String visaDaAna =
+                """
                 { "numero": "4111 1111 1111 1111", "nomeImpresso": "ANA SOUZA", "validade": "2030-12" }
                 """;
         escrever(post("/api/me/cartoes"), ANA, visaDaAna)
@@ -166,7 +166,8 @@ class EnderecosECartoesIntegracaoTest {
 
     @Test
     void rfCli007_alterarCartaoSemNumeroMantemONumeroGravado() throws Exception {
-        String semNumero = """
+        String semNumero =
+                """
                 { "numero": "", "nomeImpresso": "ANA S SOUZA", "validade": "2031-06" }
                 """;
         escrever(put("/api/me/cartoes/1"), ANA, semNumero)
@@ -212,10 +213,10 @@ class EnderecosECartoesIntegracaoTest {
             throws Exception {
         Cookie csrf = mvc.perform(get("/api/sessao")).andReturn().getResponse().getCookie("XSRF-TOKEN");
         assertThat(csrf).isNotNull();
-        MockHttpServletRequestBuilder comSessao = requisicao.cookie(sessaoDe(usuarioId), csrf)
-                .header("X-XSRF-TOKEN", csrf.getValue());
-        return mvc.perform(corpo.isEmpty() ? comSessao
-                : comSessao.contentType(MediaType.APPLICATION_JSON).content(corpo));
+        MockHttpServletRequestBuilder comSessao =
+                requisicao.cookie(sessaoDe(usuarioId), csrf).header("X-XSRF-TOKEN", csrf.getValue());
+        return mvc.perform(
+                corpo.isEmpty() ? comSessao : comSessao.contentType(MediaType.APPLICATION_JSON).content(corpo));
     }
 
     private Cookie sessaoDe(long usuarioId) {
@@ -225,18 +226,19 @@ class EnderecosECartoesIntegracaoTest {
 
     private static String endereco(String nomeCurto, String numero) {
         return """
-                {
-                  "nomeCurto": "%s",
-                  "tipoEndereco": "CASA",
-                  "tipoLogradouro": "RUA",
-                  "logradouro": "Rua das Flores",
-                  "numero": "%s",
-                  "bairro": "Jardim Paulista",
-                  "cep": "01415000",
-                  "cidade": "São Paulo",
-                  "uf": "SP"
-                }
-                """.formatted(nomeCurto, numero);
+        {
+          "nomeCurto": "%s",
+          "tipoEndereco": "CASA",
+          "tipoLogradouro": "RUA",
+          "logradouro": "Rua das Flores",
+          "numero": "%s",
+          "bairro": "Jardim Paulista",
+          "cep": "01415000",
+          "cidade": "São Paulo",
+          "uf": "SP"
+        }
+        """
+                .formatted(nomeCurto, numero);
     }
 
     private static String cartao(String validade) {
@@ -245,7 +247,8 @@ class EnderecosECartoesIntegracaoTest {
 
     private static String cartaoComNumero(String numero, String validade) {
         return """
-                { "numero": "%s", "nomeImpresso": "ANA SOUZA", "validade": "%s" }
-                """.formatted(numero, validade);
+        { "numero": "%s", "nomeImpresso": "ANA SOUZA", "validade": "%s" }
+        """
+                .formatted(numero, validade);
     }
 }

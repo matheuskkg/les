@@ -1,13 +1,13 @@
 package br.fatec.les.livraria.recomendacao.infraestrutura.externo;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ResumoDeLivro;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.AvaliacaoDada;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.LivroComprado;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.PerfilDoCliente;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Contexto enxuto do chat (RNF-REC-001, DEC-03): o catálogo à venda em uma linha por livro e o perfil com os ids dos
@@ -19,30 +19,40 @@ final class ContextoCompactoDoChat {
     static final String CABECALHO_DO_CATALOGO = "id|titulo|autores|categorias|preco";
     static final int FREQUENTES = 5;
 
-    private ContextoCompactoDoChat() {
-    }
+    private ContextoCompactoDoChat() {}
 
     /** Catálogo compacto: cabeçalho e uma linha {@code id|titulo|autores|categorias|preco} por livro à venda. */
     static String catalogo(List<ResumoDeLivro> livros) {
-        return CABECALHO_DO_CATALOGO + "\n" + livros.stream()
-                .map(livro -> livro.id() + "|" + campo(livro.titulo()) + "|" + campo(String.join(", ", livro.autores()))
-                        + "|" + campo(String.join(", ", livro.categorias())) + "|"
-                        + livro.preco().valor().toPlainString())
-                .collect(Collectors.joining("\n"));
+        return CABECALHO_DO_CATALOGO
+                + "\n"
+                + livros.stream()
+                        .map(livro ->
+                                livro.id()
+                                        + "|"
+                                        + campo(livro.titulo())
+                                        + "|"
+                                        + campo(String.join(", ", livro.autores()))
+                                        + "|"
+                                        + campo(String.join(", ", livro.categorias()))
+                                        + "|"
+                                        + livro.preco().valor().toPlainString())
+                        .collect(Collectors.joining("\n"));
     }
 
     /**
-     * Perfil enxuto: ids dos livros comprados que estão no catálogo, título curto dos que não estão, até
-     * {@value #FREQUENTES} categorias e autores e os ids das avaliações positivas e negativas.
+     * Perfil enxuto: ids dos livros comprados que estão no catálogo, título curto dos que não estão, até {@value
+     * #FREQUENTES} categorias e autores e os ids das avaliações positivas e negativas.
      */
     static String perfil(PerfilDoCliente perfil, List<ResumoDeLivro> catalogo) {
         Set<Long> idsDoCatalogo = catalogo.stream().map(ResumoDeLivro::id).collect(Collectors.toSet());
         StringBuilder texto = new StringBuilder();
         texto.append("- Livros comprados: ")
-                .append(perfil.livrosComprados().isEmpty() ? "nenhum"
-                        : perfil.livrosComprados().stream()
-                                .map(livro -> descrever(livro, idsDoCatalogo))
-                                .collect(Collectors.joining(", ")))
+                .append(
+                        perfil.livrosComprados().isEmpty()
+                                ? "nenhum"
+                                : perfil.livrosComprados().stream()
+                                        .map(livro -> descrever(livro, idsDoCatalogo))
+                                        .collect(Collectors.joining(", ")))
                 .append('\n');
         texto.append("- Categorias frequentes: ").append(lista(perfil.categoriasFrequentes())).append('\n');
         texto.append("- Autores frequentes: ").append(lista(perfil.autoresFrequentes())).append('\n');
@@ -63,10 +73,9 @@ final class ContextoCompactoDoChat {
         if (avaliacoes.isEmpty()) {
             return "nenhuma";
         }
-        List<Long> positivas = avaliacoes.stream().filter(AvaliacaoDada::positiva).map(AvaliacaoDada::livroId)
-                .toList();
-        List<Long> negativas = avaliacoes.stream().filter(avaliacao -> !avaliacao.positiva())
-                .map(AvaliacaoDada::livroId).toList();
+        List<Long> positivas = avaliacoes.stream().filter(AvaliacaoDada::positiva).map(AvaliacaoDada::livroId).toList();
+        List<Long> negativas =
+                avaliacoes.stream().filter(avaliacao -> !avaliacao.positiva()).map(AvaliacaoDada::livroId).toList();
         return "positivas: " + ids(positivas) + "; negativas: " + ids(negativas);
     }
 

@@ -1,17 +1,17 @@
 package br.fatec.les.livraria.clientes.aplicacao.consulta;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-
 import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoConta;
 import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
 import br.fatec.les.livraria.clientes.dominio.modelo.Uf;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
+
 /**
- * Filtro informado pelo administrador na consulta de clientes (RF-CLI-004, DEC-07). E-mail, telefone e situação
- * ainda não foram resolvidos para ids de usuário: o caso de uso {@code ListarClientes} consulta o módulo
- * {@code acesso} e monta o {@link FiltroCliente} da porta, que não conhece a origem desses campos (DEC-10).
+ * Filtro informado pelo administrador na consulta de clientes (RF-CLI-004, DEC-07). E-mail, telefone e situação ainda
+ * não foram resolvidos para ids de usuário: o caso de uso {@code ListarClientes} consulta o módulo {@code acesso} e
+ * monta o {@link FiltroCliente} da porta, que não conhece a origem desses campos (DEC-10).
  *
  * @param nome trecho do nome, sem diferenciar maiúsculas nem acentos
  * @param cpf CPF com ou sem máscara

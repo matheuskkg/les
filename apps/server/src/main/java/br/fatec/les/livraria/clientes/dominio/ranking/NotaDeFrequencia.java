@@ -3,8 +3,7 @@ package br.fatec.les.livraria.clientes.dominio.ranking;
 /** Nota de 0 a 100 do número de compras na janela (RN-CLI-007, DEC-04). */
 public final class NotaDeFrequencia {
 
-    private NotaDeFrequencia() {
-    }
+    private NotaDeFrequencia() {}
 
     public static int de(int compras) {
         if (compras <= 0) {

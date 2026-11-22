@@ -2,33 +2,30 @@ package br.fatec.les.livraria.catalogo.aplicacao.casodeuso;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.IntStream;
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 /**
  * Preço de venda calculado sobre o seed em H2 (RF-EST-002, RN-EST-002, RN-LIV-003, DEC-15.1).
  *
- * <p>Os valores esperados saem das margens do seed (Padrão 0.2000, Popular 0.3500, Premium 0.5000, Econômico
- * 0.1500 e Colecionador 0.7000) e do maior custo de cada livro nos scripts de estoque.
+ * <p>Os valores esperados saem das margens do seed (Padrão 0.2000, Popular 0.3500, Premium 0.5000, Econômico 0.1500 e
+ * Colecionador 0.7000) e do maior custo de cada livro nos scripts de estoque.
  */
 @SpringBootTest
 @Transactional
 class ConsultarPrecosDeVendaIntegracaoTest {
 
-    private static final List<Long> TODOS_OS_LIVROS = IntStream.rangeClosed(1, 56)
-            .mapToObj(Long::valueOf)
-            .toList();
+    private static final List<Long> TODOS_OS_LIVROS = IntStream.rangeClosed(1, 56).mapToObj(Long::valueOf).toList();
 
-    @Autowired
-    private ConsultarPrecosDeVenda consultarPrecosDeVenda;
+    @Autowired private ConsultarPrecosDeVenda consultarPrecosDeVenda;
 
     @Test
     void rfEst002_calculaPrecoPeloMaiorCustoEntreAsEntradasDoLivro() {

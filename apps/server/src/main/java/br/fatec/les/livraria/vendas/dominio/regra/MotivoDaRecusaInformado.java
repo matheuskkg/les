@@ -1,10 +1,10 @@
 package br.fatec.les.livraria.vendas.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.dominio.troca.RecusaDeTroca;
+
+import org.springframework.stereotype.Component;
 
 /** A recusa da troca exige um motivo, que vai na notificação ao cliente (RF-VEN-012, DEC-12, DEC-13). */
 @Component

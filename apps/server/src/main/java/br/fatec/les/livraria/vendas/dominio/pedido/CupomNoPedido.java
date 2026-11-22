@@ -1,8 +1,8 @@
 package br.fatec.les.livraria.vendas.dominio.pedido;
 
-import java.util.Objects;
-
 import org.jspecify.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * Cópia do cupom usado no pedido (DEC-12, DEC-16), com o id de origem na tabela da sua categoria.

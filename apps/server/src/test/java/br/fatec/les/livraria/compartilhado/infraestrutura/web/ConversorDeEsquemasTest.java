@@ -2,24 +2,23 @@ package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.YearMonth;
-import java.util.HashMap;
-import java.util.Map;
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
+import io.swagger.v3.core.converter.ModelConverters;
+import io.swagger.v3.oas.models.media.Schema;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
-import io.swagger.v3.core.converter.ModelConverters;
-import io.swagger.v3.oas.models.media.Schema;
+import java.time.YearMonth;
+import java.util.HashMap;
+import java.util.Map;
 
 class ConversorDeEsquemasTest {
 
-    record Item(String titulo, Dinheiro preco) {
-    }
+    record Item(String titulo, Dinheiro preco) {}
 
-    record Cartao(String numero, YearMonth validade, @Nullable String apelido, Item item) {
-    }
+    record Cartao(String numero, YearMonth validade, @Nullable String apelido, Item item) {}
 
     private final Map<String, Schema<?>> esquemas = esquemasDe(Cartao.class);
 

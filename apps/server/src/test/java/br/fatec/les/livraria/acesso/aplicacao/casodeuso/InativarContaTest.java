@@ -2,15 +2,9 @@ package br.fatec.les.livraria.acesso.aplicacao.casodeuso;
 
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.EMAIL;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.relogio;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
 import br.fatec.les.livraria.acesso.dominio.modelo.SituacaoDaConta;
@@ -18,6 +12,13 @@ import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
 import br.fatec.les.livraria.clientes.ClientesDeTeste.FakeUsuarioRepositorio;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /** RF-CLI-003, DEC-10: inativação da conta pelo próprio cliente. */
 class InativarContaTest {

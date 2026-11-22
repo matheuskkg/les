@@ -1,12 +1,12 @@
 package br.fatec.les.livraria.recomendacao.infraestrutura.web.dto;
 
-import org.jspecify.annotations.Nullable;
-
 import br.fatec.les.livraria.recomendacao.aplicacao.consulta.ProvedorConfigurado;
 
+import org.jspecify.annotations.Nullable;
+
 /**
- * Provedor da cadeia de IA na tela do ADMIN (RNF-REC-001, DEC-03). Informa só se há chave configurada: a chave e a
- * URL nunca são expostas.
+ * Provedor da cadeia de IA na tela do ADMIN (RNF-REC-001, DEC-03). Informa só se há chave configurada: a chave e a URL
+ * nunca são expostas.
  */
 public record ProvedorIaDto(
         Long id,

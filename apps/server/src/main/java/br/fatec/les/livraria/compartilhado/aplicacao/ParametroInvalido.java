@@ -1,8 +1,8 @@
 package br.fatec.les.livraria.compartilhado.aplicacao;
 
-import java.util.Objects;
-
 import lombok.Getter;
+
+import java.util.Objects;
 
 /** Um parâmetro da requisição está inválido. A API responde HTTP 400 (DEC-07). */
 @Getter

@@ -1,15 +1,15 @@
 package br.fatec.les.livraria.vendas.dominio.regra;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.dominio.pagamento.CupomTroca;
 import br.fatec.les.livraria.vendas.dominio.pagamento.CuponsDaCompra;
+
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Cupom desnecessário (RN-VEN-006, DEC-11): um cupom, promocional ou de troca, é desnecessário se, sem ele, os demais
@@ -35,8 +35,9 @@ public class CuponsDesnecessarios implements Regra<CuponsDaCompra> {
         Dinheiro soma = coberturas.stream().reduce(Dinheiro.ZERO, Dinheiro::somar);
         for (int i = 0; i < codigos.size(); i++) {
             if (!soma.subtrair(coberturas.get(i)).menorQue(compra.total())) {
-                violacoes.adicionar("RN-VEN-006", "O cupom " + codigos.get(i)
-                        + " é desnecessário: sem ele, os demais já cobrem o total.");
+                violacoes.adicionar(
+                        "RN-VEN-006",
+                        "O cupom " + codigos.get(i) + " é desnecessário: sem ele, os demais já cobrem o total.");
             }
         }
     }

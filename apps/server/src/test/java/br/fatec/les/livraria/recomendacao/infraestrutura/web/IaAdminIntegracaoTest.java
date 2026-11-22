@@ -9,10 +9,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.recomendacao.aplicacao.casodeuso.CadeiaDeProvedores;
 
-import javax.sql.DataSource;
+import com.jayway.jsonpath.JsonPath;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,24 +35,23 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.jayway.jsonpath.JsonPath;
+import java.time.LocalDateTime;
+import java.util.List;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.recomendacao.aplicacao.casodeuso.CadeiaDeProvedores;
-import jakarta.servlet.http.Cookie;
+import javax.sql.DataSource;
 
 /**
  * Aba "Assistente" do ADMIN sobre o seed (RNF-REC-001, DEC-03): a cadeia tem gemini, groq, openrouter, nvidia e fake,
  * só o fake com chave nos testes. As chamadas de outros provedores entram por SQL, dentro da transação do teste; a
  * recomendação de Bruno (usuário 3, sem compras) é atendida pelo fake.
  */
-@SpringBootTest(properties = {
-        "livraria.ia.provedores.gemini.chave=",
-        "livraria.ia.provedores.groq.chave=",
-        "livraria.ia.provedores.openrouter.chave=",
-        "livraria.ia.provedores.nvidia.chave="})
+@SpringBootTest(
+        properties = {
+            "livraria.ia.provedores.gemini.chave=",
+            "livraria.ia.provedores.groq.chave=",
+            "livraria.ia.provedores.openrouter.chave=",
+            "livraria.ia.provedores.nvidia.chave="
+        })
 @Transactional
 class IaAdminIntegracaoTest {
 
@@ -67,20 +70,15 @@ class IaAdminIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private DataSource dataSource;
+    @Autowired private DataSource dataSource;
 
-    @Autowired
-    private CadeiaDeProvedores cadeia;
+    @Autowired private CadeiaDeProvedores cadeia;
 
     private MockMvc mvc;
 
@@ -107,42 +105,63 @@ class IaAdminIntegracaoTest {
         return requisicao.cookie(new Cookie(EmissorDeToken.COOKIE, token)).with(csrf());
     }
 
-    private void registrarChamada(long id, long provedor, LocalDateTime em, String resultado, Integer codigoHttp,
-            String erro) {
-        JdbcClient.create(dataSource).sql("insert into chamada_ia (id, provedor_ia_id, modelo, operacao, "
-                        + "iniciada_em, latencia_ms, tentativa, resultado, status_http, erro, chamadas_http) "
-                        + "values (?, ?, 'modelo', 'CONVERSAR', ?, 500, 1, ?, ?, ?, 1)")
+    private void registrarChamada(
+            long id, long provedor, LocalDateTime em, String resultado, Integer codigoHttp, String erro) {
+        JdbcClient.create(dataSource)
+                .sql(
+                        "insert into chamada_ia (id, provedor_ia_id, modelo, operacao, "
+                                + "iniciada_em, latencia_ms, tentativa, resultado, status_http, erro, chamadas_http) "
+                                + "values (?, ?, 'modelo', 'CONVERSAR', ?, 500, 1, ?, ?, ?, 1)")
                 .params(id, provedor, em, resultado, codigoHttp, erro)
                 .update();
     }
 
     private String alterar(String corpo) throws Exception {
-        return mvc.perform(como(ADMIN, put("/api/admin/ia/provedores"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(corpo))
-                .andReturn().getResponse().getContentAsString();
+        return mvc.perform(
+                        como(ADMIN, put("/api/admin/ia/provedores"))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(corpo))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
     }
 
     @Test
     void rnfRec001_listaACadeiaComChaveConfiguradaSemExporChaveNemUrl() throws Exception {
-        registrarChamada(900001, 1, AGORA.minusDays(2), "COTA_ESGOTADA", 429,
+        registrarChamada(
+                900001,
+                1,
+                AGORA.minusDays(2),
+                "COTA_ESGOTADA",
+                429,
                 "Falha em https://generativelanguage.googleapis.com/v1beta/openai");
-        registrarChamada(900002, 1, AGORA.minusDays(1), "ERRO_HTTP", 500,
+        registrarChamada(
+                900002,
+                1,
+                AGORA.minusDays(1),
+                "ERRO_HTTP",
+                500,
                 "Falha em https://generativelanguage.googleapis.com/v1beta/openai");
         registrarChamada(900003, 1, AGORA, "SUCESSO", null, null);
 
-        String corpo = mvc.perform(como(ADMIN, get("/api/admin/ia/provedores")))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].nome").value(org.hamcrest.Matchers.contains(
-                        "gemini", "groq", "openrouter", "nvidia", "fake")))
-                .andExpect(jsonPath("$[0].chaveConfigurada").value(false))
-                .andExpect(jsonPath("$[0].modelo").isString())
-                .andExpect(jsonPath("$[0].ultimaFalha.resultado").value("ERRO_HTTP"))
-                .andExpect(jsonPath("$[0].ultimaFalha.codigoHttp").value(500))
-                .andExpect(jsonPath("$[1].ultimaFalha").doesNotExist())
-                .andExpect(jsonPath("$[4].chaveConfigurada").value(true))
-                .andExpect(jsonPath("$[4].ativo").value(true))
-                .andReturn().getResponse().getContentAsString();
+        String corpo =
+                mvc.perform(como(ADMIN, get("/api/admin/ia/provedores")))
+                        .andExpect(status().isOk())
+                        .andExpect(
+                                jsonPath("$[*].nome")
+                                        .value(
+                                                org.hamcrest.Matchers.contains(
+                                                        "gemini", "groq", "openrouter", "nvidia", "fake")))
+                        .andExpect(jsonPath("$[0].chaveConfigurada").value(false))
+                        .andExpect(jsonPath("$[0].modelo").isString())
+                        .andExpect(jsonPath("$[0].ultimaFalha.resultado").value("ERRO_HTTP"))
+                        .andExpect(jsonPath("$[0].ultimaFalha.codigoHttp").value(500))
+                        .andExpect(jsonPath("$[1].ultimaFalha").doesNotExist())
+                        .andExpect(jsonPath("$[4].chaveConfigurada").value(true))
+                        .andExpect(jsonPath("$[4].ativo").value(true))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
 
         assertThat(corpo).doesNotContain("googleapis", "groq.com", "openrouter.ai", "chave\"", "url");
     }
@@ -153,11 +172,13 @@ class IaAdminIntegracaoTest {
         mvc.perform(como(BRUNO, get("/api/me/recomendacoes")))
                 .andExpect(jsonPath("$[0].justificativa").value("Entre os mais vendidos da loja."));
 
-        String corpo = alterar("{\"provedores\":[{\"id\":4,\"ativo\":false},{\"id\":3,\"ativo\":true},"
-                + "{\"id\":2,\"ativo\":true},{\"id\":1,\"ativo\":false},{\"id\":5,\"ativo\":true}]}");
+        String corpo =
+                alterar(
+                        "{\"provedores\":[{\"id\":4,\"ativo\":false},{\"id\":3,\"ativo\":true},"
+                                + "{\"id\":2,\"ativo\":true},{\"id\":1,\"ativo\":false},{\"id\":5,\"ativo\":true}]}");
 
-        assertThat(JsonPath.<List<String>>read(corpo, "$[*].nome")).containsExactly("fake", "openrouter", "groq",
-                "gemini", "nvidia");
+        assertThat(JsonPath.<List<String>>read(corpo, "$[*].nome"))
+                .containsExactly("fake", "openrouter", "groq", "gemini", "nvidia");
         assertThat(JsonPath.<List<Integer>>read(corpo, "$[*].ordem")).containsExactly(1, 2, 3, 4, 5);
         assertThat(JsonPath.<List<Boolean>>read(corpo, "$[*].ativo")).containsExactly(false, true, true, false, true);
 
@@ -169,22 +190,27 @@ class IaAdminIntegracaoTest {
 
     @Test
     void rnfRec001_recusaCadeiaIncompletaRepetidaOuSemAtivacao() throws Exception {
-        mvc.perform(como(ADMIN, put("/api/admin/ia/provedores"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"provedores\":[{\"id\":1,\"ativo\":true},{\"id\":1,\"ativo\":true}]}"))
+        mvc.perform(
+                        como(ADMIN, put("/api/admin/ia/provedores"))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"provedores\":[{\"id\":1,\"ativo\":true},{\"id\":1,\"ativo\":true}]}"))
                 .andExpect(status().isUnprocessableContent())
-                .andExpect(jsonPath("$.violacoes[*].mensagem").value(org.hamcrest.Matchers.containsInAnyOrder(
-                        "Cada provedor aparece uma única vez na cadeia.", "Informe todos os provedores da cadeia.")));
+                .andExpect(
+                        jsonPath("$.violacoes[*].mensagem")
+                                .value(
+                                        org.hamcrest.Matchers.containsInAnyOrder(
+                                                "Cada provedor aparece uma única vez na cadeia.",
+                                                "Informe todos os provedores da cadeia.")));
 
-        mvc.perform(como(ADMIN, put("/api/admin/ia/provedores"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"provedores\":[{\"id\":1},{\"id\":2,\"ativo\":true},{\"id\":3,\"ativo\":true},"
-                                + "{\"id\":4,\"ativo\":true},{\"id\":5,\"ativo\":true}]}"))
+        mvc.perform(
+                        como(ADMIN, put("/api/admin/ia/provedores"))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        "{\"provedores\":[{\"id\":1},{\"id\":2,\"ativo\":true},{\"id\":3,\"ativo\":true},"
+                                                + "{\"id\":4,\"ativo\":true},{\"id\":5,\"ativo\":true}]}"))
                 .andExpect(status().isBadRequest());
 
-        mvc.perform(como(ADMIN, put("/api/admin/ia/provedores"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+        mvc.perform(como(ADMIN, put("/api/admin/ia/provedores")).contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -193,23 +219,25 @@ class IaAdminIntegracaoTest {
         registrarChamada(900001, 1, AGORA.minusDays(1), "COTA_ESGOTADA", 429, null);
         registrarChamada(900002, 1, AGORA.minusDays(1).plusHours(1), "COTA_ESGOTADA", 429, null);
         registrarChamada(900003, 1, AGORA.minusDays(30), "ERRO_HTTP", 500, null);
-        JdbcClient.create(dataSource).sql("insert into recomendacao (id, cliente_id, gerada_em, "
-                        + "compras_consideradas) values (900001, 1, ?, 0)")
+        JdbcClient.create(dataSource)
+                .sql(
+                        "insert into recomendacao (id, cliente_id, gerada_em, "
+                                + "compras_consideradas) values (900001, 1, ?, 0)")
                 .param(AGORA.minusDays(2))
                 .update();
 
-        String vitrine = mvc.perform(como(BRUNO, get("/api/me/recomendacoes")))
-                .andReturn().getResponse().getContentAsString();
+        String vitrine =
+                mvc.perform(como(BRUNO, get("/api/me/recomendacoes"))).andReturn().getResponse().getContentAsString();
         List<Integer> itens = JsonPath.read(vitrine, "$[*].id");
         for (int i = 0; i < 2; i++) {
-            mvc.perform(como(BRUNO, put("/api/me/recomendacoes/itens/{id}/avaliacao", itens.get(i)))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"avaliacao\":\"" + (i == 0 ? "POSITIVA" : "NEGATIVA") + "\"}"))
+            mvc.perform(
+                            como(BRUNO, put("/api/me/recomendacoes/itens/{id}/avaliacao", itens.get(i)))
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{\"avaliacao\":\"" + (i == 0 ? "POSITIVA" : "NEGATIVA") + "\"}"))
                     .andExpect(status().isNoContent());
         }
 
-        mvc.perform(como(ADMIN, get("/api/admin/ia/metricas").param("inicio", "2026-10-21")
-                        .param("fim", "2026-10-25")))
+        mvc.perform(como(ADMIN, get("/api/admin/ia/metricas").param("inicio", "2026-10-21").param("fim", "2026-10-25")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.inicio").value("2026-10-21"))
                 .andExpect(jsonPath("$.provedores", hasSize(5)))
@@ -246,21 +274,18 @@ class IaAdminIntegracaoTest {
 
     @Test
     void rnfRec001_periodoInvalidoDasMetricas() throws Exception {
-        mvc.perform(como(ADMIN, get("/api/admin/ia/metricas").param("inicio", "2026-10-25")
-                        .param("fim", "2026-10-24")))
+        mvc.perform(como(ADMIN, get("/api/admin/ia/metricas").param("inicio", "2026-10-25").param("fim", "2026-10-24")))
                 .andExpect(status().isUnprocessableContent());
-        mvc.perform(como(ADMIN, get("/api/admin/ia/metricas").param("inicio", "2025-01-01")
-                        .param("fim", "2026-10-24")))
+        mvc.perform(como(ADMIN, get("/api/admin/ia/metricas").param("inicio", "2025-01-01").param("fim", "2026-10-24")))
                 .andExpect(status().isUnprocessableContent());
-        mvc.perform(como(ADMIN, get("/api/admin/ia/metricas").param("inicio", "25/10/2026")
-                        .param("fim", "2026-10-24")))
+        mvc.perform(como(ADMIN, get("/api/admin/ia/metricas").param("inicio", "25/10/2026").param("fim", "2026-10-24")))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void rnfRec001_clienteNaoAcessaAAbaDoAssistente() throws Exception {
         mvc.perform(como(ANA, get("/api/admin/ia/provedores"))).andExpect(status().isForbidden());
-        mvc.perform(como(ANA, get("/api/admin/ia/metricas").param("inicio", "2026-10-01")
-                .param("fim", "2026-10-25"))).andExpect(status().isForbidden());
+        mvc.perform(como(ANA, get("/api/admin/ia/metricas").param("inicio", "2026-10-01").param("fim", "2026-10-25")))
+                .andExpect(status().isForbidden());
     }
 }

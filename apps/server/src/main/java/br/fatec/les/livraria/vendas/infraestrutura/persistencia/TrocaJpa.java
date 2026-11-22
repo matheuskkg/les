@@ -1,13 +1,7 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hibernate.envers.Audited;
-
 import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,9 +19,17 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.hibernate.envers.Audited;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tabela {@code troca} do MER (DEC-12, DEC-16): o "pedido de troca" de um pedido entregue. O cupom de troca gerado no
@@ -39,9 +41,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Audited
-@Table(name = "troca", indexes = {
-        @Index(name = "ix_troca_pedido", columnList = "pedido_id"),
-        @Index(name = "ix_troca_status", columnList = "status") })
+@Table(
+        name = "troca",
+        indexes = {
+            @Index(name = "ix_troca_pedido", columnList = "pedido_id"),
+            @Index(name = "ix_troca_status", columnList = "status")
+        })
 public class TrocaJpa {
 
     @Id

@@ -2,11 +2,12 @@ package br.fatec.les.livraria.clientes.dominio.regra;
 
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.endereco;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.violacoes;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.clientes.dominio.modelo.EscolhaDeEndereco;
+
+import org.junit.jupiter.api.Test;
 
 /** RF-VEN-005: a compra usa um endereço cadastrado ou um novo, nunca os dois nem nenhum. */
 class EscolhaDeEnderecoValidaTest {

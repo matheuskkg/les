@@ -1,8 +1,8 @@
 package br.fatec.les.livraria.vendas.aplicacao.porta;
 
-import java.util.Optional;
-
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
+
+import java.util.Optional;
 
 /** Persistência do pedido e das suas cópias (RF-VEN-008, DEC-12, DEC-16). */
 public interface PedidoRepositorio {

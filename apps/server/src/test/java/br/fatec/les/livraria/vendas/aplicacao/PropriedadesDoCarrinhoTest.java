@@ -3,9 +3,9 @@ package br.fatec.les.livraria.vendas.aplicacao;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.Duration;
-
 import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
 
 /** RN-VEN-014, DEC-05.1: o aviso de expiração é positivo e sai antes do fim do prazo. */
 class PropriedadesDoCarrinhoTest {

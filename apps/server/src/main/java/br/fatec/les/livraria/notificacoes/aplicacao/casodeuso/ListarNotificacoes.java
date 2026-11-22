@@ -1,22 +1,23 @@
 package br.fatec.les.livraria.notificacoes.aplicacao.casodeuso;
 
-import java.util.List;
-import java.util.Objects;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.compartilhado.aplicacao.Ordem;
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 import br.fatec.les.livraria.notificacoes.aplicacao.porta.NotificacaoRepositorio;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
+
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Objects;
+
 /**
- * Lista o histórico de notificações do usuário (DEC-13): não lidas primeiro e, dentro de cada grupo, as mais
- * recentes antes. A ordem padrão é aplicada aqui quando o cliente não informa {@code ordem}, para que a regra valha
- * também para chamadas programáticas.
+ * Lista o histórico de notificações do usuário (DEC-13): não lidas primeiro e, dentro de cada grupo, as mais recentes
+ * antes. A ordem padrão é aplicada aqui quando o cliente não informa {@code ordem}, para que a regra valha também para
+ * chamadas programáticas.
  */
 @Component
 @RequiredArgsConstructor
@@ -26,10 +27,11 @@ public class ListarNotificacoes {
      * Ordem padrão: não lidas primeiro ({@code lida} vale 0 para não lida), depois a mais recente e o id como
      * desempate.
      */
-    public static final List<Ordem> ORDEM_PADRAO = List.of(
-            new Ordem("lida", Ordem.Direcao.ASC),
-            new Ordem("criadaEm", Ordem.Direcao.DESC),
-            new Ordem("id", Ordem.Direcao.DESC));
+    public static final List<Ordem> ORDEM_PADRAO =
+            List.of(
+                    new Ordem("lida", Ordem.Direcao.ASC),
+                    new Ordem("criadaEm", Ordem.Direcao.DESC),
+                    new Ordem("id", Ordem.Direcao.DESC));
 
     private final NotificacaoRepositorio notificacoes;
 

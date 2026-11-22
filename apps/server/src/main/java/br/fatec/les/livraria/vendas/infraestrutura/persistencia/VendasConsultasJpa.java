@@ -1,17 +1,5 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.clientes.dominio.ranking.CompraDoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.CompraDeLivro;
@@ -27,7 +15,20 @@ import br.fatec.les.livraria.vendas.infraestrutura.persistencia.TrocaJpaReposito
 import br.fatec.les.livraria.vendas.infraestrutura.persistencia.TrocaJpaRepository.QuantidadeTrocada;
 import br.fatec.les.livraria.vendas.infraestrutura.persistencia.TrocaJpaRepository.TrocaDoCliente;
 import br.fatec.les.livraria.vendas.infraestrutura.persistencia.TrocaJpaRepository.TrocaDoLivro;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Adapter JPA das vendas consideradas na análise, no ranking e na recomendação (RN-ANA-001, RN-ANA-004, RN-CLI-007,
@@ -40,8 +41,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class VendasConsultasJpa implements VendasConsultas {
 
-    private static final List<StatusPedido> CONTAM_COMO_VENDA = Arrays.stream(StatusPedido.values())
-            .filter(StatusPedido::contaComoVenda).toList();
+    private static final List<StatusPedido> CONTAM_COMO_VENDA =
+            Arrays.stream(StatusPedido.values()).filter(StatusPedido::contaComoVenda).toList();
 
     private final PedidoJpaRepository pedidos;
     private final ItemPedidoJpaRepository itens;
@@ -50,28 +51,37 @@ public class VendasConsultasJpa implements VendasConsultas {
     @Override
     @Transactional(readOnly = true)
     public List<ItemVendido> itensVendidos(LocalDateTime inicio, LocalDateTime fimExclusivo) {
-        Map<Long, Long> trocadas = trocas.somarTrocadasDoPeriodo(StatusTroca.TROCADO, CONTAM_COMO_VENDA, inicio,
-                fimExclusivo).stream()
-                .collect(Collectors.toMap(QuantidadeTrocada::getItemId, QuantidadeTrocada::getQuantidade));
+        Map<Long, Long> trocadas =
+                trocas.somarTrocadasDoPeriodo(StatusTroca.TROCADO, CONTAM_COMO_VENDA, inicio, fimExclusivo).stream()
+                        .collect(Collectors.toMap(QuantidadeTrocada::getItemId, QuantidadeTrocada::getQuantidade));
         return itens.buscarDoPeriodo(CONTAM_COMO_VENDA, inicio, fimExclusivo).stream()
-                .map(item -> new ItemVendido(item.getRealizadoEm(), item.getLivro().categorias(),
-                        Dinheiro.de(item.getPrecoUnitario()), item.getQuantidade(),
-                        Math.toIntExact(trocadas.getOrDefault(item.getId(), 0L))))
+                .map(item ->
+                        new ItemVendido(
+                                item.getRealizadoEm(),
+                                item.getLivro().categorias(),
+                                Dinheiro.de(item.getPrecoUnitario()),
+                                item.getQuantidade(),
+                                Math.toIntExact(trocadas.getOrDefault(item.getId(), 0L))))
                 .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<LivroVendido> comprasDoCliente(Long clienteId) {
-        Map<Long, Long> trocadas = trocas
-                .somarTrocadasDoCliente(StatusTroca.TROCADO, CONTAM_COMO_VENDA, clienteId).stream()
-                .collect(Collectors.toMap(QuantidadeTrocada::getItemId, QuantidadeTrocada::getQuantidade));
+        Map<Long, Long> trocadas =
+                trocas.somarTrocadasDoCliente(StatusTroca.TROCADO, CONTAM_COMO_VENDA, clienteId).stream()
+                        .collect(Collectors.toMap(QuantidadeTrocada::getItemId, QuantidadeTrocada::getQuantidade));
         return itens.buscarDoCliente(CONTAM_COMO_VENDA, clienteId).stream()
-                .map(item -> new LivroVendido(item.getPedidoId(), item.getClienteId(), item.getLivro().id(),
-                        item.getLivro().titulo(), item.getLivro().autores(),
-                        item.getLivro().categorias().stream().map(CategoriaNoPedido::nome).toList(),
-                        item.getQuantidade() - Math.toIntExact(trocadas.getOrDefault(item.getId(), 0L)),
-                        item.getRealizadoEm()))
+                .map(item ->
+                        new LivroVendido(
+                                item.getPedidoId(),
+                                item.getClienteId(),
+                                item.getLivro().id(),
+                                item.getLivro().titulo(),
+                                item.getLivro().autores(),
+                                item.getLivro().categorias().stream().map(CategoriaNoPedido::nome).toList(),
+                                item.getQuantidade() - Math.toIntExact(trocadas.getOrDefault(item.getId(), 0L)),
+                                item.getRealizadoEm()))
                 .filter(livro -> livro.quantidade() > 0)
                 .toList();
     }
@@ -79,15 +89,24 @@ public class VendasConsultasJpa implements VendasConsultas {
     @Override
     @Transactional(readOnly = true)
     public List<CompraDeLivro> comprasRegistradas() {
-        Map<ParClienteLivro, Long> trocadas = trocas
-                .somarTrocadasPorClienteELivro(StatusTroca.TROCADO, CONTAM_COMO_VENDA).stream()
-                .collect(Collectors.toMap(
-                        troca -> new ParClienteLivro(troca.getClienteId(), troca.getLivro().id()),
-                        TrocaDoCliente::getQuantidade, Long::sum));
+        Map<ParClienteLivro, Long> trocadas =
+                trocas.somarTrocadasPorClienteELivro(StatusTroca.TROCADO, CONTAM_COMO_VENDA).stream()
+                        .collect(
+                                Collectors.toMap(
+                                        troca -> new ParClienteLivro(troca.getClienteId(), troca.getLivro().id()),
+                                        TrocaDoCliente::getQuantidade,
+                                        Long::sum));
         return itens.somarCompras(CONTAM_COMO_VENDA).stream()
-                .map(compra -> new CompraDeLivro(compra.getClienteId(), compra.getLivro().id(),
-                        Math.toIntExact(compra.getQuantidade() - trocadas.getOrDefault(
-                                new ParClienteLivro(compra.getClienteId(), compra.getLivro().id()), 0L))))
+                .map(compra ->
+                        new CompraDeLivro(
+                                compra.getClienteId(),
+                                compra.getLivro().id(),
+                                Math.toIntExact(
+                                        compra.getQuantidade()
+                                                - trocadas.getOrDefault(
+                                                        new ParClienteLivro(
+                                                                compra.getClienteId(), compra.getLivro().id()),
+                                                        0L))))
                 .filter(compra -> compra.quantidade() > 0)
                 .toList();
     }
@@ -95,8 +114,11 @@ public class VendasConsultasJpa implements VendasConsultas {
     @Override
     @Transactional(readOnly = true)
     public Map<Long, Integer> unidadesVendidasPorLivro() {
-        Map<Long, Long> trocadas = trocas.somarTrocadasPorLivro(StatusTroca.TROCADO, CONTAM_COMO_VENDA).stream()
-                .collect(Collectors.toMap(troca -> troca.getLivro().id(), TrocaDoLivro::getQuantidade, Long::sum));
+        Map<Long, Long> trocadas =
+                trocas.somarTrocadasPorLivro(StatusTroca.TROCADO, CONTAM_COMO_VENDA).stream()
+                        .collect(
+                                Collectors.toMap(
+                                        troca -> troca.getLivro().id(), TrocaDoLivro::getQuantidade, Long::sum));
         Map<Long, Integer> unidades = new LinkedHashMap<>();
         for (UnidadeDoLivro vendida : itens.somarVendidas(CONTAM_COMO_VENDA)) {
             Long livroId = vendida.getLivro().id();
@@ -108,16 +130,16 @@ public class VendasConsultasJpa implements VendasConsultas {
     }
 
     /** Chave de agregação por cliente e livro, para descontar as trocas concluídas (DEC-16). */
-    private record ParClienteLivro(Long clienteId, Long livroId) {
-    }
+    private record ParClienteLivro(Long clienteId, Long livroId) {}
 
     /**
      * Total menos os cupons das trocas concluídas, nunca abaixo de zero: o cupom é o preço cheio dos itens, que pode
      * passar do total quando houve desconto promocional (DEC-11, DEC-12).
      */
     private static Dinheiro valorParaORanking(PedidoDoCliente pedido, Map<Long, BigDecimal> cupons) {
-        return Dinheiro.maior(Dinheiro.ZERO, Dinheiro.de(pedido.getTotal()
-                .subtract(cupons.getOrDefault(pedido.getId(), BigDecimal.ZERO))));
+        return Dinheiro.maior(
+                Dinheiro.ZERO,
+                Dinheiro.de(pedido.getTotal().subtract(cupons.getOrDefault(pedido.getId(), BigDecimal.ZERO))));
     }
 
     @Override
@@ -126,12 +148,17 @@ public class VendasConsultasJpa implements VendasConsultas {
         if (clienteIds.isEmpty()) {
             return Map.of();
         }
-        Map<Long, BigDecimal> cupons = trocas.somarCuponsDosClientesDesde(StatusTroca.TROCADO, clienteIds,
-                CONTAM_COMO_VENDA, desde).stream()
-                .collect(Collectors.toMap(CuponsDoPedido::getPedidoId, CuponsDoPedido::getValor));
+        Map<Long, BigDecimal> cupons =
+                trocas.somarCuponsDosClientesDesde(StatusTroca.TROCADO, clienteIds, CONTAM_COMO_VENDA, desde).stream()
+                        .collect(Collectors.toMap(CuponsDoPedido::getPedidoId, CuponsDoPedido::getValor));
         return pedidos.buscarDosClientesDesde(clienteIds, CONTAM_COMO_VENDA, desde).stream()
-                .collect(Collectors.groupingBy(PedidoDoCliente::getClienteId, Collectors.mapping(
-                        pedido -> new CompraDoCliente(pedido.getRealizadoEm(), valorParaORanking(pedido, cupons)),
-                        Collectors.toList())));
+                .collect(
+                        Collectors.groupingBy(
+                                PedidoDoCliente::getClienteId,
+                                Collectors.mapping(
+                                        pedido ->
+                                                new CompraDoCliente(
+                                                        pedido.getRealizadoEm(), valorParaORanking(pedido, cupons)),
+                                        Collectors.toList())));
     }
 }

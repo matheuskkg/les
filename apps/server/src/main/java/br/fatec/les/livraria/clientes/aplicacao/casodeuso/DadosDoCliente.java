@@ -1,15 +1,16 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
-import java.time.LocalDate;
-
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.DadosDeContato;
 import br.fatec.les.livraria.acesso.dominio.modelo.TipoTelefone;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
 
+import java.time.LocalDate;
+
 /**
- * Dados do próprio cliente (RF-CLI-002, DEC-07): o cadastro que fica no {@code Cliente} mais o e-mail e o telefone
- * que ficam no {@code Usuario} do {@code acesso}, e o ranking calculado na consulta (RN-CLI-007, DEC-04). Endereços e cartões têm rotas próprias e não entram aqui.
+ * Dados do próprio cliente (RF-CLI-002, DEC-07): o cadastro que fica no {@code Cliente} mais o e-mail e o telefone que
+ * ficam no {@code Usuario} do {@code acesso}, e o ranking calculado na consulta (RN-CLI-007, DEC-04). Endereços e
+ * cartões têm rotas próprias e não entram aqui.
  */
 public record DadosDoCliente(
         Long id,

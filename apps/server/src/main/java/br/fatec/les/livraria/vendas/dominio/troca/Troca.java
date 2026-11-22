@@ -1,14 +1,14 @@
 package br.fatec.les.livraria.vendas.dominio.troca;
 
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
+
+import org.jspecify.annotations.Nullable;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import org.jspecify.annotations.Nullable;
-
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
-import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
 
 /**
  * O "pedido de troca" do RN-VEN-011 (DEC-12): itens de um pedido entregue com a quantidade de cada um. Um pedido pode
@@ -25,8 +25,14 @@ public class Troca {
     private @Nullable Dinheiro valorCupom;
     private @Nullable Long cupomId;
 
-    public Troca(@Nullable Long id, Long pedidoId, StatusTroca status, LocalDateTime solicitadaEm,
-            List<ItemTroca> itens, @Nullable String motivoRecusa, @Nullable Dinheiro valorCupom,
+    public Troca(
+            @Nullable Long id,
+            Long pedidoId,
+            StatusTroca status,
+            LocalDateTime solicitadaEm,
+            List<ItemTroca> itens,
+            @Nullable String motivoRecusa,
+            @Nullable Dinheiro valorCupom,
             @Nullable Long cupomId) {
         this.id = id;
         this.pedidoId = Objects.requireNonNull(pedidoId, "pedidoId");
@@ -96,14 +102,19 @@ public class Troca {
         exigirAutorizada();
         for (ItemTroca item : itens) {
             if (voltaEstoque.get(item.itemPedidoId()) == null) {
-                throw new IllegalArgumentException("Falta informar se o item %d volta ao estoque."
-                        .formatted(item.itemPedidoId()));
+                throw new IllegalArgumentException(
+                        "Falta informar se o item %d volta ao estoque.".formatted(item.itemPedidoId()));
             }
         }
-        itens = itens.stream()
-                .map(item -> new ItemTroca(item.id(), item.itemPedidoId(), item.quantidade(),
-                        voltaEstoque.get(item.itemPedidoId())))
-                .toList();
+        itens =
+                itens.stream()
+                        .map(item ->
+                                new ItemTroca(
+                                        item.id(),
+                                        item.itemPedidoId(),
+                                        item.quantidade(),
+                                        voltaEstoque.get(item.itemPedidoId())))
+                        .toList();
         status = StatusTroca.TROCADO;
         valorCupom = Objects.requireNonNull(valor, "valor");
         cupomId = Objects.requireNonNull(cupomGerado, "cupomGerado");

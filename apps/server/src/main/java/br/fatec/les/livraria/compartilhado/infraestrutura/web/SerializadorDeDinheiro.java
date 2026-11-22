@@ -1,6 +1,7 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ser.std.StdSerializer;

@@ -1,17 +1,19 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.seguranca;
 
-import java.io.IOException;
-import java.net.URI;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import tools.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.net.URI;
 
 /** Escreve um {@link ProblemDetail} nas respostas do Spring Security (DEC-07, DEC-08). */
 @Component

@@ -1,15 +1,15 @@
 package br.fatec.les.livraria.notificacoes.aplicacao.porta;
 
+import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
+import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
+import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
-import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
-import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
 
 /** Repositório em memória dos testes de caso de uso (DEC-13). */
 public class NotificacaoRepositorioFake implements NotificacaoRepositorio {
@@ -20,9 +20,7 @@ public class NotificacaoRepositorioFake implements NotificacaoRepositorio {
 
     @Override
     public Notificacao salvar(Notificacao notificacao) {
-        Notificacao guardada = notificacao.getId() == null
-                ? copiar(notificacao, proximoId++)
-                : notificacao;
+        Notificacao guardada = notificacao.getId() == null ? copiar(notificacao, proximoId++) : notificacao;
         porId.put(guardada.getId(), guardada);
         return guardada;
     }
@@ -35,9 +33,8 @@ public class NotificacaoRepositorioFake implements NotificacaoRepositorio {
     @Override
     public Pagina<Notificacao> listar(Long usuarioId, Paginacao paginacao) {
         paginacoes.add(paginacao);
-        List<Notificacao> doUsuario = porId.values().stream()
-                .filter(notificacao -> notificacao.pertenceA(usuarioId))
-                .toList();
+        List<Notificacao> doUsuario =
+                porId.values().stream().filter(notificacao -> notificacao.pertenceA(usuarioId)).toList();
         return new Pagina<>(doUsuario, paginacao.pagina(), paginacao.tamanho(), doUsuario.size(), 1);
     }
 
@@ -50,9 +47,10 @@ public class NotificacaoRepositorioFake implements NotificacaoRepositorio {
 
     @Override
     public int marcarTodasComoLidas(Long usuarioId, LocalDateTime agora) {
-        List<Notificacao> naoLidas = porId.values().stream()
-                .filter(notificacao -> notificacao.pertenceA(usuarioId) && !notificacao.lida())
-                .toList();
+        List<Notificacao> naoLidas =
+                porId.values().stream()
+                        .filter(notificacao -> notificacao.pertenceA(usuarioId) && !notificacao.lida())
+                        .toList();
         naoLidas.forEach(notificacao -> notificacao.marcarComoLida(agora));
         return naoLidas.size();
     }
@@ -72,8 +70,14 @@ public class NotificacaoRepositorioFake implements NotificacaoRepositorio {
     }
 
     private static Notificacao copiar(Notificacao notificacao, long id) {
-        return new Notificacao(id, notificacao.getUsuarioId(), notificacao.getTipo(), notificacao.getMensagem(),
-                notificacao.getRecurso(), notificacao.getRecursoId(), notificacao.getCriadaEm(),
+        return new Notificacao(
+                id,
+                notificacao.getUsuarioId(),
+                notificacao.getTipo(),
+                notificacao.getMensagem(),
+                notificacao.getRecurso(),
+                notificacao.getRecursoId(),
+                notificacao.getCriadaEm(),
                 notificacao.getLidaEm());
     }
 }

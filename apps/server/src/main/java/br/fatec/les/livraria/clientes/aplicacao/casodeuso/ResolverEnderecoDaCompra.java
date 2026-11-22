@@ -1,8 +1,5 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.clientes.aplicacao.ClienteDoUsuario;
 import br.fatec.les.livraria.clientes.dominio.modelo.Endereco;
 import br.fatec.les.livraria.clientes.dominio.modelo.EscolhaDeEndereco;
@@ -12,12 +9,16 @@ import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosEndereco;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.UsuarioAtual;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Resolve o endereço escolhido numa compra pelo cliente autenticado (RF-VEN-005, DEC-10): um dos endereços dele ou um
- * novo, validado como no cadastro (RN-CLI-003). Só lê: o endereço novo não é gravado aqui, e o {@code vendas} recebe
- * os dados para calcular o frete (RF-VEN-004) e para a cópia no pedido (DEC-12).
+ * novo, validado como no cadastro (RN-CLI-003). Só lê: o endereço novo não é gravado aqui, e o {@code vendas} recebe os
+ * dados para calcular o frete (RF-VEN-004) e para a cópia no pedido (DEC-12).
  */
 @Component
 @RequiredArgsConstructor
@@ -32,7 +33,7 @@ public class ResolverEnderecoDaCompra {
     /**
      * @return o endereço cadastrado, com o id, ou o novo, sem id
      * @throws br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio se a escolha ou o endereço novo forem
-     *         inválidos
+     *     inválidos
      * @throws ExcecaoDeRecursoNaoEncontrado se o endereço escolhido não for do cliente autenticado
      */
     @Transactional(readOnly = true)
@@ -43,8 +44,10 @@ public class ResolverEnderecoDaCompra {
             return Endereco.de(escolha.novo(), null);
         }
 
-        Long usuarioId = usuarioAtual.usuarioId()
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));
+        Long usuarioId =
+                usuarioAtual
+                        .usuarioId()
+                        .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cliente não encontrado."));
         return clienteDoUsuario.buscar(usuarioId).getEnderecos().stream()
                 .filter(endereco -> endereco.id().equals(escolha.enderecoId()))
                 .findFirst()

@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Campos que uma listagem aceita em {@code ordem}, com o nome exposto na API e a propriedade correspondente no
- * modelo, além da ordem padrão usada quando o cliente não informa nenhum critério (DEC-07).
+ * Campos que uma listagem aceita em {@code ordem}, com o nome exposto na API e a propriedade correspondente no modelo,
+ * além da ordem padrão usada quando o cliente não informa nenhum critério (DEC-07).
  */
 public record OrdenacaoPermitida(Map<String, String> campos, List<Ordem> padrao) {
 
@@ -41,8 +41,13 @@ public record OrdenacaoPermitida(Map<String, String> campos, List<Ordem> padrao)
     public String propriedade(String campo) {
         String propriedade = campos.get(campo);
         if (propriedade == null) {
-            throw new ParametroInvalido("ordem", "Campo de ordenação não permitido: " + campo
-                    + ". Campos permitidos: " + String.join(", ", campos.keySet()) + ".");
+            throw new ParametroInvalido(
+                    "ordem",
+                    "Campo de ordenação não permitido: "
+                            + campo
+                            + ". Campos permitidos: "
+                            + String.join(", ", campos.keySet())
+                            + ".");
         }
         return propriedade;
     }

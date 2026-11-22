@@ -24,8 +24,8 @@ public record Bandeira(Long id, String nome, List<PrefixoDeCartao> prefixos, Lis
     }
 
     /**
-     * Monta a bandeira a partir das colunas do seed/mapper: {@code prefixos} como {@code 4} ou
-     * {@code 51-55,2221-2720} e {@code tamanhos} como {@code 13,16,19}.
+     * Monta a bandeira a partir das colunas do seed/mapper: {@code prefixos} como {@code 4} ou {@code 51-55,2221-2720}
+     * e {@code tamanhos} como {@code 13,16,19}.
      */
     public static Bandeira de(Long id, String nome, String prefixos, String tamanhos) {
         return new Bandeira(id, nome, prefixosDe(prefixos), tamanhosDe(tamanhos));

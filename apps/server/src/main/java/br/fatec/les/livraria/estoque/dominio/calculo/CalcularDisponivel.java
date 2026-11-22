@@ -3,8 +3,8 @@ package br.fatec.les.livraria.estoque.dominio.calculo;
 import org.springframework.stereotype.Component;
 
 /**
- * Calcula o saldo disponível de um livro: quantidade em mãos menos as reservas ativas, nunca negativo
- * (DEC-15.3). As reservas vencidas não entram na conta, porque são liberadas na expiração (RN-EST-006).
+ * Calcula o saldo disponível de um livro: quantidade em mãos menos as reservas ativas, nunca negativo (DEC-15.3). As
+ * reservas vencidas não entram na conta, porque são liberadas na expiração (RN-EST-006).
  */
 @Component
 public class CalcularDisponivel {

@@ -1,20 +1,21 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoEndereco;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Endereços do cadastro do cliente (RN-CLI-003): percorre a lista e aplica {@link EnderecoCompleto} a cada item,
- * numerando as mensagens. A validação de um único endereço fica em {@code EnderecoCompleto} e é reutilizada pelos
- * casos de uso de adição e alteração (RF-CLI-006, RNF-CLI-004).
+ * numerando as mensagens. A validação de um único endereço fica em {@code EnderecoCompleto} e é reutilizada pelos casos
+ * de uso de adição e alteração (RF-CLI-006, RNF-CLI-004).
  */
 @Component
 @RequiredArgsConstructor

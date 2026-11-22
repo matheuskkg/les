@@ -1,10 +1,5 @@
 package br.fatec.les.livraria.vendas.aplicacao.regra;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.catalogo.aplicacao.casodeuso.ConsultarLivrosParaVenda;
 import br.fatec.les.livraria.catalogo.aplicacao.casodeuso.ConsultarPrecosDeVenda;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroParaVenda;
@@ -13,7 +8,13 @@ import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.dominio.modelo.Carrinho;
 import br.fatec.les.livraria.vendas.dominio.modelo.ItemCarrinho;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Só um carrinho com itens, todos ativos e com preço de venda, vai para o pagamento (RF-VEN-003, RN-LIV-001,
@@ -39,8 +40,8 @@ public class CarrinhoProntoParaCompra implements Regra<Carrinho> {
             LivroParaVenda livro = livros.get(livroId);
             if (livro == null || !livro.ativo() || !precos.containsKey(livroId)) {
                 String nome = livro == null ? "Livro " + livroId : livro.titulo();
-                violacoes.adicionar("RF-VEN-003",
-                        "\"%s\" não está disponível para venda. Remova-o do carrinho.".formatted(nome));
+                violacoes.adicionar(
+                        "RF-VEN-003", "\"%s\" não está disponível para venda. Remova-o do carrinho.".formatted(nome));
             }
         }
     }

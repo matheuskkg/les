@@ -1,21 +1,22 @@
 package br.fatec.les.livraria.estoque.aplicacao.casodeuso;
 
-import java.util.Map;
-import java.util.TreeMap;
+import br.fatec.les.livraria.estoque.aplicacao.porta.EstoqueTravado;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.estoque.aplicacao.porta.EstoqueTravado;
-import lombok.RequiredArgsConstructor;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Reentrada no estoque dos itens de uma troca que voltam a ser vendáveis (RF-EST-004, DEC-12, DEC-15.3): para cada
  * livro, trava a linha de saldo e soma a quantidade. Não cria entrada, porque não há custo novo; o histórico fica na
  * auditoria. Chamado pelo {@code vendas} na transação do recebimento da troca.
  *
- * <p>Os livros são travados em ordem crescente de id, como na baixa, para que as duas operações não se esperem em
- * ordem cruzada.</p>
+ * <p>Os livros são travados em ordem crescente de id, como na baixa, para que as duas operações não se esperem em ordem
+ * cruzada.
  */
 @Component
 @RequiredArgsConstructor
@@ -34,10 +35,13 @@ public class ReentrarEstoque {
                 throw new IllegalStateException("Reentrada de %d unidades do livro %d.".formatted(devolvida, livroId));
             }
         });
-        new TreeMap<>(quantidades).forEach((livroId, devolvida) -> {
-            int emMaos = estoque.quantidadeComLock(livroId)
-                    .orElseThrow(() -> new IllegalStateException("Livro sem saldo de estoque: " + livroId));
-            estoque.gravarQuantidade(livroId, emMaos + devolvida);
-        });
+        new TreeMap<>(quantidades)
+                .forEach((livroId, devolvida) -> {
+                    int emMaos =
+                            estoque.quantidadeComLock(livroId)
+                                    .orElseThrow(
+                                            () -> new IllegalStateException("Livro sem saldo de estoque: " + livroId));
+                    estoque.gravarQuantidade(livroId, emMaos + devolvida);
+                });
     }
 }

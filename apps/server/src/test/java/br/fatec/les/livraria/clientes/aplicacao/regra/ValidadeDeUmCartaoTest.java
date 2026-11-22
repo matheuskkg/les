@@ -3,13 +3,14 @@ package br.fatec.les.livraria.clientes.aplicacao.regra;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.cartao;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.relogio;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.violacoes;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.YearMonth;
+import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 
 import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
+import java.time.YearMonth;
 
 /** DEC-06: a regra de um cartão só, usada na inclusão e na alteração em "Minha conta" (relógio em 2026-10). */
 class ValidadeDeUmCartaoTest {

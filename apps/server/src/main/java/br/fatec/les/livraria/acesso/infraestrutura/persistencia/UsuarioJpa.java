@@ -1,6 +1,6 @@
 package br.fatec.les.livraria.acesso.infraestrutura.persistencia;
 
-import java.time.LocalDateTime;
+import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -14,21 +14,24 @@ import jakarta.persistence.Index;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-
-import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
+import java.time.LocalDateTime;
+
 /** Tabela {@code usuario} do MER (DEC-14, DEC-16). A situação não é gravada: é derivada de {@code inativado_em}. */
 @Audited
 @Entity
-@Table(name = "usuario", indexes = {
-        @Index(name = "ix_usuario_email", columnList = "email"),
-        @Index(name = "ix_usuario_telefone", columnList = "telefone_ddd, telefone_numero")
-})
+@Table(
+        name = "usuario",
+        indexes = {
+            @Index(name = "ix_usuario_email", columnList = "email"),
+            @Index(name = "ix_usuario_telefone", columnList = "telefone_ddd, telefone_numero")
+        })
 @Getter
 @Setter
 @NoArgsConstructor
@@ -55,6 +58,5 @@ public class UsuarioJpa {
     private LocalDateTime inativadoEm;
 
     /** Opcional: o administrador não tem telefone (DEC-10). */
-    @Embedded
-    private TelefoneJpa telefone;
+    @Embedded private TelefoneJpa telefone;
 }

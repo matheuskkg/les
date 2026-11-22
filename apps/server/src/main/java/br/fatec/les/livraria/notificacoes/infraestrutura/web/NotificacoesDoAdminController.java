@@ -1,13 +1,5 @@
 package br.fatec.les.livraria.notificacoes.infraestrutura.web;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 import br.fatec.les.livraria.compartilhado.infraestrutura.web.Listagem;
@@ -17,10 +9,20 @@ import br.fatec.les.livraria.notificacoes.aplicacao.casodeuso.MarcarComoLida;
 import br.fatec.les.livraria.notificacoes.aplicacao.casodeuso.MarcarTodasComoLidas;
 import br.fatec.les.livraria.notificacoes.infraestrutura.web.dto.ContagemDeNaoLidasDto;
 import br.fatec.les.livraria.notificacoes.infraestrutura.web.dto.NotificacaoDto;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Notificações do administrador autenticado (DEC-13, RN-VEN-016), com as mesmas rotas da área do cliente. O id do
@@ -40,11 +42,12 @@ public class NotificacoesDoAdminController {
     @GetMapping
     @Operation(summary = "Lista as notificações do administrador, não lidas primeiro e mais recentes antes")
     public Pagina<NotificacaoDto> listarNotificacoesDoAdmin(
-            @Listagem(campos = { "id", "tipo", "criadaEm", "lidaEm", "lida" },
-                    padrao = { "lida,asc", "criadaEm,desc", "id,desc" }) Paginacao paginacao,
+            @Listagem(
+                            campos = {"id", "tipo", "criadaEm", "lidaEm", "lida"},
+                            padrao = {"lida,asc", "criadaEm,desc", "id,desc"})
+                    Paginacao paginacao,
             Authentication autenticacao) {
-        return listarNotificacoes.executar(UsuarioDaRequisicao.id(autenticacao), paginacao)
-                .map(mapeador::paraDto);
+        return listarNotificacoes.executar(UsuarioDaRequisicao.id(autenticacao), paginacao).map(mapeador::paraDto);
     }
 
     @GetMapping("/nao-lidas")
@@ -56,8 +59,8 @@ public class NotificacoesDoAdminController {
     @PostMapping("/{id}/ler")
     @Operation(summary = "Marca uma notificação do administrador como lida")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Notificação marcada como lida"),
-            @ApiResponse(responseCode = "404", description = "Notificação não encontrada para o administrador")
+        @ApiResponse(responseCode = "204", description = "Notificação marcada como lida"),
+        @ApiResponse(responseCode = "404", description = "Notificação não encontrada para o administrador")
     })
     public ResponseEntity<Void> marcarComoLidaDoAdmin(@PathVariable Long id, Authentication autenticacao) {
         marcarComoLida.executar(UsuarioDaRequisicao.id(autenticacao), id);

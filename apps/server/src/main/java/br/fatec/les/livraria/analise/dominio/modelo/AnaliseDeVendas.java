@@ -1,13 +1,13 @@
 package br.fatec.les.livraria.analise.dominio.modelo;
 
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
 /**
  * Resultado da análise de vendas, base do gráfico e da exportação (RF-ANA-001, RF-ANA-004).
@@ -24,11 +24,11 @@ public record AnaliseDeVendas(PeriodoDeAnalise periodo, List<SerieDeVendas> seri
 
     /**
      * Soma as vendas por mês e categoria (RN-ANA-001) e completa com R$ 0,00 os meses sem venda de cada categoria
-     * selecionada (RN-ANA-003). Um item com várias categorias entra com o valor cheio em cada uma (DEC-12); vendas
-     * fora do período ou de categorias não selecionadas são ignoradas.
+     * selecionada (RN-ANA-003). Um item com várias categorias entra com o valor cheio em cada uma (DEC-12); vendas fora
+     * do período ou de categorias não selecionadas são ignoradas.
      */
-    public static AnaliseDeVendas calcular(PeriodoDeAnalise periodo, List<CategoriaAnalisada> categorias,
-            List<VendaNoMes> vendas) {
+    public static AnaliseDeVendas calcular(
+            PeriodoDeAnalise periodo, List<CategoriaAnalisada> categorias, List<VendaNoMes> vendas) {
         List<YearMonth> meses = periodo.meses();
         Map<Long, Map<YearMonth, Dinheiro>> totais = new HashMap<>();
         for (VendaNoMes venda : vendas) {
@@ -40,8 +40,9 @@ public record AnaliseDeVendas(PeriodoDeAnalise periodo, List<SerieDeVendas> seri
         List<SerieDeVendas> series = new ArrayList<>();
         for (CategoriaAnalisada categoria : categorias) {
             Map<YearMonth, Dinheiro> porMes = totais.getOrDefault(categoria.id(), Map.of());
-            series.add(new SerieDeVendas(categoria,
-                    meses.stream().map(mes -> porMes.getOrDefault(mes, Dinheiro.ZERO)).toList()));
+            series.add(
+                    new SerieDeVendas(
+                            categoria, meses.stream().map(mes -> porMes.getOrDefault(mes, Dinheiro.ZERO)).toList()));
         }
         return new AnaliseDeVendas(periodo, series);
     }

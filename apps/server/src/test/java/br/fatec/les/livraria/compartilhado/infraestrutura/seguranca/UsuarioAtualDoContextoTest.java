@@ -2,7 +2,8 @@ package br.fatec.les.livraria.compartilhado.infraestrutura.seguranca;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.PrincipalDaSessao;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Autor;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -13,8 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.PrincipalDaSessao;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Autor;
+import java.util.List;
 
 /** Autor das escritas (RNF-GER-002, DEC-08) nos três contextos da tabela. */
 class UsuarioAtualDoContextoTest {
@@ -60,7 +60,9 @@ class UsuarioAtualDoContextoTest {
     }
 
     private static void autenticar(PrincipalDaSessao principal) {
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                principal, null, List.of(new SimpleGrantedAuthority("ROLE_CLIENTE"))));
+        SecurityContextHolder.getContext()
+                .setAuthentication(
+                        new UsernamePasswordAuthenticationToken(
+                                principal, null, List.of(new SimpleGrantedAuthority("ROLE_CLIENTE"))));
     }
 }

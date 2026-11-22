@@ -1,8 +1,8 @@
 package br.fatec.les.livraria.clientes.dominio.calculo;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
+
+import org.springframework.stereotype.Component;
 
 /**
  * Dígito verificador de cartão de crédito pelo algoritmo de Luhn (RN-CLI-004, DEC-18). Aceita o número com ou sem

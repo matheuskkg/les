@@ -4,7 +4,10 @@ import br.fatec.les.livraria.clientes.dominio.modelo.TipoEndereco;
 import br.fatec.les.livraria.clientes.dominio.modelo.TipoLogradouro;
 import br.fatec.les.livraria.clientes.dominio.modelo.Uf;
 
-/** Endereço informado no cadastro e nas rotas {@code /api/me/enderecos} (RN-CLI-003, RF-CLI-006, DEC-10). O país não é editável: é sempre "Brasil". */
+/**
+ * Endereço informado no cadastro e nas rotas {@code /api/me/enderecos} (RN-CLI-003, RF-CLI-006, DEC-10). O país não é
+ * editável: é sempre "Brasil".
+ */
 public record EnderecoDoCadastro(
         String nomeCurto,
         TipoEndereco tipoEndereco,
@@ -15,5 +18,4 @@ public record EnderecoDoCadastro(
         String cep,
         String cidade,
         Uf uf,
-        String observacoes) {
-}
+        String observacoes) {}

@@ -3,22 +3,23 @@ package br.fatec.les.livraria.clientes.aplicacao.regra;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.CPF;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.padrao;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.violacoes;
+
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 import br.fatec.les.livraria.clientes.ClientesDeTeste.FakeClienteRepositorio;
 import br.fatec.les.livraria.clientes.ClientesDeTeste.FakeUsuarioRepositorio;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 /** RF-CLI-001: unicidade do CPF entre as contas em uso (DEC-10). */
 class CpfUnicoTest {
 
     private final FakeClienteRepositorio clientes = new FakeClienteRepositorio();
     private final FakeUsuarioRepositorio usuarios = new FakeUsuarioRepositorio();
-    private final CpfUnico regra = new CpfUnico(clientes,
-            br.fatec.les.livraria.clientes.ClientesDeTeste.contasEmUso(usuarios));
+    private final CpfUnico regra =
+            new CpfUnico(clientes, br.fatec.les.livraria.clientes.ClientesDeTeste.contasEmUso(usuarios));
 
     @Test
     void rfCli001_cpfDeContaEmUsoViolaARegra() {

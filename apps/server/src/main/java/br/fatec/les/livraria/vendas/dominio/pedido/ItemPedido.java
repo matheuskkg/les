@@ -1,8 +1,8 @@
 package br.fatec.les.livraria.vendas.dominio.pedido;
 
-import java.util.Objects;
-
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
+import java.util.Objects;
 
 /**
  * Item vendido: a cópia do livro, o preço de venda na finalização e a quantidade (RF-VEN-008, DEC-12).

@@ -6,7 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.YearMonth;
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,15 +22,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
-import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio;
+import java.time.YearMonth;
 
 /** Formatos do DEC-07 com a configuração real da aplicação (Jackson, springdoc e tratamento de erros). */
 @SpringBootTest
 class ApiNoContextoTest {
 
-    record Oferta(String titulo, Dinheiro preco, YearMonth validade, @Nullable String observacao) {
-    }
+    record Oferta(String titulo, Dinheiro preco, YearMonth validade, @Nullable String observacao) {}
 
     @RestController
     static class ControllerDeTeste {
@@ -54,8 +53,7 @@ class ApiNoContextoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
     private MockMvc mvc;
 

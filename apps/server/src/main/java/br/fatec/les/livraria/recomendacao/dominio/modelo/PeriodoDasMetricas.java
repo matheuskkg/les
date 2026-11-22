@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Período das métricas da IA em dias, com o inicial e o final inclusive (RNF-REC-001, DEC-03). As regras
- * {@code FimDasMetricasNaoAnteriorAoInicio} e {@code PeriodoDasMetricasDeAte366Dias} validam o intervalo.
+ * Período das métricas da IA em dias, com o inicial e o final inclusive (RNF-REC-001, DEC-03). As regras {@code
+ * FimDasMetricasNaoAnteriorAoInicio} e {@code PeriodoDasMetricasDeAte366Dias} validam o intervalo.
  *
  * @param inicio primeiro dia
- * @param fim    último dia
+ * @param fim último dia
  */
 public record PeriodoDasMetricas(LocalDate inicio, LocalDate fim) {
 

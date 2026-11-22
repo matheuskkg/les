@@ -1,23 +1,24 @@
 package br.fatec.les.livraria.recomendacao.infraestrutura.persistencia;
 
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
+import br.fatec.les.livraria.recomendacao.aplicacao.porta.ConversasRepositorio;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.PapelDaMensagem;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
-import br.fatec.les.livraria.recomendacao.aplicacao.porta.ConversasRepositorio;
-import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
-import br.fatec.les.livraria.recomendacao.dominio.modelo.PapelDaMensagem;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 /**
- * Adapter JPA das conversas com o assistente (RNF-REC-001, DEC-03, DEC-14). Cada operação tem a própria transação;
- * numa mensagem existente, só a avaliação muda. O texto é cortado no tamanho da coluna.
+ * Adapter JPA das conversas com o assistente (RNF-REC-001, DEC-03, DEC-14). Cada operação tem a própria transação; numa
+ * mensagem existente, só a avaliação muda. O texto é cortado no tamanho da coluna.
  */
 @Component
 @RequiredArgsConstructor
@@ -45,8 +46,10 @@ public class ConversasRepositorioJpa implements ConversasRepositorio {
     @Override
     @Transactional
     public void arquivar(Long conversaId, LocalDateTime em) {
-        ConversaJpa conversa = conversas.findById(conversaId)
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Conversa não encontrada."));
+        ConversaJpa conversa =
+                conversas
+                        .findById(conversaId)
+                        .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Conversa não encontrada."));
         conversa.setArquivadaEm(em);
     }
 
@@ -68,8 +71,9 @@ public class ConversasRepositorioJpa implements ConversasRepositorio {
             return List.of();
         }
         return mensagens.buscarPorIds(ids).stream()
-                .sorted(Comparator.comparing(MensagemConversaJpa::getEnviadaEm)
-                        .thenComparing(MensagemConversaJpa::getId))
+                .sorted(
+                        Comparator.comparing(MensagemConversaJpa::getEnviadaEm)
+                                .thenComparing(MensagemConversaJpa::getId))
                 .map(ConversasRepositorioJpa::paraDominio)
                 .toList();
     }
@@ -110,8 +114,10 @@ public class ConversasRepositorioJpa implements ConversasRepositorio {
     }
 
     private MensagemConversaJpa avaliada(MensagemDaConversa mensagem) {
-        MensagemConversaJpa entidade = mensagens.findById(mensagem.id())
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Mensagem não encontrada."));
+        MensagemConversaJpa entidade =
+                mensagens
+                        .findById(mensagem.id())
+                        .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Mensagem não encontrada."));
         entidade.setAvaliacao(mensagem.avaliacao());
         entidade.setAvaliadaEm(mensagem.avaliadaEm());
         return entidade;
@@ -125,11 +131,19 @@ public class ConversasRepositorioJpa implements ConversasRepositorio {
     }
 
     private static MensagemDaConversa paraDominio(MensagemConversaJpa entidade) {
-        return new MensagemDaConversa(entidade.getId(), entidade.getConversa().getId(), entidade.getPapel(),
-                entidade.getTexto(), entidade.getTipo(),
-                entidade.getLivros().stream().sorted(Comparator.comparingInt(LivroCitadoJpa::getPosicao))
-                        .map(LivroCitadoJpa::getLivroId).toList(),
-                entidade.getChamadaIa() == null ? null : entidade.getChamadaIa().getId(), entidade.getEnviadaEm(),
-                entidade.getAvaliacao(), entidade.getAvaliadaEm());
+        return new MensagemDaConversa(
+                entidade.getId(),
+                entidade.getConversa().getId(),
+                entidade.getPapel(),
+                entidade.getTexto(),
+                entidade.getTipo(),
+                entidade.getLivros().stream()
+                        .sorted(Comparator.comparingInt(LivroCitadoJpa::getPosicao))
+                        .map(LivroCitadoJpa::getLivroId)
+                        .toList(),
+                entidade.getChamadaIa() == null ? null : entidade.getChamadaIa().getId(),
+                entidade.getEnviadaEm(),
+                entidade.getAvaliacao(),
+                entidade.getAvaliadaEm());
     }
 }

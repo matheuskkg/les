@@ -1,15 +1,16 @@
 package br.fatec.les.livraria.notificacoes.aplicacao.casodeuso;
 
-import java.util.Objects;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
 import br.fatec.les.livraria.notificacoes.aplicacao.porta.NotificacaoRepositorio;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 /**
  * Marca uma notificação do próprio usuário como lida (DEC-13). Notificação inexistente ou de outro usuário responde
@@ -23,17 +24,19 @@ public class MarcarComoLida {
     private final Relogio relogio;
 
     /**
-     * @param usuarioId      dono da notificação, obtido da sessão
-     * @param notificacaoId  id informado na rota
+     * @param usuarioId dono da notificação, obtido da sessão
+     * @param notificacaoId id informado na rota
      * @throws ExcecaoDeRecursoNaoEncontrado se a notificação não existir ou for de outro usuário
      */
     @Transactional
     public void executar(Long usuarioId, Long notificacaoId) {
         Objects.requireNonNull(usuarioId, "usuarioId");
         Objects.requireNonNull(notificacaoId, "notificacaoId");
-        Notificacao notificacao = notificacoes.buscarPorId(notificacaoId)
-                .filter(encontrada -> encontrada.pertenceA(usuarioId))
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Notificação não encontrada."));
+        Notificacao notificacao =
+                notificacoes
+                        .buscarPorId(notificacaoId)
+                        .filter(encontrada -> encontrada.pertenceA(usuarioId))
+                        .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Notificação não encontrada."));
         if (notificacao.lida()) {
             return;
         }

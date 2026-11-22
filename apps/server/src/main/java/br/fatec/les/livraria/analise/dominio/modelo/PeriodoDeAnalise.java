@@ -9,8 +9,8 @@ import java.util.Objects;
 
 /**
  * Período da análise entre duas datas, com o inicial e o final inclusive (RF-ANA-002). O filtro é por dia, mas os
- * pontos do gráfico continuam sendo os meses tocados pelo intervalo (RN-ANA-001, RNF-ANA-001): um mês parcial entra
- * com as vendas dos dias selecionados.
+ * pontos do gráfico continuam sendo os meses tocados pelo intervalo (RN-ANA-001, RNF-ANA-001): um mês parcial entra com
+ * as vendas dos dias selecionados.
  *
  * @param inicio primeiro dia do período
  * @param fim último dia do período, não anterior ao primeiro

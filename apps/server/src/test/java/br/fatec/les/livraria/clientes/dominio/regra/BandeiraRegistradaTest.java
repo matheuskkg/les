@@ -5,12 +5,8 @@ import static br.fatec.les.livraria.clientes.ClientesDeTeste.bandeiras;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.cartao;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.comCartoes;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.padrao;
+
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.Test;
 
 import br.fatec.les.livraria.clientes.dominio.calculo.IdentificarBandeira;
 import br.fatec.les.livraria.clientes.dominio.modelo.Bandeira;
@@ -18,6 +14,11 @@ import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Optional;
 
 /** RN-CLI-005 (DEC-18): bandeira do cartão identificada pelo número. */
 class BandeiraRegistradaTest {
@@ -31,7 +32,8 @@ class BandeiraRegistradaTest {
         List<Optional<Bandeira>> identificadas = regra.identificar(padrao(), violacoes, bandeiras());
 
         assertThat(violacoes.lista()).isEmpty();
-        assertThat(identificadas).singleElement()
+        assertThat(identificadas)
+                .singleElement()
                 .satisfies(bandeira -> assertThat(bandeira).get().extracting(Bandeira::nome).isEqualTo("Visa"));
     }
 
@@ -72,14 +74,15 @@ class BandeiraRegistradaTest {
         NovoCartao desconhecido = new NovoCartao("9999999999999999", "ANA SOUZA", cartao().validade());
         Violacoes violacoes = new Violacoes();
 
-        List<Optional<Bandeira>> identificadas = regra.identificar(
-                comCartoes(List.of(cartao(), desconhecido, mastercard)), violacoes, bandeiras());
+        List<Optional<Bandeira>> identificadas =
+                regra.identificar(comCartoes(List.of(cartao(), desconhecido, mastercard)), violacoes, bandeiras());
 
         assertThat(identificadas).hasSize(3);
         assertThat(identificadas.get(0)).get().extracting(Bandeira::nome).isEqualTo("Visa");
         assertThat(identificadas.get(1)).isEmpty();
         assertThat(identificadas.get(2)).get().extracting(Bandeira::nome).isEqualTo(MASTERCARD.nome());
-        assertThat(violacoes.lista()).singleElement()
+        assertThat(violacoes.lista())
+                .singleElement()
                 .extracting(Violacao::mensagem)
                 .isEqualTo("Cartão 2: bandeira do cartão não aceita.");
     }

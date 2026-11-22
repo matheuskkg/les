@@ -3,11 +3,11 @@ package br.fatec.les.livraria.catalogo.dominio.calculo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.math.BigDecimal;
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
 import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+import java.math.BigDecimal;
 
 /** Preço de venda: maior custo × (1 + margem), arredondado só no fim (RF-EST-002, RN-EST-002, DEC-15.1). */
 class CalcularPrecoVendaTest {

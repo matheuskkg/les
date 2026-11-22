@@ -1,15 +1,16 @@
 package br.fatec.les.livraria.vendas.aplicacao.casodeuso;
 
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.IdentificarCliente;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
 import br.fatec.les.livraria.vendas.aplicacao.MontarCarrinhoConsultado;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.CarrinhoConsultado;
 import br.fatec.les.livraria.vendas.aplicacao.porta.CarrinhoRepositorio;
 import br.fatec.les.livraria.vendas.dominio.modelo.Carrinho;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Dispensa o aviso de um livro retirado do carrinho por expiração (RNF-VEN-001, DEC-16). Readicionar o livro também
@@ -31,8 +32,10 @@ public class DispensarItemRemovido {
     @Transactional
     public CarrinhoConsultado executar(Long livroId) {
         Long clienteId = identificarCliente.executar();
-        Carrinho carrinho = carrinhos.buscarPorClienteParaAlterar(clienteId)
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Carrinho não encontrado."));
+        Carrinho carrinho =
+                carrinhos
+                        .buscarPorClienteParaAlterar(clienteId)
+                        .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Carrinho não encontrado."));
         carrinho.dispensarRemovido(livroId);
         return montarCarrinho.montar(carrinhos.salvar(carrinho));
     }

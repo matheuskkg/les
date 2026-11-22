@@ -8,7 +8,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.Duration;
+import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
+import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.TokenDeSessao;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,14 +35,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
-import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.TokenDeSessao;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import jakarta.servlet.http.Cookie;
+import java.time.Duration;
 
 /** Regras de autenticação, autorização e CSRF com o contexto real da aplicação (DEC-08, DEC-15.4). */
 @SpringBootTest
@@ -73,23 +74,17 @@ class SegurancaIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private JwtDecoder jwtDecoder;
+    @Autowired private JwtDecoder jwtDecoder;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private CodificadorDeSenha senhas;
+    @Autowired private CodificadorDeSenha senhas;
 
-    @Autowired
-    private Relogio relogio;
+    @Autowired private Relogio relogio;
 
     private MockMvc mvc;
 
@@ -148,8 +143,15 @@ class SegurancaIntegracaoTest {
 
     @Test
     void usuarioInativoNoBancoInvalidaOToken() throws Exception {
-        Usuario inativo = usuarios.salvar(new Usuario(null, "inativo.seguranca@livraria.test", null,
-                senhas.codificar("Senha@123"), Papel.CLIENTE, relogio.agora().minusDays(1)));
+        Usuario inativo =
+                usuarios.salvar(
+                        new Usuario(
+                                null,
+                                "inativo.seguranca@livraria.test",
+                                null,
+                                senhas.codificar("Senha@123"),
+                                Papel.CLIENTE,
+                                relogio.agora().minusDays(1)));
 
         mvc.perform(get("/api/me/exemplo").cookie(cookieDe(inativo)))
                 .andExpect(status().isUnauthorized())
@@ -158,8 +160,15 @@ class SegurancaIntegracaoTest {
 
     @Test
     void cookieDeUsuarioInativoNaoBloqueiaARotaPublicaDaVitrine() throws Exception {
-        Usuario inativo = usuarios.salvar(new Usuario(null, "inativo.vitrine@livraria.test", null,
-                senhas.codificar("Senha@123"), Papel.CLIENTE, relogio.agora().minusDays(1)));
+        Usuario inativo =
+                usuarios.salvar(
+                        new Usuario(
+                                null,
+                                "inativo.vitrine@livraria.test",
+                                null,
+                                senhas.codificar("Senha@123"),
+                                Papel.CLIENTE,
+                                relogio.agora().minusDays(1)));
 
         mvc.perform(get("/api/livros/exemplo").cookie(cookieDe(inativo)))
                 .andExpect(status().isOk())
@@ -168,30 +177,41 @@ class SegurancaIntegracaoTest {
 
     @Test
     void cookieInvalidoEmRotaDoClienteResponde401EApagaOCookie() throws Exception {
-        Usuario inativo = usuarios.salvar(new Usuario(null, "inativo.me.cookie@livraria.test", null,
-                senhas.codificar("Senha@123"), Papel.CLIENTE, relogio.agora().minusDays(1)));
+        Usuario inativo =
+                usuarios.salvar(
+                        new Usuario(
+                                null,
+                                "inativo.me.cookie@livraria.test",
+                                null,
+                                senhas.codificar("Senha@123"),
+                                Papel.CLIENTE,
+                                relogio.agora().minusDays(1)));
 
         mvc.perform(get("/api/me/exemplo").cookie(cookieDe(inativo)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.detail").value("Autenticação necessária."))
-                .andExpect(resultado -> assertThat(resultado.getResponse().getHeaders("Set-Cookie"))
-                        .anyMatch(cookie -> cookie.startsWith(EmissorDeToken.COOKIE + "=")
-                                && cookie.contains("Max-Age=0")));
+                .andExpect(resultado ->
+                        assertThat(resultado.getResponse().getHeaders("Set-Cookie"))
+                                .anyMatch(cookie ->
+                                        cookie.startsWith(EmissorDeToken.COOKIE + "=")
+                                                && cookie.contains("Max-Age=0")));
     }
 
     @Test
     void cookieComAssinaturaInvalidaEmRotaDoClienteResponde401EApagaOCookie() throws Exception {
         mvc.perform(get("/api/me/exemplo").cookie(new Cookie(EmissorDeToken.COOKIE, "token-invalido")))
                 .andExpect(status().isUnauthorized())
-                .andExpect(resultado -> assertThat(resultado.getResponse().getHeaders("Set-Cookie"))
-                        .anyMatch(cookie -> cookie.startsWith(EmissorDeToken.COOKIE + "=")
-                                && cookie.contains("Max-Age=0")));
+                .andExpect(resultado ->
+                        assertThat(resultado.getResponse().getHeaders("Set-Cookie"))
+                                .anyMatch(cookie ->
+                                        cookie.startsWith(EmissorDeToken.COOKIE + "=")
+                                                && cookie.contains("Max-Age=0")));
     }
 
     @Test
     void usuarioInexistenteNoBancoInvalidaOToken() throws Exception {
-        Usuario fantasma = new Usuario(999_999L, "fantasma.seguranca@livraria.test", null, "hash-ficticio",
-                Papel.CLIENTE, null);
+        Usuario fantasma =
+                new Usuario(999_999L, "fantasma.seguranca@livraria.test", null, "hash-ficticio", Papel.CLIENTE, null);
 
         mvc.perform(get("/api/me/exemplo").cookie(cookieDe(fantasma)))
                 .andExpect(status().isUnauthorized())
@@ -201,8 +221,8 @@ class SegurancaIntegracaoTest {
     @Test
     void papelVemDoBancoENaoDaClaimDoToken() throws Exception {
         Usuario cliente = criarCliente("cliente.claim.admin@livraria.test");
-        Usuario tokenComPapelAdmin = new Usuario(cliente.getId(), cliente.getEmail(), null, cliente.getSenhaHash(),
-                Papel.ADMIN, null);
+        Usuario tokenComPapelAdmin =
+                new Usuario(cliente.getId(), cliente.getEmail(), null, cliente.getSenhaHash(), Papel.ADMIN, null);
 
         mvc.perform(get("/api/admin/exemplo").cookie(cookieDe(tokenComPapelAdmin)))
                 .andExpect(status().isForbidden())

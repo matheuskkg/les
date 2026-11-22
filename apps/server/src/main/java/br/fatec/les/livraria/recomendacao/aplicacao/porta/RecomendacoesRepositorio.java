@@ -1,10 +1,10 @@
 package br.fatec.les.livraria.recomendacao.aplicacao.porta;
 
-import java.util.List;
-import java.util.Optional;
-
 import br.fatec.les.livraria.recomendacao.dominio.modelo.AvaliacaoDada;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.Recomendacao;
+
+import java.util.List;
+import java.util.Optional;
 
 /** Porta de saída das recomendações da vitrine (RNF-REC-001, DEC-03). */
 public interface RecomendacoesRepositorio {

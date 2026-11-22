@@ -1,14 +1,14 @@
 package br.fatec.les.livraria.recomendacao.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.EnvioDeMensagem;
 
+import org.springframework.stereotype.Component;
+
 /**
- * A mensagem ao assistente não pode ficar em branco e tem no máximo {@value #TAMANHO_MAXIMO} caracteres
- * (RNF-REC-001, DEC-03). Os caracteres são contados por code point, como o contador do widget.
+ * A mensagem ao assistente não pode ficar em branco e tem no máximo {@value #TAMANHO_MAXIMO} caracteres (RNF-REC-001,
+ * DEC-03). Os caracteres são contados por code point, como o contador do widget.
  */
 @Component
 public class TamanhoDaMensagem implements Regra<EnvioDeMensagem> {

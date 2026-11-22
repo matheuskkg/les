@@ -1,14 +1,14 @@
 package br.fatec.les.livraria.recomendacao.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.EnvioDeMensagem;
 
+import org.springframework.stereotype.Component;
+
 /**
- * O cliente envia no máximo {@value #LIMITE} mensagens por minuto ao assistente (RNF-REC-001, DEC-03). A contagem
- * vem de {@code mensagem_conversa} e inclui as conversas arquivadas, para "Limpar conversa" não zerar o limite.
+ * O cliente envia no máximo {@value #LIMITE} mensagens por minuto ao assistente (RNF-REC-001, DEC-03). A contagem vem
+ * de {@code mensagem_conversa} e inclui as conversas arquivadas, para "Limpar conversa" não zerar o limite.
  */
 @Component
 public class LimiteDeMensagensPorMinuto implements Regra<EnvioDeMensagem> {

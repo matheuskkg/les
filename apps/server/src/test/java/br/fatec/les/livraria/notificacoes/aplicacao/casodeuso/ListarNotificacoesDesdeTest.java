@@ -2,13 +2,13 @@ package br.fatec.les.livraria.notificacoes.aplicacao.casodeuso;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.notificacoes.aplicacao.porta.NotificacaoRepositorioFake;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.TipoNotificacao;
+
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
 
 /** Reenvio das notificações posteriores ao {@code Last-Event-ID} (DEC-13). */
 class ListarNotificacoesDesdeTest {
@@ -49,7 +49,13 @@ class ListarNotificacoesDesdeTest {
     }
 
     private Notificacao criar(Long usuarioId) {
-        return notificacoes.salvar(Notificacao.nova(usuarioId, TipoNotificacao.PEDIDO_APROVADO,
-                "Pedido aprovado.", null, null, LocalDateTime.of(2026, 10, 24, 8, 0)));
+        return notificacoes.salvar(
+                Notificacao.nova(
+                        usuarioId,
+                        TipoNotificacao.PEDIDO_APROVADO,
+                        "Pedido aprovado.",
+                        null,
+                        null,
+                        LocalDateTime.of(2026, 10, 24, 8, 0)));
     }
 }

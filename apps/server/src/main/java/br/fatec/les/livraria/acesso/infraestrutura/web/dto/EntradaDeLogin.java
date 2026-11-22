@@ -7,6 +7,4 @@ import jakarta.validation.constraints.NotBlank;
  * obrigatória. Campo em branco responde 400, como os demais parâmetros inválidos (DEC-07).
  */
 public record EntradaDeLogin(
-        @NotBlank(message = "Informe o login.") String login,
-        @NotBlank(message = "Informe a senha.") String senha) {
-}
+        @NotBlank(message = "Informe o login.") String login, @NotBlank(message = "Informe a senha.") String senha) {}

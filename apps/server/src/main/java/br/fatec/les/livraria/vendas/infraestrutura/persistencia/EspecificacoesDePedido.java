@@ -1,27 +1,27 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
+import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.Especificacoes;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.FiltroPedido;
+import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
+
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+
+import org.springframework.data.jpa.domain.Specification;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.data.jpa.domain.Specification;
-
-import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.Especificacoes;
-import br.fatec.les.livraria.vendas.aplicacao.consulta.FiltroPedido;
-import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
-
 /**
- * Traduz o {@link FiltroPedido} para as {@link Specification} da consulta de pedidos do admin (RF-VEN-009, DEC-07).
- * Os campos se combinam com E; status repetidos combinam com OU.
+ * Traduz o {@link FiltroPedido} para as {@link Specification} da consulta de pedidos do admin (RF-VEN-009, DEC-07). Os
+ * campos se combinam com E; status repetidos combinam com OU.
  */
 final class EspecificacoesDePedido {
 
-    private EspecificacoesDePedido() {
-    }
+    private EspecificacoesDePedido() {}
 
     static Specification<PedidoJpa> de(FiltroPedido filtro) {
         Objects.requireNonNull(filtro, "filtro");
@@ -49,8 +49,9 @@ final class EspecificacoesDePedido {
             maisRecente.select(cb.max(outra.get("id"))).where(cb.equal(outra.get("pedido"), raiz));
             Subquery<Long> naSituacao = consulta.subquery(Long.class);
             Root<TrocaJpa> troca = naSituacao.from(TrocaJpa.class);
-            naSituacao.select(troca.get("id")).where(cb.equal(troca.get("id"), maisRecente),
-                    troca.get("status").in(situacoes));
+            naSituacao
+                    .select(troca.get("id"))
+                    .where(cb.equal(troca.get("id"), maisRecente), troca.get("status").in(situacoes));
             return cb.exists(naSituacao);
         };
     }

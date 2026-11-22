@@ -1,20 +1,21 @@
 package br.fatec.les.livraria.catalogo.aplicacao.casodeuso;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import br.fatec.les.livraria.catalogo.aplicacao.consulta.MedidasDoLivro;
+import br.fatec.les.livraria.catalogo.aplicacao.porta.CatalogoConsultas;
+import br.fatec.les.livraria.compartilhado.aplicacao.Ids;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.catalogo.aplicacao.consulta.MedidasDoLivro;
-import br.fatec.les.livraria.catalogo.aplicacao.porta.CatalogoConsultas;
-import br.fatec.les.livraria.compartilhado.aplicacao.Ids;
-import lombok.RequiredArgsConstructor;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Expõe ao {@code vendas} o peso e as dimensões dos livros, inclusive os inativos, para o cálculo de frete
- * (RF-VEN-004, DEC-05.3).
+ * Expõe ao {@code vendas} o peso e as dimensões dos livros, inclusive os inativos, para o cálculo de frete (RF-VEN-004,
+ * DEC-05.3).
  */
 @Component
 @RequiredArgsConstructor

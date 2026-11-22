@@ -1,5 +1,10 @@
 package br.fatec.les.livraria.clientes.infraestrutura.persistencia;
 
+import br.fatec.les.livraria.clientes.dominio.modelo.TipoEndereco;
+import br.fatec.les.livraria.clientes.dominio.modelo.TipoLogradouro;
+import br.fatec.les.livraria.clientes.dominio.modelo.Uf;
+import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosEndereco;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,10 +19,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
-import br.fatec.les.livraria.clientes.dominio.modelo.TipoEndereco;
-import br.fatec.les.livraria.clientes.dominio.modelo.TipoLogradouro;
-import br.fatec.les.livraria.clientes.dominio.modelo.Uf;
-import br.fatec.les.livraria.clientes.dominio.regra.TamanhosMaximosEndereco;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,8 +36,7 @@ public class EnderecoJpa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "endereco_seq")
-    @SequenceGenerator(name = "endereco_seq", sequenceName = "endereco_seq", initialValue = 10000,
-            allocationSize = 1)
+    @SequenceGenerator(name = "endereco_seq", sequenceName = "endereco_seq", initialValue = 10000, allocationSize = 1)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

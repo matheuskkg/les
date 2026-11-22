@@ -1,16 +1,17 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
-import java.util.Optional;
+import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
 
 /**
- * Cliente de um usuário de login, quando o usuário não é o da sessão atual ou não precisa ser (DEC-10). O
- * {@code vendas} o usa ao esvaziar o carrinho na inativação da conta.
+ * Cliente de um usuário de login, quando o usuário não é o da sessão atual ou não precisa ser (DEC-10). O {@code
+ * vendas} o usa ao esvaziar o carrinho na inativação da conta.
  */
 @Component
 @RequiredArgsConstructor

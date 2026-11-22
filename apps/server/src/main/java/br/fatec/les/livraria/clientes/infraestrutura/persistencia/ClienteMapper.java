@@ -1,15 +1,15 @@
 package br.fatec.les.livraria.clientes.infraestrutura.persistencia;
 
-import java.time.YearMonth;
-
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-
 import br.fatec.les.livraria.clientes.dominio.modelo.Bandeira;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.Endereco;
 import br.fatec.les.livraria.compartilhado.dominio.Cpf;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import java.time.YearMonth;
 
 /** Mapeamento domínio ↔ tabelas {@code cliente}, {@code endereco}, {@code cartao} e {@code bandeira} (DEC-16). */
 @Mapper
@@ -46,8 +46,12 @@ public interface ClienteMapper {
         if (cartao == null) {
             return null;
         }
-        return new Cartao(cartao.getId(), cartao.getNumero(), cartao.getNomeImpresso(),
-                paraBandeiraDoCartao(cartao.getBandeira()), paraYearMonth(cartao.getValidade()),
+        return new Cartao(
+                cartao.getId(),
+                cartao.getNumero(),
+                cartao.getNomeImpresso(),
+                paraBandeiraDoCartao(cartao.getBandeira()),
+                paraYearMonth(cartao.getValidade()),
                 cartao.isPreferencial());
     }
 

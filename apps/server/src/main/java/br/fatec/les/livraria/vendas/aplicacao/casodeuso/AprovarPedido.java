@@ -1,12 +1,5 @@
 package br.fatec.les.livraria.vendas.aplicacao.casodeuso;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.ConsultarUsuarioDoCliente;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
@@ -24,7 +17,15 @@ import br.fatec.les.livraria.vendas.dominio.pagamento.CupomTroca;
 import br.fatec.les.livraria.vendas.dominio.pagamento.SituacaoCupom;
 import br.fatec.les.livraria.vendas.dominio.pedido.ItemPedido;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Segunda transação da finalização quando a operadora aceita todos os cartões (RN-VEN-007, RN-VEN-006, RF-EST-003,
@@ -33,7 +34,7 @@ import lombok.RequiredArgsConstructor;
  *
  * <p>Trava o checkout e depois o pedido, na mesma ordem da expiração. Se a expiração já reprovou o pedido, nada muda e
  * o pedido volta como está. Se o prazo do checkout venceu antes da aprovação, as reservas já não seguram o estoque: o
- * pedido é reprovado como na expiração, sem baixa.</p>
+ * pedido é reprovado como na expiração, sem baixa.
  */
 @Component
 @RequiredArgsConstructor
@@ -50,13 +51,19 @@ public class AprovarPedido {
     private final ReprovarPedido reprovarPedido;
     private final Relogio relogio;
 
-    /** @param troco excedente dos cupons de troca, calculado na distribuição do pagamento (RN-VEN-006) */
+    /**
+     * @param troco excedente dos cupons de troca, calculado na distribuição do pagamento (RN-VEN-006)
+     */
     @Transactional
     public Pedido executar(Pedido registrado, Dinheiro troco) {
-        Checkout checkout = checkouts.buscarParaAlterar(registrado.getCheckoutId()).orElseThrow(
-                () -> new IllegalStateException("Checkout não encontrado: " + registrado.getCheckoutId()));
-        Pedido pedido = pedidos.buscarParaAlterar(registrado.getId()).orElseThrow(
-                () -> new IllegalStateException("Pedido não encontrado: " + registrado.getId()));
+        Checkout checkout =
+                checkouts
+                        .buscarParaAlterar(registrado.getCheckoutId())
+                        .orElseThrow(() ->
+                                new IllegalStateException("Checkout não encontrado: " + registrado.getCheckoutId()));
+        Pedido pedido =
+                pedidos.buscarParaAlterar(registrado.getId())
+                        .orElseThrow(() -> new IllegalStateException("Pedido não encontrado: " + registrado.getId()));
         if (!pedido.emProcessamento()) {
             return pedido;
         }
@@ -68,9 +75,15 @@ public class AprovarPedido {
         Pedido aprovado = pedidos.salvar(pedido);
         baixarEstoque.executar(OrigemReserva.CHECKOUT, checkout.getId(), quantidades(aprovado));
         if (troco.ehPositivo()) {
-            cuponsDeTroca.gerar(new CupomTroca(null, aprovado.getClienteId(), "TROCO-" + aprovado.getId(), troco,
-                    propriedadesDoCupom.validadeDeUmCupomGeradoEm(agora.toLocalDate()), SituacaoCupom.DISPONIVEL,
-                    agora));
+            cuponsDeTroca.gerar(
+                    new CupomTroca(
+                            null,
+                            aprovado.getClienteId(),
+                            "TROCO-" + aprovado.getId(),
+                            troco,
+                            propriedadesDoCupom.validadeDeUmCupomGeradoEm(agora.toLocalDate()),
+                            SituacaoCupom.DISPONIVEL,
+                            agora));
         }
         checkout.concluir();
         checkouts.salvar(checkout);
@@ -89,12 +102,21 @@ public class AprovarPedido {
             mensagem += " O troco de %s virou um cupom de troca.".formatted(troco.emReais());
         }
         String doCliente = mensagem;
-        consultarUsuario.executar(pedido.getClienteId()).ifPresent(usuarioId -> notificar.executar(
-                Notificar.Comando.sobre(usuarioId, TipoNotificacao.PEDIDO_APROVADO, doCliente, "pedido",
-                        pedido.getId())));
-        notificarAdministradores.executar(NotificarAdministradores.Comando.sobre(
-                TipoNotificacao.PEDIDO_AGUARDANDO_DESPACHO,
-                "O pedido nº %d foi aprovado e aguarda despacho.".formatted(pedido.getId()), "pedido",
-                pedido.getId()));
+        consultarUsuario
+                .executar(pedido.getClienteId())
+                .ifPresent(usuarioId ->
+                        notificar.executar(
+                                Notificar.Comando.sobre(
+                                        usuarioId,
+                                        TipoNotificacao.PEDIDO_APROVADO,
+                                        doCliente,
+                                        "pedido",
+                                        pedido.getId())));
+        notificarAdministradores.executar(
+                NotificarAdministradores.Comando.sobre(
+                        TipoNotificacao.PEDIDO_AGUARDANDO_DESPACHO,
+                        "O pedido nº %d foi aprovado e aguarda despacho.".formatted(pedido.getId()),
+                        "pedido",
+                        pedido.getId()));
     }
 }

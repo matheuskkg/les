@@ -2,12 +2,12 @@ package br.fatec.les.livraria.recomendacao.dominio.calculo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.Recomendacao;
 
 import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.recomendacao.dominio.modelo.Recomendacao;
+import java.time.LocalDateTime;
+import java.util.List;
 
 class RecomendacaoAindaValidaTest {
 

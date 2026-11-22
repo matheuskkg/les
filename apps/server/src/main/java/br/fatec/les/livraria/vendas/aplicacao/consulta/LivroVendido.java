@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Livro de um pedido que conta como venda, com o cliente e o pedido, base da recomendação personalizada
- * (RNF-REC-001, DEC-03, DEC-12). Título, autores e categorias vêm da cópia do livro no pedido.
+ * Livro de um pedido que conta como venda, com o cliente e o pedido, base da recomendação personalizada (RNF-REC-001,
+ * DEC-03, DEC-12). Título, autores e categorias vêm da cópia do livro no pedido.
  *
  * @param pedidoId pedido do item
  * @param clienteId cliente do pedido
@@ -17,8 +17,15 @@ import java.util.Objects;
  * @param quantidade quantidade comprada menos a trocada em trocas concluídas, nunca negativa
  * @param realizadoEm data e hora da finalização do pedido
  */
-public record LivroVendido(Long pedidoId, Long clienteId, Long livroId, String titulo, List<String> autores,
-        List<String> categorias, int quantidade, LocalDateTime realizadoEm) {
+public record LivroVendido(
+        Long pedidoId,
+        Long clienteId,
+        Long livroId,
+        String titulo,
+        List<String> autores,
+        List<String> categorias,
+        int quantidade,
+        LocalDateTime realizadoEm) {
 
     public LivroVendido {
         Objects.requireNonNull(pedidoId, "pedidoId");

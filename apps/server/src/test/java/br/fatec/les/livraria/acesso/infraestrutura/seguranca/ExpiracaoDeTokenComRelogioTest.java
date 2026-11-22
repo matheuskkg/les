@@ -3,10 +3,10 @@ package br.fatec.les.livraria.acesso.infraestrutura.seguranca;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.concurrent.atomic.AtomicReference;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.compartilhado.infraestrutura.tempo.RelogioDoSistema;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +18,10 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidationException;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.compartilhado.infraestrutura.tempo.RelogioDoSistema;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.concurrent.atomic.AtomicReference;
 
 /** Emissão e validação do JWT usam o mesmo {@link Relogio} controlável dos testes E2E (DEC-08, DEC-09). */
 @SpringBootTest
@@ -54,17 +54,13 @@ class ExpiracaoDeTokenComRelogioTest {
         }
     }
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private JwtDecoder jwtDecoder;
+    @Autowired private JwtDecoder jwtDecoder;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private RelogioDeTeste relogio;
+    @Autowired private RelogioDeTeste relogio;
 
     @Test
     void tokenEmitidoNoRelogioFixoExpiraQuandoORelogioAvanca() {
@@ -79,7 +75,6 @@ class ExpiracaoDeTokenComRelogioTest {
 
         relogio.avancar(VALIDADE.plusMinutes(2));
 
-        assertThatThrownBy(() -> jwtDecoder.decode(token.valor()))
-                .isInstanceOf(JwtValidationException.class);
+        assertThatThrownBy(() -> jwtDecoder.decode(token.valor())).isInstanceOf(JwtValidationException.class);
     }
 }

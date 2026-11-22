@@ -1,22 +1,22 @@
 package br.fatec.les.livraria.recomendacao.infraestrutura.web.dto;
 
+import br.fatec.les.livraria.recomendacao.dominio.modelo.ChamadasNoDia;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.MetricasDaIa;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.MetricasDoProvedor;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.ResultadoDaChamada;
+
+import org.jspecify.annotations.Nullable;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.jspecify.annotations.Nullable;
-
-import br.fatec.les.livraria.recomendacao.dominio.modelo.ChamadasNoDia;
-import br.fatec.les.livraria.recomendacao.dominio.modelo.MetricasDaIa;
-import br.fatec.les.livraria.recomendacao.dominio.modelo.MetricasDoProvedor;
-import br.fatec.les.livraria.recomendacao.dominio.modelo.ResultadoDaChamada;
-
 /**
  * Métricas de funcionamento da IA no período (RNF-REC-001, DEC-03): uma linha por provedor, na ordem da cadeia, as
- * recomendações gravadas sem IA, que não têm provedor, e a série diária do gráfico com todos os dias do período.
- * As taxas vão de 0 a 1 e são omitidas, como as latências e a média e o máximo das chamadas HTTP, quando não há o que
+ * recomendações gravadas sem IA, que não têm provedor, e a série diária do gráfico com todos os dias do período. As
+ * taxas vão de 0 a 1 e são omitidas, como as latências e a média e o máximo das chamadas HTTP, quando não há o que
  * medir.
  */
 public record MetricasDaIaDto(
@@ -86,8 +86,7 @@ public record MetricasDaIaDto(
     }
 
     /** Quantidade de falhas com um resultado. */
-    public record FalhasPorResultadoDto(ResultadoDaChamada resultado, long quantidade) {
-    }
+    public record FalhasPorResultadoDto(ResultadoDaChamada resultado, long quantidade) {}
 
     /** Chamadas e falhas de todos os provedores em um dia. */
     public record ChamadasNoDiaDto(LocalDate dia, long chamadas, long falhas) {

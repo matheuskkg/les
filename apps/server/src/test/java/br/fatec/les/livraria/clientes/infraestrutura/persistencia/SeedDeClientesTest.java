@@ -2,10 +2,10 @@ package br.fatec.les.livraria.clientes.infraestrutura.persistencia;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import javax.sql.DataSource;
+import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,10 +17,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import javax.sql.DataSource;
 
 /** Seed do CLI-01 em H2 (RF-CLI-001, RNF-CLI-003, RN-CLI-005, DEC-10, DEC-14, DEC-16). */
 @SpringBootTest
@@ -28,6 +28,7 @@ import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 class SeedDeClientesTest {
 
     private static final String SENHA = "Senha@123";
+
     /** 2026-10-24T12:00 em America/Sao_Paulo, o instante citado no comentário do seed 201_clientes.sql. */
     private static final LocalDateTime AGORA = LocalDateTime.of(2026, 10, 24, 12, 0);
 
@@ -45,20 +46,15 @@ class SeedDeClientesTest {
         }
     }
 
-    @Autowired
-    private DataSource dataSource;
+    @Autowired private DataSource dataSource;
 
-    @Autowired
-    private ClienteJpaRepository clientes;
+    @Autowired private ClienteJpaRepository clientes;
 
-    @Autowired
-    private BandeiraJpaRepository bandeiras;
+    @Autowired private BandeiraJpaRepository bandeiras;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private CodificadorDeSenha senhas;
+    @Autowired private CodificadorDeSenha senhas;
 
     private JdbcClient jdbc;
 

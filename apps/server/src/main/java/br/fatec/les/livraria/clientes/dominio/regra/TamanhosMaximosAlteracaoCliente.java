@@ -1,10 +1,10 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.clientes.dominio.modelo.DadosCadastraisCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
+import org.springframework.stereotype.Component;
 
 /**
  * Tamanho máximo do nome na alteração dos dados do cliente (RF-CLI-002, RN-CLI-006). A constante é a mesma da coluna
@@ -18,8 +18,8 @@ public class TamanhosMaximosAlteracaoCliente implements Regra<DadosCadastraisCli
     @Override
     public void validar(DadosCadastraisCliente alvo, Violacoes violacoes) {
         if (alvo.nome() != null && alvo.nome().strip().length() > TamanhosMaximosCliente.NOME) {
-            violacoes.adicionar(CODIGO,
-                    "O nome do cliente deve ter no máximo " + TamanhosMaximosCliente.NOME + " caracteres.");
+            violacoes.adicionar(
+                    CODIGO, "O nome do cliente deve ter no máximo " + TamanhosMaximosCliente.NOME + " caracteres.");
         }
     }
 }

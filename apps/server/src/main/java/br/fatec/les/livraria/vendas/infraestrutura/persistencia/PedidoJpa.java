@@ -1,17 +1,9 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.envers.Audited;
-import org.hibernate.type.SqlTypes;
-
 import br.fatec.les.livraria.vendas.dominio.pedido.ClienteNoPedido;
 import br.fatec.les.livraria.vendas.dominio.pedido.EnderecoNoPedido;
 import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,9 +20,19 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.envers.Audited;
+import org.hibernate.type.SqlTypes;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tabela {@code pedido} do MER (DEC-12, DEC-16). Cliente e endereços são snapshots imutáveis em JSON com o id de
@@ -44,11 +46,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Audited
-@Table(name = "pedido", indexes = {
-        @Index(name = "ix_pedido_cliente", columnList = "cliente_id"),
-        @Index(name = "ix_pedido_checkout_status", columnList = "checkout_id, status"),
-        @Index(name = "ix_pedido_realizado_em", columnList = "realizado_em"),
-        @Index(name = "ix_pedido_status_realizado_em", columnList = "status, realizado_em") })
+@Table(
+        name = "pedido",
+        indexes = {
+            @Index(name = "ix_pedido_cliente", columnList = "cliente_id"),
+            @Index(name = "ix_pedido_checkout_status", columnList = "checkout_id, status"),
+            @Index(name = "ix_pedido_realizado_em", columnList = "realizado_em"),
+            @Index(name = "ix_pedido_status_realizado_em", columnList = "status, realizado_em")
+        })
 public class PedidoJpa {
 
     @Id

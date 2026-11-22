@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.clientes.dominio.modelo.DadosCadastraisCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Email;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
+import org.springframework.stereotype.Component;
 
 /** E-mail com formato válido (RN-CLI-006, DEC-10), conferido pelo value object {@link Email}. */
 @Component

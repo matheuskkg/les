@@ -2,14 +2,14 @@ package br.fatec.les.livraria.vendas.dominio.regra;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.dominio.troca.RecusaDeTroca;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 class RegrasDaRecusaDeTrocaTest {
 

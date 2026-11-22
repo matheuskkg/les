@@ -1,10 +1,5 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
 import br.fatec.les.livraria.clientes.dominio.calculo.DigitoVerificadorLuhn;
 import br.fatec.les.livraria.clientes.dominio.calculo.IdentificarBandeira;
@@ -13,13 +8,19 @@ import br.fatec.les.livraria.clientes.dominio.modelo.Bandeira;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Número do cartão válido (RN-CLI-004, DEC-18): havendo bandeira identificada pelo número, o comprimento precisa
- * constar nos tamanhos dela e o dígito verificador precisa passar pelo Luhn. Número sem bandeira é reportado por
- * {@link BandeiraRegistrada} (RN-CLI-005), e o formato de 13 a 19 dígitos, por {@code CartaoCompleto}. A regra é pura:
- * recebe as bandeiras já carregadas pelo caso de uso.
+ * constar nos tamanhos dela e o dígito verificador precisa passar pelo Luhn. Número sem bandeira é reportado por {@link
+ * BandeiraRegistrada} (RN-CLI-005), e o formato de 13 a 19 dígitos, por {@code CartaoCompleto}. A regra é pura: recebe
+ * as bandeiras já carregadas pelo caso de uso.
  */
 @Component
 @RequiredArgsConstructor
@@ -58,9 +59,8 @@ public class NumeroDoCartaoValido {
             return;
         }
         if (!tamanhoDoCartao.aceita(digitos, bandeira.get()) || !digitoVerificadorLuhn.valido(digitos)) {
-            violacoes.adicionar(CODIGO, prefixo.isEmpty()
-                    ? "Número do cartão inválido."
-                    : prefixo + "número do cartão inválido.");
+            violacoes.adicionar(
+                    CODIGO, prefixo.isEmpty() ? "Número do cartão inválido." : prefixo + "número do cartão inválido.");
         }
     }
 }

@@ -2,14 +2,14 @@ package br.fatec.les.livraria.recomendacao.dominio.calculo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.TipoDeResposta;
+
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 class ReenvioSemRespostaTest {
 
@@ -21,8 +21,8 @@ class ReenvioSemRespostaTest {
     }
 
     private static MensagemDaConversa resposta() {
-        return MensagemDaConversa.doAssistente(1L,
-                new RespostaDoAssistente(TipoDeResposta.DUVIDA, "Pode repetir?", List.of()), 9L, AGORA);
+        return MensagemDaConversa.doAssistente(
+                1L, new RespostaDoAssistente(TipoDeResposta.DUVIDA, "Pode repetir?", List.of()), 9L, AGORA);
     }
 
     @Test

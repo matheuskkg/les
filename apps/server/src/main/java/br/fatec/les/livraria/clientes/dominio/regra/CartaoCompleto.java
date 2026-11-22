@@ -1,17 +1,17 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 
+import org.springframework.stereotype.Component;
+
 /**
  * Composição do cartão de crédito (RN-CLI-004, DEC-06, DEC-18): número, nome impresso e validade. A bandeira é
  * identificada pelo número e não é informada pelo cliente. O código de segurança não é gravado (DEC-10), então não é
- * exigido no cadastro nem aceito pela API. Valida um cartão; a lista do cadastro é percorrida por
- * {@code CartoesCompletos}.
+ * exigido no cadastro nem aceito pela API. Valida um cartão; a lista do cadastro é percorrida por {@code
+ * CartoesCompletos}.
  */
 @Component
 public class CartaoCompleto implements Regra<NovoCartao> {

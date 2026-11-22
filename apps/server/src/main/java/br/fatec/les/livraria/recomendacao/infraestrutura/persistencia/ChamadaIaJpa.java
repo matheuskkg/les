@@ -1,9 +1,8 @@
 package br.fatec.les.livraria.recomendacao.infraestrutura.persistencia;
 
-import java.time.LocalDateTime;
-
 import br.fatec.les.livraria.recomendacao.dominio.modelo.OperacaoIa;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ResultadoDaChamada;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,26 +16,33 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 /**
- * Tabela {@code chamada_ia} do MER (RNF-REC-001, DEC-03, DEC-14): log só de inserção de cada tentativa da cadeia,
- * com o provedor, o resultado, a latência e os tokens. Não é auditada: é um log e não uma entidade de negócio
- * alterável, então não tem tabela {@code _aud} (DEC-03).
+ * Tabela {@code chamada_ia} do MER (RNF-REC-001, DEC-03, DEC-14): log só de inserção de cada tentativa da cadeia, com o
+ * provedor, o resultado, a latência e os tokens. Não é auditada: é um log e não uma entidade de negócio alterável,
+ * então não tem tabela {@code _aud} (DEC-03).
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "chamada_ia",
+@Table(
+        name = "chamada_ia",
         indexes = @Index(name = "ix_chamada_ia_provedor_iniciada", columnList = "provedor_ia_id, iniciada_em"))
 public class ChamadaIaJpa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "chamada_ia_seq")
-    @SequenceGenerator(name = "chamada_ia_seq", sequenceName = "chamada_ia_seq", initialValue = 10000,
+    @SequenceGenerator(
+            name = "chamada_ia_seq",
+            sequenceName = "chamada_ia_seq",
+            initialValue = 10000,
             allocationSize = 50)
     private Long id;
 

@@ -2,13 +2,6 @@ package br.fatec.les.livraria.vendas.dominio.regra;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
-import java.time.Period;
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
@@ -21,6 +14,13 @@ import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
 import br.fatec.les.livraria.vendas.dominio.troca.Troca;
 import br.fatec.les.livraria.vendas.dominio.troca.TrocasDoPedido;
 
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.util.Arrays;
+import java.util.List;
+
 class RegrasDaSolicitacaoDeTrocaTest {
 
     private static final LocalDateTime AGORA = LocalDateTime.of(2026, 10, 24, 12, 0);
@@ -32,7 +32,8 @@ class RegrasDaSolicitacaoDeTrocaTest {
         aprovado.aprovar();
 
         assertThat(violacoes(new PedidoEntregueParaTroca(), solicitacao(aprovado, List.of(), item(101L, 1))))
-                .extracting(Violacao::codigo).containsExactly("RN-VEN-013");
+                .extracting(Violacao::codigo)
+                .containsExactly("RN-VEN-013");
         assertThat(violacoes(new PedidoEntregueParaTroca(), solicitacao(entregueHaDias(1), List.of(), item(101L, 1))))
                 .isEmpty();
     }
@@ -42,7 +43,8 @@ class RegrasDaSolicitacaoDeTrocaTest {
         assertThat(violacoes(new DentroDoPrazoDeTroca(), solicitacao(entregueHaDias(7), List.of(), item(101L, 1))))
                 .isEmpty();
         assertThat(violacoes(new DentroDoPrazoDeTroca(), solicitacao(entregueHaDias(8), List.of(), item(101L, 1))))
-                .extracting(Violacao::codigo).containsExactly("RN-VEN-013");
+                .extracting(Violacao::codigo)
+                .containsExactly("RN-VEN-013");
     }
 
     @Test
@@ -75,15 +77,27 @@ class RegrasDaSolicitacaoDeTrocaTest {
     @Test
     void rfVen011_quantidadeEntreUmEADisponivelDescontandoTrocasRecusadas() {
         Pedido pedido = entregueHaDias(1);
-        List<Troca> anteriores = List.of(new Troca(1L, 1L, StatusTroca.TROCA_RECUSADA, AGORA,
-                List.of(new ItemTroca(1L, 102L, 1, null)), "Item danificado pelo uso", null, null));
+        List<Troca> anteriores =
+                List.of(
+                        new Troca(
+                                1L,
+                                1L,
+                                StatusTroca.TROCA_RECUSADA,
+                                AGORA,
+                                List.of(new ItemTroca(1L, 102L, 1, null)),
+                                "Item danificado pelo uso",
+                                null,
+                                null));
         QuantidadeDisponivelParaTroca regra = new QuantidadeDisponivelParaTroca();
 
         assertThat(violacoes(regra, solicitacao(pedido, anteriores, item(101L, 2)))).isEmpty();
         assertThat(violacoes(regra, solicitacao(pedido, anteriores, item(101L, 3)))).hasSize(1);
         assertThat(violacoes(regra, solicitacao(pedido, anteriores, item(101L, 0)))).hasSize(1);
         assertThat(violacoes(regra, solicitacao(pedido, anteriores, item(102L, 1))))
-                .extracting(Violacao::mensagem).first().asString().contains("não tem mais unidades");
+                .extracting(Violacao::mensagem)
+                .first()
+                .asString()
+                .contains("não tem mais unidades");
     }
 
     private static Pedido entregueHaDias(int dias) {

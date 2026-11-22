@@ -1,19 +1,20 @@
 package br.fatec.les.livraria.vendas.aplicacao.casodeuso;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.ItemVendido;
+import br.fatec.les.livraria.vendas.aplicacao.porta.VendasConsultas;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.vendas.aplicacao.consulta.ItemVendido;
-import br.fatec.les.livraria.vendas.aplicacao.porta.VendasConsultas;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 
 /**
- * Itens vendidos num período, por item e sem agregação, para o módulo de análise somar por mês e categoria
- * (RF-ANA-001, RN-ANA-001, RN-ANA-004, DEC-12).
+ * Itens vendidos num período, por item e sem agregação, para o módulo de análise somar por mês e categoria (RF-ANA-001,
+ * RN-ANA-001, RN-ANA-004, DEC-12).
  */
 @Component
 @RequiredArgsConstructor

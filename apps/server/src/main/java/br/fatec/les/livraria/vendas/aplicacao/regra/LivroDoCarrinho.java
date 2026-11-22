@@ -1,22 +1,23 @@
 package br.fatec.les.livraria.vendas.aplicacao.regra;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.catalogo.aplicacao.casodeuso.ConsultarLivrosParaVenda;
 import br.fatec.les.livraria.catalogo.aplicacao.casodeuso.ConsultarPrecosDeVenda;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroParaVenda;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.dominio.modelo.ItemProposto;
+
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
+
 /**
- * Só um livro ativo e com preço de venda pode entrar no carrinho (RF-VEN-001, RN-LIV-001, RN-EST-002). O
- * livro é consultado no catálogo e o preço é calculado pelo caso de uso público do catálogo. O estoque é
- * conferido depois, ao reservar (RN-VEN-001).
+ * Só um livro ativo e com preço de venda pode entrar no carrinho (RF-VEN-001, RN-LIV-001, RN-EST-002). O livro é
+ * consultado no catálogo e o preço é calculado pelo caso de uso público do catálogo. O estoque é conferido depois, ao
+ * reservar (RN-VEN-001).
  */
 @Component
 @RequiredArgsConstructor

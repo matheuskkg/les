@@ -1,12 +1,5 @@
 package br.fatec.les.livraria.recomendacao.infraestrutura.externo;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.recomendacao.aplicacao.TextoNormalizado;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.AssistenteDeLivros;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.FerramentasDoAssistente;
@@ -20,23 +13,30 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDeRecomendacao;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.TipoDeResposta;
 
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
- * Assistente determinístico, sem rede, usado nos testes e nos E2E (RNF-REC-001, DEC-03). É o último provedor da
- * cadeia: quando nenhum provedor real tem chave, só ele responde. O nome e o modelo são {@code fake} e a chave é
- * sempre considerada configurada.
+ * Assistente determinístico, sem rede, usado nos testes e nos E2E (RNF-REC-001, DEC-03). É o último provedor da cadeia:
+ * quando nenhum provedor real tem chave, só ele responde. O nome e o modelo são {@code fake} e a chave é sempre
+ * considerada configurada.
  *
- * <p>Regras:</p>
+ * <p>Regras:
+ *
  * <ul>
- *   <li>{@code recomendar} devolve os candidatos na ordem recebida, com a justificativa
- *       "Indicado pelas categorias e autores que você costuma comprar." ou, sem livros comprados, "Entre os mais
- *       vendidos da loja.";</li>
- *   <li>{@code conversar} responde {@link TipoDeResposta#FORA_DO_ESCOPO} quando a mensagem contém "previsão do
- *       tempo" ou "futebol", sem diferenciar maiúsculas nem acentos;</li>
- *   <li>quando a mensagem pede recomendação, usa {@link FerramentasDoAssistente#recomendarParaMim()} e responde
- *       {@link TipoDeResposta#RECOMENDACAO} com até três livros;</li>
- *   <li>nas demais mensagens, busca com o texto sem pontuação e, se não houver resultado, tenta cada palavra de
- *       quatro ou mais letras até achar alguma. Com resultados, responde {@link TipoDeResposta#BUSCA} e cita até
- *       três livros; sem resultado, responde {@link TipoDeResposta#DUVIDA} sem livros.</li>
+ *   <li>{@code recomendar} devolve os candidatos na ordem recebida, com a justificativa "Indicado pelas categorias e
+ *       autores que você costuma comprar." ou, sem livros comprados, "Entre os mais vendidos da loja.";
+ *   <li>{@code conversar} responde {@link TipoDeResposta#FORA_DO_ESCOPO} quando a mensagem contém "previsão do tempo"
+ *       ou "futebol", sem diferenciar maiúsculas nem acentos;
+ *   <li>quando a mensagem pede recomendação, usa {@link FerramentasDoAssistente#recomendarParaMim()} e responde {@link
+ *       TipoDeResposta#RECOMENDACAO} com até três livros;
+ *   <li>nas demais mensagens, busca com o texto sem pontuação e, se não houver resultado, tenta cada palavra de quatro
+ *       ou mais letras até achar alguma. Com resultados, responde {@link TipoDeResposta#BUSCA} e cita até três livros;
+ *       sem resultado, responde {@link TipoDeResposta#DUVIDA} sem livros.
  * </ul>
  */
 @Component("assistenteDeLivrosFake")
@@ -48,7 +48,8 @@ public class AssistenteDeLivrosFake implements AssistenteDeLivros {
     static final String JUSTIFICATIVA_MAIS_VENDIDOS = "Entre os mais vendidos da loja.";
     static final String TEXTO_DE_BUSCA = "Encontrei estes livros para você.";
     static final String TEXTO_DE_RECOMENDACAO = "Separei estas leituras para você.";
-    static final String TEXTO_DE_DUVIDA = "Não encontrei livros para essa busca. Tente pelo título, autor ou categoria.";
+    static final String TEXTO_DE_DUVIDA =
+            "Não encontrei livros para essa busca. Tente pelo título, autor ou categoria.";
     static final String TEXTO_FORA_DO_ESCOPO = "Só posso ajudar com livros da loja.";
 
     private static final int LIMITE_DE_LIVROS_CITADOS = 3;
@@ -73,9 +74,11 @@ public class AssistenteDeLivrosFake implements AssistenteDeLivros {
     public RespostaDoProvedor<RespostaDeRecomendacao> recomendar(
             PerfilDoCliente perfil, List<LivroCandidato> candidatos) {
         String justificativa = perfil.semLivrosComprados() ? JUSTIFICATIVA_MAIS_VENDIDOS : JUSTIFICATIVA_DO_PERFIL;
-        return RespostaDoProvedor.semTokens(new RespostaDeRecomendacao(candidatos.stream()
-                .map(candidato -> new ItemRecomendado(candidato.id(), justificativa))
-                .toList()));
+        return RespostaDoProvedor.semTokens(
+                new RespostaDeRecomendacao(
+                        candidatos.stream()
+                                .map(candidato -> new ItemRecomendado(candidato.id(), justificativa))
+                                .toList()));
     }
 
     @Override
@@ -93,8 +96,9 @@ public class AssistenteDeLivrosFake implements AssistenteDeLivros {
         if (pedeRecomendacao(mensagemNova)) {
             List<ResumoDeLivro> recomendados = ferramentas.recomendarParaMim();
             if (!recomendados.isEmpty()) {
-                return RespostaDoProvedor.semTokens(new RespostaDoAssistente(TipoDeResposta.RECOMENDACAO,
-                        TEXTO_DE_RECOMENDACAO, citados(recomendados)));
+                return RespostaDoProvedor.semTokens(
+                        new RespostaDoAssistente(
+                                TipoDeResposta.RECOMENDACAO, TEXTO_DE_RECOMENDACAO, citados(recomendados)));
             }
         }
 
@@ -109,10 +113,7 @@ public class AssistenteDeLivrosFake implements AssistenteDeLivros {
     }
 
     private static List<Long> citados(List<ResumoDeLivro> livros) {
-        return livros.stream()
-                .limit(LIMITE_DE_LIVROS_CITADOS)
-                .map(ResumoDeLivro::id)
-                .toList();
+        return livros.stream().limit(LIMITE_DE_LIVROS_CITADOS).map(ResumoDeLivro::id).toList();
     }
 
     /** Busca primeiro pela mensagem inteira e, se necessário, por cada palavra que possa ser uma chave. */
@@ -146,9 +147,7 @@ public class AssistenteDeLivrosFake implements AssistenteDeLivros {
     }
 
     private static String semPontuacao(String mensagem) {
-        return mensagem.replaceAll("[^\\p{L}\\p{N}\\s]", " ")
-                .replaceAll("\\s+", " ")
-                .trim();
+        return mensagem.replaceAll("[^\\p{L}\\p{N}\\s]", " ").replaceAll("\\s+", " ").trim();
     }
 
     private static List<String> palavrasDaBusca(String mensagem) {

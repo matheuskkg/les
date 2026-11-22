@@ -10,8 +10,7 @@ public final class NotaDeValor {
     private static final Dinheiro ATE_600 = Dinheiro.de("600.00");
     private static final Dinheiro ATE_1000 = Dinheiro.de("1000.00");
 
-    private NotaDeValor() {
-    }
+    private NotaDeValor() {}
 
     public static int de(Dinheiro soma) {
         if (!soma.ehPositivo()) {

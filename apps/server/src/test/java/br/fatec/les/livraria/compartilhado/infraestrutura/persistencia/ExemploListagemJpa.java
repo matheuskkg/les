@@ -1,10 +1,5 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.persistencia;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +10,13 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
 import lombok.Getter;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /** Entidade exclusiva dos testes das listagens; não faz parte do contrato da API. */
 @Getter
@@ -44,16 +45,16 @@ public class ExemploListagemJpa {
     private LocalDate dataCadastro;
 
     @ManyToMany
-    @JoinTable(name = "exemplo_listagem_tag",
+    @JoinTable(
+            name = "exemplo_listagem_tag",
             joinColumns = @JoinColumn(name = "exemplo_listagem_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<ExemploTagJpa> tags = new HashSet<>();
 
-    protected ExemploListagemJpa() {
-    }
+    protected ExemploListagemJpa() {}
 
-    public ExemploListagemJpa(String nome, String codigo, String cpf, String uf, BigDecimal valor,
-            LocalDate dataCadastro) {
+    public ExemploListagemJpa(
+            String nome, String codigo, String cpf, String uf, BigDecimal valor, LocalDate dataCadastro) {
         this.nome = nome;
         this.codigo = codigo;
         this.cpf = cpf;

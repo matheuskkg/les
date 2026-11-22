@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.vendas.dominio.pagamento;
 
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
 import java.time.LocalDate;
 import java.util.Objects;
-
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
 /**
  * Promocional informado numa compra, com o que a validação precisa saber (RN-VEN-007, DEC-11, DEC-15.2).

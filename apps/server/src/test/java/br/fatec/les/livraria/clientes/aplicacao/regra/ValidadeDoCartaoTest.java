@@ -5,12 +5,13 @@ import static br.fatec.les.livraria.clientes.ClientesDeTeste.cartao;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.padrao;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.relogio;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.violacoes;
+
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
 
 import java.time.YearMonth;
 import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 /** DEC-06: o cartão não pode ser cadastrado com validade vencida no mês corrente. */
 class ValidadeDoCartaoTest {
@@ -40,14 +41,23 @@ class ValidadeDoCartaoTest {
         assertThat(violacoes(comValidade(YearMonth.of(2026, 9)), regra)).hasSize(1);
     }
 
-    private static br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente comValidade(
-            YearMonth validade) {
+    private static br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente comValidade(YearMonth validade) {
         var padrao = padrao();
-        var novo = new br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao(
-                cartao().numero(), cartao().nomeImpresso(), validade);
-        return new br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente(padrao.nome(),
-                padrao.genero(), padrao.dataNascimento(), padrao.cpf(), padrao.email(),
-                padrao.tipoTelefone(), padrao.ddd(), padrao.numero(), padrao.senha(),
-                padrao.confirmacaoSenha(), padrao.enderecos(), List.of(novo));
+        var novo =
+                new br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao(
+                        cartao().numero(), cartao().nomeImpresso(), validade);
+        return new br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente(
+                padrao.nome(),
+                padrao.genero(),
+                padrao.dataNascimento(),
+                padrao.cpf(),
+                padrao.email(),
+                padrao.tipoTelefone(),
+                padrao.ddd(),
+                padrao.numero(),
+                padrao.senha(),
+                padrao.confirmacaoSenha(),
+                padrao.enderecos(),
+                List.of(novo));
     }
 }

@@ -2,10 +2,10 @@ package br.fatec.les.livraria.recomendacao.dominio.calculo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.List;
 import java.util.stream.IntStream;
-
-import org.junit.jupiter.api.Test;
 
 class Percentil95Test {
 

@@ -11,8 +11,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-import java.util.concurrent.atomic.AtomicReference;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,10 +32,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Carrinho do cliente sobre o seed (RF-VEN-001, RF-VEN-002, RN-VEN-001, DEC-15.3): livro 1 (Dom Casmurro, 20 em
@@ -58,14 +59,11 @@ class CarrinhoIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
     private MockMvc mvc;
 
@@ -116,8 +114,7 @@ class CarrinhoIntegracaoTest {
         adicionar(ANA, 1, 1).andExpect(status().isOk());
         escrever(put("/api/me/carrinho/itens/1"), ANA, "{\"quantidade\":0}")
                 .andExpect(status().isUnprocessableContent());
-        escrever(put("/api/me/carrinho/itens/5"), ANA, "{\"quantidade\":1}")
-                .andExpect(status().isNotFound());
+        escrever(put("/api/me/carrinho/itens/5"), ANA, "{\"quantidade\":1}").andExpect(status().isNotFound());
     }
 
     @Test
@@ -187,7 +184,9 @@ class CarrinhoIntegracaoTest {
     }
 
     private ResultActions adicionar(long usuarioId, long livroId, int quantidade) throws Exception {
-        return escrever(post("/api/me/carrinho/itens"), usuarioId,
+        return escrever(
+                post("/api/me/carrinho/itens"),
+                usuarioId,
                 "{\"livroId\":%d,\"quantidade\":%d}".formatted(livroId, quantidade));
     }
 
@@ -195,10 +194,10 @@ class CarrinhoIntegracaoTest {
             throws Exception {
         Cookie csrf = mvc.perform(get("/api/sessao")).andReturn().getResponse().getCookie("XSRF-TOKEN");
         assertThat(csrf).isNotNull();
-        MockHttpServletRequestBuilder comSessao = requisicao.cookie(sessaoDe(usuarioId), csrf)
-                .header("X-XSRF-TOKEN", csrf.getValue());
-        return mvc.perform(corpo.isEmpty() ? comSessao
-                : comSessao.contentType(MediaType.APPLICATION_JSON).content(corpo));
+        MockHttpServletRequestBuilder comSessao =
+                requisicao.cookie(sessaoDe(usuarioId), csrf).header("X-XSRF-TOKEN", csrf.getValue());
+        return mvc.perform(
+                corpo.isEmpty() ? comSessao : comSessao.contentType(MediaType.APPLICATION_JSON).content(corpo));
     }
 
     private Cookie sessaoDe(long usuarioId) {

@@ -8,7 +8,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
+import br.fatec.les.livraria.vendas.dominio.pedido.ClienteNoPedido;
+import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
+import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,40 +27,30 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
-import br.fatec.les.livraria.vendas.dominio.pedido.ClienteNoPedido;
-import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
-import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
-import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
 
 /**
- * "Meus pedidos" do cliente logado (RF-CLI-005, DEC-07, DEC-12). Grava pedidos da Ana (usuário 2, cliente 1) e do
- * Bruno (usuário 3, cliente 2) e desfaz tudo no fim; como outros testes podem deixar pedidos no banco, as asserções
- * olham os números gravados aqui.
+ * "Meus pedidos" do cliente logado (RF-CLI-005, DEC-07, DEC-12). Grava pedidos da Ana (usuário 2, cliente 1) e do Bruno
+ * (usuário 3, cliente 2) e desfaz tudo no fim; como outros testes podem deixar pedidos no banco, as asserções olham os
+ * números gravados aqui.
  */
 @SpringBootTest
 @Transactional
 class MeusPedidosControllerTest {
 
     private static final String ROTA = "/api/me/pedidos";
-    private static final ClienteNoPedido ANA = new ClienteNoPedido(1L, "Ana Souza", "52998224725",
-            "ana.souza@livraria.test", "(11) 98888-7001");
-    private static final ClienteNoPedido BRUNO = new ClienteNoPedido(2L, "Bruno Lima", "11144477735",
-            "bruno.lima@livraria.test", "(21) 98888-7002");
+    private static final ClienteNoPedido ANA =
+            new ClienteNoPedido(1L, "Ana Souza", "52998224725", "ana.souza@livraria.test", "(11) 98888-7001");
+    private static final ClienteNoPedido BRUNO =
+            new ClienteNoPedido(2L, "Bruno Lima", "11144477735", "bruno.lima@livraria.test", "(21) 98888-7002");
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private PedidoRepositorio pedidos;
+    @Autowired private PedidoRepositorio pedidos;
 
     private MockMvc mvc;
     private long aprovadoDaAna;

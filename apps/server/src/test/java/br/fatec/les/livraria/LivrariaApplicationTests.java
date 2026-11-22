@@ -7,6 +7,5 @@ import org.springframework.boot.test.context.SpringBootTest;
 class LivrariaApplicationTests {
 
     @Test
-    void contextoSobeComProfileH2() {
-    }
+    void contextoSobeComProfileH2() {}
 }

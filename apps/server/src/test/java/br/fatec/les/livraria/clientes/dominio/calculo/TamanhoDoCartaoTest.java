@@ -4,6 +4,7 @@ import static br.fatec.les.livraria.clientes.ClientesDeTeste.AMERICAN_EXPRESS;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.HIPERCARD;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.MASTERCARD;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.VISA;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;

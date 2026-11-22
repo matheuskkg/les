@@ -2,38 +2,35 @@ package br.fatec.les.livraria.catalogo.aplicacao.casodeuso;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import br.fatec.les.livraria.catalogo.aplicacao.consulta.FiltroLivro;
+import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroListado;
+import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
+import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.catalogo.aplicacao.consulta.FiltroLivro;
-import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroListado;
-import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
-import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
- * Livros ativos por lote de ids sobre o seed em H2 (RNF-REC-001, RNF-GER-001): quem precisa de poucos livros não
- * lê a vitrine inteira, e o resultado por id é o mesmo da vitrine, com autores, categorias, editora, preço e
- * disponível.
+ * Livros ativos por lote de ids sobre o seed em H2 (RNF-REC-001, RNF-GER-001): quem precisa de poucos livros não lê a
+ * vitrine inteira, e o resultado por id é o mesmo da vitrine, com autores, categorias, editora, preço e disponível.
  */
 @SpringBootTest
 @Transactional
 class ConsultarLivrosAtivosIntegracaoTest {
 
-    private static final FiltroLivro SEM_FILTRO = new FiltroLivro(null, null, List.of(), null, null, null, null,
-            null, null, null, null, null, null);
+    private static final FiltroLivro SEM_FILTRO =
+            new FiltroLivro(null, null, List.of(), null, null, null, null, null, null, null, null, null, null);
 
-    @Autowired
-    private ConsultarLivrosAtivos consultarLivrosAtivos;
+    @Autowired private ConsultarLivrosAtivos consultarLivrosAtivos;
 
-    @Autowired
-    private ListarLivros listarLivros;
+    @Autowired private ListarLivros listarLivros;
 
     @Test
     void rnfRec001_devolveSoOsAtivosEntreOsIdsComPrecoEDisponivel() {
@@ -51,8 +48,8 @@ class ConsultarLivrosAtivosIntegracaoTest {
     @Test
     void rnfRec001_oLivroPorIdEOMesmoDaVitrine() {
         Pagina<LivroListado> vitrine = listarLivros.executar(SEM_FILTRO, new Paginacao(0, 100, List.of()));
-        Map<Long, LivroListado> porId = vitrine.itens().stream()
-                .collect(Collectors.toMap(livro -> livro.livro().id(), Function.identity()));
+        Map<Long, LivroListado> porId =
+                vitrine.itens().stream().collect(Collectors.toMap(livro -> livro.livro().id(), Function.identity()));
         List<Long> ids = List.of(1L, 5L, 30L, 56L);
 
         Map<Long, LivroListado> lidos = consultarLivrosAtivos.executar(ids);

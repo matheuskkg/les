@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.tempo;
 
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 
 /**
  * Expõe o {@link Relogio} da aplicação como {@link Clock}, para que a validação de datas do JWT use a mesma fonte de

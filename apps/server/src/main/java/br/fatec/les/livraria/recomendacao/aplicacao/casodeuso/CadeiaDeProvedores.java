@@ -1,18 +1,5 @@
 package br.fatec.les.livraria.recomendacao.aplicacao.casodeuso;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.aplicacao.EstadoEmMemoria;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.recomendacao.aplicacao.AssistenteIndisponivel;
@@ -37,16 +24,29 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.ResultadoDaChamada;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.VoltaDaChamada;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 /**
  * Cadeia de provedores de IA generativa da vitrine e do chatbot (RNF-REC-001, DEC-03). A ordem e a ativação vêm de
- * {@code provedor_ia}; cada tentativa, com sucesso ou falha, vira uma linha em {@code chamada_ia}. O primeiro
- * provedor ativo, com chave e fora da espera de cota atende; se ele falhar, a cadeia passa ao próximo. Quando todos
- * falham ou nenhum está disponível, lança {@link AssistenteIndisponivel} para o caso de uso decidir o fallback.
+ * {@code provedor_ia}; cada tentativa, com sucesso ou falha, vira uma linha em {@code chamada_ia}. O primeiro provedor
+ * ativo, com chave e fora da espera de cota atende; se ele falhar, a cadeia passa ao próximo. Quando todos falham ou
+ * nenhum está disponível, lança {@link AssistenteIndisponivel} para o caso de uso decidir o fallback.
  *
- * <p>A lista de provedores fica em cache por 30 segundos (pelo {@link Relogio}); o REC-05 chama
- * {@link #invalidarCache()} ao alterar a ordem ou a ativação. A espera depois de um HTTP 429 (a indicada pelo
- * provedor, entre 10 s e 5 min, ou até o dia virar quando a cota é diária) também é só em memória, via
- * {@link ProvedorEmEsperaPorCota}. O reset dos E2E limpa as duas coisas por {@link EstadoEmMemoria} (DEC-09).</p>
+ * <p>A lista de provedores fica em cache por 30 segundos (pelo {@link Relogio}); o REC-05 chama {@link
+ * #invalidarCache()} ao alterar a ordem ou a ativação. A espera depois de um HTTP 429 (a indicada pelo provedor, entre
+ * 10 s e 5 min, ou até o dia virar quando a cota é diária) também é só em memória, via {@link ProvedorEmEsperaPorCota}.
+ * O reset dos E2E limpa as duas coisas por {@link EstadoEmMemoria} (DEC-09).
  */
 @Component
 public class CadeiaDeProvedores implements EstadoEmMemoria {
@@ -72,8 +72,9 @@ public class CadeiaDeProvedores implements EstadoEmMemoria {
             ChamadasIaRepositorio chamadas,
             Relogio relogio) {
         // Falha na subida se dois adapters tiverem o mesmo nome.
-        this.assistentesPorNome = assistentes.stream()
-                .collect(Collectors.toUnmodifiableMap(AssistenteDeLivros::nome, Function.identity()));
+        this.assistentesPorNome =
+                assistentes.stream()
+                        .collect(Collectors.toUnmodifiableMap(AssistenteDeLivros::nome, Function.identity()));
         this.provedores = provedores;
         this.chamadas = chamadas;
         this.relogio = relogio;
@@ -83,24 +84,22 @@ public class CadeiaDeProvedores implements EstadoEmMemoria {
     /**
      * Ordena os candidatos e justifica cada indicação (RNF-REC-001, DEC-03).
      *
-     * @param perfil     histórico e preferências do cliente
+     * @param perfil histórico e preferências do cliente
      * @param candidatos livros ativos e com estoque, já pontuados pelo server
      * @return resposta do provedor que atendeu, com o id da chamada registrada
      */
-    public Atendimento<RespostaDeRecomendacao> recomendar(
-            PerfilDoCliente perfil, List<LivroCandidato> candidatos) {
-        return atender(OperacaoIa.RECOMENDAR,
-                assistente -> assistente.recomendar(perfil, candidatos));
+    public Atendimento<RespostaDeRecomendacao> recomendar(PerfilDoCliente perfil, List<LivroCandidato> candidatos) {
+        return atender(OperacaoIa.RECOMENDAR, assistente -> assistente.recomendar(perfil, candidatos));
     }
 
     /**
      * Responde à mensagem nova do cliente (RNF-REC-001, DEC-03).
      *
-     * @param perfil       histórico e preferências do cliente
-     * @param historico    últimas mensagens da conversa ativa
+     * @param perfil histórico e preferências do cliente
+     * @param historico últimas mensagens da conversa ativa
      * @param mensagemNova mensagem que o cliente acabou de enviar
-     * @param ferramentas  tools só de leitura do catálogo, do estoque e das compras
-     * @param catalogo     livros à venda, no formato compacto do prompt do chat (REC-09)
+     * @param ferramentas tools só de leitura do catálogo, do estoque e das compras
+     * @param catalogo livros à venda, no formato compacto do prompt do chat (REC-09)
      * @return resposta do provedor que atendeu, com o id da chamada registrada
      */
     public Atendimento<RespostaDoAssistente> conversar(
@@ -109,7 +108,8 @@ public class CadeiaDeProvedores implements EstadoEmMemoria {
             String mensagemNova,
             FerramentasDoAssistente ferramentas,
             List<ResumoDeLivro> catalogo) {
-        return atender(OperacaoIa.CONVERSAR,
+        return atender(
+                OperacaoIa.CONVERSAR,
                 assistente -> assistente.conversar(perfil, historico, mensagemNova, ferramentas, catalogo));
     }
 
@@ -140,46 +140,79 @@ public class CadeiaDeProvedores implements EstadoEmMemoria {
                 resposta = chamada.executar(disponivel.assistente());
             } catch (FalhaNaChamadaDeIa falha) {
                 avisarFalha(disponivel, falha.getResultado(), falha.getCodigoHttp(), falha.getMessage());
-                registrar(disponivel, operacao, inicio, inicioNanos, tentativa, falha.getResultado(),
-                        falha.getCodigoHttp(), falha.getMessage(), falha.getVoltas());
+                registrar(
+                        disponivel,
+                        operacao,
+                        inicio,
+                        inicioNanos,
+                        tentativa,
+                        falha.getResultado(),
+                        falha.getCodigoHttp(),
+                        falha.getMessage(),
+                        falha.getVoltas());
                 if (falha.getResultado() == ResultadoDaChamada.COTA_ESGOTADA) {
-                    emEspera.registrarCotaEsgotada(disponivel.assistente().nome(), falha.getEsperaSugerida(),
-                            falha.isCotaDiaria());
+                    emEspera.registrarCotaEsgotada(
+                            disponivel.assistente().nome(), falha.getEsperaSugerida(), falha.isCotaDiaria());
                 }
                 continue;
             } catch (RuntimeException inesperada) {
                 avisarFalha(disponivel, ResultadoDaChamada.ERRO_HTTP, null, mensagem(inesperada));
-                registrar(disponivel, operacao, inicio, inicioNanos, tentativa, ResultadoDaChamada.ERRO_HTTP,
-                        null, mensagem(inesperada), List.of());
+                registrar(
+                        disponivel,
+                        operacao,
+                        inicio,
+                        inicioNanos,
+                        tentativa,
+                        ResultadoDaChamada.ERRO_HTTP,
+                        null,
+                        mensagem(inesperada),
+                        List.of());
                 continue;
             }
             // O registro do sucesso fica fora do try: uma falha ao gravar o log não pode virar falha do provedor.
-            Long chamadaIaId = registrar(disponivel, operacao, inicio, inicioNanos, tentativa,
-                    ResultadoDaChamada.SUCESSO, null, null, resposta.voltas());
+            Long chamadaIaId =
+                    registrar(
+                            disponivel,
+                            operacao,
+                            inicio,
+                            inicioNanos,
+                            tentativa,
+                            ResultadoDaChamada.SUCESSO,
+                            null,
+                            null,
+                            resposta.voltas());
             return new Atendimento<>(resposta.conteudo(), chamadaIaId, disponivel.assistente().nome());
         }
 
         throw new AssistenteIndisponivel();
     }
 
-    private Long registrar(ProvedorDisponivel disponivel, OperacaoIa operacao, LocalDateTime inicio,
-            long inicioNanos, int tentativa, ResultadoDaChamada resultado, Integer codigoHttp, String erro,
+    private Long registrar(
+            ProvedorDisponivel disponivel,
+            OperacaoIa operacao,
+            LocalDateTime inicio,
+            long inicioNanos,
+            int tentativa,
+            ResultadoDaChamada resultado,
+            Integer codigoHttp,
+            String erro,
             List<VoltaDaChamada> voltas) {
         TokensDasVoltas.Resumo tokens = TokensDasVoltas.calcular(voltas);
-        return chamadas.registrar(new ChamadaIa(
-                disponivel.provedor().id(),
-                disponivel.assistente().modelo(),
-                operacao,
-                inicio,
-                latenciaMs(inicioNanos),
-                tentativa,
-                resultado,
-                codigoHttp,
-                erro,
-                tokens.entrada(),
-                tokens.saida(),
-                voltas.size(),
-                tokens.descricao()));
+        return chamadas.registrar(
+                new ChamadaIa(
+                        disponivel.provedor().id(),
+                        disponivel.assistente().modelo(),
+                        operacao,
+                        inicio,
+                        latenciaMs(inicioNanos),
+                        tentativa,
+                        resultado,
+                        codigoHttp,
+                        erro,
+                        tokens.entrada(),
+                        tokens.saida(),
+                        voltas.size(),
+                        tokens.descricao()));
     }
 
     /** Provedores ativos, com bean de mesmo nome, com chave e fora da espera de 429, na ordem da tabela. */
@@ -223,17 +256,22 @@ public class CadeiaDeProvedores implements EstadoEmMemoria {
     }
 
     /**
-     * Deixa a falha visível no log do server (DEC-03). Só entram provedor, modelo, resultado, código HTTP e a
-     * mensagem truncada; a chave e o prompt/mensagens do cliente nunca são registrados.
+     * Deixa a falha visível no log do server (DEC-03). Só entram provedor, modelo, resultado, código HTTP e a mensagem
+     * truncada; a chave e o prompt/mensagens do cliente nunca são registrados.
      */
-    private static void avisarFalha(ProvedorDisponivel disponivel, ResultadoDaChamada resultado,
-            Integer codigoHttp, String erro) {
+    private static void avisarFalha(
+            ProvedorDisponivel disponivel, ResultadoDaChamada resultado, Integer codigoHttp, String erro) {
         String mensagem = erro == null ? "" : erro;
         if (mensagem.length() > ChamadaIa.LIMITE_DO_ERRO) {
             mensagem = mensagem.substring(0, ChamadaIa.LIMITE_DO_ERRO);
         }
-        LOG.warn("Falha no provedor de IA: provedor={}, modelo={}, resultado={}, codigoHttp={}, erro={}",
-                disponivel.assistente().nome(), disponivel.assistente().modelo(), resultado, codigoHttp, mensagem);
+        LOG.warn(
+                "Falha no provedor de IA: provedor={}, modelo={}, resultado={}, codigoHttp={}, erro={}",
+                disponivel.assistente().nome(),
+                disponivel.assistente().modelo(),
+                resultado,
+                codigoHttp,
+                mensagem);
     }
 
     private static String mensagem(RuntimeException excecao) {

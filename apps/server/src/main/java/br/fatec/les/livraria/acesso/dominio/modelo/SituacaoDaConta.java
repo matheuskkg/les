@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.acesso.dominio.modelo;
 
+import org.springframework.stereotype.Component;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
-
-import org.springframework.stereotype.Component;
 
 /**
  * Calcula a situação da conta (RF-CLI-003, DEC-10): ativa sem inativação; inativa até 7 dias depois dela; encerrada
@@ -21,8 +21,6 @@ public class SituacaoDaConta {
             return SituacaoConta.ATIVA;
         }
         // "há no máximo 7 dias" ainda é INATIVA; "há mais de 7 dias" é ENCERRADA.
-        return inativadoEm.plus(PRAZO_DE_REATIVACAO).isBefore(agora)
-                ? SituacaoConta.ENCERRADA
-                : SituacaoConta.INATIVA;
+        return inativadoEm.plus(PRAZO_DE_REATIVACAO).isBefore(agora) ? SituacaoConta.ENCERRADA : SituacaoConta.INATIVA;
     }
 }

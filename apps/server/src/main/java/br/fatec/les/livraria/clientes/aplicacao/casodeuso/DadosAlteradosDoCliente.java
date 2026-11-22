@@ -1,10 +1,10 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
-import java.time.LocalDate;
-
 import br.fatec.les.livraria.acesso.dominio.modelo.TipoTelefone;
 import br.fatec.les.livraria.clientes.dominio.modelo.DadosCadastraisCliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
+
+import java.time.LocalDate;
 
 /**
  * Comando da alteração dos dados do cliente (RF-CLI-002, RN-CLI-006, DEC-10). O {@code usuarioId} vem da sessão, nunca
@@ -20,5 +20,5 @@ public record DadosAlteradosDoCliente(
         String email,
         TipoTelefone tipoTelefone,
         String ddd,
-        String numero) implements DadosCadastraisCliente {
-}
+        String numero)
+        implements DadosCadastraisCliente {}

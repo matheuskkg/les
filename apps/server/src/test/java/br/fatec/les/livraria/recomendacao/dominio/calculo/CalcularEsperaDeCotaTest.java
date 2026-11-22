@@ -2,14 +2,14 @@ package br.fatec.les.livraria.recomendacao.dominio.calculo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.Test;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import org.junit.jupiter.api.Test;
-
 /**
- * Espera de um provedor que respondeu 429 (RNF-REC-001, DEC-03, REC-09): tempo sugerido limitado entre 10 s e 5 min,
- * 5 min sem indicação e até a meia-noite na cota diária.
+ * Espera de um provedor que respondeu 429 (RNF-REC-001, DEC-03, REC-09): tempo sugerido limitado entre 10 s e 5 min, 5
+ * min sem indicação e até a meia-noite na cota diária.
  */
 class CalcularEsperaDeCotaTest {
 
@@ -42,8 +42,7 @@ class CalcularEsperaDeCotaTest {
     void rnfRec001_limitesDeDezSegundosECincoMinutosSaoMantidos() {
         assertThat(CalcularEsperaDeCota.calcular(Duration.ofSeconds(10), false, AGORA))
                 .isEqualTo(Duration.ofSeconds(10));
-        assertThat(CalcularEsperaDeCota.calcular(Duration.ofMinutes(5), false, AGORA))
-                .isEqualTo(Duration.ofMinutes(5));
+        assertThat(CalcularEsperaDeCota.calcular(Duration.ofMinutes(5), false, AGORA)).isEqualTo(Duration.ofMinutes(5));
     }
 
     @Test
@@ -56,8 +55,7 @@ class CalcularEsperaDeCotaTest {
 
     @Test
     void rnfRec001_cotaDiariaIgnoraOTempoSugerido() {
-        assertThat(CalcularEsperaDeCota.calcular(Duration.ofHours(10), true, AGORA))
-                .isEqualTo(Duration.ofHours(14));
+        assertThat(CalcularEsperaDeCota.calcular(Duration.ofHours(10), true, AGORA)).isEqualTo(Duration.ofHours(14));
     }
 
     @Test

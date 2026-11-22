@@ -1,8 +1,8 @@
 package br.fatec.les.livraria.clientes.dominio.modelo;
 
-import java.time.LocalDate;
-
 import br.fatec.les.livraria.acesso.dominio.modelo.TipoTelefone;
+
+import java.time.LocalDate;
 
 /**
  * Dados cadastrais do cliente que o cadastro e a alteração compartilham (RF-CLI-002, RN-CLI-006, DEC-10). As regras

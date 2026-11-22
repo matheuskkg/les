@@ -3,11 +3,12 @@ package br.fatec.les.livraria.clientes.dominio.regra;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.comEnderecos;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.padrao;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.violacoes;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 /** RN-CLI-001 e RN-CLI-002: ao menos um endereço atende a cobrança e a entrega, escolhidas na compra (DEC-10). */
 class EnderecoDoClienteTest {

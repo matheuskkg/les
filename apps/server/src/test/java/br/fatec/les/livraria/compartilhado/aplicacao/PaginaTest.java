@@ -3,9 +3,9 @@ package br.fatec.les.livraria.compartilhado.aplicacao;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 /** Envelope de saída das listagens (DEC-07). */
 class PaginaTest {

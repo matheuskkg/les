@@ -3,11 +3,11 @@ package br.fatec.les.livraria.vendas.dominio.pedido;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDateTime;
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
 
 import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
+import java.time.LocalDateTime;
 
 class PedidoTest {
 

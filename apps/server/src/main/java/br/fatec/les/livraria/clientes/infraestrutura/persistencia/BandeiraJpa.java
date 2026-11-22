@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,8 +25,7 @@ public class BandeiraJpa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "bandeira_seq")
-    @SequenceGenerator(name = "bandeira_seq", sequenceName = "bandeira_seq", initialValue = 10000,
-            allocationSize = 1)
+    @SequenceGenerator(name = "bandeira_seq", sequenceName = "bandeira_seq", initialValue = 10000, allocationSize = 1)
     private Long id;
 
     @Column(name = "nome", nullable = false, length = 40)

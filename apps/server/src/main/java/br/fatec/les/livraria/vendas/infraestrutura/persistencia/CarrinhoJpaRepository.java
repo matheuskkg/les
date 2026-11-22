@@ -1,8 +1,6 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import jakarta.persistence.LockModeType;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,7 +8,9 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import jakarta.persistence.LockModeType;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 public interface CarrinhoJpaRepository extends JpaRepository<CarrinhoJpa, Long> {
 
@@ -31,7 +31,8 @@ public interface CarrinhoJpaRepository extends JpaRepository<CarrinhoJpa, Long> 
     List<Long> buscarIdsVencidos(@Param("agora") LocalDateTime agora);
 
     /** Carrinhos sem aviso cujo prazo vence em {@code (agora, limite]} (RN-VEN-014). */
-    @Query("""
+    @Query(
+            """
             select c.id from CarrinhoJpa c
             where c.avisoEnviadoEm is null and c.expiraEm > :agora and c.expiraEm <= :limite
             order by c.expiraEm

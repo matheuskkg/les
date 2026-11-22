@@ -1,22 +1,23 @@
 package br.fatec.les.livraria.notificacoes.infraestrutura.persistencia;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.ConversorDePaginacao;
 import br.fatec.les.livraria.notificacoes.aplicacao.porta.NotificacaoRepositorio;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
+
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
 /**
- * Adapter JPA da porta de notificações (DEC-13, DEC-14). A marcação de todas como lidas carrega as entidades e as
- * salva uma a uma para que o Envers registre a alteração (RNF-GER-002), em vez de um {@code update} em lote que
- * passaria sem revisão.
+ * Adapter JPA da porta de notificações (DEC-13, DEC-14). A marcação de todas como lidas carrega as entidades e as salva
+ * uma a uma para que o Envers registre a alteração (RNF-GER-002), em vez de um {@code update} em lote que passaria sem
+ * revisão.
  */
 @Component
 @RequiredArgsConstructor

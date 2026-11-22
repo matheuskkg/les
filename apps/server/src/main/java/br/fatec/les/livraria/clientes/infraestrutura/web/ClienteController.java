@@ -1,7 +1,22 @@
 package br.fatec.les.livraria.clientes.infraestrutura.web;
 
-import java.net.URI;
-import java.util.List;
+import br.fatec.les.livraria.clientes.aplicacao.casodeuso.CadastrarCliente;
+import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
+import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
+import br.fatec.les.livraria.clientes.dominio.modelo.NovoEndereco;
+import br.fatec.les.livraria.clientes.infraestrutura.web.dto.CadastroDeCliente;
+import br.fatec.les.livraria.clientes.infraestrutura.web.dto.CartaoDoCadastro;
+import br.fatec.les.livraria.clientes.infraestrutura.web.dto.ClienteCriado;
+import br.fatec.les.livraria.clientes.infraestrutura.web.dto.EnderecoDoCadastro;
+import br.fatec.les.livraria.clientes.infraestrutura.web.dto.TelefoneDoCadastro;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,21 +27,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.fatec.les.livraria.clientes.aplicacao.casodeuso.CadastrarCliente;
-import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
-import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
-import br.fatec.les.livraria.clientes.dominio.modelo.NovoEndereco;
-import br.fatec.les.livraria.clientes.infraestrutura.web.dto.CadastroDeCliente;
-import br.fatec.les.livraria.clientes.infraestrutura.web.dto.CartaoDoCadastro;
-import br.fatec.les.livraria.clientes.infraestrutura.web.dto.ClienteCriado;
-import br.fatec.les.livraria.clientes.infraestrutura.web.dto.EnderecoDoCadastro;
-import br.fatec.les.livraria.clientes.infraestrutura.web.dto.TelefoneDoCadastro;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import lombok.RequiredArgsConstructor;
+import java.net.URI;
+import java.util.List;
 
 /**
  * Autocadastro de cliente (RF-CLI-001, DEC-07, DEC-10). Rota pública já liberada na configuração de segurança. A
@@ -42,21 +44,31 @@ public class ClienteController {
     @PostMapping
     @Operation(summary = "Cadastra um cliente e o usuário de login dele")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Cliente cadastrado",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ClienteCriado.class))),
-            @ApiResponse(responseCode = "422", description = "Dados do cadastro violam regras de negócio",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "400", description = "JSON malformado ou valor de enum inválido",
-                    content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
-                            schema = @Schema(implementation = ProblemDetail.class)))
+        @ApiResponse(
+                responseCode = "201",
+                description = "Cliente cadastrado",
+                content =
+                        @Content(
+                                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                schema = @Schema(implementation = ClienteCriado.class))),
+        @ApiResponse(
+                responseCode = "422",
+                description = "Dados do cadastro violam regras de negócio",
+                content =
+                        @Content(
+                                mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                                schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+                responseCode = "400",
+                description = "JSON malformado ou valor de enum inválido",
+                content =
+                        @Content(
+                                mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                                schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<ClienteCriado> cadastrar(@RequestBody CadastroDeCliente entrada) {
         Long id = cadastrarCliente.executar(paraComando(entrada));
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .location(URI.create("/api/me"))
-                .body(new ClienteCriado(id));
+        return ResponseEntity.status(HttpStatus.CREATED).location(URI.create("/api/me")).body(new ClienteCriado(id));
     }
 
     private static NovoCliente paraComando(CadastroDeCliente entrada) {
@@ -87,9 +99,17 @@ public class ClienteController {
         if (endereco == null) {
             return null;
         }
-        return new NovoEndereco(endereco.nomeCurto(), endereco.tipoEndereco(), endereco.tipoLogradouro(),
-                endereco.logradouro(), endereco.numero(), endereco.bairro(), endereco.cep(), endereco.cidade(),
-                endereco.uf(), endereco.observacoes());
+        return new NovoEndereco(
+                endereco.nomeCurto(),
+                endereco.tipoEndereco(),
+                endereco.tipoLogradouro(),
+                endereco.logradouro(),
+                endereco.numero(),
+                endereco.bairro(),
+                endereco.cep(),
+                endereco.cidade(),
+                endereco.uf(),
+                endereco.observacoes());
     }
 
     private static List<NovoCartao> cartoes(List<CartaoDoCadastro> cartoes) {

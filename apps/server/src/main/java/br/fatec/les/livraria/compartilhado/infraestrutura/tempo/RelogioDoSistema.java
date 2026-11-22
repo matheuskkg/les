@@ -1,12 +1,12 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.tempo;
 
-import java.time.Clock;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 
 import org.springframework.stereotype.Component;
 
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Component
 public class RelogioDoSistema implements Relogio {

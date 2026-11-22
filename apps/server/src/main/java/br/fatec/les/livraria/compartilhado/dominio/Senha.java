@@ -9,6 +9,5 @@ public final class Senha {
     /** Limite do BCrypt, em bytes UTF-8. */
     public static final int TAMANHO_MAXIMO_EM_BYTES = 72;
 
-    private Senha() {
-    }
+    private Senha() {}
 }

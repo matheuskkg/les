@@ -2,16 +2,16 @@ package br.fatec.les.livraria.notificacoes.aplicacao.casodeuso;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.compartilhado.aplicacao.Ordem;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 import br.fatec.les.livraria.notificacoes.aplicacao.porta.NotificacaoRepositorioFake;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
 import br.fatec.les.livraria.notificacoes.dominio.modelo.TipoNotificacao;
+
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 /** Listagem paginada do histórico (DEC-13, DEC-07). */
 class ListarNotificacoesTest {
@@ -28,10 +28,11 @@ class ListarNotificacoesTest {
         caso.executar(CLIENTE, Paginacao.padrao());
 
         assertThat(notificacoes.ultimaPaginacao().ordem()).containsExactlyElementsOf(ListarNotificacoes.ORDEM_PADRAO);
-        assertThat(ListarNotificacoes.ORDEM_PADRAO).containsExactly(
-                new Ordem("lida", Ordem.Direcao.ASC),
-                new Ordem("criadaEm", Ordem.Direcao.DESC),
-                new Ordem("id", Ordem.Direcao.DESC));
+        assertThat(ListarNotificacoes.ORDEM_PADRAO)
+                .containsExactly(
+                        new Ordem("lida", Ordem.Direcao.ASC),
+                        new Ordem("criadaEm", Ordem.Direcao.DESC),
+                        new Ordem("id", Ordem.Direcao.DESC));
     }
 
     @Test
@@ -64,7 +65,8 @@ class ListarNotificacoesTest {
     }
 
     private void criar(Long usuarioId) {
-        notificacoes.salvar(Notificacao.nova(usuarioId, TipoNotificacao.PEDIDO_APROVADO,
-                "Pedido aprovado.", "pedido", 10042L, CRIADA_EM));
+        notificacoes.salvar(
+                Notificacao.nova(
+                        usuarioId, TipoNotificacao.PEDIDO_APROVADO, "Pedido aprovado.", "pedido", 10042L, CRIADA_EM));
     }
 }

@@ -1,9 +1,8 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.alteracao;
-import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import br.fatec.les.livraria.acesso.dominio.modelo.TipoTelefone;
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.DadosAlteradosDoCliente;
@@ -11,6 +10,8 @@ import br.fatec.les.livraria.clientes.dominio.modelo.DadosCadastraisCliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
 import br.fatec.les.livraria.compartilhado.dominio.Violacao;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
+import org.junit.jupiter.api.Test;
 
 /** RF-CLI-002, RN-CLI-006, DEC-10: dados obrigatórios da alteração do cadastro do cliente. */
 class DadosObrigatoriosAlteracaoClienteTest {
@@ -24,27 +25,41 @@ class DadosObrigatoriosAlteracaoClienteTest {
 
     @Test
     void rnCli006_cpfOmitidoNaoEhObrigatorio() {
-        DadosAlteradosDoCliente semCpf = new DadosAlteradosDoCliente(2L, "Ana Souza", Genero.FEMININO,
-                alteracao().dataNascimento(), null, alteracao().email(), TipoTelefone.CELULAR,
-                alteracao().ddd(), alteracao().numero());
+        DadosAlteradosDoCliente semCpf =
+                new DadosAlteradosDoCliente(
+                        2L,
+                        "Ana Souza",
+                        Genero.FEMININO,
+                        alteracao().dataNascimento(),
+                        null,
+                        alteracao().email(),
+                        TipoTelefone.CELULAR,
+                        alteracao().ddd(),
+                        alteracao().numero());
 
         assertThat(violacoes(semCpf)).isEmpty();
     }
 
     @Test
     void rnCli006_camposObrigatoriosEmBrancoAcumulamViolacoes() {
-        DadosAlteradosDoCliente vazio = new DadosAlteradosDoCliente(2L, " ", null, null, null, " ",
-                null, null, null);
+        DadosAlteradosDoCliente vazio = new DadosAlteradosDoCliente(2L, " ", null, null, null, " ", null, null, null);
 
-        assertThat(violacoes(vazio))
-                .hasSize(7)
-                .allMatch(violacao -> violacao.codigo().equals("RN-CLI-006"));
+        assertThat(violacoes(vazio)).hasSize(7).allMatch(violacao -> violacao.codigo().equals("RN-CLI-006"));
     }
 
     @Test
     void rnCli006_dddENumeroInvalidos() {
-        DadosAlteradosDoCliente invalido = new DadosAlteradosDoCliente(2L, "Ana Souza", Genero.FEMININO,
-                alteracao().dataNascimento(), null, alteracao().email(), TipoTelefone.CELULAR, "1", "123");
+        DadosAlteradosDoCliente invalido =
+                new DadosAlteradosDoCliente(
+                        2L,
+                        "Ana Souza",
+                        Genero.FEMININO,
+                        alteracao().dataNascimento(),
+                        null,
+                        alteracao().email(),
+                        TipoTelefone.CELULAR,
+                        "1",
+                        "123");
 
         assertThat(violacoes(invalido))
                 .extracting(Violacao::mensagem)

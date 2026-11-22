@@ -1,21 +1,23 @@
 package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
-import java.time.YearMonth;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.clientes.aplicacao.ClienteDoUsuario;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.YearMonth;
 
 /**
  * Exclui fisicamente um cartão do cliente autenticado (RF-CLI-007, DEC-10). Se era o preferencial, o cartão restante
- * mais recente ainda válido (DEC-06) assume a preferência; a regra fica no agregado {@link Cliente}. Cartão de outro cliente responde 404
- * (DEC-07); os pedidos antigos não mudam, porque guardam só a bandeira e os 4 últimos dígitos (DEC-16).
+ * mais recente ainda válido (DEC-06) assume a preferência; a regra fica no agregado {@link Cliente}. Cartão de outro
+ * cliente responde 404 (DEC-07); os pedidos antigos não mudam, porque guardam só a bandeira e os 4 últimos dígitos
+ * (DEC-16).
  */
 @Component
 @RequiredArgsConstructor

@@ -5,15 +5,8 @@ import static br.fatec.les.livraria.clientes.ClientesDeTeste.comEnderecos;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.comNome;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.endereco;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.violacoes;
+
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
@@ -21,7 +14,16 @@ import br.fatec.les.livraria.clientes.dominio.modelo.NovoEndereco;
 import br.fatec.les.livraria.clientes.infraestrutura.persistencia.CartaoJpa;
 import br.fatec.les.livraria.clientes.infraestrutura.persistencia.ClienteJpa;
 import br.fatec.les.livraria.clientes.infraestrutura.persistencia.EnderecoJpa;
+
 import jakarta.persistence.Column;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 /** RN-CLI-006, RN-CLI-003, RN-CLI-004: limites das colunas do cliente, do endereço e do cartão. */
 class TamanhosMaximosClienteTest {
@@ -61,8 +63,7 @@ class TamanhosMaximosClienteTest {
 
     @Test
     void rnCli004_nomeImpressoAcimaDoLimiteEhRejeitado() {
-        rejeita("RN-CLI-004", "nome impresso",
-                comCartoes(List.of(cartaoComNomeImpresso(maior(NOME_IMPRESSO)))));
+        rejeita("RN-CLI-004", "nome impresso", comCartoes(List.of(cartaoComNomeImpresso(maior(NOME_IMPRESSO)))));
     }
 
     /** As constantes da regra precisam continuar iguais às colunas JPA que elas protegem. */
@@ -119,46 +120,93 @@ class TamanhosMaximosClienteTest {
     }
 
     private static NovoEndereco enderecoComLimites() {
-        return new NovoEndereco(limite(NOME_CURTO), endereco().tipoEndereco(), endereco().tipoLogradouro(),
-                limite(LOGRADOURO), limite(NUMERO_DO_ENDERECO), limite(BAIRRO), endereco().cep(),
-                limite(CIDADE), endereco().uf(), limite(OBSERVACOES));
+        return new NovoEndereco(
+                limite(NOME_CURTO),
+                endereco().tipoEndereco(),
+                endereco().tipoLogradouro(),
+                limite(LOGRADOURO),
+                limite(NUMERO_DO_ENDERECO),
+                limite(BAIRRO),
+                endereco().cep(),
+                limite(CIDADE),
+                endereco().uf(),
+                limite(OBSERVACOES));
     }
 
     private static NovoEndereco enderecoComNomeCurto(String nomeCurto) {
-        return comEndereco(nomeCurto, endereco().logradouro(), endereco().numero(), endereco().bairro(),
-                endereco().cidade(), endereco().observacoes());
+        return comEndereco(
+                nomeCurto,
+                endereco().logradouro(),
+                endereco().numero(),
+                endereco().bairro(),
+                endereco().cidade(),
+                endereco().observacoes());
     }
 
     private static NovoEndereco enderecoComLogradouro(String logradouro) {
-        return comEndereco(endereco().nomeCurto(), logradouro, endereco().numero(), endereco().bairro(),
-                endereco().cidade(), endereco().observacoes());
+        return comEndereco(
+                endereco().nomeCurto(),
+                logradouro,
+                endereco().numero(),
+                endereco().bairro(),
+                endereco().cidade(),
+                endereco().observacoes());
     }
 
     private static NovoEndereco enderecoComNumero(String numero) {
-        return comEndereco(endereco().nomeCurto(), endereco().logradouro(), numero, endereco().bairro(),
-                endereco().cidade(), endereco().observacoes());
+        return comEndereco(
+                endereco().nomeCurto(),
+                endereco().logradouro(),
+                numero,
+                endereco().bairro(),
+                endereco().cidade(),
+                endereco().observacoes());
     }
 
     private static NovoEndereco enderecoComBairro(String bairro) {
-        return comEndereco(endereco().nomeCurto(), endereco().logradouro(), endereco().numero(), bairro,
-                endereco().cidade(), endereco().observacoes());
+        return comEndereco(
+                endereco().nomeCurto(),
+                endereco().logradouro(),
+                endereco().numero(),
+                bairro,
+                endereco().cidade(),
+                endereco().observacoes());
     }
 
     private static NovoEndereco enderecoComCidade(String cidade) {
-        return comEndereco(endereco().nomeCurto(), endereco().logradouro(), endereco().numero(), endereco().bairro(),
-                cidade, endereco().observacoes());
+        return comEndereco(
+                endereco().nomeCurto(),
+                endereco().logradouro(),
+                endereco().numero(),
+                endereco().bairro(),
+                cidade,
+                endereco().observacoes());
     }
 
     private static NovoEndereco enderecoComObservacoes(String observacoes) {
-        return comEndereco(endereco().nomeCurto(), endereco().logradouro(), endereco().numero(), endereco().bairro(),
-                endereco().cidade(), observacoes);
+        return comEndereco(
+                endereco().nomeCurto(),
+                endereco().logradouro(),
+                endereco().numero(),
+                endereco().bairro(),
+                endereco().cidade(),
+                observacoes);
     }
 
-    private static NovoEndereco comEndereco(String nomeCurto, String logradouro, String numero, String bairro,
-            String cidade, String observacoes) {
+    private static NovoEndereco comEndereco(
+            String nomeCurto, String logradouro, String numero, String bairro, String cidade, String observacoes) {
         NovoEndereco base = endereco();
-        return new NovoEndereco(nomeCurto, base.tipoEndereco(), base.tipoLogradouro(), logradouro, numero, bairro,
-                base.cep(), cidade, base.uf(), observacoes);
+        return new NovoEndereco(
+                nomeCurto,
+                base.tipoEndereco(),
+                base.tipoLogradouro(),
+                logradouro,
+                numero,
+                bairro,
+                base.cep(),
+                cidade,
+                base.uf(),
+                observacoes);
     }
 
     private static NovoCartao cartaoComNomeImpresso(String nomeImpresso) {

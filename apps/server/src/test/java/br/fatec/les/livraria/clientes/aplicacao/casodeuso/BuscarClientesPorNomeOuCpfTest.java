@@ -2,17 +2,17 @@ package br.fatec.les.livraria.clientes.aplicacao.casodeuso;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Optional;
-import java.util.Set;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.clientes.aplicacao.consulta.ClienteResumo;
 import br.fatec.les.livraria.clientes.aplicacao.consulta.FiltroCliente;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClientesConsultas;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
+import java.util.Set;
 
 class BuscarClientesPorNomeOuCpfTest {
 

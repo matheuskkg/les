@@ -3,11 +3,6 @@ package br.fatec.les.livraria.compartilhado.infraestrutura.seed;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -15,28 +10,39 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.UUID;
+
 class ExecutorDeSeedsTest {
 
-    @TempDir
-    Path pasta;
+    @TempDir Path pasta;
 
     private DriverManagerDataSource dataSource;
     private JdbcClient jdbc;
 
     @BeforeEach
     void criarBanco() {
-        dataSource = new DriverManagerDataSource(
-                "jdbc:h2:mem:" + UUID.randomUUID() + ";MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
-                "sa", "");
+        dataSource =
+                new DriverManagerDataSource(
+                        "jdbc:h2:mem:"
+                                + UUID.randomUUID()
+                                + ";MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
+                        "sa",
+                        "");
         jdbc = JdbcClient.create(dataSource);
         // No teste unitário não há Hibernate: a tabela que em produção é criada pela entidade
         // SeedExecucaoJpa é criada aqui.
-        jdbc.sql("""
-                create table seed_execucao (
-                    arquivo varchar(255) primary key,
-                    checksum varchar(64) not null,
-                    executado_em timestamp not null
-                )""").update();
+        jdbc.sql(
+                        """
+                        create table seed_execucao (
+                            arquivo varchar(255) primary key,
+                            checksum varchar(64) not null,
+                            executado_em timestamp not null
+                        )\
+                        """)
+                .update();
     }
 
     @Test
@@ -94,8 +100,11 @@ class ExecutorDeSeedsTest {
 
         executor(false).executar();
 
-        assertThat(jdbc.sql("select count(*) from information_schema.tables where table_name = 'bandeira'")
-                .query(Integer.class).single()).isZero();
+        assertThat(
+                        jdbc.sql("select count(*) from information_schema.tables where table_name = 'bandeira'")
+                                .query(Integer.class)
+                                .single())
+                .isZero();
     }
 
     private ExecutorDeSeeds executor(boolean habilitado) {

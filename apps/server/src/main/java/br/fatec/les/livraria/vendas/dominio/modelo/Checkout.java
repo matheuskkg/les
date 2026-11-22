@@ -1,16 +1,16 @@
 package br.fatec.les.livraria.vendas.dominio.modelo;
 
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
-
 /**
- * Sessão de compra entre o carrinho e o pedido (RF-VEN-003, DEC-12). Segura as reservas dos itens até o prazo
- * {@code expiraEm}, contado do início; não guarda endereços, cartões nem cupons, que cada finalização recebe na
- * requisição (DEC-16).
+ * Sessão de compra entre o carrinho e o pedido (RF-VEN-003, DEC-12). Segura as reservas dos itens até o prazo {@code
+ * expiraEm}, contado do início; não guarda endereços, cartões nem cupons, que cada finalização recebe na requisição
+ * (DEC-16).
  */
 public class Checkout {
 
@@ -23,8 +23,15 @@ public class Checkout {
     private SituacaoCheckout situacao;
     private LocalDateTime avisoEnviadoEm;
 
-    public Checkout(Long id, Long clienteId, SituacaoCheckout situacao, LocalDateTime iniciadoEm,
-            LocalDateTime expiraEm, LocalDateTime avisoEnviadoEm, Long versao, List<ItemCheckout> itens) {
+    public Checkout(
+            Long id,
+            Long clienteId,
+            SituacaoCheckout situacao,
+            LocalDateTime iniciadoEm,
+            LocalDateTime expiraEm,
+            LocalDateTime avisoEnviadoEm,
+            Long versao,
+            List<ItemCheckout> itens) {
         this.id = id;
         this.clienteId = Objects.requireNonNull(clienteId, "clienteId");
         this.situacao = Objects.requireNonNull(situacao, "situacao");
@@ -58,7 +65,9 @@ public class Checkout {
 
     /** RN-VEN-014: o aviso sai uma vez, quando faltar a antecedência ou menos; vencido, não há aviso atrasado. */
     public boolean deveAvisarEm(LocalDateTime agora, Duration antecedencia) {
-        return aberto() && avisoEnviadoEm == null && expiraEm.isAfter(agora)
+        return aberto()
+                && avisoEnviadoEm == null
+                && expiraEm.isAfter(agora)
                 && !expiraEm.isAfter(agora.plus(antecedencia));
     }
 
@@ -99,9 +108,7 @@ public class Checkout {
 
     /** Itens retirados por expiração, para os removidos do carrinho (RNF-VEN-001). */
     public List<ItemRemovidoCarrinho> itensRemovidosEm(LocalDateTime agora) {
-        return itens.stream()
-                .map(item -> new ItemRemovidoCarrinho(item.livroId(), item.quantidade(), agora))
-                .toList();
+        return itens.stream().map(item -> new ItemRemovidoCarrinho(item.livroId(), item.quantidade(), agora)).toList();
     }
 
     private void exigirAberto() {

@@ -1,14 +1,14 @@
 package br.fatec.les.livraria.recomendacao.aplicacao.porta;
 
+import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
-
 /**
- * Porta de saída das conversas com o assistente (RNF-REC-001, DEC-03). Cada operação roda na própria transação:
- * o chat não mantém transação aberta durante a chamada à IA.
+ * Porta de saída das conversas com o assistente (RNF-REC-001, DEC-03). Cada operação roda na própria transação: o chat
+ * não mantém transação aberta durante a chamada à IA.
  */
 public interface ConversasRepositorio {
 

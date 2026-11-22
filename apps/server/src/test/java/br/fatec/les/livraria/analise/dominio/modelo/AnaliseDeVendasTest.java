@@ -3,15 +3,15 @@ package br.fatec.les.livraria.analise.dominio.modelo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
+import org.junit.jupiter.api.Test;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Set;
-
-import org.junit.jupiter.api.Test;
-
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
 class AnaliseDeVendasTest {
 
@@ -24,29 +24,37 @@ class AnaliseDeVendasTest {
 
     @Test
     void rnAna001_somaAsVendasDeCadaCategoriaPorMes() {
-        AnaliseDeVendas analise = AnaliseDeVendas.calcular(periodo(JANEIRO, FEVEREIRO), List.of(ROMANCE),
-                List.of(venda(JANEIRO, "10.00", 1L), venda(JANEIRO, "5.50", 1L), venda(FEVEREIRO, "7.25", 1L)));
+        AnaliseDeVendas analise =
+                AnaliseDeVendas.calcular(
+                        periodo(JANEIRO, FEVEREIRO),
+                        List.of(ROMANCE),
+                        List.of(venda(JANEIRO, "10.00", 1L), venda(JANEIRO, "5.50", 1L), venda(FEVEREIRO, "7.25", 1L)));
 
-        assertThat(analise.series()).singleElement()
-                .satisfies(serie -> assertThat(serie.valores()).containsExactly(Dinheiro.de("15.50"),
-                        Dinheiro.de("7.25")));
+        assertThat(analise.series())
+                .singleElement()
+                .satisfies(serie ->
+                        assertThat(serie.valores()).containsExactly(Dinheiro.de("15.50"), Dinheiro.de("7.25")));
     }
 
     @Test
     void rnAna001_itemComVariasCategoriasEntraComValorCheioEmCadaUma_DEC_12() {
-        AnaliseDeVendas analise = AnaliseDeVendas.calcular(periodo(MARCO, MARCO),
-                List.of(ROMANCE, HISTORIA), List.of(venda(MARCO, "95.76", 1L, 5L)));
+        AnaliseDeVendas analise =
+                AnaliseDeVendas.calcular(
+                        periodo(MARCO, MARCO), List.of(ROMANCE, HISTORIA), List.of(venda(MARCO, "95.76", 1L, 5L)));
 
-        assertThat(analise.series()).extracting(SerieDeVendas::valores)
+        assertThat(analise.series())
+                .extracting(SerieDeVendas::valores)
                 .containsExactly(List.of(Dinheiro.de("95.76")), List.of(Dinheiro.de("95.76")));
     }
 
     @Test
     void rnAna003_mesesSemVendaValemZeroNaOrdemDosMeses() {
-        AnaliseDeVendas analise = AnaliseDeVendas.calcular(periodo(JANEIRO, MARCO),
-                List.of(TECNOLOGIA, ROMANCE), List.of(venda(FEVEREIRO, "20.00", 1L)));
+        AnaliseDeVendas analise =
+                AnaliseDeVendas.calcular(
+                        periodo(JANEIRO, MARCO), List.of(TECNOLOGIA, ROMANCE), List.of(venda(FEVEREIRO, "20.00", 1L)));
 
-        assertThat(analise.series()).extracting(serie -> serie.categoria().nome())
+        assertThat(analise.series())
+                .extracting(serie -> serie.categoria().nome())
                 .containsExactly("Tecnologia", "Romance");
         assertThat(analise.series().get(0).valores()).containsOnly(Dinheiro.ZERO).hasSize(3);
         assertThat(analise.series().get(1).valores())
@@ -55,8 +63,11 @@ class AnaliseDeVendasTest {
 
     @Test
     void rfAna003_ignoraCategoriasNaoSelecionadasEMesesForaDoPeriodo() {
-        AnaliseDeVendas analise = AnaliseDeVendas.calcular(periodo(FEVEREIRO, FEVEREIRO),
-                List.of(ROMANCE), List.of(venda(JANEIRO, "1.00", 1L), venda(FEVEREIRO, "2.00", 4L)));
+        AnaliseDeVendas analise =
+                AnaliseDeVendas.calcular(
+                        periodo(FEVEREIRO, FEVEREIRO),
+                        List.of(ROMANCE),
+                        List.of(venda(JANEIRO, "1.00", 1L), venda(FEVEREIRO, "2.00", 4L)));
 
         assertThat(analise.series().getFirst().valores()).containsExactly(Dinheiro.ZERO);
     }

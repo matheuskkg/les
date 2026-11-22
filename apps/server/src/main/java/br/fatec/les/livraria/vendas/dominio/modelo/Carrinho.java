@@ -1,5 +1,7 @@
 package br.fatec.les.livraria.vendas.dominio.modelo;
 
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -7,18 +9,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
-
 /**
- * Carrinho de compras do cliente (RF-VEN-001, RF-VEN-002, DEC-12, DEC-16). Há um carrinho por cliente,
- * criado na primeira adição. O prazo de bloqueio ({@code expiraEm}) é contado a partir do último item
- * incluído (DEC-05.1) e as reservas de estoque acompanham esse prazo.
+ * Carrinho de compras do cliente (RF-VEN-001, RF-VEN-002, DEC-12, DEC-16). Há um carrinho por cliente, criado na
+ * primeira adição. O prazo de bloqueio ({@code expiraEm}) é contado a partir do último item incluído (DEC-05.1) e as
+ * reservas de estoque acompanham esse prazo.
  *
- * <p>Vencido o prazo, os itens saem do carrinho e ficam nos itens removidos, à mostra até o cliente adicionar o
- * livro de novo ou dispensar o aviso (RN-VEN-014, RN-VEN-015, RNF-VEN-001).</p>
+ * <p>Vencido o prazo, os itens saem do carrinho e ficam nos itens removidos, à mostra até o cliente adicionar o livro
+ * de novo ou dispensar o aviso (RN-VEN-014, RN-VEN-015, RNF-VEN-001).
  *
- * <p>O carrinho não guarda preço: a leitura usa o preço de venda atual do catálogo. O pedido é que copia os
- * dados na finalização (DEC-12, DEC-16).</p>
+ * <p>O carrinho não guarda preço: a leitura usa o preço de venda atual do catálogo. O pedido é que copia os dados na
+ * finalização (DEC-12, DEC-16).
  */
 public class Carrinho {
 
@@ -29,8 +29,13 @@ public class Carrinho {
     private LocalDateTime expiraEm;
     private LocalDateTime avisoEnviadoEm;
 
-    public Carrinho(Long id, Long clienteId, LocalDateTime expiraEm, LocalDateTime avisoEnviadoEm,
-            List<ItemCarrinho> itens, List<ItemRemovidoCarrinho> removidos) {
+    public Carrinho(
+            Long id,
+            Long clienteId,
+            LocalDateTime expiraEm,
+            LocalDateTime avisoEnviadoEm,
+            List<ItemCarrinho> itens,
+            List<ItemRemovidoCarrinho> removidos) {
         this.id = id;
         this.clienteId = Objects.requireNonNull(clienteId, "clienteId");
         this.itens = new ArrayList<>(Objects.requireNonNull(itens, "itens"));
@@ -55,8 +60,8 @@ public class Carrinho {
     }
 
     /**
-     * Adiciona um livro ou soma à linha existente (RF-VEN-001). A linha é única por livro (DEC-16). Um livro que
-     * estava nos itens removidos sai de lá, porque foi adicionado de novo (RNF-VEN-001).
+     * Adiciona um livro ou soma à linha existente (RF-VEN-001). A linha é única por livro (DEC-16). Um livro que estava
+     * nos itens removidos sai de lá, porque foi adicionado de novo (RNF-VEN-001).
      *
      * @throws IllegalArgumentException se a quantidade não for positiva
      */
@@ -65,14 +70,15 @@ public class Carrinho {
         if (quantidade < 1) {
             throw new IllegalArgumentException("A quantidade adicionada deve ser no mínimo 1.");
         }
-        item(livroId).ifPresentOrElse(item -> item.somar(quantidade),
-                () -> itens.add(new ItemCarrinho(null, livroId, quantidade)));
+        item(livroId)
+                .ifPresentOrElse(
+                        item -> item.somar(quantidade), () -> itens.add(new ItemCarrinho(null, livroId, quantidade)));
         removidos.removeIf(removido -> removido.livroId().equals(livroId));
     }
 
     /**
-     * Define a quantidade de um item existente (RF-VEN-002). A remoção é feita por {@link #remover(Long)},
-     * porque zero não é uma quantidade válida.
+     * Define a quantidade de um item existente (RF-VEN-002). A remoção é feita por {@link #remover(Long)}, porque zero
+     * não é uma quantidade válida.
      *
      * @throws ExcecaoDeRecursoNaoEncontrado se o livro não estiver no carrinho
      */
@@ -112,11 +118,14 @@ public class Carrinho {
     }
 
     /**
-     * RN-VEN-014: o aviso sai uma vez, quando faltar a antecedência ou menos para o vencimento. Um carrinho já
-     * vencido não recebe aviso atrasado: ele é expirado.
+     * RN-VEN-014: o aviso sai uma vez, quando faltar a antecedência ou menos para o vencimento. Um carrinho já vencido
+     * não recebe aviso atrasado: ele é expirado.
      */
     public boolean deveAvisarEm(LocalDateTime agora, Duration antecedencia) {
-        return !itens.isEmpty() && expiraEm != null && avisoEnviadoEm == null && expiraEm.isAfter(agora)
+        return !itens.isEmpty()
+                && expiraEm != null
+                && avisoEnviadoEm == null
+                && expiraEm.isAfter(agora)
                 && !expiraEm.isAfter(agora.plus(antecedencia));
     }
 
@@ -131,9 +140,10 @@ public class Carrinho {
      */
     public void expirar(LocalDateTime agora) {
         Objects.requireNonNull(agora, "agora");
-        List<ItemRemovidoCarrinho> retirados = itens.stream()
-                .map(item -> new ItemRemovidoCarrinho(item.getLivroId(), item.getQuantidade(), agora))
-                .toList();
+        List<ItemRemovidoCarrinho> retirados =
+                itens.stream()
+                        .map(item -> new ItemRemovidoCarrinho(item.getLivroId(), item.getQuantidade(), agora))
+                        .toList();
         itens.clear();
         registrarRemovidos(retirados);
         encerrarExpiracao();
@@ -167,8 +177,8 @@ public class Carrinho {
     }
 
     /**
-     * Retira os itens para o checkout (DEC-12): o carrinho fica vazio, sem prazo, e pode receber itens novos. Os
-     * itens removidos por expiração continuam à mostra.
+     * Retira os itens para o checkout (DEC-12): o carrinho fica vazio, sem prazo, e pode receber itens novos. Os itens
+     * removidos por expiração continuam à mostra.
      *
      * @return os itens retirados
      */
@@ -187,8 +197,7 @@ public class Carrinho {
     }
 
     private ItemCarrinho itemExigido(Long livroId) {
-        return item(livroId)
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Item não encontrado no carrinho."));
+        return item(livroId).orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Item não encontrado no carrinho."));
     }
 
     public Long getId() {

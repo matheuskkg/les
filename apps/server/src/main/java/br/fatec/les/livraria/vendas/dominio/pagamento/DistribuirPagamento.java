@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.vendas.dominio.pagamento;
 
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
 /**
  * Distribuição do pagamento (RF-VEN-007, RN-VEN-006, DEC-11), nesta ordem: o promocional abate o desconto da sua base;
@@ -12,8 +12,7 @@ import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
  */
 public final class DistribuirPagamento {
 
-    private DistribuirPagamento() {
-    }
+    private DistribuirPagamento() {}
 
     public static DistribuicaoDoPagamento de(CuponsDaCompra compra) {
         Dinheiro total = compra.total();
@@ -30,7 +29,15 @@ public final class DistribuirPagamento {
         }
 
         Dinheiro troco = Dinheiro.maior(somaDosCupons.subtrair(total.subtrair(desconto)), Dinheiro.ZERO);
-        return new DistribuicaoDoPagamento(compra.subtotal(), compra.frete(), total, compra.promocional(), desconto, abatidos, troco,
-                aCobrir, compra.temCupom());
+        return new DistribuicaoDoPagamento(
+                compra.subtotal(),
+                compra.frete(),
+                total,
+                compra.promocional(),
+                desconto,
+                abatidos,
+                troco,
+                aCobrir,
+                compra.temCupom());
     }
 }

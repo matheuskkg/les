@@ -2,14 +2,14 @@ package br.fatec.les.livraria.vendas.infraestrutura.operadora;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
-import java.time.YearMonth;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.vendas.dominio.pagamento.CobrancaNoCartao;
 import br.fatec.les.livraria.vendas.dominio.pagamento.RespostaDaOperadora;
+
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.time.YearMonth;
 
 class OperadoraDeCartaoSimuladaTest {
 
@@ -50,8 +50,8 @@ class OperadoraDeCartaoSimuladaTest {
 
     @Test
     void rnVen007_cobrancaNaoMostraNumeroNemCodigo() {
-        CobrancaNoCartao cobranca = new CobrancaNoCartao("4111111111111234", YearMonth.of(2030, 1), "987",
-                Dinheiro.de("10.00"));
+        CobrancaNoCartao cobranca =
+                new CobrancaNoCartao("4111111111111234", YearMonth.of(2030, 1), "987", Dinheiro.de("10.00"));
 
         assertThat(cobranca.toString()).contains("1234").doesNotContain("41111111").doesNotContain("987");
     }

@@ -1,7 +1,5 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
-import org.hibernate.envers.Audited;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,9 +11,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.hibernate.envers.Audited;
 
 /**
  * Tabela {@code uso_cupom_promocional} do MER (DEC-15.2): cada cliente usa cada promocional uma vez, garantido pelo
@@ -27,16 +28,23 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Audited
-@Table(name = "uso_cupom_promocional", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_uso_cupom_promocional_cliente",
-                columnNames = { "cupom_promocional_id", "cliente_id" }),
-        @UniqueConstraint(name = "uk_uso_cupom_promocional_pedido", columnNames = "pedido_id") })
+@Table(
+        name = "uso_cupom_promocional",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uk_uso_cupom_promocional_cliente",
+                    columnNames = {"cupom_promocional_id", "cliente_id"}),
+            @UniqueConstraint(name = "uk_uso_cupom_promocional_pedido", columnNames = "pedido_id")
+        })
 public class UsoCupomPromocionalJpa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "uso_cupom_promocional_seq")
-    @SequenceGenerator(name = "uso_cupom_promocional_seq", sequenceName = "uso_cupom_promocional_seq",
-            initialValue = 10000, allocationSize = 50)
+    @SequenceGenerator(
+            name = "uso_cupom_promocional_seq",
+            sequenceName = "uso_cupom_promocional_seq",
+            initialValue = 10000,
+            allocationSize = 50)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

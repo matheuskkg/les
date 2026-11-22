@@ -2,15 +2,6 @@ package br.fatec.les.livraria.recomendacao.infraestrutura.externo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import org.junit.jupiter.api.Test;
-
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.DetalheDoLivro;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.FerramentasDoAssistente;
@@ -24,19 +15,31 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDeRecomendacao;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.TipoDeResposta;
 
+import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 /**
- * Comportamento determinístico do fake, sem rede (RNF-REC-001, DEC-03). O fake atende os testes e os E2E e é o
- * último provedor da cadeia.
+ * Comportamento determinístico do fake, sem rede (RNF-REC-001, DEC-03). O fake atende os testes e os E2E e é o último
+ * provedor da cadeia.
  */
 class AssistenteDeLivrosFakeTest {
 
     private static final PerfilDoCliente SEM_HISTORICO =
             new PerfilDoCliente(List.of(), List.of(), List.of(), List.of());
-    private static final PerfilDoCliente COM_HISTORICO = new PerfilDoCliente(
-            List.of(new LivroComprado(10L, "Memórias Póstumas", List.of("Romance"), List.of("Machado de Assis"))),
-            List.of("Romance"),
-            List.of("Machado de Assis"),
-            List.of());
+    private static final PerfilDoCliente COM_HISTORICO =
+            new PerfilDoCliente(
+                    List.of(
+                            new LivroComprado(
+                                    10L, "Memórias Póstumas", List.of("Romance"), List.of("Machado de Assis"))),
+                    List.of("Romance"),
+                    List.of("Machado de Assis"),
+                    List.of());
 
     private final AssistenteDeLivrosFake assistente = new AssistenteDeLivrosFake();
     private final FerramentasFalsas ferramentas = new FerramentasFalsas();
@@ -109,7 +112,8 @@ class AssistenteDeLivrosFakeTest {
 
     @Test
     void rnfRec001_buscaLimitaAteTresLivrosCitados() {
-        ferramentas.comResultado("Romance",
+        ferramentas.comResultado(
+                "Romance",
                 livro(1L, "Dom Casmurro"),
                 livro(2L, "Memórias Póstumas"),
                 livro(3L, "Quincas Borba"),
@@ -141,7 +145,8 @@ class AssistenteDeLivrosFakeTest {
         RespostaDeRecomendacao resposta = assistente.recomendar(COM_HISTORICO, candidatos).conteudo();
 
         assertThat(resposta.itens()).extracting(item -> item.livroId()).containsExactly(3L, 1L);
-        assertThat(resposta.itens()).extracting(item -> item.justificativa())
+        assertThat(resposta.itens())
+                .extracting(item -> item.justificativa())
                 .containsOnly(AssistenteDeLivrosFake.JUSTIFICATIVA_DO_PERFIL);
     }
 
@@ -152,7 +157,8 @@ class AssistenteDeLivrosFakeTest {
         RespostaDeRecomendacao resposta = assistente.recomendar(SEM_HISTORICO, candidatos).conteudo();
 
         assertThat(resposta.itens()).extracting(item -> item.livroId()).containsExactly(1L);
-        assertThat(resposta.itens()).extracting(item -> item.justificativa())
+        assertThat(resposta.itens())
+                .extracting(item -> item.justificativa())
                 .containsOnly(AssistenteDeLivrosFake.JUSTIFICATIVA_MAIS_VENDIDOS);
     }
 
@@ -165,13 +171,17 @@ class AssistenteDeLivrosFakeTest {
     }
 
     private static LivroCandidato candidato(Long id, String titulo) {
-        return new LivroCandidato(id, titulo, List.of("Machado de Assis"), List.of("Romance"),
-                Dinheiro.de("29.90"), new BigDecimal("10"));
+        return new LivroCandidato(
+                id,
+                titulo,
+                List.of("Machado de Assis"),
+                List.of("Romance"),
+                Dinheiro.de("29.90"),
+                new BigDecimal("10"));
     }
 
     private static ResumoDeLivro livro(Long id, String titulo) {
-        return new ResumoDeLivro(id, titulo, List.of("Machado de Assis"), List.of("Romance"),
-                Dinheiro.de("29.90"));
+        return new ResumoDeLivro(id, titulo, List.of("Machado de Assis"), List.of("Romance"), Dinheiro.de("29.90"));
     }
 
     /** Tools em memória, com os resultados indexados pelo texto buscado. */
@@ -201,8 +211,8 @@ class AssistenteDeLivrosFakeTest {
         }
 
         @Override
-        public List<ResumoDeLivro> buscarLivros(String texto, String categoria, BigDecimal precoMinimo,
-                BigDecimal precoMaximo) {
+        public List<ResumoDeLivro> buscarLivros(
+                String texto, String categoria, BigDecimal precoMinimo, BigDecimal precoMaximo) {
             buscas.add(texto);
             return resultados.getOrDefault(texto, List.of());
         }

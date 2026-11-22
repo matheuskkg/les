@@ -1,7 +1,21 @@
 package br.fatec.les.livraria.vendas.infraestrutura.web;
 
-import java.time.LocalDate;
-import java.util.List;
+import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
+import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
+import br.fatec.les.livraria.compartilhado.infraestrutura.web.Listagem;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConfirmarEntrega;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarPedido;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ContarPorStatus;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.DespacharPedido;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ListarPedidos;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.ConsultaDePedidos;
+import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
+import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
+import br.fatec.les.livraria.vendas.infraestrutura.web.dto.ContagemPorStatusDto;
+import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PedidoDetalheDto;
+import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PedidoListadoDto;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,30 +25,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
-import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
-import br.fatec.les.livraria.compartilhado.infraestrutura.web.Listagem;
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConfirmarEntrega;
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ContarPorStatus;
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarPedido;
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.DespacharPedido;
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ListarPedidos;
-import br.fatec.les.livraria.vendas.aplicacao.consulta.ConsultaDePedidos;
-import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
-import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
-import br.fatec.les.livraria.vendas.infraestrutura.web.dto.ContagemPorStatusDto;
-import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PedidoDetalheDto;
-import br.fatec.les.livraria.vendas.infraestrutura.web.dto.PedidoListadoDto;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDate;
+import java.util.List;
 
 /**
- * Consulta de pedidos do administrador (RF-VEN-009, RF-VEN-010, DEC-07, DEC-12). Só o papel {@code ADMIN} acessa
- * {@code /api/admin/**}. Os filtros são opcionais e se combinam com E; status repetidos combinam com OU. O código
- * do cliente filtra o histórico do cadastro (RF-CLI-005), e {@code situacao}, o status da troca mais recente do
- * pedido (DEC-12): o CPF de uma conta encerrada pode voltar em outra (DEC-10). O período
- * de {@code realizadoEm} é informado em dias, no fuso da loja, e o último dia entra inteiro. Despacho e confirmação
- * da entrega são ações em sub-rotas {@code POST} que devolvem o pedido alterado; fora do diagrama do DEC-12
- * respondem 409. A contagem por status alimenta as abas da tela do admin.
+ * Consulta de pedidos do administrador (RF-VEN-009, RF-VEN-010, DEC-07, DEC-12). Só o papel {@code ADMIN} acessa {@code
+ * /api/admin/**}. Os filtros são opcionais e se combinam com E; status repetidos combinam com OU. O código do cliente
+ * filtra o histórico do cadastro (RF-CLI-005), e {@code situacao}, o status da troca mais recente do pedido (DEC-12): o
+ * CPF de uma conta encerrada pode voltar em outra (DEC-10). O período de {@code realizadoEm} é informado em dias, no
+ * fuso da loja, e o último dia entra inteiro. Despacho e confirmação da entrega são ações em sub-rotas {@code POST} que
+ * devolvem o pedido alterado; fora do diagrama do DEC-12 respondem 409. A contagem por status alimenta as abas da tela
+ * do admin.
  */
 @RestController
 @RequestMapping("/api/admin/pedidos")
@@ -57,9 +58,12 @@ public class PedidoAdminController {
             @RequestParam(required = false) String cpf,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate realizadoEmDe,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate realizadoEmAte,
-            @Listagem(campos = { "realizadoEm", "total", "id" }, padrao = "realizadoEm,desc") Paginacao paginacao) {
-        ConsultaDePedidos consulta = new ConsultaDePedidos(numero, clienteId, status, situacao, cliente, cpf, realizadoEmDe,
-                realizadoEmAte);
+            @Listagem(
+                            campos = {"realizadoEm", "total", "id"},
+                            padrao = "realizadoEm,desc")
+                    Paginacao paginacao) {
+        ConsultaDePedidos consulta =
+                new ConsultaDePedidos(numero, clienteId, status, situacao, cliente, cpf, realizadoEmDe, realizadoEmAte);
         return listarPedidos.executar(consulta, paginacao).map(PedidoListadoDto::de);
     }
 

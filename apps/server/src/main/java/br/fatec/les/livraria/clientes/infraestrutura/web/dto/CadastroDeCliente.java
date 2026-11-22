@@ -1,13 +1,13 @@
 package br.fatec.les.livraria.clientes.infraestrutura.web.dto;
 
+import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
+
 import java.time.LocalDate;
 import java.util.List;
 
-import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
-
 /**
- * Corpo de {@code POST /api/clientes} (RF-CLI-001, DEC-07, DEC-10). Os campos sem validação de formato deixam as
- * regras de negócio acumularem as violações e responderem 422.
+ * Corpo de {@code POST /api/clientes} (RF-CLI-001, DEC-07, DEC-10). Os campos sem validação de formato deixam as regras
+ * de negócio acumularem as violações e responderem 422.
  */
 public record CadastroDeCliente(
         String nome,
@@ -19,5 +19,4 @@ public record CadastroDeCliente(
         String senha,
         String confirmacaoSenha,
         List<EnderecoDoCadastro> enderecos,
-        List<CartaoDoCadastro> cartoes) {
-}
+        List<CartaoDoCadastro> cartoes) {}

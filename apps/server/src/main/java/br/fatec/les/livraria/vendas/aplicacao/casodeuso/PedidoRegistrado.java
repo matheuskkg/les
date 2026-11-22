@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.vendas.aplicacao.casodeuso;
 
-import java.util.List;
-import java.util.Objects;
-
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.vendas.dominio.pagamento.CobrancaNoCartao;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Pedido gravado {@code EM PROCESSAMENTO} e o que só existe em memória até o resultado da operadora (DEC-11, DEC-13):

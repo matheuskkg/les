@@ -1,5 +1,9 @@
 package br.fatec.les.livraria.clientes.dominio.modelo;
 
+import br.fatec.les.livraria.compartilhado.dominio.Cpf;
+
+import lombok.Getter;
+
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -7,9 +11,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
-import br.fatec.les.livraria.compartilhado.dominio.Cpf;
-import lombok.Getter;
 
 /**
  * Cliente do e-commerce (RF-CLI-001, RN-CLI-006, DEC-10). O e-mail e o telefone ficam no {@code Usuario} do módulo
@@ -36,8 +37,15 @@ public class Cliente {
     private final List<Endereco> enderecos;
     private final List<Cartao> cartoes;
 
-    public Cliente(Long id, Long usuarioId, String nome, Genero genero, LocalDate dataNascimento, Cpf cpf,
-            List<Endereco> enderecos, List<Cartao> cartoes) {
+    public Cliente(
+            Long id,
+            Long usuarioId,
+            String nome,
+            Genero genero,
+            LocalDate dataNascimento,
+            Cpf cpf,
+            List<Endereco> enderecos,
+            List<Cartao> cartoes) {
         this.id = id;
         this.usuarioId = Objects.requireNonNull(usuarioId, "usuarioId");
         this.nome = Objects.requireNonNull(nome, "nome");
@@ -51,8 +59,7 @@ public class Cliente {
         }
         long preferenciais = this.cartoes.stream().filter(Cartao::preferencial).count();
         if (!this.cartoes.isEmpty() && preferenciais != 1) {
-            throw new IllegalArgumentException(
-                    "Havendo cartões, exatamente um deve ser o preferencial (RF-CLI-007).");
+            throw new IllegalArgumentException("Havendo cartões, exatamente um deve ser o preferencial (RF-CLI-007).");
         }
     }
 
@@ -129,9 +136,7 @@ public class Cliente {
         throw new IllegalArgumentException("Cartão não encontrado no cliente: " + alterado.id());
     }
 
-    /**
-     * Marca o cartão informado como o único preferencial, desmarcando o anterior (RF-CLI-007, DEC-10).
-     */
+    /** Marca o cartão informado como o único preferencial, desmarcando o anterior (RF-CLI-007, DEC-10). */
     public Cliente comCartaoPreferencial(Long cartaoId) {
         if (cartao(cartaoId).isEmpty()) {
             throw new IllegalArgumentException("Cartão não encontrado no cliente: " + cartaoId);
@@ -152,8 +157,8 @@ public class Cliente {
     }
 
     /**
-     * Remove o cartão; se ele era o preferencial, assume o cartão restante mais recente ainda válido em
-     * {@code mesAtual} (ou o mais recente, se todos estiverem vencidos) (RF-CLI-007, DEC-06, DEC-10).
+     * Remove o cartão; se ele era o preferencial, assume o cartão restante mais recente ainda válido em {@code
+     * mesAtual} (ou o mais recente, se todos estiverem vencidos) (RF-CLI-007, DEC-06, DEC-10).
      */
     public Cliente semCartao(Long cartaoId, YearMonth mesAtual) {
         List<Cartao> lista = new ArrayList<>(cartoes);
@@ -169,8 +174,10 @@ public class Cliente {
         }
         lista.remove(removido);
         if (removido.preferencial() && !lista.isEmpty()) {
-            List<Cartao> validos = mesAtual == null ? lista
-                    : lista.stream().filter(cartao -> !cartao.validade().isBefore(mesAtual)).toList();
+            List<Cartao> validos =
+                    mesAtual == null
+                            ? lista
+                            : lista.stream().filter(cartao -> !cartao.validade().isBefore(mesAtual)).toList();
             Cartao maisRecente = maisRecente(validos.isEmpty() ? lista : validos);
             lista.replaceAll(cartao -> comPreferencial(cartao, cartao == maisRecente));
         }
@@ -191,8 +198,13 @@ public class Cliente {
         if (cartao.preferencial() == preferencial) {
             return cartao;
         }
-        return new Cartao(cartao.id(), cartao.numero(), cartao.nomeImpresso(), cartao.bandeira(),
-                cartao.validade(), preferencial);
+        return new Cartao(
+                cartao.id(),
+                cartao.numero(),
+                cartao.nomeImpresso(),
+                cartao.bandeira(),
+                cartao.validade(),
+                preferencial);
     }
 
     /** O cartão cadastrado mais recentemente é o de maior id (DEC-14: a sequence cresce a cada cadastro). */

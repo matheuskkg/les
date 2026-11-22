@@ -1,11 +1,5 @@
 package br.fatec.les.livraria.vendas.aplicacao;
 
-import java.util.List;
-import java.util.Locale;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeNegocio;
@@ -25,7 +19,14 @@ import br.fatec.les.livraria.vendas.dominio.regra.CuponsDeTrocaDisponiveis;
 import br.fatec.les.livraria.vendas.dominio.regra.CuponsDeTrocaSemRepeticao;
 import br.fatec.les.livraria.vendas.dominio.regra.CuponsDesnecessarios;
 import br.fatec.les.livraria.vendas.dominio.regra.UmCupomPromocionalPorCompra;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Confere os cupons de uma compra e distribui o total entre eles (RF-VEN-007, RN-VEN-003, RN-VEN-006, RN-VEN-007,
@@ -51,8 +52,12 @@ public class ConferirCupons {
      * @throws ExcecaoDeRecursoNaoEncontrado se um cupom de troca não for do cliente
      */
     @Transactional(readOnly = true)
-    public DistribuicaoDoPagamento conferir(Long clienteId, Dinheiro subtotal, Dinheiro frete,
-            List<String> codigosPromocionais, List<Long> cuponsDeTroca) {
+    public DistribuicaoDoPagamento conferir(
+            Long clienteId,
+            Dinheiro subtotal,
+            Dinheiro frete,
+            List<String> codigosPromocionais,
+            List<Long> cuponsDeTroca) {
         Violacoes violacoes = new Violacoes();
         umPromocional.validar(codigosPromocionais, violacoes);
         semRepeticao.validar(cuponsDeTroca, violacoes);
@@ -62,8 +67,13 @@ public class ConferirCupons {
         List<CupomTroca> trocas = trocasDoCliente(clienteId, cuponsDeTroca);
 
         if (promocional != null) {
-            promocionalValido.validar(new PromocionalNaCompra(promocional, subtotal, relogio.hoje(),
-                    promocionais.usadoPeloCliente(promocional.id(), clienteId)), violacoes);
+            promocionalValido.validar(
+                    new PromocionalNaCompra(
+                            promocional,
+                            subtotal,
+                            relogio.hoje(),
+                            promocionais.usadoPeloCliente(promocional.id(), clienteId)),
+                    violacoes);
         }
         trocasDisponiveis.validar(new CuponsDeTrocaNaCompra(trocas, relogio.hoje()), violacoes);
         violacoes.lancarSeHouver();
@@ -75,16 +85,20 @@ public class ConferirCupons {
 
     private CupomPromocional promocional(String codigo) {
         String normalizado = codigo == null ? "" : codigo.strip().toUpperCase(Locale.ROOT);
-        return promocionais.buscarPorCodigo(normalizado).orElseThrow(
-                () -> new ExcecaoDeNegocio("RN-VEN-007", "Cupom " + normalizado + " não encontrado."));
+        return promocionais
+                .buscarPorCodigo(normalizado)
+                .orElseThrow(() -> new ExcecaoDeNegocio("RN-VEN-007", "Cupom " + normalizado + " não encontrado."));
     }
 
     /** Na ordem informada, que é a ordem em que os cupons cobrem o total (DEC-11). */
     private List<CupomTroca> trocasDoCliente(Long clienteId, List<Long> ids) {
         List<CupomTroca> encontrados = cuponsDeTroca.buscarDoCliente(clienteId, ids);
         return ids.stream()
-                .map(id -> encontrados.stream().filter(cupom -> cupom.id().equals(id)).findFirst()
-                        .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cupom de troca não encontrado.")))
+                .map(id ->
+                        encontrados.stream()
+                                .filter(cupom -> cupom.id().equals(id))
+                                .findFirst()
+                                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Cupom de troca não encontrado.")))
                 .toList();
     }
 }

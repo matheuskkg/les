@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.clientes.infraestrutura.web.dto;
 
-import java.time.LocalDate;
-
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.DadosDoCliente;
 import br.fatec.les.livraria.clientes.dominio.modelo.Genero;
+
+import java.time.LocalDate;
 
 /**
  * Resposta de {@code GET /api/me} e {@code PUT /api/me} (RF-CLI-002, DEC-07): os dados do próprio cliente, com o id

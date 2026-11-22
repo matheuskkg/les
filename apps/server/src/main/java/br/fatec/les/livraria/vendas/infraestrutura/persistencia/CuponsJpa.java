@@ -1,19 +1,20 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.vendas.aplicacao.porta.CuponsDeTroca;
 import br.fatec.les.livraria.vendas.aplicacao.porta.CuponsPromocionais;
 import br.fatec.les.livraria.vendas.dominio.pagamento.CupomPromocional;
 import br.fatec.les.livraria.vendas.dominio.pagamento.CupomTroca;
 import br.fatec.les.livraria.vendas.dominio.pagamento.SituacaoCupom;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 /** Leitura dos cupons promocionais e de troca (DEC-11, DEC-15.2). */
 @Component
@@ -102,12 +103,23 @@ public class CuponsJpa implements CuponsPromocionais, CuponsDeTroca {
     }
 
     private static CupomPromocional paraDominio(CupomPromocionalJpa jpa) {
-        return new CupomPromocional(jpa.getId(), jpa.getCodigo(), jpa.getTipo(), jpa.getValor(), jpa.getValidade(),
+        return new CupomPromocional(
+                jpa.getId(),
+                jpa.getCodigo(),
+                jpa.getTipo(),
+                jpa.getValor(),
+                jpa.getValidade(),
                 jpa.getValorMinimo() == null ? null : Dinheiro.de(jpa.getValorMinimo()));
     }
 
     private static CupomTroca paraDominio(CupomJpa jpa) {
-        return new CupomTroca(jpa.getId(), jpa.getClienteId(), jpa.getCodigo(), Dinheiro.de(jpa.getValor()),
-                jpa.getValidade(), jpa.getSituacao(), jpa.getGeradoEm());
+        return new CupomTroca(
+                jpa.getId(),
+                jpa.getClienteId(),
+                jpa.getCodigo(),
+                Dinheiro.de(jpa.getValor()),
+                jpa.getValidade(),
+                jpa.getSituacao(),
+                jpa.getGeradoEm());
     }
 }

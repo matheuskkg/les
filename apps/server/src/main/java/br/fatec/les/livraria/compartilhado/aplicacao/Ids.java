@@ -4,13 +4,12 @@ import java.util.Collection;
 import java.util.Objects;
 
 /**
- * Validação comum das consultas em lote por id (DEC-15.3). Os casos de uso exigem uma coleção não nula, sem
- * elementos nulos, e devolvem um mapa vazio sem acionar a porta quando não há nenhum id.
+ * Validação comum das consultas em lote por id (DEC-15.3). Os casos de uso exigem uma coleção não nula, sem elementos
+ * nulos, e devolvem um mapa vazio sem acionar a porta quando não há nenhum id.
  */
 public final class Ids {
 
-    private Ids() {
-    }
+    private Ids() {}
 
     /**
      * @param ids ids de uma consulta em lote; não pode ser nulo nem conter elementos nulos

@@ -28,9 +28,7 @@ class CalcularDisponivelTest {
 
     @Test
     void recusaQuantidadesNegativas() {
-        assertThatThrownBy(() -> calcular.calcular(-1, 0))
-                .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> calcular.calcular(1, -1))
-                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> calcular.calcular(-1, 0)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> calcular.calcular(1, -1)).isInstanceOf(IllegalArgumentException.class);
     }
 }

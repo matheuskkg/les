@@ -1,10 +1,5 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
-import java.util.Optional;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
 import br.fatec.les.livraria.vendas.dominio.pedido.CupomPedido;
@@ -12,7 +7,13 @@ import br.fatec.les.livraria.vendas.dominio.pedido.ItemPedido;
 import br.fatec.les.livraria.vendas.dominio.pedido.PagamentoCartao;
 import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
 import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 /**
  * Adapter JPA do pedido (RF-VEN-008, DEC-12, DEC-16). As cópias são gravadas na criação e não mudam: depois dela, só o
@@ -28,9 +29,13 @@ public class PedidoRepositorioJpa implements PedidoRepositorio {
     @Override
     @Transactional
     public Pedido salvar(Pedido pedido) {
-        PedidoJpa entidade = pedido.getId() == null ? nova(pedido)
-                : repositorio.findById(pedido.getId()).orElseThrow(
-                        () -> new IllegalStateException("Pedido não encontrado: " + pedido.getId()));
+        PedidoJpa entidade =
+                pedido.getId() == null
+                        ? nova(pedido)
+                        : repositorio
+                                .findById(pedido.getId())
+                                .orElseThrow(
+                                        () -> new IllegalStateException("Pedido não encontrado: " + pedido.getId()));
         entidade.setStatus(pedido.getStatus());
         entidade.setEntregueEm(pedido.getEntregueEm());
         return paraDominio(repositorio.saveAndFlush(entidade));
@@ -45,7 +50,8 @@ public class PedidoRepositorioJpa implements PedidoRepositorio {
     @Override
     @Transactional
     public Optional<Pedido> buscarEmProcessamentoDoCheckout(Long checkoutId) {
-        return repositorio.buscarPorCheckoutComLock(checkoutId, StatusPedido.EM_PROCESSAMENTO)
+        return repositorio
+                .buscarPorCheckoutComLock(checkoutId, StatusPedido.EM_PROCESSAMENTO)
                 .map(PedidoRepositorioJpa::paraDominio);
     }
 
@@ -89,12 +95,23 @@ public class PedidoRepositorioJpa implements PedidoRepositorio {
     }
 
     static Pedido paraDominio(PedidoJpa entidade) {
-        return new Pedido(entidade.getId(), entidade.getCheckout() == null ? null : entidade.getCheckout().getId(),
-                entidade.getClienteId(), entidade.getStatus(), entidade.getRealizadoEm(), entidade.getEntregueEm(),
-                entidade.getCliente(), entidade.getEnderecoEntrega(), entidade.getEnderecoCobranca(),
+        return new Pedido(
+                entidade.getId(),
+                entidade.getCheckout() == null ? null : entidade.getCheckout().getId(),
+                entidade.getClienteId(),
+                entidade.getStatus(),
+                entidade.getRealizadoEm(),
+                entidade.getEntregueEm(),
+                entidade.getCliente(),
+                entidade.getEnderecoEntrega(),
+                entidade.getEnderecoCobranca(),
                 entidade.getItens().stream()
-                        .map(item -> new ItemPedido(item.getId(), item.getLivro(),
-                                Dinheiro.de(item.getPrecoUnitario()), item.getQuantidade()))
+                        .map(item ->
+                                new ItemPedido(
+                                        item.getId(),
+                                        item.getLivro(),
+                                        Dinheiro.de(item.getPrecoUnitario()),
+                                        item.getQuantidade()))
                         .toList(),
                 entidade.getCartoes().stream()
                         .map(cartao -> new PagamentoCartao(cartao.getCartao(), Dinheiro.de(cartao.getValor())))
@@ -102,7 +119,9 @@ public class PedidoRepositorioJpa implements PedidoRepositorio {
                 entidade.getCupons().stream()
                         .map(cupom -> new CupomPedido(cupom.getCupom(), Dinheiro.de(cupom.getValorAbatido())))
                         .toList(),
-                Dinheiro.de(entidade.getSubtotalItens()), Dinheiro.de(entidade.getFrete()),
-                Dinheiro.de(entidade.getDescontoPromocional()), Dinheiro.de(entidade.getTotal()));
+                Dinheiro.de(entidade.getSubtotalItens()),
+                Dinheiro.de(entidade.getFrete()),
+                Dinheiro.de(entidade.getDescontoPromocional()),
+                Dinheiro.de(entidade.getTotal()));
     }
 }

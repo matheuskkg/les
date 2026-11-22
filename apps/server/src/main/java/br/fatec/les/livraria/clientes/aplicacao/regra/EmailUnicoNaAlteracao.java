@@ -1,13 +1,14 @@
 package br.fatec.les.livraria.clientes.aplicacao.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.ContasEmUso;
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.DadosAlteradosDoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Email;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
 
 /**
  * Unicidade do e-mail na alteração dos dados do cliente (RF-CLI-002, DEC-10). A própria conta é ignorada: manter o

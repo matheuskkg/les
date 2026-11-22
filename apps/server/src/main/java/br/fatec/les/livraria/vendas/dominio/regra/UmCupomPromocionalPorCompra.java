@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.vendas.dominio.regra;
 
-import java.util.List;
+import br.fatec.les.livraria.compartilhado.dominio.Regra;
+import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 
 import org.springframework.stereotype.Component;
 
-import br.fatec.les.livraria.compartilhado.dominio.Regra;
-import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+import java.util.List;
 
 /** Um cupom promocional por compra, de qualquer tipo, inclusive os de frete (RN-VEN-003, DEC-11). */
 @Component

@@ -19,7 +19,7 @@ public record EnderecoInformadoDto(
         String observacoes) {
 
     public NovoEndereco paraNovoEndereco() {
-        return new NovoEndereco(nomeCurto, tipoEndereco, tipoLogradouro, logradouro, numero, bairro, cep, cidade, uf,
-                observacoes);
+        return new NovoEndereco(
+                nomeCurto, tipoEndereco, tipoLogradouro, logradouro, numero, bairro, cep, cidade, uf, observacoes);
     }
 }

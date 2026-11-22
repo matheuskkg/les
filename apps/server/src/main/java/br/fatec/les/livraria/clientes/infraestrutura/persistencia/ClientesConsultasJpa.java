@@ -1,14 +1,5 @@
 package br.fatec.les.livraria.clientes.infraestrutura.persistencia;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.clientes.aplicacao.consulta.ClienteResumo;
 import br.fatec.les.livraria.clientes.aplicacao.consulta.FiltroCliente;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClientesConsultas;
@@ -16,17 +7,28 @@ import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.ConversorDePaginacao;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
- * Adapter JPA da consulta de clientes do admin (RF-CLI-004, RNF-CLI-005, DEC-07). A listagem usa as
- * {@link EspecificacoesDeCliente} e devolve só os dados da tabela {@code cliente}; endereços e cartões são
- * carregados apenas no detalhe.
+ * Adapter JPA da consulta de clientes do admin (RF-CLI-004, RNF-CLI-005, DEC-07). A listagem usa as {@link
+ * EspecificacoesDeCliente} e devolve só os dados da tabela {@code cliente}; endereços e cartões são carregados apenas
+ * no detalhe.
  */
 @Component
 @RequiredArgsConstructor
@@ -39,14 +41,14 @@ public class ClientesConsultasJpa implements ClientesConsultas {
     @Override
     @Transactional(readOnly = true)
     public Pagina<ClienteResumo> listar(FiltroCliente filtro, Paginacao paginacao) {
-        Page<ClienteJpa> pagina = clientes.findAll(EspecificacoesDeCliente.de(filtro),
-                ConversorDePaginacao.paraPageable(paginacao));
+        Page<ClienteJpa> pagina =
+                clientes.findAll(EspecificacoesDeCliente.de(filtro), ConversorDePaginacao.paraPageable(paginacao));
         return ConversorDePaginacao.paraPagina(pagina, ClientesConsultasJpa::paraResumo);
     }
 
     /**
-     * Os ids por nome e CPF usam as mesmas {@link EspecificacoesDeCliente} da listagem, mas projetadas só na
-     * coluna {@code id}: o cliente inteiro não vem do banco (RF-VEN-009, RNF-GER-001).
+     * Os ids por nome e CPF usam as mesmas {@link EspecificacoesDeCliente} da listagem, mas projetadas só na coluna
+     * {@code id}: o cliente inteiro não vem do banco (RF-VEN-009, RNF-GER-001).
      */
     @Override
     @Transactional(readOnly = true)
@@ -70,7 +72,12 @@ public class ClientesConsultasJpa implements ClientesConsultas {
     }
 
     private static ClienteResumo paraResumo(ClienteJpa cliente) {
-        return new ClienteResumo(cliente.getId(), cliente.getUsuarioId(), cliente.getNome(), cliente.getCpf(),
-                cliente.getGenero(), cliente.getDataNascimento());
+        return new ClienteResumo(
+                cliente.getId(),
+                cliente.getUsuarioId(),
+                cliente.getNome(),
+                cliente.getCpf(),
+                cliente.getGenero(),
+                cliente.getDataNascimento());
     }
 }

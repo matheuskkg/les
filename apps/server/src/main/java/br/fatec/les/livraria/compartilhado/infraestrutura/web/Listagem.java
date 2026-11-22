@@ -7,9 +7,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Declara uma listagem paginada: os campos ordenáveis e a ordem padrão. O parâmetro anotado é do tipo
- * {@link br.fatec.les.livraria.compartilhado.aplicacao.Paginacao} e é resolvido por {@link ResolvedorDePaginacao}
- * (DEC-07).
+ * Declara uma listagem paginada: os campos ordenáveis e a ordem padrão. O parâmetro anotado é do tipo {@link
+ * br.fatec.les.livraria.compartilhado.aplicacao.Paginacao} e é resolvido por {@link ResolvedorDePaginacao} (DEC-07).
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

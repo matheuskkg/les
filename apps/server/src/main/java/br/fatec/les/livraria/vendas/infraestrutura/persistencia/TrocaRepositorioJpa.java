@@ -1,16 +1,17 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.vendas.aplicacao.porta.TrocaRepositorio;
 import br.fatec.les.livraria.vendas.dominio.troca.ItemTroca;
 import br.fatec.les.livraria.vendas.dominio.troca.Troca;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Adapter JPA da troca (RF-VEN-011, DEC-12, DEC-16). Os itens são gravados na criação; depois dela mudam o status, o
@@ -28,9 +29,12 @@ public class TrocaRepositorioJpa implements TrocaRepositorio {
     @Override
     @Transactional
     public Troca salvar(Troca troca) {
-        TrocaJpa entidade = troca.getId() == null ? nova(troca)
-                : repositorio.findById(troca.getId()).orElseThrow(
-                        () -> new IllegalStateException("Troca não encontrada: " + troca.getId()));
+        TrocaJpa entidade =
+                troca.getId() == null
+                        ? nova(troca)
+                        : repositorio
+                                .findById(troca.getId())
+                                .orElseThrow(() -> new IllegalStateException("Troca não encontrada: " + troca.getId()));
         entidade.setStatus(troca.getStatus());
         entidade.setMotivoRecusa(troca.getMotivoRecusa());
         entidade.setValorCupom(troca.getValorCupom() == null ? null : troca.getValorCupom().valor());
@@ -72,11 +76,18 @@ public class TrocaRepositorioJpa implements TrocaRepositorio {
     }
 
     static Troca paraDominio(TrocaJpa entidade) {
-        return new Troca(entidade.getId(), entidade.getPedido().getId(), entidade.getStatus(),
+        return new Troca(
+                entidade.getId(),
+                entidade.getPedido().getId(),
+                entidade.getStatus(),
                 entidade.getSolicitadaEm(),
                 entidade.getItens().stream()
-                        .map(item -> new ItemTroca(item.getId(), item.getItemPedido().getId(), item.getQuantidade(),
-                                item.getVoltaEstoque()))
+                        .map(item ->
+                                new ItemTroca(
+                                        item.getId(),
+                                        item.getItemPedido().getId(),
+                                        item.getQuantidade(),
+                                        item.getVoltaEstoque()))
                         .toList(),
                 entidade.getMotivoRecusa(),
                 entidade.getValorCupom() == null ? null : Dinheiro.de(entidade.getValorCupom()),

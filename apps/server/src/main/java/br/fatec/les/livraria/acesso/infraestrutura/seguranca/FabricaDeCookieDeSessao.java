@@ -1,11 +1,12 @@
 package br.fatec.les.livraria.acesso.infraestrutura.seguranca;
 
-import org.springframework.http.ResponseCookie;
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.infraestrutura.seguranca.PropriedadesJwt;
 import br.fatec.les.livraria.compartilhado.infraestrutura.seguranca.PropriedadesSessao;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseCookie;
+import org.springframework.stereotype.Component;
 
 /** Monta o cookie {@code sessao} com os atributos do DEC-08, tanto na emissão quanto na limpeza. */
 @Component

@@ -1,41 +1,5 @@
 package br.fatec.les.livraria.recomendacao.infraestrutura.externo;
 
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-
-import org.jspecify.annotations.Nullable;
-import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.ToolResponseMessage;
-import org.springframework.ai.chat.messages.ToolResponseMessage.ToolResponse;
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.metadata.Usage;
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.converter.BeanOutputConverter;
-import org.springframework.ai.model.tool.ToolCallingManager;
-import org.springframework.ai.model.tool.ToolExecutionResult;
-import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.support.ToolCallbacks;
-import org.springframework.ai.tool.ToolCallback;
-
-import com.openai.core.http.Headers;
-import com.openai.errors.OpenAIIoException;
-import com.openai.errors.OpenAIServiceException;
-
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.AssistenteDeLivros;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.FalhaNaChamadaDeIa;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.FerramentasDoAssistente;
@@ -60,25 +24,64 @@ import br.fatec.les.livraria.recomendacao.dominio.regra.LimiteDeCorrecoesDeForma
 import br.fatec.les.livraria.recomendacao.dominio.regra.LimiteDeVoltasDeTools;
 import br.fatec.les.livraria.recomendacao.infraestrutura.PropriedadesIa;
 
+import com.openai.core.http.Headers;
+import com.openai.errors.OpenAIIoException;
+import com.openai.errors.OpenAIServiceException;
+
+import org.jspecify.annotations.Nullable;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.ToolResponseMessage;
+import org.springframework.ai.chat.messages.ToolResponseMessage.ToolResponse;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.metadata.Usage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.converter.BeanOutputConverter;
+import org.springframework.ai.model.tool.ToolCallingManager;
+import org.springframework.ai.model.tool.ToolExecutionResult;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.support.ToolCallbacks;
+import org.springframework.ai.tool.ToolCallback;
+
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+
 /**
- * Provedor real compatível com a API OpenAI (Gemini, Groq e OpenRouter), via Spring AI (RNF-REC-001, DEC-03). O
- * cliente só é montado quando há chave, sem retry próprio: a {@code CadeiaDeProvedores} decide o que fazer na falha.
+ * Provedor real compatível com a API OpenAI (Gemini, Groq e OpenRouter), via Spring AI (RNF-REC-001, DEC-03). O cliente
+ * só é montado quando há chave, sem retry próprio: a {@code CadeiaDeProvedores} decide o que fazer na falha.
  *
  * <p>O loop de tools é controlado pelo adapter, não pelo Spring AI: cada {@code call} faz uma única chamada HTTP, as
  * tools de leitura são executadas pelo {@link ToolCallingManager} e a volta seguinte recebe o histórico devolvido por
  * ele. No formato {@code ferramenta}, a resposta final vem da tool {@code responder}, que encerra o loop sem outra
- * chamada. Os limites de voltas, de correção e de chamadas HTTP ficam em {@link LimiteDeVoltasDeTools},
- * {@link LimiteDeCorrecoesDeFormato} e {@link LimiteDeChamadasHttp}.</p>
+ * chamada. Os limites de voltas, de correção e de chamadas HTTP ficam em {@link LimiteDeVoltasDeTools}, {@link
+ * LimiteDeCorrecoesDeFormato} e {@link LimiteDeChamadasHttp}.
  */
 public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
 
-    static final String SISTEMA_DA_RECOMENDACAO = """
+    static final String SISTEMA_DA_RECOMENDACAO =
+            """
             Você é o assistente de uma livraria on-line. Recebe o perfil de um cliente e uma lista de livros \
             candidatos. Escolha, entre os candidatos, os que combinam com o perfil e ordene do mais ao menos \
             indicado. Para cada um, escreva em português uma justificativa curta, de até 140 caracteres, dirigida \
-            ao cliente. Use apenas os ids da lista de candidatos.""";
+            ao cliente. Use apenas os ids da lista de candidatos.\
+            """;
 
-    static final String SISTEMA_DA_CONVERSA = """
+    static final String SISTEMA_DA_CONVERSA =
+            """
             Você é o assistente de uma livraria on-line e responde em português, de forma curta e cordial. \
             Ajude só com assuntos da loja: livros do catálogo, autores, categorias, preços e dúvidas gerais sobre \
             compra, frete, trocas e pedidos. Para qualquer outro assunto, responda com o tipo FORA_DO_ESCOPO. \
@@ -86,12 +89,15 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
             título, autor, gênero ou faixa de preço. Use verLivro só para a sinopse ou a quantidade em estoque e \
             recomendarParaMim para sugestões pelo histórico do cliente. Cite só ids do catálogo; nunca invente \
             livros. O tipo da resposta é RECOMENDACAO quando sugere livros pelo gosto do cliente, BUSCA quando \
-            atende a uma busca, DUVIDA quando esclarece uma dúvida e FORA_DO_ESCOPO quando o assunto não é da loja.""";
+            atende a uma busca, DUVIDA quando esclarece uma dúvida e FORA_DO_ESCOPO quando o assunto não é da loja.\
+            """;
 
-    static final String INSTRUCAO_DA_FERRAMENTA_DE_RESPOSTA = """
+    static final String INSTRUCAO_DA_FERRAMENTA_DE_RESPOSTA =
+            """
             Sempre entregue a resposta final chamando a ferramenta responder, com o tipo, o texto e os ids dos \
             livros citados. Nunca escreva a resposta no texto da mensagem: o texto serve só para as chamadas das \
-            ferramentas de consulta.""";
+            ferramentas de consulta.\
+            """;
 
     private static final BeanOutputConverter<SaidaDeRecomendacao> CONVERSOR_DA_RECOMENDACAO =
             new BeanOutputConverter<>(SaidaDeRecomendacao.class);
@@ -111,14 +117,15 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
     public AssistenteDeLivrosOpenAi(String nome, PropriedadesIa.Provedor provedor, Duration tempoLimite) {
         this.nome = Objects.requireNonNull(nome, "nome");
         this.provedor = Objects.requireNonNull(provedor, "provedor");
-        this.opcoesBase = OpenAiChatOptions.builder()
-                .baseUrl(provedor.urlBase())
-                .apiKey(provedor.chave())
-                .model(provedor.modelo())
-                .timeout(tempoLimite)
-                .maxRetries(0)
-                .customHeaders(provedor.cabecalhos())
-                .build();
+        this.opcoesBase =
+                OpenAiChatOptions.builder()
+                        .baseUrl(provedor.urlBase())
+                        .apiKey(provedor.chave())
+                        .model(provedor.modelo())
+                        .timeout(tempoLimite)
+                        .maxRetries(0)
+                        .customHeaders(provedor.cabecalhos())
+                        .build();
         this.modelo = provedor.temChave() ? OpenAiChatModel.builder().options(opcoesBase).build() : null;
     }
 
@@ -153,24 +160,36 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
         if (!provedor.usaJsonSchema()) {
             sistema += "\n\n" + CONVERSOR_DA_RECOMENDACAO.getFormat();
         }
-        Prompt prompt = new Prompt(List.of(
-                new SystemMessage(sistema),
-                new UserMessage("Perfil do cliente:\n" + descrever(perfil) + "\n\nCandidatos:\n"
-                        + descrever(candidatos))),
-                opcoesDaRecomendacao());
+        Prompt prompt =
+                new Prompt(
+                        List.of(
+                                new SystemMessage(sistema),
+                                new UserMessage(
+                                        "Perfil do cliente:\n"
+                                                + descrever(perfil)
+                                                + "\n\nCandidatos:\n"
+                                                + descrever(candidatos))),
+                        opcoesDaRecomendacao());
 
         try {
             while (true) {
                 ChatResponse resposta = chamarHttp(modelo, prompt, voltas);
                 String texto = conteudo(resposta);
                 try {
-                    SaidaDeRecomendacao saida = CONVERSOR_DA_RECOMENDACAO.convert(
-                            Objects.requireNonNullElse(texto, ""));
+                    SaidaDeRecomendacao saida =
+                            CONVERSOR_DA_RECOMENDACAO.convert(Objects.requireNonNullElse(texto, ""));
                     return RespostaDoProvedor.comVoltas(new RespostaDeRecomendacao(itens(saida)), voltas);
                 } catch (RuntimeException invalida) {
-                    Correcao correcao = corrigir(prompt, correcoes, "Resposta fora do formato esperado.",
-                            invalida, voltas, atual -> promptDeCorrecao(atual, texto,
-                                    correcaoDeFormato(invalida), opcoesDaRecomendacao()));
+                    Correcao correcao =
+                            corrigir(
+                                    prompt,
+                                    correcoes,
+                                    "Resposta fora do formato esperado.",
+                                    invalida,
+                                    voltas,
+                                    atual ->
+                                            promptDeCorrecao(
+                                                    atual, texto, correcaoDeFormato(invalida), opcoesDaRecomendacao()));
                     prompt = correcao.prompt();
                     correcoes = correcao.feitas();
                 }
@@ -198,45 +217,66 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
         List<ToolCallback> callbacks = callbacks(ferramentas, ferramenta);
 
         Prompt prompt = promptInicial(perfil, historico, mensagemNova, catalogo, callbacks, ferramenta, 1);
-        List<String> nomesDisponiveis = callbacks.stream()
-                .map(callback -> callback.getToolDefinition().name())
-                .toList();
+        List<String> nomesDisponiveis =
+                callbacks.stream().map(callback -> callback.getToolDefinition().name()).toList();
         try {
             while (true) {
                 ChatResponse resposta = chamarHttp(modelo, prompt, voltas);
                 AssistantMessage saida = mensagem(resposta);
                 List<AssistantMessage.ToolCall> chamadas = chamadas(saida);
 
-                Optional<AssistantMessage.ToolCall> respostaFinal = ferramenta
-                        ? chamadas.stream()
-                                .filter(chamada -> FerramentaDeResposta.NOME.equals(chamada.name()))
-                                .findFirst()
-                        : Optional.empty();
+                Optional<AssistantMessage.ToolCall> respostaFinal =
+                        ferramenta
+                                ? chamadas.stream()
+                                        .filter(chamada -> FerramentaDeResposta.NOME.equals(chamada.name()))
+                                        .findFirst()
+                                : Optional.empty();
                 if (respostaFinal.isPresent()) {
                     try {
                         return RespostaDoProvedor.comVoltas(
-                                respostaDoAssistente(CONVERSOR_DO_ASSISTENTE.convert(
-                                        respostaFinal.get().arguments())),
+                                respostaDoAssistente(CONVERSOR_DO_ASSISTENTE.convert(respostaFinal.get().arguments())),
                                 voltas);
                     } catch (RuntimeException invalida) {
-                        Correcao correcao = corrigir(prompt, correcoes,
-                                "Resposta da ferramenta responder fora do formato esperado.", invalida, voltas,
-                                atual -> promptDeCorrecao(atual, saida, correcaoDaFerramenta(invalida), callbacks,
-                                        ferramenta, voltas.size() + 1));
+                        Correcao correcao =
+                                corrigir(
+                                        prompt,
+                                        correcoes,
+                                        "Resposta da ferramenta responder fora do formato esperado.",
+                                        invalida,
+                                        voltas,
+                                        atual ->
+                                                promptDeCorrecao(
+                                                        atual,
+                                                        saida,
+                                                        correcaoDaFerramenta(invalida),
+                                                        callbacks,
+                                                        ferramenta,
+                                                        voltas.size() + 1));
                         prompt = correcao.prompt();
                         correcoes = correcao.feitas();
                         continue;
                     }
                 }
 
-                List<AssistantMessage.ToolCall> desconhecidas = chamadas.stream()
-                        .filter(chamada -> !nomesDisponiveis.contains(chamada.name()))
-                        .toList();
+                List<AssistantMessage.ToolCall> desconhecidas =
+                        chamadas.stream().filter(chamada -> !nomesDisponiveis.contains(chamada.name())).toList();
                 if (!desconhecidas.isEmpty()) {
-                    Correcao correcao = corrigir(prompt, correcoes,
-                            "A resposta chamou uma ferramenta que não existe.", null, voltas,
-                            atual -> promptDeCorrecaoDeFerramentaDesconhecida(atual, saida, desconhecidas,
-                                    nomesDisponiveis, callbacks, ferramenta, voltas.size() + 1));
+                    Correcao correcao =
+                            corrigir(
+                                    prompt,
+                                    correcoes,
+                                    "A resposta chamou uma ferramenta que não existe.",
+                                    null,
+                                    voltas,
+                                    atual ->
+                                            promptDeCorrecaoDeFerramentaDesconhecida(
+                                                    atual,
+                                                    saida,
+                                                    desconhecidas,
+                                                    nomesDisponiveis,
+                                                    callbacks,
+                                                    ferramenta,
+                                                    voltas.size() + 1));
                     prompt = correcao.prompt();
                     correcoes = correcao.feitas();
                     continue;
@@ -256,16 +296,29 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
                     } catch (RuntimeException excecao) {
                         throw traduzir(excecao, voltas);
                     }
-                    prompt = new Prompt(resultado.conversationHistory(),
-                            opcoesDaConversa(callbacks, ferramenta, voltas.size() + 1));
+                    prompt =
+                            new Prompt(
+                                    resultado.conversationHistory(),
+                                    opcoesDaConversa(callbacks, ferramenta, voltas.size() + 1));
                     continue;
                 }
 
                 if (ferramenta) {
-                    Correcao correcao = corrigir(prompt, correcoes,
-                            "A resposta não chamou a ferramenta responder.", null, voltas,
-                            atual -> promptDeCorrecao(atual, saida, correcaoDaFerramenta(null), callbacks,
-                                    ferramenta, voltas.size() + 1));
+                    Correcao correcao =
+                            corrigir(
+                                    prompt,
+                                    correcoes,
+                                    "A resposta não chamou a ferramenta responder.",
+                                    null,
+                                    voltas,
+                                    atual ->
+                                            promptDeCorrecao(
+                                                    atual,
+                                                    saida,
+                                                    correcaoDaFerramenta(null),
+                                                    callbacks,
+                                                    ferramenta,
+                                                    voltas.size() + 1));
                     prompt = correcao.prompt();
                     correcoes = correcao.feitas();
                     continue;
@@ -273,13 +326,26 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
 
                 try {
                     return RespostaDoProvedor.comVoltas(
-                            respostaDoAssistente(CONVERSOR_DO_ASSISTENTE.convert(Objects.requireNonNullElse(
-                                    conteudo(resposta), ""))),
+                            respostaDoAssistente(
+                                    CONVERSOR_DO_ASSISTENTE.convert(
+                                            Objects.requireNonNullElse(conteudo(resposta), ""))),
                             voltas);
                 } catch (RuntimeException invalida) {
-                    Correcao correcao = corrigir(prompt, correcoes, "Resposta fora do formato esperado.",
-                            invalida, voltas, atual -> promptDeCorrecao(atual, saida,
-                                    correcaoDeFormato(invalida), callbacks, ferramenta, voltas.size() + 1));
+                    Correcao correcao =
+                            corrigir(
+                                    prompt,
+                                    correcoes,
+                                    "Resposta fora do formato esperado.",
+                                    invalida,
+                                    voltas,
+                                    atual ->
+                                            promptDeCorrecao(
+                                                    atual,
+                                                    saida,
+                                                    correcaoDeFormato(invalida),
+                                                    callbacks,
+                                                    ferramenta,
+                                                    voltas.size() + 1));
                     prompt = correcao.prompt();
                     correcoes = correcao.feitas();
                 }
@@ -292,23 +358,34 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
         }
     }
 
-    private Prompt promptInicial(PerfilDoCliente perfil, List<MensagemAnterior> historico, String mensagemNova,
-            List<ResumoDeLivro> catalogo, List<ToolCallback> callbacks, boolean ferramenta, int volta) {
-        String sistema = SISTEMA_DA_CONVERSA
-                + (ferramenta ? "\n\n" + INSTRUCAO_DA_FERRAMENTA_DE_RESPOSTA : "")
-                + "\n\nCatálogo à venda:\n" + ContextoCompactoDoChat.catalogo(catalogo)
-                + "\n\nPerfil do cliente:\n" + ContextoCompactoDoChat.perfil(perfil, catalogo);
+    private Prompt promptInicial(
+            PerfilDoCliente perfil,
+            List<MensagemAnterior> historico,
+            String mensagemNova,
+            List<ResumoDeLivro> catalogo,
+            List<ToolCallback> callbacks,
+            boolean ferramenta,
+            int volta) {
+        String sistema =
+                SISTEMA_DA_CONVERSA
+                        + (ferramenta ? "\n\n" + INSTRUCAO_DA_FERRAMENTA_DE_RESPOSTA : "")
+                        + "\n\nCatálogo à venda:\n"
+                        + ContextoCompactoDoChat.catalogo(catalogo)
+                        + "\n\nPerfil do cliente:\n"
+                        + ContextoCompactoDoChat.perfil(perfil, catalogo);
         if (!ferramenta && !provedor.usaJsonSchema()) {
             sistema += "\n\n" + CONVERSOR_DO_ASSISTENTE.getFormat();
         }
 
         List<Message> mensagens = new ArrayList<>();
         mensagens.add(new SystemMessage(sistema));
-        mensagens.addAll(historico.stream()
-                .<Message>map(mensagem -> mensagem.papel() == PapelDaMensagem.CLIENTE
-                        ? new UserMessage(mensagem.texto())
-                        : new AssistantMessage(mensagem.texto()))
-                .toList());
+        mensagens.addAll(
+                historico.stream()
+                        .<Message>map(mensagem ->
+                                mensagem.papel() == PapelDaMensagem.CLIENTE
+                                        ? new UserMessage(mensagem.texto())
+                                        : new AssistantMessage(mensagem.texto()))
+                        .toList());
         mensagens.add(new UserMessage(mensagemNova));
         return new Prompt(mensagens, opcoesDaConversa(callbacks, ferramenta, volta));
     }
@@ -323,14 +400,13 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
     }
 
     /**
-     * Opções de uma volta do chat: as tools de leitura e, no formato {@code ferramenta}, a tool de resposta final.
-     * O {@code tool_choice} é {@code required} na primeira volta quando configurado e sempre no formato
-     * {@code ferramenta}; nas demais voltas fica {@code auto} para o modelo poder responder (DEC-03).
+     * Opções de uma volta do chat: as tools de leitura e, no formato {@code ferramenta}, a tool de resposta final. O
+     * {@code tool_choice} é {@code required} na primeira volta quando configurado e sempre no formato {@code
+     * ferramenta}; nas demais voltas fica {@code auto} para o modelo poder responder (DEC-03).
      */
     private OpenAiChatOptions opcoesDaConversa(List<ToolCallback> callbacks, boolean ferramenta, int volta) {
-        OpenAiChatOptions.Builder opcoes = opcoesBase.mutate()
-                .toolCallbacks(callbacks)
-                .toolChoice(escolhaDeFerramenta(ferramenta, volta));
+        OpenAiChatOptions.Builder opcoes =
+                opcoesBase.mutate().toolCallbacks(callbacks).toolChoice(escolhaDeFerramenta(ferramenta, volta));
         if (provedor.usaJsonSchema()) {
             opcoes.responseFormat(formatoJsonSchema(CONVERSOR_DO_ASSISTENTE));
         }
@@ -390,19 +466,23 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
      * chamadas HTTP não é repetido aqui: {@link #chamarHttp} recusa a próxima chamada quando o total do provedor
      * acabou, mantendo o resultado {@code LIMITE_DE_CHAMADAS}.
      */
-    private Correcao corrigir(Prompt prompt, int correcoes, String mensagem, @Nullable Throwable causa,
-            List<VoltaDaChamada> voltas, UnaryOperator<Prompt> montarPrompt) {
+    private Correcao corrigir(
+            Prompt prompt,
+            int correcoes,
+            String mensagem,
+            @Nullable Throwable causa,
+            List<VoltaDaChamada> voltas,
+            UnaryOperator<Prompt> montarPrompt) {
         if (!limiteDeCorrecoes.permite(correcoes)) {
             throw respostaInvalida(mensagem, causa, voltas);
         }
         return new Correcao(montarPrompt.apply(prompt), correcoes + 1);
     }
 
-    private record Correcao(Prompt prompt, int feitas) {
-    }
+    private record Correcao(Prompt prompt, int feitas) {}
 
-    private static Prompt promptDeCorrecao(Prompt prompt, @Nullable String textoAnterior, String correcao,
-            OpenAiChatOptions opcoes) {
+    private static Prompt promptDeCorrecao(
+            Prompt prompt, @Nullable String textoAnterior, String correcao, OpenAiChatOptions opcoes) {
         List<Message> mensagens = new ArrayList<>(prompt.getInstructions());
         mensagens.add(new AssistantMessage(Objects.requireNonNullElse(textoAnterior, "")));
         mensagens.add(new UserMessage(correcao));
@@ -410,20 +490,37 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
     }
 
     /**
-     * Corrige uma resposta que não chamou a tool de resposta final. Como a resposta pode ter chamado tools, o
-     * histórico leva a mensagem do assistente e uma resposta de erro para cada chamada antes da mensagem de correção,
-     * senão a próxima requisição fica inválida para a API OpenAI (DEC-03).
+     * Corrige uma resposta que não chamou a tool de resposta final. Como a resposta pode ter chamado tools, o histórico
+     * leva a mensagem do assistente e uma resposta de erro para cada chamada antes da mensagem de correção, senão a
+     * próxima requisição fica inválida para a API OpenAI (DEC-03).
      */
-    private Prompt promptDeCorrecao(Prompt prompt, @Nullable AssistantMessage saida, String correcao,
-            List<ToolCallback> callbacks, boolean ferramenta, int volta) {
-        return promptDeCorrecao(prompt, saida, correcao, callbacks, ferramenta, volta,
-                chamada -> FerramentaDeResposta.NOME.equals(chamada.name())
-                        ? "Erro: " + correcao
-                        : "Não executada: a resposta final veio na ferramenta responder.");
+    private Prompt promptDeCorrecao(
+            Prompt prompt,
+            @Nullable AssistantMessage saida,
+            String correcao,
+            List<ToolCallback> callbacks,
+            boolean ferramenta,
+            int volta) {
+        return promptDeCorrecao(
+                prompt,
+                saida,
+                correcao,
+                callbacks,
+                ferramenta,
+                volta,
+                chamada ->
+                        FerramentaDeResposta.NOME.equals(chamada.name())
+                                ? "Erro: " + correcao
+                                : "Não executada: a resposta final veio na ferramenta responder.");
     }
 
-    private Prompt promptDeCorrecao(Prompt prompt, @Nullable AssistantMessage saida, String correcao,
-            List<ToolCallback> callbacks, boolean ferramenta, int volta,
+    private Prompt promptDeCorrecao(
+            Prompt prompt,
+            @Nullable AssistantMessage saida,
+            String correcao,
+            List<ToolCallback> callbacks,
+            boolean ferramenta,
+            int volta,
             Function<AssistantMessage.ToolCall, String> respostaDeErro) {
         List<Message> mensagens = new ArrayList<>(prompt.getInstructions());
         if (saida == null) {
@@ -431,9 +528,11 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
         } else {
             mensagens.add(saida);
             if (saida.hasToolCalls()) {
-                List<ToolResponse> respostas = saida.getToolCalls().stream()
-                        .map(chamada -> new ToolResponse(chamada.id(), chamada.name(), respostaDeErro.apply(chamada)))
-                        .toList();
+                List<ToolResponse> respostas =
+                        saida.getToolCalls().stream()
+                                .map(chamada ->
+                                        new ToolResponse(chamada.id(), chamada.name(), respostaDeErro.apply(chamada)))
+                                .toList();
                 mensagens.add(ToolResponseMessage.builder().responses(respostas).build());
             }
         }
@@ -445,20 +544,39 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
      * Corrige uma chamada de ferramenta que não está entre as anunciadas ao modelo (DEC-03). A mensagem lista as
      * ferramentas disponíveis e o histórico responde às chamadas com erro, para a próxima requisição ser válida.
      */
-    private Prompt promptDeCorrecaoDeFerramentaDesconhecida(Prompt prompt, @Nullable AssistantMessage saida,
-            List<AssistantMessage.ToolCall> desconhecidas, List<String> disponiveis, List<ToolCallback> callbacks,
-            boolean ferramenta, int volta) {
-        String correcao = "A resposta chamou ferramentas que não existem: "
-                + desconhecidas.stream().map(AssistantMessage.ToolCall::name).distinct()
-                        .collect(Collectors.joining(", "))
-                + ". Ferramentas disponíveis: " + String.join(", ", disponiveis)
-                + ". Responda chamando apenas as ferramentas disponíveis"
-                + (ferramenta ? " e entregue a resposta final com a ferramenta responder." : ".");
-        return promptDeCorrecao(prompt, saida, correcao, callbacks, ferramenta, volta,
-                chamada -> desconhecidas.contains(chamada)
-                        ? "Erro: a ferramenta " + chamada.name() + " não existe. Ferramentas disponíveis: "
-                                + String.join(", ", disponiveis) + "."
-                        : "Não executada: a resposta chamou uma ferramenta desconhecida.");
+    private Prompt promptDeCorrecaoDeFerramentaDesconhecida(
+            Prompt prompt,
+            @Nullable AssistantMessage saida,
+            List<AssistantMessage.ToolCall> desconhecidas,
+            List<String> disponiveis,
+            List<ToolCallback> callbacks,
+            boolean ferramenta,
+            int volta) {
+        String correcao =
+                "A resposta chamou ferramentas que não existem: "
+                        + desconhecidas.stream()
+                                .map(AssistantMessage.ToolCall::name)
+                                .distinct()
+                                .collect(Collectors.joining(", "))
+                        + ". Ferramentas disponíveis: "
+                        + String.join(", ", disponiveis)
+                        + ". Responda chamando apenas as ferramentas disponíveis"
+                        + (ferramenta ? " e entregue a resposta final com a ferramenta responder." : ".");
+        return promptDeCorrecao(
+                prompt,
+                saida,
+                correcao,
+                callbacks,
+                ferramenta,
+                volta,
+                chamada ->
+                        desconhecidas.contains(chamada)
+                                ? "Erro: a ferramenta "
+                                        + chamada.name()
+                                        + " não existe. Ferramentas disponíveis: "
+                                        + String.join(", ", disponiveis)
+                                        + "."
+                                : "Não executada: a resposta chamou uma ferramenta desconhecida.");
     }
 
     private static String correcaoDeFormato(@Nullable RuntimeException erro) {
@@ -477,9 +595,10 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
         if (saida.tipo() == null) {
             throw new IllegalArgumentException("tipo ausente na resposta.");
         }
-        List<Long> citados = saida.livrosCitados() == null ? List.of() : saida.livrosCitados().stream()
-                .filter(Objects::nonNull)
-                .toList();
+        List<Long> citados =
+                saida.livrosCitados() == null
+                        ? List.of()
+                        : saida.livrosCitados().stream().filter(Objects::nonNull).toList();
         return new RespostaDoAssistente(saida.tipo(), Objects.requireNonNullElse(saida.texto(), ""), citados);
     }
 
@@ -515,21 +634,23 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
 
     private OpenAiChatModel modeloConfigurado() {
         if (modelo == null) {
-            throw new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_HTTP, null, "Provedor " + nome + " sem chave.",
-                    List.of());
+            throw new FalhaNaChamadaDeIa(
+                    ResultadoDaChamada.ERRO_HTTP, null, "Provedor " + nome + " sem chave.", List.of());
         }
         return modelo;
     }
 
     private static FalhaNaChamadaDeIa limiteDeChamadas(List<VoltaDaChamada> voltas) {
-        return new FalhaNaChamadaDeIa(ResultadoDaChamada.LIMITE_DE_CHAMADAS, null,
-                "Limite de chamadas ao provedor por mensagem atingido.", List.copyOf(voltas));
+        return new FalhaNaChamadaDeIa(
+                ResultadoDaChamada.LIMITE_DE_CHAMADAS,
+                null,
+                "Limite de chamadas ao provedor por mensagem atingido.",
+                List.copyOf(voltas));
     }
 
-    private static FalhaNaChamadaDeIa respostaInvalida(String mensagem, @Nullable Throwable causa,
-            List<VoltaDaChamada> voltas) {
-        return new FalhaNaChamadaDeIa(ResultadoDaChamada.RESPOSTA_INVALIDA, null, mensagem, List.copyOf(voltas),
-                causa);
+    private static FalhaNaChamadaDeIa respostaInvalida(
+            String mensagem, @Nullable Throwable causa, List<VoltaDaChamada> voltas) {
+        return new FalhaNaChamadaDeIa(ResultadoDaChamada.RESPOSTA_INVALIDA, null, mensagem, List.copyOf(voltas), causa);
     }
 
     static FalhaNaChamadaDeIa traduzir(RuntimeException excecao) {
@@ -542,29 +663,34 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
             if (causa instanceof OpenAIServiceException servico) {
                 if (servico.statusCode() == 429) {
                     String mensagem = mensagem(causa);
-                    Duration espera = InterpretarEsperaSugerida
-                            .deCabecalho(cabecalho(servico.headers(), "Retry-After"), Instant.now())
-                            .or(() -> InterpretarEsperaSugerida.daMensagem(mensagem))
-                            .orElse(null);
-                    return new FalhaNaChamadaDeIa(ResultadoDaChamada.COTA_ESGOTADA, 429, mensagem, feitas,
-                            excecao, espera, DetectarCotaDiaria.ehDiaria(mensagem, espera));
+                    Duration espera =
+                            InterpretarEsperaSugerida.deCabecalho(
+                                            cabecalho(servico.headers(), "Retry-After"), Instant.now())
+                                    .or(() -> InterpretarEsperaSugerida.daMensagem(mensagem))
+                                    .orElse(null);
+                    return new FalhaNaChamadaDeIa(
+                            ResultadoDaChamada.COTA_ESGOTADA,
+                            429,
+                            mensagem,
+                            feitas,
+                            excecao,
+                            espera,
+                            DetectarCotaDiaria.ehDiaria(mensagem, espera));
                 }
-                return new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_HTTP, servico.statusCode(), mensagem(causa),
-                        feitas, excecao);
+                return new FalhaNaChamadaDeIa(
+                        ResultadoDaChamada.ERRO_HTTP, servico.statusCode(), mensagem(causa), feitas, excecao);
             }
             if (causa instanceof InterruptedIOException) {
-                return new FalhaNaChamadaDeIa(ResultadoDaChamada.TEMPO_ESGOTADO, null, mensagem(causa), feitas,
-                        excecao);
+                return new FalhaNaChamadaDeIa(
+                        ResultadoDaChamada.TEMPO_ESGOTADO, null, mensagem(causa), feitas, excecao);
             }
         }
         for (Throwable causa = excecao; causa != null; causa = causa.getCause()) {
             if (causa instanceof OpenAIIoException || causa instanceof IOException) {
-                return new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_DE_REDE, null, mensagem(causa), feitas,
-                        excecao);
+                return new FalhaNaChamadaDeIa(ResultadoDaChamada.ERRO_DE_REDE, null, mensagem(causa), feitas, excecao);
             }
         }
-        return new FalhaNaChamadaDeIa(ResultadoDaChamada.RESPOSTA_INVALIDA, null, mensagem(excecao), feitas,
-                excecao);
+        return new FalhaNaChamadaDeIa(ResultadoDaChamada.RESPOSTA_INVALIDA, null, mensagem(excecao), feitas, excecao);
     }
 
     /** Valor do cabeçalho HTTP, procurado sem diferenciar maiúsculas. */
@@ -589,28 +715,48 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
 
     static String descrever(PerfilDoCliente perfil) {
         StringBuilder texto = new StringBuilder();
-        texto.append("- Livros comprados: ").append(perfil.livrosComprados().isEmpty() ? "nenhum"
-                : perfil.livrosComprados().stream().map(AssistenteDeLivrosOpenAi::descrever)
-                        .collect(Collectors.joining("; "))).append('\n');
+        texto.append("- Livros comprados: ")
+                .append(
+                        perfil.livrosComprados().isEmpty()
+                                ? "nenhum"
+                                : perfil.livrosComprados().stream()
+                                        .map(AssistenteDeLivrosOpenAi::descrever)
+                                        .collect(Collectors.joining("; ")))
+                .append('\n');
         texto.append("- Categorias frequentes: ").append(lista(perfil.categoriasFrequentes())).append('\n');
         texto.append("- Autores frequentes: ").append(lista(perfil.autoresFrequentes())).append('\n');
-        texto.append("- Avaliações de recomendações: ").append(perfil.avaliacoes().isEmpty() ? "nenhuma"
-                : perfil.avaliacoes().stream().map(AssistenteDeLivrosOpenAi::descrever)
-                        .collect(Collectors.joining("; ")));
+        texto.append("- Avaliações de recomendações: ")
+                .append(
+                        perfil.avaliacoes().isEmpty()
+                                ? "nenhuma"
+                                : perfil.avaliacoes().stream()
+                                        .map(AssistenteDeLivrosOpenAi::descrever)
+                                        .collect(Collectors.joining("; ")));
         return texto.toString();
     }
 
     static String descrever(List<LivroCandidato> candidatos) {
         return candidatos.stream()
-                .map(candidato -> "- id " + candidato.id() + ": " + candidato.titulo()
-                        + " | autores: " + lista(candidato.autores())
-                        + " | categorias: " + lista(candidato.categorias())
-                        + " | preço: " + candidato.preco().emReais())
+                .map(candidato ->
+                        "- id "
+                                + candidato.id()
+                                + ": "
+                                + candidato.titulo()
+                                + " | autores: "
+                                + lista(candidato.autores())
+                                + " | categorias: "
+                                + lista(candidato.categorias())
+                                + " | preço: "
+                                + candidato.preco().emReais())
                 .collect(Collectors.joining("\n"));
     }
 
     private static String descrever(LivroComprado livro) {
-        return livro.titulo() + " (categorias: " + lista(livro.categorias()) + "; autores: " + lista(livro.autores())
+        return livro.titulo()
+                + " (categorias: "
+                + lista(livro.categorias())
+                + "; autores: "
+                + lista(livro.autores())
                 + ")";
     }
 
@@ -623,15 +769,12 @@ public class AssistenteDeLivrosOpenAi implements AssistenteDeLivros {
     }
 
     /** Saída estruturada da recomendação, convertida pelo Spring AI a partir do JSON do modelo. */
-    record SaidaDeRecomendacao(@Nullable List<ItemDaSaida> itens) {
-    }
+    record SaidaDeRecomendacao(@Nullable List<ItemDaSaida> itens) {}
 
     /** Livro indicado na saída estruturada, com o id de um dos candidatos. */
-    record ItemDaSaida(@Nullable Long livroId, @Nullable String justificativa) {
-    }
+    record ItemDaSaida(@Nullable Long livroId, @Nullable String justificativa) {}
 
     /** Saída estruturada do chat: tipo, texto e ids dos livros citados. */
-    record SaidaDoAssistente(@Nullable TipoDeResposta tipo, @Nullable String texto,
-            @Nullable List<Long> livrosCitados) {
-    }
+    record SaidaDoAssistente(
+            @Nullable TipoDeResposta tipo, @Nullable String texto, @Nullable List<Long> livrosCitados) {}
 }

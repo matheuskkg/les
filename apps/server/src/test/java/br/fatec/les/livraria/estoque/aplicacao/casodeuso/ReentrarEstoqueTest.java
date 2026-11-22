@@ -3,10 +3,10 @@ package br.fatec.les.livraria.estoque.aplicacao.casodeuso;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.junit.jupiter.api.Test;
 
 /** RF-EST-004, DEC-15.3: reentrada dos itens da troca que voltam ao estoque. */
 class ReentrarEstoqueTest {

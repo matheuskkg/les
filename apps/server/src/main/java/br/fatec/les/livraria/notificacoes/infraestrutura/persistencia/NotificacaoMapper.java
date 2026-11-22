@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.notificacoes.infraestrutura.persistencia;
 
+import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-
-import br.fatec.les.livraria.notificacoes.dominio.modelo.Notificacao;
 
 /** Mapeamento domínio ↔ tabela {@code notificacao} (DEC-14, DEC-16). */
 @Mapper

@@ -6,6 +6,7 @@ import static br.fatec.les.livraria.clientes.ClientesDeTeste.HIPERCARD;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.MASTERCARD;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.VISA;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.bandeiras;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;

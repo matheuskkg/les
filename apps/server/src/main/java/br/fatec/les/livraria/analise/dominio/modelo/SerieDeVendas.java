@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.analise.dominio.modelo;
 
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
 import java.util.List;
 import java.util.Objects;
-
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 
 /**
  * Linha do gráfico de uma categoria: um valor por mês do período, na ordem dos meses (RNF-ANA-001, RN-ANA-003).

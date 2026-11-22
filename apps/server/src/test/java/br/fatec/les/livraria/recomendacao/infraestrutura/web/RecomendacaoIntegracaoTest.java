@@ -8,11 +8,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.recomendacao.aplicacao.casodeuso.CadeiaDeProvedores;
 
-import javax.sql.DataSource;
+import com.jayway.jsonpath.JsonPath;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,25 +33,24 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.jayway.jsonpath.JsonPath;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.recomendacao.aplicacao.casodeuso.CadeiaDeProvedores;
-import jakarta.servlet.http.Cookie;
+import javax.sql.DataSource;
 
 /**
- * "Recomendados para você" sobre o seed, atendido pelo provedor {@code fake} (RNF-REC-001, DEC-03). Os clientes
- * ativos com histórico no seed já compraram quase todo o catálogo, então o teste copia para Ana (usuário 2,
- * cliente 1) o pedido entregue 2 do seed, dentro da transação do teste; Bruno (usuário 3) não comprou e recebe os
- * mais vendidos.
+ * "Recomendados para você" sobre o seed, atendido pelo provedor {@code fake} (RNF-REC-001, DEC-03). Os clientes ativos
+ * com histórico no seed já compraram quase todo o catálogo, então o teste copia para Ana (usuário 2, cliente 1) o
+ * pedido entregue 2 do seed, dentro da transação do teste; Bruno (usuário 3) não comprou e recebe os mais vendidos.
  */
-@SpringBootTest(properties = {
-        "livraria.ia.provedores.gemini.chave=",
-        "livraria.ia.provedores.groq.chave=",
-        "livraria.ia.provedores.openrouter.chave=",
-        "livraria.ia.provedores.nvidia.chave="})
+@SpringBootTest(
+        properties = {
+            "livraria.ia.provedores.gemini.chave=",
+            "livraria.ia.provedores.groq.chave=",
+            "livraria.ia.provedores.openrouter.chave=",
+            "livraria.ia.provedores.nvidia.chave="
+        })
 @Transactional
 class RecomendacaoIntegracaoTest {
 
@@ -67,20 +69,15 @@ class RecomendacaoIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private DataSource dataSource;
+    @Autowired private DataSource dataSource;
 
-    @Autowired
-    private CadeiaDeProvedores cadeia;
+    @Autowired private CadeiaDeProvedores cadeia;
 
     private MockMvc mvc;
 
@@ -96,19 +93,35 @@ class RecomendacaoIntegracaoTest {
     /** Copia linhas trocando as colunas informadas por expressões SQL (pares coluna, expressão). */
     private void copiar(String tabela, String filtro, String... trocas) {
         JdbcClient jdbc = JdbcClient.create(dataSource);
-        List<String> colunas = jdbc.sql("select column_name from information_schema.columns "
-                + "where table_schema = 'public' and table_name = :tabela order by ordinal_position")
-                .param("tabela", tabela).query(String.class).list();
+        List<String> colunas =
+                jdbc.sql(
+                                "select column_name from information_schema.columns "
+                                        + "where table_schema = 'public' and table_name = :tabela order by ordinal_position")
+                        .param("tabela", tabela)
+                        .query(String.class)
+                        .list();
         java.util.Map<String, String> expressoes = new java.util.HashMap<>();
         for (int i = 0; i < trocas.length; i += 2) {
             expressoes.put(trocas[i], trocas[i + 1]);
         }
-        String destino = colunas.stream().map(coluna -> "\"" + coluna + "\"")
-                .collect(java.util.stream.Collectors.joining(", "));
-        String origem = colunas.stream().map(coluna -> expressoes.getOrDefault(coluna, "\"" + coluna + "\""))
-                .collect(java.util.stream.Collectors.joining(", "));
-        jdbc.sql("insert into \"" + tabela + "\" (" + destino + ") select " + origem + " from \"" + tabela
-                + "\" where " + filtro).update();
+        String destino =
+                colunas.stream().map(coluna -> "\"" + coluna + "\"").collect(java.util.stream.Collectors.joining(", "));
+        String origem =
+                colunas.stream()
+                        .map(coluna -> expressoes.getOrDefault(coluna, "\"" + coluna + "\""))
+                        .collect(java.util.stream.Collectors.joining(", "));
+        jdbc.sql(
+                        "insert into \""
+                                + tabela
+                                + "\" ("
+                                + destino
+                                + ") select "
+                                + origem
+                                + " from \""
+                                + tabela
+                                + "\" where "
+                                + filtro)
+                .update();
     }
 
     @AfterTransaction
@@ -123,15 +136,21 @@ class RecomendacaoIntegracaoTest {
     }
 
     private List<Integer> idsDosItens(Long usuarioId) throws Exception {
-        String corpo = mvc.perform(como(usuarioId, get("/api/me/recomendacoes")))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String corpo =
+                mvc.perform(como(usuarioId, get("/api/me/recomendacoes")))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
         return JsonPath.read(corpo, "$[*].id");
     }
 
     private List<Integer> idsDosLivros(Long usuarioId) throws Exception {
-        String corpo = mvc.perform(como(usuarioId, get("/api/me/recomendacoes")))
-                .andReturn().getResponse().getContentAsString();
+        String corpo =
+                mvc.perform(como(usuarioId, get("/api/me/recomendacoes")))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
         return JsonPath.read(corpo, "$[*].livro.id");
     }
 
@@ -140,9 +159,10 @@ class RecomendacaoIntegracaoTest {
     }
 
     private void avaliar(Long usuarioId, Integer itemId, String avaliacao) throws Exception {
-        mvc.perform(como(usuarioId, put("/api/me/recomendacoes/itens/{id}/avaliacao", itemId))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"avaliacao\":\"" + avaliacao + "\"}"))
+        mvc.perform(
+                        como(usuarioId, put("/api/me/recomendacoes/itens/{id}/avaliacao", itemId))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"avaliacao\":\"" + avaliacao + "\"}"))
                 .andExpect(status().isNoContent());
     }
 
@@ -150,10 +170,15 @@ class RecomendacaoIntegracaoTest {
     void rnfRec001_clienteComHistoricoRecebeLivrosJustificadosPelaIa() throws Exception {
         mvc.perform(como(ANA, get("/api/me/recomendacoes")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.allOf(
-                        org.hamcrest.Matchers.greaterThan(0), org.hamcrest.Matchers.lessThanOrEqualTo(8))))
-                .andExpect(jsonPath("$[0].justificativa")
-                        .value("Indicado pelas categorias e autores que você costuma comprar."))
+                .andExpect(
+                        jsonPath("$.length()")
+                                .value(
+                                        org.hamcrest.Matchers.allOf(
+                                                org.hamcrest.Matchers.greaterThan(0),
+                                                org.hamcrest.Matchers.lessThanOrEqualTo(8))))
+                .andExpect(
+                        jsonPath("$[0].justificativa")
+                                .value("Indicado pelas categorias e autores que você costuma comprar."))
                 .andExpect(jsonPath("$[0].livro.titulo").isString())
                 .andExpect(jsonPath("$[0].livro.precoVenda").isString())
                 .andExpect(jsonPath("$[0].avaliacao").doesNotExist());
@@ -223,9 +248,10 @@ class RecomendacaoIntegracaoTest {
     void rnfRec001_itemDeOutroClienteRespondeNaoEncontrado() throws Exception {
         Integer itemDaAna = idsDosItens(ANA).getFirst();
 
-        mvc.perform(como(BRUNO, put("/api/me/recomendacoes/itens/{id}/avaliacao", itemDaAna))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"avaliacao\":\"NEGATIVA\"}"))
+        mvc.perform(
+                        como(BRUNO, put("/api/me/recomendacoes/itens/{id}/avaliacao", itemDaAna))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"avaliacao\":\"NEGATIVA\"}"))
                 .andExpect(status().isNotFound());
     }
 
@@ -233,9 +259,10 @@ class RecomendacaoIntegracaoTest {
     void rnfRec001_avaliacaoAusenteRespondeRequisicaoInvalida() throws Exception {
         Integer item = idsDosItens(ANA).getFirst();
 
-        mvc.perform(como(ANA, put("/api/me/recomendacoes/itens/{id}/avaliacao", item))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+        mvc.perform(
+                        como(ANA, put("/api/me/recomendacoes/itens/{id}/avaliacao", item))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
                 .andExpect(status().isBadRequest());
     }
 

@@ -3,9 +3,9 @@ package br.fatec.les.livraria.clientes.dominio.modelo;
 import java.util.Objects;
 
 /**
- * Prefixo de número de cartão de crédito de uma bandeira (RN-CLI-005, DEC-18): um prefixo puro ({@code 4}) ou uma
- * faixa inclusiva ({@code 51-55}, {@code 2221-2720}). O texto vem da coluna {@code prefixos} da tabela de bandeiras do
- * seed e é comparado com o início do número.
+ * Prefixo de número de cartão de crédito de uma bandeira (RN-CLI-005, DEC-18): um prefixo puro ({@code 4}) ou uma faixa
+ * inclusiva ({@code 51-55}, {@code 2221-2720}). O texto vem da coluna {@code prefixos} da tabela de bandeiras do seed e
+ * é comparado com o início do número.
  */
 public record PrefixoDeCartao(String inicio, String fim) {
 
@@ -13,8 +13,8 @@ public record PrefixoDeCartao(String inicio, String fim) {
         exigirDigitos(inicio, "início");
         exigirDigitos(fim, "fim");
         if (inicio.length() != fim.length()) {
-            throw new IllegalArgumentException("O início e o fim da faixa devem ter o mesmo tamanho: " + inicio
-                    + "-" + fim);
+            throw new IllegalArgumentException(
+                    "O início e o fim da faixa devem ter o mesmo tamanho: " + inicio + "-" + fim);
         }
         if (inicio.compareTo(fim) > 0) {
             throw new IllegalArgumentException("A faixa de prefixos está invertida: " + inicio + "-" + fim);

@@ -1,14 +1,5 @@
 package br.fatec.les.livraria.vendas.aplicacao.casodeuso;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.ConsultarUsuarioDoCliente;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
@@ -32,16 +23,26 @@ import br.fatec.les.livraria.vendas.dominio.troca.RecebimentoDeTroca;
 import br.fatec.les.livraria.vendas.dominio.troca.RecebimentoDeTroca.ItemRecebido;
 import br.fatec.les.livraria.vendas.dominio.troca.Troca;
 import br.fatec.les.livraria.vendas.dominio.troca.ValorDaTroca;
+
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 /**
- * O administrador confirma o recebimento dos itens de uma troca autorizada (RF-VEN-014, RF-VEN-015, RN-VEN-012,
- * DEC-11, DEC-12, DEC-13): informa se cada item volta ao estoque, os que voltam têm reentrada (RF-EST-004), a troca
- * passa a {@code TROCADO} e gera um cupom de troca do cliente no valor dos itens, também para os que não voltam. O
- * pedido continua {@code ENTREGUE}, e o cliente recebe {@code TROCA_CONCLUIDA}.
+ * O administrador confirma o recebimento dos itens de uma troca autorizada (RF-VEN-014, RF-VEN-015, RN-VEN-012, DEC-11,
+ * DEC-12, DEC-13): informa se cada item volta ao estoque, os que voltam têm reentrada (RF-EST-004), a troca passa a
+ * {@code TROCADO} e gera um cupom de troca do cliente no valor dos itens, também para os que não voltam. O pedido
+ * continua {@code ENTREGUE}, e o cliente recebe {@code TROCA_CONCLUIDA}.
  *
  * <p>A troca é travada até o fim da transação; confirmar de novo responde 409, antes das regras do recebimento. A
- * reentrada vem antes do cupom, para que uma falha no estoque não chegue a gravar o código.</p>
+ * reentrada vem antes do cupom, para que uma falha no estoque não chegue a gravar o código.
  */
 @Component
 @RequiredArgsConstructor
@@ -59,7 +60,7 @@ public class ConfirmarRecebimentoDaTroca {
     private final RetornoAoEstoqueDeCadaItem retornoDeCadaItem; // RF-VEN-014
 
     /**
-     * @param id    número da troca
+     * @param id número da troca
      * @param itens se cada item da troca volta ao estoque
      * @return o pedido da troca, com as trocas atualizadas
      * @throws ExcecaoDeRecursoNaoEncontrado se a troca não existir
@@ -69,8 +70,9 @@ public class ConfirmarRecebimentoDaTroca {
     @Transactional
     public PedidoDetalhado executar(Long id, List<ItemRecebido> itens) {
         Objects.requireNonNull(id, "id");
-        Troca troca = trocas.buscarParaAlterar(id)
-                .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Troca não encontrada."));
+        Troca troca =
+                trocas.buscarParaAlterar(id)
+                        .orElseThrow(() -> new ExcecaoDeRecursoNaoEncontrado("Troca não encontrada."));
         troca.exigirAutorizada();
         RecebimentoDeTroca recebimento = new RecebimentoDeTroca(troca, itens == null ? List.of() : itens);
         Violacoes.verificar(recebimento, retornoDeCadaItem);
@@ -83,23 +85,35 @@ public class ConfirmarRecebimentoDaTroca {
         }
         LocalDateTime agora = relogio.agora();
         Dinheiro valor = ValorDaTroca.de(troca, pedido);
-        CupomTroca cupom = cuponsDeTroca.gerar(new CupomTroca(null, pedido.getClienteId(), "TROCA-" + id, valor,
-                propriedadesDoCupom.validadeDeUmCupomGeradoEm(agora.toLocalDate()), SituacaoCupom.DISPONIVEL,
-                agora));
+        CupomTroca cupom =
+                cuponsDeTroca.gerar(
+                        new CupomTroca(
+                                null,
+                                pedido.getClienteId(),
+                                "TROCA-" + id,
+                                valor,
+                                propriedadesDoCupom.validadeDeUmCupomGeradoEm(agora.toLocalDate()),
+                                SituacaoCupom.DISPONIVEL,
+                                agora));
         troca.confirmarRecebimento(voltaEstoque, valor, cupom.id());
         trocas.salvar(troca);
 
-        consultarUsuario.executar(pedido.getClienteId()).ifPresent(usuarioId -> notificar.executar(
-                Notificar.Comando.sobre(usuarioId, TipoNotificacao.TROCA_CONCLUIDA,
-                        "A troca nº %d do pedido nº %d foi concluída. O cupom de troca %s, de %s, já pode ser usado."
-                                .formatted(id, pedido.getId(), cupom.codigo(), valor.emReais()),
-                        "pedido", pedido.getId())));
+        consultarUsuario
+                .executar(pedido.getClienteId())
+                .ifPresent(usuarioId ->
+                        notificar.executar(
+                                Notificar.Comando.sobre(
+                                        usuarioId,
+                                        TipoNotificacao.TROCA_CONCLUIDA,
+                                        "A troca nº %d do pedido nº %d foi concluída. O cupom de troca %s, de %s, já pode ser usado."
+                                                .formatted(id, pedido.getId(), cupom.codigo(), valor.emReais()),
+                                        "pedido",
+                                        pedido.getId())));
         return detalharPedido.executar(pedido);
     }
 
     /** Unidades dos itens que voltam ao estoque, somadas por livro (RF-EST-004). */
-    private static Map<Long, Integer> devolvidosPorLivro(Troca troca, Pedido pedido,
-            Map<Long, Boolean> voltaEstoque) {
+    private static Map<Long, Integer> devolvidosPorLivro(Troca troca, Pedido pedido, Map<Long, Boolean> voltaEstoque) {
         Map<Long, Integer> porLivro = new HashMap<>();
         for (ItemTroca item : troca.getItens()) {
             if (Boolean.TRUE.equals(voltaEstoque.get(item.itemPedidoId()))) {

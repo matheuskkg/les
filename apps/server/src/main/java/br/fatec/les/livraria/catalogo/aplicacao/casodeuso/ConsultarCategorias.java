@@ -1,15 +1,16 @@
 package br.fatec.les.livraria.catalogo.aplicacao.casodeuso;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import br.fatec.les.livraria.catalogo.aplicacao.consulta.CategoriaDoLivro;
+import br.fatec.les.livraria.catalogo.aplicacao.porta.CatalogoConsultas;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.catalogo.aplicacao.consulta.CategoriaDoLivro;
-import br.fatec.les.livraria.catalogo.aplicacao.porta.CatalogoConsultas;
-import lombok.RequiredArgsConstructor;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 /** Busca categorias pelos ids, para outros módulos conferirem e nomearem as escolhidas (RF-ANA-003, RN-LIV-002). */
 @Component

@@ -7,12 +7,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.List;
+import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
+import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.UsuarioAtual;
+import br.fatec.les.livraria.estoque.infraestrutura.persistencia.EstoqueJpa;
+import br.fatec.les.livraria.estoque.infraestrutura.persistencia.EstoqueJpaRepository;
 
-import javax.sql.DataSource;
+import jakarta.servlet.http.Cookie;
 
 import org.hibernate.envers.RevisionType;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,21 +39,17 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.CodificadorDeSenha;
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.dominio.modelo.Papel;
-import br.fatec.les.livraria.acesso.dominio.modelo.Usuario;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.UsuarioAtual;
-import br.fatec.les.livraria.estoque.infraestrutura.persistencia.EstoqueJpa;
-import br.fatec.les.livraria.estoque.infraestrutura.persistencia.EstoqueJpaRepository;
-import jakarta.servlet.http.Cookie;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import javax.sql.DataSource;
 
 /**
- * Log de transação com o Hibernate Envers e o profile H2 (RNF-GER-002, DEC-08, DEC-14). Verifica o autor gravado
- * nas três situações: escrita fora de requisição HTTP ({@code sistema}), escrita sem login ({@code anonimo}) e
- * escrita autenticada (e-mail e id do usuário).
+ * Log de transação com o Hibernate Envers e o profile H2 (RNF-GER-002, DEC-08, DEC-14). Verifica o autor gravado nas
+ * três situações: escrita fora de requisição HTTP ({@code sistema}), escrita sem login ({@code anonimo}) e escrita
+ * autenticada (e-mail e id do usuário).
  */
 @SpringBootTest
 class AuditoriaIntegracaoTest {
@@ -95,29 +96,21 @@ class AuditoriaIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private CodificadorDeSenha senhas;
+    @Autowired private CodificadorDeSenha senhas;
 
-    @Autowired
-    private Relogio relogio;
+    @Autowired private Relogio relogio;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private EstoqueJpaRepository estoques;
+    @Autowired private EstoqueJpaRepository estoques;
 
-    @Autowired
-    private DataSource dataSource;
+    @Autowired private DataSource dataSource;
 
-    @Autowired
-    private PlatformTransactionManager transacoes;
+    @Autowired private PlatformTransactionManager transacoes;
 
     private MockMvc mvc;
     private JdbcClient jdbc;
@@ -136,12 +129,14 @@ class AuditoriaIntegracaoTest {
         RequestAttributes anteriores = RequestContextHolder.getRequestAttributes();
         RequestContextHolder.resetRequestAttributes();
         try {
-            EscritaDeEstoque escrita = new TransactionTemplate(transacoes).execute(status -> {
-                EstoqueJpa estoque = estoques.findByLivroId(LIVRO_COM_ESTOQUE).orElseThrow();
-                estoque.setQuantidade(estoque.getQuantidade() + 1);
-                estoques.save(estoque);
-                return new EscritaDeEstoque(estoque.getId(), estoque.getQuantidade());
-            });
+            EscritaDeEstoque escrita =
+                    new TransactionTemplate(transacoes)
+                            .execute(status -> {
+                                EstoqueJpa estoque = estoques.findByLivroId(LIVRO_COM_ESTOQUE).orElseThrow();
+                                estoque.setQuantidade(estoque.getQuantidade() + 1);
+                                estoques.save(estoque);
+                                return new EscritaDeEstoque(estoque.getId(), estoque.getQuantidade());
+                            });
 
             Revisao revisao = revisaoMaisRecenteDeEstoque(escrita.estoqueId());
             assertThat(revisao.usuario()).isEqualTo(UsuarioAtual.SISTEMA);
@@ -150,12 +145,12 @@ class AuditoriaIntegracaoTest {
                     .as("a revisão usa o instante da porta Relogio, não o fuso padrão da JVM")
                     .isEqualTo(AGORA);
 
-            var linha = jdbc.sql(
-                    "select quantidade, tipo_revisao from estoque_aud where revisao = ? and id = ?")
-                    .param(revisao.id())
-                    .param(escrita.estoqueId())
-                    .query()
-                    .singleRow();
+            var linha =
+                    jdbc.sql("select quantidade, tipo_revisao from estoque_aud where revisao = ? and id = ?")
+                            .param(revisao.id())
+                            .param(escrita.estoqueId())
+                            .query()
+                            .singleRow();
             assertThat(((Number) linha.get("quantidade")).intValue()).isEqualTo(escrita.quantidade());
             assertThat(((Number) linha.get("tipo_revisao")).intValue())
                     .isEqualTo(RevisionType.MOD.getRepresentation().intValue());
@@ -166,15 +161,23 @@ class AuditoriaIntegracaoTest {
 
     @Test
     void loginQueReativaContaRegistraRevisaoAnonima() throws Exception {
-        Usuario reativada = usuarios.salvar(new Usuario(null, EMAIL_REATIVADA, null, senhas.codificar(SENHA),
-                Papel.CLIENTE, relogio.agora().minusDays(1)));
+        Usuario reativada =
+                usuarios.salvar(
+                        new Usuario(
+                                null,
+                                EMAIL_REATIVADA,
+                                null,
+                                senhas.codificar(SENHA),
+                                Papel.CLIENTE,
+                                relogio.agora().minusDays(1)));
         Cookie csrf = tokenCsrf();
 
-        mvc.perform(post("/api/sessao")
-                .cookie(csrf)
-                .header(CABECALHO_CSRF, csrf.getValue())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"login\":\"%s\",\"senha\":\"%s\"}".formatted(EMAIL_REATIVADA, SENHA)))
+        mvc.perform(
+                        post("/api/sessao")
+                                .cookie(csrf)
+                                .header(CABECALHO_CSRF, csrf.getValue())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"login\":\"%s\",\"senha\":\"%s\"}".formatted(EMAIL_REATIVADA, SENHA)))
                 .andExpect(status().isOk());
 
         Revisao revisao = revisaoMaisRecenteDeUsuario(reativada.getId());
@@ -188,9 +191,7 @@ class AuditoriaIntegracaoTest {
         Cookie sessao = new Cookie(EmissorDeToken.COOKIE, emissor.emitir(administrador()).valor());
         Long estoqueId = estoques.findByLivroId(LIVRO_COM_ESTOQUE).orElseThrow().getId();
 
-        mvc.perform(put("/api/admin/auditoria/estoque")
-                .cookie(sessao, csrf)
-                .header(CABECALHO_CSRF, csrf.getValue()))
+        mvc.perform(put("/api/admin/auditoria/estoque").cookie(sessao, csrf).header(CABECALHO_CSRF, csrf.getValue()))
                 .andExpect(status().isOk());
 
         Revisao revisao = revisaoMaisRecenteDeEstoque(estoqueId);
@@ -200,14 +201,16 @@ class AuditoriaIntegracaoTest {
 
     @Test
     void tabelaDeAuditoriaDoUsuarioNaoGuardaOSenhaHash() {
-        Long colunas = jdbc.sql("""
-                select count(*)
-                from information_schema.columns
-                where lower(table_name) = 'usuario_aud'
-                  and lower(column_name) = 'senha_hash'
-                """)
-                .query(Long.class)
-                .single();
+        Long colunas =
+                jdbc.sql(
+                                """
+                                select count(*)
+                                from information_schema.columns
+                                where lower(table_name) = 'usuario_aud'
+                                  and lower(column_name) = 'senha_hash'
+                                """)
+                        .query(Long.class)
+                        .single();
 
         assertThat(colunas).as("a senha fica fora de usuario_aud (RNF-CLI-003)").isZero();
     }
@@ -218,16 +221,18 @@ class AuditoriaIntegracaoTest {
 
     /** Revisão gravada para a linha de estoque escrita, pelo vínculo de {@code estoque_aud} com {@code revisao}. */
     private Revisao revisaoMaisRecenteDeEstoque(Long estoqueId) {
-        List<Revisao> revisoes = jdbc.sql("""
-                select r.id, r.usuario_id, r.usuario, r.data_hora
-                from revisao r
-                join estoque_aud e on e.revisao = r.id
-                where e.id = ?
-                order by r.id desc
-                """)
-                .param(estoqueId)
-                .query(AuditoriaIntegracaoTest::mapearRevisao)
-                .list();
+        List<Revisao> revisoes =
+                jdbc.sql(
+                                """
+                                select r.id, r.usuario_id, r.usuario, r.data_hora
+                                from revisao r
+                                join estoque_aud e on e.revisao = r.id
+                                where e.id = ?
+                                order by r.id desc
+                                """)
+                        .param(estoqueId)
+                        .query(AuditoriaIntegracaoTest::mapearRevisao)
+                        .list();
 
         assertThat(revisoes).as("revisão da escrita do estoque %s", estoqueId).isNotEmpty();
         return revisoes.get(0);
@@ -235,16 +240,18 @@ class AuditoriaIntegracaoTest {
 
     /** Revisão da escrita da conta, pelo vínculo de {@code usuario_aud} com {@code revisao}. */
     private Revisao revisaoMaisRecenteDeUsuario(Long usuarioId) {
-        List<Revisao> revisoes = jdbc.sql("""
-                select r.id, r.usuario_id, r.usuario, r.data_hora
-                from revisao r
-                join usuario_aud u on u.revisao = r.id
-                where u.id = ?
-                order by r.id desc
-                """)
-                .param(usuarioId)
-                .query(AuditoriaIntegracaoTest::mapearRevisao)
-                .list();
+        List<Revisao> revisoes =
+                jdbc.sql(
+                                """
+                                select r.id, r.usuario_id, r.usuario, r.data_hora
+                                from revisao r
+                                join usuario_aud u on u.revisao = r.id
+                                where u.id = ?
+                                order by r.id desc
+                                """)
+                        .param(usuarioId)
+                        .query(AuditoriaIntegracaoTest::mapearRevisao)
+                        .list();
 
         assertThat(revisoes).as("revisão da escrita do usuário %s", usuarioId).isNotEmpty();
         return revisoes.get(0);
@@ -265,9 +272,7 @@ class AuditoriaIntegracaoTest {
         return csrf;
     }
 
-    private record Revisao(Long id, Long usuarioId, String usuario, LocalDateTime dataHora) {
-    }
+    private record Revisao(Long id, Long usuarioId, String usuario, LocalDateTime dataHora) {}
 
-    private record EscritaDeEstoque(Long estoqueId, Integer quantidade) {
-    }
+    private record EscritaDeEstoque(Long estoqueId, Integer quantidade) {}
 }

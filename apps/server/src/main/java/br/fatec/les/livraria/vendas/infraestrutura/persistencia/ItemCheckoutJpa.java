@@ -1,7 +1,5 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
-import org.hibernate.envers.Audited;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,9 +11,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.hibernate.envers.Audited;
 
 /**
  * Tabela {@code item_checkout} do MER (DEC-16): uma linha por livro no checkout ({@code UNIQUE (checkout_id,
@@ -26,14 +27,20 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Audited
-@Table(name = "item_checkout",
-        uniqueConstraints = @UniqueConstraint(name = "uk_item_checkout_livro", columnNames = { "checkout_id",
-                "livro_id" }))
+@Table(
+        name = "item_checkout",
+        uniqueConstraints =
+                @UniqueConstraint(
+                        name = "uk_item_checkout_livro",
+                        columnNames = {"checkout_id", "livro_id"}))
 public class ItemCheckoutJpa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "item_checkout_seq")
-    @SequenceGenerator(name = "item_checkout_seq", sequenceName = "item_checkout_seq", initialValue = 10000,
+    @SequenceGenerator(
+            name = "item_checkout_seq",
+            sequenceName = "item_checkout_seq",
+            initialValue = 10000,
             allocationSize = 50)
     private Long id;
 

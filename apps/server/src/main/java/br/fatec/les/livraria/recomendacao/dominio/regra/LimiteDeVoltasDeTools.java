@@ -2,8 +2,8 @@ package br.fatec.les.livraria.recomendacao.dominio.regra;
 
 /**
  * Uma mensagem ao assistente pode executar no máximo {@value #MAXIMO_DE_VOLTAS} voltas de tools de leitura antes da
- * resposta final (RNF-REC-001, DEC-03). Passar do limite é falha do provedor, com o resultado
- * {@code LIMITE_DE_CHAMADAS}, e a cadeia segue para o próximo.
+ * resposta final (RNF-REC-001, DEC-03). Passar do limite é falha do provedor, com o resultado {@code
+ * LIMITE_DE_CHAMADAS}, e a cadeia segue para o próximo.
  */
 public class LimiteDeVoltasDeTools {
 

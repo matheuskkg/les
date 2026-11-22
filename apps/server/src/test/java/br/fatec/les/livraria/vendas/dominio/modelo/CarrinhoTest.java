@@ -3,13 +3,13 @@ package br.fatec.les.livraria.vendas.dominio.modelo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.List;
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
 
 import org.junit.jupiter.api.Test;
 
-import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeRecursoNaoEncontrado;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /** RF-VEN-001, RF-VEN-002, RN-VEN-014, RN-VEN-015, RNF-VEN-001, DEC-16: regras do agregado do carrinho. */
 class CarrinhoTest {
@@ -42,16 +42,14 @@ class CarrinhoTest {
     void rfVen002_alterarOuRemoverLivroForaDoCarrinhoNaoEhEncontrado() {
         Carrinho carrinho = Carrinho.vazio(1L);
 
-        assertThatThrownBy(() -> carrinho.alterarQuantidade(10L, 2))
-                .isInstanceOf(ExcecaoDeRecursoNaoEncontrado.class);
+        assertThatThrownBy(() -> carrinho.alterarQuantidade(10L, 2)).isInstanceOf(ExcecaoDeRecursoNaoEncontrado.class);
         assertThatThrownBy(() -> carrinho.remover(10L)).isInstanceOf(ExcecaoDeRecursoNaoEncontrado.class);
     }
 
     @Test
     void rnVen014_renovarOPrazoZeraOAvisoEEsvaziarEncerraOBloqueio() {
         LocalDateTime prazo = LocalDateTime.of(2026, 10, 24, 12, 30);
-        Carrinho carrinho = new Carrinho(1L, 1L, prazo.minusMinutes(10), prazo.minusMinutes(15), List.of(),
-                List.of());
+        Carrinho carrinho = new Carrinho(1L, 1L, prazo.minusMinutes(10), prazo.minusMinutes(15), List.of(), List.of());
 
         carrinho.renovarExpiracao(prazo);
         assertThat(carrinho.getExpiraEm()).isEqualTo(prazo);
@@ -99,7 +97,8 @@ class CarrinhoTest {
 
         assertThat(carrinho.getItens()).isEmpty();
         assertThat(carrinho.getExpiraEm()).isNull();
-        assertThat(carrinho.getRemovidos()).containsExactly(new ItemRemovidoCarrinho(10L, 3, PRAZO), new ItemRemovidoCarrinho(11L, 1, PRAZO));
+        assertThat(carrinho.getRemovidos())
+                .containsExactly(new ItemRemovidoCarrinho(10L, 3, PRAZO), new ItemRemovidoCarrinho(11L, 1, PRAZO));
     }
 
     @Test
@@ -131,8 +130,7 @@ class CarrinhoTest {
         carrinho.dispensarRemovido(10L);
 
         assertThat(carrinho.getRemovidos()).isEmpty();
-        assertThatThrownBy(() -> carrinho.dispensarRemovido(10L))
-                .isInstanceOf(ExcecaoDeRecursoNaoEncontrado.class);
+        assertThatThrownBy(() -> carrinho.dispensarRemovido(10L)).isInstanceOf(ExcecaoDeRecursoNaoEncontrado.class);
     }
 
     @Test

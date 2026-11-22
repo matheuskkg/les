@@ -13,8 +13,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-import java.util.concurrent.atomic.AtomicReference;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.estoque.aplicacao.porta.ReservasDeEstoque;
+import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
+import br.fatec.les.livraria.estoque.dominio.modelo.Reserva;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ExpirarReservas;
+import br.fatec.les.livraria.vendas.aplicacao.porta.CarrinhoRepositorio;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,15 +39,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.estoque.aplicacao.porta.ReservasDeEstoque;
-import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
-import br.fatec.les.livraria.estoque.dominio.modelo.Reserva;
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ExpirarReservas;
-import br.fatec.les.livraria.vendas.aplicacao.porta.CarrinhoRepositorio;
-import jakarta.servlet.http.Cookie;
+import java.time.LocalDateTime;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Sessão de compra sobre o seed (RF-VEN-003, RN-VEN-014, RNF-VEN-001, DEC-10, DEC-12): prazo de 60 min e aviso 5 min
@@ -65,23 +66,17 @@ class CheckoutIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private ExpirarReservas expirarReservas;
+    @Autowired private ExpirarReservas expirarReservas;
 
-    @Autowired
-    private CarrinhoRepositorio carrinhos;
+    @Autowired private CarrinhoRepositorio carrinhos;
 
-    @Autowired
-    private ReservasDeEstoque reservas;
+    @Autowired private ReservasDeEstoque reservas;
 
     private MockMvc mvc;
 
@@ -130,12 +125,14 @@ class CheckoutIntegracaoTest {
         adicionar(ANA, 7, 2).andExpect(status().isOk());
         adicionar(ANA, 1, 1).andExpect(status().isOk());
 
-        long checkoutId = idDe(escrever(post("/api/me/checkout"), ANA)
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.itens[*].livroId", contains(7, 1)))
-                .andExpect(jsonPath("$.subtotal").exists())
-                .andExpect(jsonPath("$.quantidadeDeItens").value(3))
-                .andExpect(jsonPath("$.expiraEm").value("2026-10-24T16:00:00Z")));
+        long checkoutId =
+                idDe(
+                        escrever(post("/api/me/checkout"), ANA)
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.itens[*].livroId", contains(7, 1)))
+                                .andExpect(jsonPath("$.subtotal").exists())
+                                .andExpect(jsonPath("$.quantidadeDeItens").value(3))
+                                .andExpect(jsonPath("$.expiraEm").value("2026-10-24T16:00:00Z")));
 
         mvc.perform(get("/api/me/carrinho").cookie(sessaoDe(ANA)))
                 .andExpect(jsonPath("$.itens", hasSize(0)))
@@ -146,8 +143,7 @@ class CheckoutIntegracaoTest {
         assertThat(reservas.listarPorOrigem(OrigemReserva.CARRINHO, carrinhoId())).isEmpty();
         assertThat(reservas.listarPorOrigem(OrigemReserva.CHECKOUT, checkoutId))
                 .extracting(Reserva::getLivroId, Reserva::getQuantidade, Reserva::getExpiraEm)
-                .containsExactlyInAnyOrder(tuple(7L, 2, INICIO.plusHours(1)),
-                        tuple(1L, 1, INICIO.plusHours(1)));
+                .containsExactlyInAnyOrder(tuple(7L, 2, INICIO.plusHours(1)), tuple(1L, 1, INICIO.plusHours(1)));
         mvc.perform(get("/api/livros/7")).andExpect(jsonPath("$.disponivel").value(4));
     }
 
@@ -201,7 +197,8 @@ class CheckoutIntegracaoTest {
         mvc.perform(get("/api/me/checkout").cookie(sessaoDe(ANA))).andExpect(status().isNotFound());
         assertThat(reservas.listarPorOrigem(OrigemReserva.CHECKOUT, checkoutId)).isEmpty();
         assertThat(reservas.listarPorOrigem(OrigemReserva.CARRINHO, carrinhoId()))
-                .extracting(Reserva::getQuantidade).containsExactly(3);
+                .extracting(Reserva::getQuantidade)
+                .containsExactly(3);
         escrever(post("/api/me/checkout/voltar"), ANA).andExpect(status().isNotFound());
     }
 
@@ -280,8 +277,7 @@ class CheckoutIntegracaoTest {
         escrever(post("/api/me/checkout/voltar"), ANA)
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes[0].codigo").value("RN-VEN-001"))
-                .andExpect(jsonPath("$.violacoes[0].mensagem").value(containsString(
-                        "Diminua ou remova no carrinho")));
+                .andExpect(jsonPath("$.violacoes[0].mensagem").value(containsString("Diminua ou remova no carrinho")));
         mvc.perform(get("/api/me/checkout").cookie(sessaoDe(ANA))).andExpect(status().isOk());
     }
 
@@ -299,7 +295,9 @@ class CheckoutIntegracaoTest {
     }
 
     private ResultActions adicionar(long usuarioId, long livroId, int quantidade) throws Exception {
-        return escrever(post("/api/me/carrinho/itens"), usuarioId,
+        return escrever(
+                post("/api/me/carrinho/itens"),
+                usuarioId,
                 "{\"livroId\":%d,\"quantidade\":%d}".formatted(livroId, quantidade));
     }
 
@@ -311,10 +309,10 @@ class CheckoutIntegracaoTest {
             throws Exception {
         Cookie csrf = mvc.perform(get("/api/sessao")).andReturn().getResponse().getCookie("XSRF-TOKEN");
         assertThat(csrf).isNotNull();
-        MockHttpServletRequestBuilder comSessao = requisicao.cookie(sessaoDe(usuarioId), csrf)
-                .header("X-XSRF-TOKEN", csrf.getValue());
-        return mvc.perform(corpo.isEmpty() ? comSessao
-                : comSessao.contentType(MediaType.APPLICATION_JSON).content(corpo));
+        MockHttpServletRequestBuilder comSessao =
+                requisicao.cookie(sessaoDe(usuarioId), csrf).header("X-XSRF-TOKEN", csrf.getValue());
+        return mvc.perform(
+                corpo.isEmpty() ? comSessao : comSessao.contentType(MediaType.APPLICATION_JSON).content(corpo));
     }
 
     private Cookie sessaoDe(long usuarioId) {

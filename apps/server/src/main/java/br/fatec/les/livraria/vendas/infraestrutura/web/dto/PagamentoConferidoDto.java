@@ -1,10 +1,10 @@
 package br.fatec.les.livraria.vendas.infraestrutura.web.dto;
 
-import java.util.List;
-
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.PagamentoConferido;
 import br.fatec.les.livraria.vendas.dominio.pagamento.DistribuicaoDoPagamento;
+
+import java.util.List;
 
 /**
  * Distribuição do pagamento conferido (RF-VEN-007, RN-VEN-006, DEC-11): total, desconto do promocional, cupons de
@@ -22,9 +22,14 @@ public record PagamentoConferidoDto(
 
     public static PagamentoConferidoDto de(PagamentoConferido conferido) {
         DistribuicaoDoPagamento distribuicao = conferido.distribuicao();
-        return new PagamentoConferidoDto(distribuicao.subtotal(), distribuicao.frete(), distribuicao.total(),
+        return new PagamentoConferidoDto(
+                distribuicao.subtotal(),
+                distribuicao.frete(),
+                distribuicao.total(),
                 distribuicao.descontoPromocional(),
-                distribuicao.cuponsDeTroca().stream().map(CupomAbatidoDto::de).toList(), distribuicao.troco(),
-                distribuicao.restante(), conferido.cartoes().stream().map(CartaoConferidoDto::de).toList());
+                distribuicao.cuponsDeTroca().stream().map(CupomAbatidoDto::de).toList(),
+                distribuicao.troco(),
+                distribuicao.restante(),
+                conferido.cartoes().stream().map(CartaoConferidoDto::de).toList());
     }
 }

@@ -1,9 +1,9 @@
 package br.fatec.les.livraria.clientes.aplicacao.consulta;
 
-import java.util.Objects;
-
 import br.fatec.les.livraria.acesso.aplicacao.consulta.ContatoDoUsuario;
 import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
+
+import java.util.Objects;
 
 /**
  * Detalhe de um cliente para o admin (RF-CLI-004, DEC-07, DEC-10): os dados pessoais com endereços e cartões do

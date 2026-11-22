@@ -1,17 +1,17 @@
 package br.fatec.les.livraria.vendas.dominio.regra;
 
-import java.math.BigDecimal;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.dominio.pagamento.CartoesDaCompra;
 import br.fatec.les.livraria.vendas.dominio.pagamento.PagamentoEmCartao;
 
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+
 /**
- * Valor de cada cartão (RN-VEN-004, DEC-11): informado, positivo e em centavos inteiros. Não é arredondado, para que
- * R$ 9,995 não passe pelo mínimo de R$ 10,00.
+ * Valor de cada cartão (RN-VEN-004, DEC-11): informado, positivo e em centavos inteiros. Não é arredondado, para que R$
+ * 9,995 não passe pelo mínimo de R$ 10,00.
  */
 @Component
 public class ValorInformadoDoCartao implements Regra<CartoesDaCompra> {

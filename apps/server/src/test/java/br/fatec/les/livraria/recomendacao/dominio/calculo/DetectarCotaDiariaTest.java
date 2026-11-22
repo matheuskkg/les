@@ -2,9 +2,9 @@ package br.fatec.les.livraria.recomendacao.dominio.calculo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.Duration;
-
 import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
 
 /**
  * Detecção da cota diária no 429 (RNF-REC-001, DEC-03, REC-09), que mantém o provedor fora da cadeia até o dia
@@ -39,13 +39,18 @@ class DetectarCotaDiariaTest {
 
     @Test
     void rnfRec001_idDeCotaDiariaDoGeminiEhCotaDiaria() {
-        assertThat(DetectarCotaDiaria.ehDiaria(
-                "quotaId: GenerateRequestsPerDayPerProjectPerModel-FreeTier. Please retry in 41.9s", null)).isTrue();
+        assertThat(
+                        DetectarCotaDiaria.ehDiaria(
+                                "quotaId: GenerateRequestsPerDayPerProjectPerModel-FreeTier. Please retry in 41.9s",
+                                null))
+                .isTrue();
     }
 
     @Test
     void rnfRec001_palavrasComDiaNoMeioNaoSaoCotaDiaria() {
-        assertThat(DetectarCotaDiaria.ehDiaria("Try again in 10m or upgrade today, immediately", Duration.ofMinutes(10)))
+        assertThat(
+                        DetectarCotaDiaria.ehDiaria(
+                                "Try again in 10m or upgrade today, immediately", Duration.ofMinutes(10)))
                 .isFalse();
     }
 

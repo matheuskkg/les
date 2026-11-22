@@ -4,11 +4,10 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
- * Bloqueio temporário de unidades de um livro para um carrinho ou um checkout (RN-VEN-014, RN-EST-006,
- * DEC-16). O dono da reserva é opaco para o {@code estoque}: só a origem e o id dele (DEC-16).
+ * Bloqueio temporário de unidades de um livro para um carrinho ou um checkout (RN-VEN-014, RN-EST-006, DEC-16). O dono
+ * da reserva é opaco para o {@code estoque}: só a origem e o id dele (DEC-16).
  *
- * <p>Uma reserva está ativa enquanto {@code expiraEm} estiver no futuro; ela é o que consome o disponível
- * (DEC-15.3).</p>
+ * <p>Uma reserva está ativa enquanto {@code expiraEm} estiver no futuro; ela é o que consome o disponível (DEC-15.3).
  */
 public class Reserva {
 
@@ -19,8 +18,7 @@ public class Reserva {
     private int quantidade;
     private LocalDateTime expiraEm;
 
-    public Reserva(Long id, Long livroId, OrigemReserva origem, Long origemId, int quantidade,
-            LocalDateTime expiraEm) {
+    public Reserva(Long id, Long livroId, OrigemReserva origem, Long origemId, int quantidade, LocalDateTime expiraEm) {
         this.id = id;
         this.livroId = Objects.requireNonNull(livroId, "livroId");
         this.origem = Objects.requireNonNull(origem, "origem");
@@ -29,9 +27,11 @@ public class Reserva {
         this.expiraEm = Objects.requireNonNull(expiraEm, "expiraEm");
     }
 
-    /** @return reserva nova, ainda sem id. */
-    public static Reserva nova(Long livroId, OrigemReserva origem, Long origemId, int quantidade,
-            LocalDateTime expiraEm) {
+    /**
+     * @return reserva nova, ainda sem id.
+     */
+    public static Reserva nova(
+            Long livroId, OrigemReserva origem, Long origemId, int quantidade, LocalDateTime expiraEm) {
         return new Reserva(null, livroId, origem, origemId, quantidade, expiraEm);
     }
 

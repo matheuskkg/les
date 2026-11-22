@@ -1,18 +1,18 @@
 package br.fatec.les.livraria.vendas.infraestrutura.web.dto;
 
-import java.time.Instant;
-import java.util.List;
-
-import org.jspecify.annotations.Nullable;
-
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import br.fatec.les.livraria.compartilhado.infraestrutura.tempo.RelogioDoSistema;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.CarrinhoConsultado;
 
+import org.jspecify.annotations.Nullable;
+
+import java.time.Instant;
+import java.util.List;
+
 /**
- * Carrinho na API (RF-VEN-001, DEC-07). {@code expiraEm} é só para exibição (DEC-13), em UTC; ausente quando o
- * carrinho está vazio. {@code removidos} traz os livros retirados por expiração (RNF-VEN-001). {@code checkout}
- * informa a compra em andamento, quando há (RF-VEN-003, DEC-12).
+ * Carrinho na API (RF-VEN-001, DEC-07). {@code expiraEm} é só para exibição (DEC-13), em UTC; ausente quando o carrinho
+ * está vazio. {@code removidos} traz os livros retirados por expiração (RNF-VEN-001). {@code checkout} informa a compra
+ * em andamento, quando há (RF-VEN-003, DEC-12).
  */
 public record CarrinhoDto(
         List<ItemComPrecoDto> itens,
@@ -23,11 +23,14 @@ public record CarrinhoDto(
         @Nullable CheckoutEmAndamentoDto checkout) {
 
     public static CarrinhoDto de(CarrinhoConsultado carrinho) {
-        CheckoutEmAndamentoDto checkout = carrinho.checkout() == null ? null
-                : CheckoutEmAndamentoDto.de(carrinho.checkout());
-        return new CarrinhoDto(carrinho.itens().stream().map(ItemComPrecoDto::de).toList(), carrinho.subtotal(),
+        CheckoutEmAndamentoDto checkout =
+                carrinho.checkout() == null ? null : CheckoutEmAndamentoDto.de(carrinho.checkout());
+        return new CarrinhoDto(
+                carrinho.itens().stream().map(ItemComPrecoDto::de).toList(),
+                carrinho.subtotal(),
                 carrinho.quantidadeDeItens(),
                 carrinho.expiraEm() == null ? null : carrinho.expiraEm().atZone(RelogioDoSistema.FUSO).toInstant(),
-                carrinho.removidos().stream().map(ItemRemovidoDoCarrinhoDto::de).toList(), checkout);
+                carrinho.removidos().stream().map(ItemRemovidoDoCarrinhoDto::de).toList(),
+                checkout);
     }
 }

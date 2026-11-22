@@ -19,8 +19,7 @@ public record SolicitacaoDeAnalise(LocalDate inicio, LocalDate fim, List<Long> c
     public SolicitacaoDeAnalise {
         Objects.requireNonNull(inicio, "inicio");
         Objects.requireNonNull(fim, "fim");
-        categorias = categorias == null ? List.of()
-                : categorias.stream().filter(Objects::nonNull).distinct().toList();
+        categorias = categorias == null ? List.of() : categorias.stream().filter(Objects::nonNull).distinct().toList();
     }
 
     /**

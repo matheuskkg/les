@@ -3,11 +3,10 @@ package br.fatec.les.livraria.compartilhado.infraestrutura.persistencia;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import br.fatec.les.livraria.compartilhado.aplicacao.Ordem;
+import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
+import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
+import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,40 +19,40 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.compartilhado.aplicacao.Ordem;
-import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
-import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
-import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Listagens filtradas em H2: envelope, ordenação com desempate, filtros combinados (RF-CLI-004, RF-LIV-005,
  * RNF-GER-001). Usa uma entidade só de teste, que não entra no contrato OpenAPI.
  */
-@SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:listagem;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;"
-        + "DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1")
+@SpringBootTest(
+        properties =
+                "spring.datasource.url=jdbc:h2:mem:listagem;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;"
+                        + "DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1")
 @ActiveProfiles("h2")
 @Transactional
 class ListagemJpaTest {
 
-    @Autowired
-    private ExemploListagemRepositorio exemplos;
+    @Autowired private ExemploListagemRepositorio exemplos;
 
-    @Autowired
-    private ExemploTagRepositorio tags;
+    @Autowired private ExemploTagRepositorio tags;
 
     @BeforeEach
     void inserirDados() {
         ExemploTagJpa poesia = tags.save(new ExemploTagJpa("poesia"));
         ExemploTagJpa romance = tags.save(new ExemploTagJpa("romance"));
 
-        ExemploListagemJpa ana = salvar("Ana Ávila", "A-1", "12345678900", "SP", "10.00",
-                LocalDate.of(2020, 1, 10));
+        ExemploListagemJpa ana = salvar("Ana Ávila", "A-1", "12345678900", "SP", "10.00", LocalDate.of(2020, 1, 10));
         ana.adicionarTag(poesia);
         ana.adicionarTag(romance);
         exemplos.saveAndFlush(ana);
 
-        ExemploListagemJpa anaSemAcento = salvar("ana avila", "A-2", "12345678900", "SP", "20.00",
-                LocalDate.of(2021, 2, 10));
+        ExemploListagemJpa anaSemAcento =
+                salvar("ana avila", "A-2", "12345678900", "SP", "20.00", LocalDate.of(2021, 2, 10));
         anaSemAcento.adicionarTag(romance);
         exemplos.saveAndFlush(anaSemAcento);
 
@@ -67,8 +66,8 @@ class ListagemJpaTest {
     void devolveOEnvelopeDePaginacao() {
         Paginacao paginacao = new Paginacao(0, 2, List.of(new Ordem("codigo", Ordem.Direcao.ASC)));
 
-        Page<ExemploListagemJpa> page = exemplos.findAll(Specification.unrestricted(),
-                ConversorDePaginacao.paraPageable(paginacao));
+        Page<ExemploListagemJpa> page =
+                exemplos.findAll(Specification.unrestricted(), ConversorDePaginacao.paraPageable(paginacao));
         Pagina<String> pagina = ConversorDePaginacao.paraPagina(page, ExemploListagemJpa::getCodigo);
 
         assertThat(pagina.itens()).containsExactly("A-1", "A-2");
@@ -85,13 +84,12 @@ class ListagemJpaTest {
         salvar("Mesmo Nome", "D-3", "10000000003", "SP", "10.00", LocalDate.of(2026, 1, 3));
 
         Specification<ExemploListagemJpa> mesmoNome = Especificacoes.contem("nome", "Mesmo Nome");
-        Pageable primeiraPagina = ConversorDePaginacao
-                .paraPageable(new Paginacao(0, 2, List.of(new Ordem("nome", Ordem.Direcao.ASC))));
-        Pageable segundaPagina = ConversorDePaginacao
-                .paraPageable(new Paginacao(1, 2, List.of(new Ordem("nome", Ordem.Direcao.ASC))));
+        Pageable primeiraPagina =
+                ConversorDePaginacao.paraPageable(new Paginacao(0, 2, List.of(new Ordem("nome", Ordem.Direcao.ASC))));
+        Pageable segundaPagina =
+                ConversorDePaginacao.paraPageable(new Paginacao(1, 2, List.of(new Ordem("nome", Ordem.Direcao.ASC))));
 
-        assertThat(primeiraPagina.getSort().toList()).extracting(Sort.Order::getProperty)
-                .containsExactly("nome", "id");
+        assertThat(primeiraPagina.getSort().toList()).extracting(Sort.Order::getProperty).containsExactly("nome", "id");
 
         List<ExemploListagemJpa> itens = new ArrayList<>();
         itens.addAll(exemplos.findAll(mesmoNome, primeiraPagina).getContent());
@@ -124,12 +122,14 @@ class ListagemJpaTest {
 
     @Test
     void combinaContemIgualdadeEmIntervaloEDigitos() {
-        Specification<ExemploListagemJpa> filtro = Especificacoes.<ExemploListagemJpa>contem("nome", "ávila")
-                .and(Especificacoes.igual("uf", " SP "))
-                .and(Especificacoes.em("codigo", List.of("A-1", "A-2", "B-1")))
-                .and(Especificacoes.<ExemploListagemJpa, BigDecimal>entre("valor",
-                        new BigDecimal("15.00"), new BigDecimal("25.00")))
-                .and(Especificacoes.digitos("cpf", "123.456.789-00"));
+        Specification<ExemploListagemJpa> filtro =
+                Especificacoes.<ExemploListagemJpa>contem("nome", "ávila")
+                        .and(Especificacoes.igual("uf", " SP "))
+                        .and(Especificacoes.em("codigo", List.of("A-1", "A-2", "B-1")))
+                        .and(
+                                Especificacoes.<ExemploListagemJpa, BigDecimal>entre(
+                                        "valor", new BigDecimal("15.00"), new BigDecimal("25.00")))
+                        .and(Especificacoes.digitos("cpf", "123.456.789-00"));
 
         assertThat(buscar(filtro)).extracting(ExemploListagemJpa::getCodigo).containsExactly("A-2");
     }
@@ -152,8 +152,9 @@ class ListagemJpaTest {
     void filtraPorRelacionamentoSemDuplicarLinhas() {
         Specification<ExemploListagemJpa> filtro = Especificacoes.existe("tags", "nome", "poesia");
 
-        Pagina<ExemploListagemJpa> pagina = ConversorDePaginacao.paraPagina(
-                exemplos.findAll(filtro, ConversorDePaginacao.paraPageable(Paginacao.padrao())));
+        Pagina<ExemploListagemJpa> pagina =
+                ConversorDePaginacao.paraPagina(
+                        exemplos.findAll(filtro, ConversorDePaginacao.paraPageable(Paginacao.padrao())));
 
         assertThat(pagina.totalItens()).isEqualTo(1);
         assertThat(pagina.itens()).extracting(ExemploListagemJpa::getCodigo).containsExactly("A-1");
@@ -161,15 +162,14 @@ class ListagemJpaTest {
 
     @Test
     void filtraPorRelacionamentoComVariosValoresUsandoOu() {
-        Specification<ExemploListagemJpa> filtro = Especificacoes.existe("tags", "nome",
-                List.of("poesia", "romance"));
+        Specification<ExemploListagemJpa> filtro = Especificacoes.existe("tags", "nome", List.of("poesia", "romance"));
 
-        Pagina<ExemploListagemJpa> pagina = ConversorDePaginacao.paraPagina(
-                exemplos.findAll(filtro, ConversorDePaginacao.paraPageable(Paginacao.padrao())));
+        Pagina<ExemploListagemJpa> pagina =
+                ConversorDePaginacao.paraPagina(
+                        exemplos.findAll(filtro, ConversorDePaginacao.paraPageable(Paginacao.padrao())));
 
         assertThat(pagina.totalItens()).isEqualTo(2);
-        assertThat(pagina.itens()).extracting(ExemploListagemJpa::getCodigo)
-                .containsExactlyInAnyOrder("A-1", "A-2");
+        assertThat(pagina.itens()).extracting(ExemploListagemJpa::getCodigo).containsExactlyInAnyOrder("A-1", "A-2");
     }
 
     @Test
@@ -197,10 +197,10 @@ class ListagemJpaTest {
                 .hasMessageContaining("valor");
     }
 
-    private ExemploListagemJpa salvar(String nome, String codigo, String cpf, String uf, String valor,
-            LocalDate dataCadastro) {
-        return exemplos.saveAndFlush(new ExemploListagemJpa(nome, codigo, cpf, uf,
-                new BigDecimal(valor), dataCadastro));
+    private ExemploListagemJpa salvar(
+            String nome, String codigo, String cpf, String uf, String valor, LocalDate dataCadastro) {
+        return exemplos.saveAndFlush(
+                new ExemploListagemJpa(nome, codigo, cpf, uf, new BigDecimal(valor), dataCadastro));
     }
 
     private List<ExemploListagemJpa> buscar(Specification<ExemploListagemJpa> especificacao) {

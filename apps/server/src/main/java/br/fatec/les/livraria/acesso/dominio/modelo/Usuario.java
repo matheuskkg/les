@@ -1,10 +1,11 @@
 package br.fatec.les.livraria.acesso.dominio.modelo;
 
+import br.fatec.les.livraria.compartilhado.dominio.Email;
+
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
-
-import br.fatec.les.livraria.compartilhado.dominio.Email;
-import lombok.Getter;
 
 /**
  * Identidade de login do sistema (DEC-08, DEC-10): e-mail e telefone servem de login, a senha fica só como hash e a
@@ -15,8 +16,10 @@ public class Usuario {
 
     private final Long id;
     private String email;
+
     /** Opcional: o administrador não tem telefone (DEC-10). */
     private Telefone telefone;
+
     private String senhaHash;
     private final Papel papel;
     private LocalDateTime inativadoEm;

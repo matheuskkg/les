@@ -3,11 +3,12 @@ package br.fatec.les.livraria.clientes.aplicacao.regra;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.comDataNascimento;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.relogio;
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.violacoes;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
-
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
 
 /** RN-CLI-006: data de nascimento plausível, contada a partir do relógio (2026-10-24 nos testes). */
 class DataNascimentoValidaTest {

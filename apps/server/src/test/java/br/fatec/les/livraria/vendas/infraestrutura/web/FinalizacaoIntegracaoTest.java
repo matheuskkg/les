@@ -8,12 +8,23 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.AprovarPedido;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ExpirarReservas;
+import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
+import br.fatec.les.livraria.vendas.dominio.pagamento.SituacaoCupom;
+import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
+import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
+import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
+import br.fatec.les.livraria.vendas.infraestrutura.persistencia.CupomJpa;
+import br.fatec.les.livraria.vendas.infraestrutura.persistencia.CupomJpaRepository;
+
+import com.jayway.jsonpath.JsonPath;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,22 +42,12 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.jayway.jsonpath.JsonPath;
-
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.AprovarPedido;
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ExpirarReservas;
-import br.fatec.les.livraria.vendas.aplicacao.porta.PedidoRepositorio;
-import br.fatec.les.livraria.vendas.dominio.pagamento.SituacaoCupom;
-import br.fatec.les.livraria.vendas.dominio.pedido.Pedido;
-import br.fatec.les.livraria.vendas.dominio.pedido.Pedidos;
-import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
-import br.fatec.les.livraria.vendas.infraestrutura.persistencia.CupomJpa;
-import br.fatec.les.livraria.vendas.infraestrutura.persistencia.CupomJpaRepository;
-import jakarta.servlet.http.Cookie;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * "Finalizar compra" de ponta a ponta (RF-VEN-008, RN-VEN-002, RN-VEN-006, RN-VEN-007, RN-VEN-008, RF-EST-003,
@@ -72,29 +73,21 @@ class FinalizacaoIntegracaoTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
-    @Autowired
-    private CupomJpaRepository cupons;
+    @Autowired private CupomJpaRepository cupons;
 
-    @Autowired
-    private PedidoRepositorio pedidos;
+    @Autowired private PedidoRepositorio pedidos;
 
-    @Autowired
-    private ExpirarReservas expirarReservas;
+    @Autowired private ExpirarReservas expirarReservas;
 
-    @Autowired
-    private AprovarPedido aprovarPedido;
+    @Autowired private AprovarPedido aprovarPedido;
 
-    @Autowired
-    private JdbcClient jdbc;
+    @Autowired private JdbcClient jdbc;
 
     private MockMvc mvc;
     private int saldoInicial;
@@ -116,28 +109,42 @@ class FinalizacaoIntegracaoTest {
         Cliente ana = novoCliente();
         long checkoutId = iniciarCheckout(ana);
 
-        String resposta = finalizar(ana, cartaoSalvo(ana, "49.88", "123"), "\"cuponsPromocionais\":[\"BEMVINDO10\"]")
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value("APROVADA"))
-                .andExpect(jsonPath("$.total").value("49.88"))
-                .andExpect(jsonPath("$.recusas", hasSize(0)))
-                .andReturn().getResponse().getContentAsString();
+        String resposta =
+                finalizar(ana, cartaoSalvo(ana, "49.88", "123"), "\"cuponsPromocionais\":[\"BEMVINDO10\"]")
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.status").value("APROVADA"))
+                        .andExpect(jsonPath("$.total").value("49.88"))
+                        .andExpect(jsonPath("$.recusas", hasSize(0)))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
         long pedidoId = ((Number) JsonPath.read(resposta, "$.pedidoId")).longValue();
 
         assertThat(saldo()).isEqualTo(saldoInicial - 1);
-        assertThat(jdbc.sql("select count(*) from reserva where origem = 'CHECKOUT' and origem_id = ?")
-                .param(checkoutId).query(Long.class).single()).isZero();
+        assertThat(
+                        jdbc.sql("select count(*) from reserva where origem = 'CHECKOUT' and origem_id = ?")
+                                .param(checkoutId)
+                                .query(Long.class)
+                                .single())
+                .isZero();
         mvc.perform(get("/api/me/checkout").cookie(sessaoDe(ana.usuarioId()))).andExpect(status().isNotFound());
         assertThat(statusAuditados(pedidoId)).containsExactly("EM_PROCESSAMENTO", "APROVADA");
         assertThat(tiposNotificados(ana.usuarioId())).contains("PEDIDO_APROVADO");
         assertThat(tiposNotificados(1L)).contains("PEDIDO_AGUARDANDO_DESPACHO");
 
-        Map<String, Object> copia = jdbc.sql("select cast(p.cliente as varchar) cliente, cast(i.livro as varchar) livro,"
-                + " cast(c.cartao as varchar) cartao from pedido p join item_pedido i on i.pedido_id = p.id"
-                + " join pagamento_cartao c on c.pedido_id = p.id where p.id = ?").param(pedidoId).query().singleRow();
+        Map<String, Object> copia =
+                jdbc.sql(
+                                "select cast(p.cliente as varchar) cliente, cast(i.livro as varchar) livro,"
+                                        + " cast(c.cartao as varchar) cartao from pedido p join item_pedido i on i.pedido_id = p.id"
+                                        + " join pagamento_cartao c on c.pedido_id = p.id where p.id = ?")
+                        .param(pedidoId)
+                        .query()
+                        .singleRow();
         assertThat(copia.get("cliente").toString()).contains(ana.cpf());
         assertThat(copia.get("livro").toString()).contains("Dom Casmurro").contains("categorias");
-        assertThat(copia.get("cartao").toString()).contains("1111").doesNotContain("4111111111111111")
+        assertThat(copia.get("cartao").toString())
+                .contains("1111")
+                .doesNotContain("4111111111111111")
                 .doesNotContain("123");
     }
 
@@ -172,14 +179,20 @@ class FinalizacaoIntegracaoTest {
         long cupom = cupomDeTroca(ana, "70.00");
         iniciarCheckout(ana);
 
-        String resposta = finalizar(ana, "[]", "\"cuponsDeTroca\":[" + cupom + "]")
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value("APROVADA"))
-                .andReturn().getResponse().getContentAsString();
+        String resposta =
+                finalizar(ana, "[]", "\"cuponsDeTroca\":[" + cupom + "]")
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.status").value("APROVADA"))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
         long pedidoId = ((Number) JsonPath.read(resposta, "$.pedidoId")).longValue();
 
-        CupomJpa troco = this.cupons.findAll().stream()
-                .filter(gerado -> gerado.getCodigo().equals("TROCO-" + pedidoId)).findFirst().orElseThrow();
+        CupomJpa troco =
+                this.cupons.findAll().stream()
+                        .filter(gerado -> gerado.getCodigo().equals("TROCO-" + pedidoId))
+                        .findFirst()
+                        .orElseThrow();
         assertThat(troco.getValor()).isEqualByComparingTo("10.12");
         assertThat(troco.getClienteId()).isEqualTo(ana.clienteId());
         assertThat(troco.getSituacao()).isEqualTo(SituacaoCupom.DISPONIVEL);
@@ -196,8 +209,12 @@ class FinalizacaoIntegracaoTest {
         finalizar(ana, cartaoSalvo(ana, "59.88", "12"), null)
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes[0].codigo").value("RN-CLI-004"));
-        assertThat(jdbc.sql("select count(*) from pedido where cliente_id = ?").param(ana.clienteId())
-                .query(Long.class).single()).isZero();
+        assertThat(
+                        jdbc.sql("select count(*) from pedido where cliente_id = ?")
+                                .param(ana.clienteId())
+                                .query(Long.class)
+                                .single())
+                .isZero();
     }
 
     @Test
@@ -230,21 +247,30 @@ class FinalizacaoIntegracaoTest {
     }
 
     private ResultActions finalizar(Cliente cliente, String cartoes, String cupons) throws Exception {
-        String corpo = "{\"entrega\":{\"enderecoId\":%d},\"cobranca\":{\"enderecoId\":%d},\"cartoes\":%s%s}"
-                .formatted(cliente.enderecoId(), cliente.enderecoId(), cartoes, cupons == null ? "" : "," + cupons);
+        String corpo =
+                "{\"entrega\":{\"enderecoId\":%d},\"cobranca\":{\"enderecoId\":%d},\"cartoes\":%s%s}"
+                        .formatted(
+                                cliente.enderecoId(),
+                                cliente.enderecoId(),
+                                cartoes,
+                                cupons == null ? "" : "," + cupons);
         return escrever(post("/api/me/checkout/finalizar"), cliente.usuarioId(), corpo);
     }
 
     private static String cartaoSalvo(Cliente cliente, String valor, String codigo) {
-        return "[{\"cartaoId\":%d,\"valor\":\"%s\",\"codigoSeguranca\":\"%s\"}]".formatted(cliente.cartaoId(), valor,
-                codigo);
+        return "[{\"cartaoId\":%d,\"valor\":\"%s\",\"codigoSeguranca\":\"%s\"}]"
+                .formatted(cliente.cartaoId(), valor, codigo);
     }
 
     private long iniciarCheckout(Cliente cliente) throws Exception {
         escrever(post("/api/me/carrinho/itens"), cliente.usuarioId(), "{\"livroId\":1,\"quantidade\":1}")
                 .andExpect(status().isOk());
-        String checkout = escrever(post("/api/me/checkout"), cliente.usuarioId(), "")
-                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        String checkout =
+                escrever(post("/api/me/checkout"), cliente.usuarioId(), "")
+                        .andExpect(status().isCreated())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
         return ((Number) JsonPath.read(checkout, "$.id")).longValue();
     }
 
@@ -263,7 +289,8 @@ class FinalizacaoIntegracaoTest {
         int n = CLIENTES.incrementAndGet();
         String cpf = cpf(700000000 + n * 1013);
         String email = "finalizacao" + n + "@livraria.test";
-        String corpo = """
+        String corpo =
+                """
                 {
                   "nome": "Cliente Finalização", "genero": "FEMININO", "dataNascimento": "1990-01-01",
                   "cpf": "%s", "email": "%s",
@@ -275,19 +302,29 @@ class FinalizacaoIntegracaoTest {
                   "cartoes": [{ "numero": "4111111111111111", "nomeImpresso": "CLIENTE FINALIZACAO",
                     "validade": "2030-12" }]
                 }
-                """.formatted(cpf, email, n);
+                """
+                        .formatted(cpf, email, n);
         Cookie csrf = mvc.perform(get("/api/sessao")).andReturn().getResponse().getCookie("XSRF-TOKEN");
-        mvc.perform(post("/api/clientes").cookie(csrf).header("X-XSRF-TOKEN", csrf.getValue())
-                .contentType(MediaType.APPLICATION_JSON).content(corpo)).andExpect(status().isCreated());
+        mvc.perform(
+                        post("/api/clientes")
+                                .cookie(csrf)
+                                .header("X-XSRF-TOKEN", csrf.getValue())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(corpo))
+                .andExpect(status().isCreated());
         long usuarioId = usuarios.buscarPorLogin(email).orElseThrow().getId();
         Cookie sessao = sessaoDe(usuarioId);
-        String enderecos = mvc.perform(get("/api/me/enderecos").cookie(sessao)).andReturn().getResponse()
-                .getContentAsString();
-        String cartoes = mvc.perform(get("/api/me/cartoes").cookie(sessao)).andReturn().getResponse()
-                .getContentAsString();
-        long clienteId = jdbc.sql("select id from cliente where usuario_id = ?").param(usuarioId)
-                .query(Long.class).single();
-        return new Cliente(usuarioId, clienteId, cpf, ((Number) JsonPath.read(enderecos, "$[0].id")).longValue(),
+        String enderecos =
+                mvc.perform(get("/api/me/enderecos").cookie(sessao)).andReturn().getResponse().getContentAsString();
+        String cartoes =
+                mvc.perform(get("/api/me/cartoes").cookie(sessao)).andReturn().getResponse().getContentAsString();
+        long clienteId =
+                jdbc.sql("select id from cliente where usuario_id = ?").param(usuarioId).query(Long.class).single();
+        return new Cliente(
+                usuarioId,
+                clienteId,
+                cpf,
+                ((Number) JsonPath.read(enderecos, "$[0].id")).longValue(),
                 ((Number) JsonPath.read(cartoes, "$[0].id")).longValue());
     }
 
@@ -306,17 +343,20 @@ class FinalizacaoIntegracaoTest {
     }
 
     private int saldo() {
-        return jdbc.sql("select quantidade from estoque where livro_id = ?").param(LIVRO).query(Integer.class)
-                .single();
+        return jdbc.sql("select quantidade from estoque where livro_id = ?").param(LIVRO).query(Integer.class).single();
     }
 
     private List<String> statusAuditados(long pedidoId) {
-        return jdbc.sql("select status from pedido_aud where id = ? order by revisao").param(pedidoId)
-                .query(String.class).list();
+        return jdbc.sql("select status from pedido_aud where id = ? order by revisao")
+                .param(pedidoId)
+                .query(String.class)
+                .list();
     }
 
     private List<String> tiposNotificados(long usuarioId) {
-        return jdbc.sql("select tipo from notificacao where usuario_id = ?").param(usuarioId).query(String.class)
+        return jdbc.sql("select tipo from notificacao where usuario_id = ?")
+                .param(usuarioId)
+                .query(String.class)
                 .list();
     }
 
@@ -324,10 +364,10 @@ class FinalizacaoIntegracaoTest {
             throws Exception {
         Cookie csrf = mvc.perform(get("/api/sessao")).andReturn().getResponse().getCookie("XSRF-TOKEN");
         assertThat(csrf).isNotNull();
-        MockHttpServletRequestBuilder comSessao = requisicao.cookie(sessaoDe(usuarioId), csrf)
-                .header("X-XSRF-TOKEN", csrf.getValue());
-        return mvc.perform(corpo.isEmpty() ? comSessao
-                : comSessao.contentType(MediaType.APPLICATION_JSON).content(corpo));
+        MockHttpServletRequestBuilder comSessao =
+                requisicao.cookie(sessaoDe(usuarioId), csrf).header("X-XSRF-TOKEN", csrf.getValue());
+        return mvc.perform(
+                corpo.isEmpty() ? comSessao : comSessao.contentType(MediaType.APPLICATION_JSON).content(corpo));
     }
 
     private Cookie sessaoDe(long usuarioId) {
@@ -335,6 +375,5 @@ class FinalizacaoIntegracaoTest {
         return new Cookie(EmissorDeToken.COOKIE, token);
     }
 
-    private record Cliente(long usuarioId, long clienteId, String cpf, long enderecoId, long cartaoId) {
-    }
+    private record Cliente(long usuarioId, long clienteId, String cpf, long enderecoId, long cartaoId) {}
 }

@@ -1,20 +1,21 @@
 package br.fatec.les.livraria.catalogo.aplicacao.casodeuso;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import br.fatec.les.livraria.catalogo.aplicacao.consulta.SinopseDoLivro;
+import br.fatec.les.livraria.catalogo.aplicacao.porta.CatalogoConsultas;
+import br.fatec.les.livraria.compartilhado.aplicacao.Ids;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.catalogo.aplicacao.consulta.SinopseDoLivro;
-import br.fatec.les.livraria.catalogo.aplicacao.porta.CatalogoConsultas;
-import br.fatec.les.livraria.compartilhado.aplicacao.Ids;
-import lombok.RequiredArgsConstructor;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Expõe ao {@code recomendacao} a sinopse dos livros, para a busca do assistente por texto na sinopse
- * (RNF-REC-001, DEC-03).
+ * Expõe ao {@code recomendacao} a sinopse dos livros, para a busca do assistente por texto na sinopse (RNF-REC-001,
+ * DEC-03).
  */
 @Component
 @RequiredArgsConstructor

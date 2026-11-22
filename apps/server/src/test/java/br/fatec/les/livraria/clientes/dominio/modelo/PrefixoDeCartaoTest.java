@@ -38,11 +38,8 @@ class PrefixoDeCartaoTest {
 
     @Test
     void rnCli005_prefixoInvalidoEhRejeitado() {
-        assertThatThrownBy(() -> PrefixoDeCartao.de("abc"))
-                .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> PrefixoDeCartao.de("51-5"))
-                .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> PrefixoDeCartao.de("55-51"))
-                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> PrefixoDeCartao.de("abc")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> PrefixoDeCartao.de("51-5")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> PrefixoDeCartao.de("55-51")).isInstanceOf(IllegalArgumentException.class);
     }
 }

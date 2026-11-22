@@ -1,14 +1,15 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
 import static br.fatec.les.livraria.clientes.ClientesDeTeste.violacoes;
+
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.YearMonth;
-
-import org.junit.jupiter.api.Test;
 
 import br.fatec.les.livraria.clientes.dominio.modelo.EscolhaDeCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
+
+import org.junit.jupiter.api.Test;
+
+import java.time.YearMonth;
 
 /** RF-VEN-006: a compra usa um cartão cadastrado ou um novo, nunca os dois nem nenhum. */
 class EscolhaDeCartaoValidaTest {

@@ -3,9 +3,9 @@ package br.fatec.les.livraria.acesso.dominio.modelo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDateTime;
-
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
 
 class UsuarioTest {
 
@@ -80,8 +80,7 @@ class UsuarioTest {
     void alterarSenhaHashNuloFalha_RF_CLI_008() {
         Usuario usuario = usuario();
 
-        assertThatThrownBy(() -> usuario.alterarSenhaHash(null))
-                .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> usuario.alterarSenhaHash(null)).isInstanceOf(NullPointerException.class);
     }
 
     private static Usuario usuario() {

@@ -1,13 +1,14 @@
 package br.fatec.les.livraria.notificacoes.aplicacao.casodeuso;
 
-import java.util.Objects;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.notificacoes.aplicacao.porta.NotificacaoRepositorio;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.notificacoes.aplicacao.porta.NotificacaoRepositorio;
-import lombok.RequiredArgsConstructor;
+import java.util.Objects;
 
 /** Marca como lidas todas as notificações não lidas do próprio usuário (DEC-13). */
 @Component

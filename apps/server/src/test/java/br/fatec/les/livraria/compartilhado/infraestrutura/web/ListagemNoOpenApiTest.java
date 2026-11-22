@@ -10,6 +10,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
+import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
+import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.ConversorDePaginacao;
+import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.ExemploListagemJpa;
+import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.ExemploListagemRepositorio;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,18 +31,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
-import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
-import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.ConversorDePaginacao;
-import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.ExemploListagemJpa;
-import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.ExemploListagemRepositorio;
-
 /**
- * Listagem de exemplo com a configuração real de MVC e springdoc (DEC-07): os parâmetros aparecem na especificação
- * e os valores inválidos respondem 400 em ProblemDetail. O controller só existe neste contexto de teste.
+ * Listagem de exemplo com a configuração real de MVC e springdoc (DEC-07): os parâmetros aparecem na especificação e os
+ * valores inválidos respondem 400 em ProblemDetail. O controller só existe neste contexto de teste.
  */
-@SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:listagem-openapi;MODE=PostgreSQL;"
-        + "DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1")
+@SpringBootTest(
+        properties =
+                "spring.datasource.url=jdbc:h2:mem:listagem-openapi;MODE=PostgreSQL;"
+                        + "DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1")
 @ActiveProfiles("h2")
 class ListagemNoOpenApiTest {
 
@@ -51,7 +53,10 @@ class ListagemNoOpenApiTest {
 
         @GetMapping("/api/exemplo/listagem")
         Pagina<String> listar(
-                @Listagem(campos = { "nome", "codigo" }, padrao = "nome,asc") Paginacao paginacao) {
+                @Listagem(
+                                campos = {"nome", "codigo"},
+                                padrao = "nome,asc")
+                        Paginacao paginacao) {
             return ConversorDePaginacao.paraPagina(
                     exemplos.findAll(Specification.unrestricted(), ConversorDePaginacao.paraPageable(paginacao)),
                     ExemploListagemJpa::getCodigo);
@@ -67,8 +72,7 @@ class ListagemNoOpenApiTest {
         }
     }
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
     private MockMvc mvc;
 
@@ -79,11 +83,13 @@ class ListagemNoOpenApiTest {
 
     @Test
     void aceitaPaginaTamanhoEOrdemRepetida() throws Exception {
-        mvc.perform(get("/api/exemplo/listagem").with(jwt())
-                .param("pagina", "1")
-                .param("tamanho", "2")
-                .param("ordem", "nome,desc")
-                .param("ordem", "codigo,asc"))
+        mvc.perform(
+                        get("/api/exemplo/listagem")
+                                .with(jwt())
+                                .param("pagina", "1")
+                                .param("tamanho", "2")
+                                .param("ordem", "nome,desc")
+                                .param("ordem", "codigo,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.itens").isArray())
                 .andExpect(jsonPath("$.pagina").value(1))
@@ -97,30 +103,60 @@ class ListagemNoOpenApiTest {
         mvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters.length()").value(3))
-                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[*].name",
-                        hasItems("pagina", "tamanho", "ordem")))
-                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'pagina')]"
-                        + ".schema.minimum").value(hasItem(0)))
-                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'pagina')]"
-                        + ".schema.default").value(hasItem(0)))
-                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'tamanho')]"
-                        + ".schema.minimum").value(hasItem(1)))
-                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'tamanho')]"
-                        + ".schema.maximum").value(hasItem(100)))
-                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'tamanho')]"
-                        + ".schema.default").value(hasItem(20)))
-                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]"
-                        + ".schema.type").value(hasItem("array")))
-                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]"
-                        + ".description").value(hasItem(containsString("nome, codigo"))))
-                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]"
-                        + ".description").value(hasItem(containsString("Padrão: nome,asc"))))
-                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]"
-                        + ".schema.example").isEmpty())
-                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]"
-                        + ".explode").value(hasItem(true)))
-                .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'paginacao')]")
-                        .isEmpty())
+                .andExpect(
+                        jsonPath(
+                                "$.paths['/api/exemplo/listagem'].get.parameters[*].name",
+                                hasItems("pagina", "tamanho", "ordem")))
+                .andExpect(
+                        jsonPath(
+                                        "$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'pagina')]"
+                                                + ".schema.minimum")
+                                .value(hasItem(0)))
+                .andExpect(
+                        jsonPath(
+                                        "$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'pagina')]"
+                                                + ".schema.default")
+                                .value(hasItem(0)))
+                .andExpect(
+                        jsonPath(
+                                        "$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'tamanho')]"
+                                                + ".schema.minimum")
+                                .value(hasItem(1)))
+                .andExpect(
+                        jsonPath(
+                                        "$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'tamanho')]"
+                                                + ".schema.maximum")
+                                .value(hasItem(100)))
+                .andExpect(
+                        jsonPath(
+                                        "$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'tamanho')]"
+                                                + ".schema.default")
+                                .value(hasItem(20)))
+                .andExpect(
+                        jsonPath(
+                                        "$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]"
+                                                + ".schema.type")
+                                .value(hasItem("array")))
+                .andExpect(
+                        jsonPath(
+                                        "$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]"
+                                                + ".description")
+                                .value(hasItem(containsString("nome, codigo"))))
+                .andExpect(
+                        jsonPath(
+                                        "$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]"
+                                                + ".description")
+                                .value(hasItem(containsString("Padrão: nome,asc"))))
+                .andExpect(
+                        jsonPath(
+                                        "$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]"
+                                                + ".schema.example")
+                                .isEmpty())
+                .andExpect(
+                        jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'ordem')]" + ".explode")
+                                .value(hasItem(true)))
+                .andExpect(
+                        jsonPath("$.paths['/api/exemplo/listagem'].get.parameters[?(@.name == 'paginacao')]").isEmpty())
                 .andExpect(jsonPath("$.components.schemas.Paginacao").doesNotExist())
                 .andExpect(jsonPath("$.paths['/api/exemplo/listagem'].get.requestBody").doesNotExist());
     }

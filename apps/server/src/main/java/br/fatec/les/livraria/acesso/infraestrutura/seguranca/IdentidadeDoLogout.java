@@ -1,13 +1,14 @@
 package br.fatec.les.livraria.acesso.infraestrutura.seguranca;
 
-import java.util.Optional;
+import jakarta.servlet.http.HttpServletRequest;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Component;
 
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
 
 /**
  * Descobre o usuário do cookie {@code sessao} no logout, sem tornar a rota autenticada (DEC-08, DEC-13).

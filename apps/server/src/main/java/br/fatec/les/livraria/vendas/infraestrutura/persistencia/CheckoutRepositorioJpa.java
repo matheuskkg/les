@@ -1,19 +1,20 @@
 package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import br.fatec.les.livraria.vendas.aplicacao.porta.CheckoutRepositorio;
+import br.fatec.les.livraria.vendas.dominio.modelo.Checkout;
+import br.fatec.les.livraria.vendas.dominio.modelo.ItemCheckout;
+import br.fatec.les.livraria.vendas.dominio.modelo.SituacaoCheckout;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.vendas.aplicacao.porta.CheckoutRepositorio;
-import br.fatec.les.livraria.vendas.dominio.modelo.Checkout;
-import br.fatec.les.livraria.vendas.dominio.modelo.ItemCheckout;
-import br.fatec.les.livraria.vendas.dominio.modelo.SituacaoCheckout;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Adapter JPA do checkout (RF-VEN-003, DEC-12, DEC-16). Os itens são gravados na criação e não mudam depois: para
@@ -28,14 +29,16 @@ public class CheckoutRepositorioJpa implements CheckoutRepositorio {
     @Override
     @Transactional(readOnly = true)
     public Optional<Checkout> buscarAbertoPorCliente(Long clienteId) {
-        return repositorio.findFirstByClienteIdAndSituacao(clienteId, SituacaoCheckout.ABERTO)
+        return repositorio
+                .findFirstByClienteIdAndSituacao(clienteId, SituacaoCheckout.ABERTO)
                 .map(CheckoutRepositorioJpa::paraDominio);
     }
 
     @Override
     @Transactional
     public Optional<Checkout> buscarAbertoPorClienteParaAlterar(Long clienteId) {
-        return repositorio.buscarPorClienteComLock(clienteId, SituacaoCheckout.ABERTO)
+        return repositorio
+                .buscarPorClienteComLock(clienteId, SituacaoCheckout.ABERTO)
                 .map(CheckoutRepositorioJpa::paraDominio);
     }
 
@@ -80,8 +83,11 @@ public class CheckoutRepositorioJpa implements CheckoutRepositorio {
                 entidade.getItens().add(linha);
             }
         } else {
-            entidade = repositorio.findById(checkout.getId()).orElseThrow(
-                    () -> new IllegalStateException("Checkout não encontrado: " + checkout.getId()));
+            entidade =
+                    repositorio
+                            .findById(checkout.getId())
+                            .orElseThrow(
+                                    () -> new IllegalStateException("Checkout não encontrado: " + checkout.getId()));
             if (!Objects.equals(entidade.getVersion(), checkout.getVersao())) {
                 throw new ObjectOptimisticLockingFailureException(CheckoutJpa.class, checkout.getId());
             }
@@ -92,8 +98,14 @@ public class CheckoutRepositorioJpa implements CheckoutRepositorio {
     }
 
     private static Checkout paraDominio(CheckoutJpa entidade) {
-        return new Checkout(entidade.getId(), entidade.getClienteId(), entidade.getSituacao(),
-                entidade.getIniciadoEm(), entidade.getExpiraEm(), entidade.getAvisoEnviadoEm(), entidade.getVersion(),
+        return new Checkout(
+                entidade.getId(),
+                entidade.getClienteId(),
+                entidade.getSituacao(),
+                entidade.getIniciadoEm(),
+                entidade.getExpiraEm(),
+                entidade.getAvisoEnviadoEm(),
+                entidade.getVersion(),
                 entidade.getItens().stream()
                         .map(item -> new ItemCheckout(item.getLivroId(), item.getQuantidade()))
                         .toList());

@@ -20,8 +20,7 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest
 class ConfiguracaoDoWebTest {
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
     private MockMvc mvc;
 

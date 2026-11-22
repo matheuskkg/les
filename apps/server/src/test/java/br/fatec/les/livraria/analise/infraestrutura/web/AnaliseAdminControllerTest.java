@@ -8,7 +8,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.nio.charset.StandardCharsets;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,18 +23,16 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
-import jakarta.servlet.http.Cookie;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Análise de vendas do admin sobre o seed histórico (RF-ANA-001 a RF-ANA-004, RN-ANA-001 a RN-ANA-004, DEC-12,
  * DEC-15.4). Março de 2025 tem valores escritos à mão no {@code scripts/gerar_seed_historico.py}: dois Dom Casmurro
- * (Romance e História) com frete e promocional, três Fundação com uma unidade TROCADO, dois O Hobbit com uma unidade
- * em TROCA AUTORIZADA e um Código Limpo REPROVADA. Outubro de 2026 tem os pedidos 237, 238 e 241 APROVADA, o 242
- * EM TRANSPORTE e o 244 REPROVADA, para fixar a regra do RN-ANA-004: aprovada, em transporte e entregue contam;
- * reprovada não. Só meses passados são consultados, então os pedidos que outros testes gravam com o relógio real não
- * mudam os valores.
+ * (Romance e História) com frete e promocional, três Fundação com uma unidade TROCADO, dois O Hobbit com uma unidade em
+ * TROCA AUTORIZADA e um Código Limpo REPROVADA. Outubro de 2026 tem os pedidos 237, 238 e 241 APROVADA, o 242 EM
+ * TRANSPORTE e o 244 REPROVADA, para fixar a regra do RN-ANA-004: aprovada, em transporte e entregue contam; reprovada
+ * não. Só meses passados são consultados, então os pedidos que outros testes gravam com o relógio real não mudam os
+ * valores.
  */
 @SpringBootTest
 @Transactional
@@ -39,14 +40,11 @@ class AnaliseAdminControllerTest {
 
     private static final String ROTA = "/api/admin/analise";
 
-    @Autowired
-    private WebApplicationContext contexto;
+    @Autowired private WebApplicationContext contexto;
 
-    @Autowired
-    private UsuarioRepositorio usuarios;
+    @Autowired private UsuarioRepositorio usuarios;
 
-    @Autowired
-    private EmissorDeToken emissor;
+    @Autowired private EmissorDeToken emissor;
 
     private MockMvc mvc;
 
@@ -62,8 +60,10 @@ class AnaliseAdminControllerTest {
                 .andExpect(jsonPath("$.inicio").value("2025-03-01"))
                 .andExpect(jsonPath("$.fim").value("2025-03-31"))
                 .andExpect(jsonPath("$.meses", contains("2025-03")))
-                .andExpect(jsonPath("$.series[*].categoria",
-                        contains("Romance", "História", "Ficção Científica", "Fantasia", "Tecnologia")))
+                .andExpect(
+                        jsonPath(
+                                "$.series[*].categoria",
+                                contains("Romance", "História", "Ficção Científica", "Fantasia", "Tecnologia")))
                 // RN-ANA-001 e DEC-12: valor cheio em cada categoria, sem frete e sem o desconto do promocional.
                 .andExpect(jsonPath("$.series[0].valores", contains("95.76")))
                 .andExpect(jsonPath("$.series[1].valores", contains("95.76")))
@@ -77,8 +77,13 @@ class AnaliseAdminControllerTest {
 
     @Test
     void rnAna004_contamAprovadaEmTransporteEEntregueNoMesmoMes() throws Exception {
-        mvc.perform(como(1L, get(ROTA).param("inicio", "2026-10-01").param("fim", "2026-10-31")
-                .param("categoria", "1", "2", "3", "4", "5")))
+        mvc.perform(
+                        como(
+                                1L,
+                                get(ROTA)
+                                        .param("inicio", "2026-10-01")
+                                        .param("fim", "2026-10-31")
+                                        .param("categoria", "1", "2", "3", "4", "5")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.meses", contains("2026-10")))
                 // Romance não tem pedido pendente em outubro; Ficção, Fantasia, Tecnologia e História somam os
@@ -92,8 +97,13 @@ class AnaliseAdminControllerTest {
 
     @Test
     void rnAna003_umValorPorMesNaOrdemDoPeriodo() throws Exception {
-        mvc.perform(como(1L, get(ROTA).param("inicio", "2025-03-01").param("fim", "2025-05-31")
-                .param("categoria", "2")))
+        mvc.perform(
+                        como(
+                                1L,
+                                get(ROTA)
+                                        .param("inicio", "2025-03-01")
+                                        .param("fim", "2025-05-31")
+                                        .param("categoria", "2")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.meses", contains("2025-03", "2025-04", "2025-05")))
                 .andExpect(jsonPath("$.series[0].categoriaId").value(2))
@@ -105,8 +115,13 @@ class AnaliseAdminControllerTest {
     void rfAna002_filtraPelosDiasExatosEMantemUmPontoPorMes_DEC_19() throws Exception {
         // Março de 2025: pedido 44 em 05/03 (Dom Casmurro, 95,76), 45 em 12/03 (Fundação, 96,00 após a troca) e
         // 46 em 18/03 (O Hobbit, 80,00). Recortes dentro do mesmo mês devem trazer apenas os pedidos dos dias pedidos.
-        mvc.perform(como(1L, get(ROTA).param("inicio", "2025-03-01").param("fim", "2025-03-10")
-                .param("categoria", "1", "2", "3")))
+        mvc.perform(
+                        como(
+                                1L,
+                                get(ROTA)
+                                        .param("inicio", "2025-03-01")
+                                        .param("fim", "2025-03-10")
+                                        .param("categoria", "1", "2", "3")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.inicio").value("2025-03-01"))
                 .andExpect(jsonPath("$.fim").value("2025-03-10"))
@@ -115,8 +130,13 @@ class AnaliseAdminControllerTest {
                 .andExpect(jsonPath("$.series[1].valores", contains("0.00")))
                 .andExpect(jsonPath("$.series[2].valores", contains("0.00")));
 
-        mvc.perform(como(1L, get(ROTA).param("inicio", "2025-03-12").param("fim", "2025-03-20")
-                .param("categoria", "1", "2", "3")))
+        mvc.perform(
+                        como(
+                                1L,
+                                get(ROTA)
+                                        .param("inicio", "2025-03-12")
+                                        .param("fim", "2025-03-20")
+                                        .param("categoria", "1", "2", "3")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.meses", contains("2025-03")))
                 .andExpect(jsonPath("$.series[0].valores", contains("0.00")))
@@ -126,16 +146,31 @@ class AnaliseAdminControllerTest {
 
     @Test
     void rfAna002_rnAna002_rfAna003_periodoESelecaoInvalidosRespondem422() throws Exception {
-        mvc.perform(como(1L, get(ROTA).param("inicio", "2025-03-01").param("fim", "2025-02-01")
-                .param("categoria", "1")))
+        mvc.perform(
+                        como(
+                                1L,
+                                get(ROTA)
+                                        .param("inicio", "2025-03-01")
+                                        .param("fim", "2025-02-01")
+                                        .param("categoria", "1")))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes[*].codigo", contains("RF-ANA-002")));
         // 24 meses calendário: 01/11/2024 a 31/10/2026, mesmo com quantidades diferentes de dias por mês.
-        mvc.perform(como(1L, get(ROTA).param("inicio", "2024-11-01").param("fim", "2026-10-31")
-                .param("categoria", "1")))
+        mvc.perform(
+                        como(
+                                1L,
+                                get(ROTA)
+                                        .param("inicio", "2024-11-01")
+                                        .param("fim", "2026-10-31")
+                                        .param("categoria", "1")))
                 .andExpect(status().isOk());
-        mvc.perform(como(1L, get(ROTA).param("inicio", "2024-11-01").param("fim", "2026-11-01")
-                .param("categoria", "1")))
+        mvc.perform(
+                        como(
+                                1L,
+                                get(ROTA)
+                                        .param("inicio", "2024-11-01")
+                                        .param("fim", "2026-11-01")
+                                        .param("categoria", "1")))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.violacoes[*].codigo", contains("RN-ANA-002")));
         mvc.perform(como(1L, marco(get(ROTA))))
@@ -145,11 +180,21 @@ class AnaliseAdminControllerTest {
 
     @Test
     void dataMalformadaAusenteOuCategoriaInexistenteResponde400_DEC_07() throws Exception {
-        mvc.perform(como(1L, get(ROTA).param("inicio", "2025-13-01").param("fim", "2025-12-31")
-                .param("categoria", "1")))
+        mvc.perform(
+                        como(
+                                1L,
+                                get(ROTA)
+                                        .param("inicio", "2025-13-01")
+                                        .param("fim", "2025-12-31")
+                                        .param("categoria", "1")))
                 .andExpect(status().isBadRequest());
-        mvc.perform(como(1L, get(ROTA).param("inicio", "2025-02-30").param("fim", "2025-03-31")
-                .param("categoria", "1")))
+        mvc.perform(
+                        como(
+                                1L,
+                                get(ROTA)
+                                        .param("inicio", "2025-02-30")
+                                        .param("fim", "2025-03-31")
+                                        .param("categoria", "1")))
                 .andExpect(status().isBadRequest());
         mvc.perform(como(1L, get(ROTA).param("inicio", "2025-03-01").param("categoria", "1")))
                 .andExpect(status().isBadRequest());
@@ -166,20 +211,27 @@ class AnaliseAdminControllerTest {
 
     @Test
     void rfAna004_exportaOsDadosDoGraficoEmCsv_DEC_15_4() throws Exception {
-        byte[] csv = mvc.perform(como(1L, marco(get(ROTA + "/exportacao")).param("categoria", "2", "4")))
-                .andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-                .andExpect(header().string("Content-Disposition",
-                        "attachment; filename=\"analise-de-vendas-2025-03-01-a-2025-03-31.csv\""))
-                .andReturn().getResponse().getContentAsByteArray();
+        byte[] csv =
+                mvc.perform(como(1L, marco(get(ROTA + "/exportacao")).param("categoria", "2", "4")))
+                        .andExpect(status().isOk())
+                        .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+                        .andExpect(
+                                header().string(
+                                                "Content-Disposition",
+                                                "attachment; filename=\"analise-de-vendas-2025-03-01-a-2025-03-31.csv\""))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsByteArray();
 
-        assertThat(new String(csv, StandardCharsets.UTF_8)).isEqualTo("﻿" + """
-                mes;categoria;valor\r
-                2025-03;Ficção Científica;96,00\r
-                2025-03;Tecnologia;0,00\r
-                """);
-        mvc.perform(como(1L, marco(get(ROTA + "/exportacao"))))
-                .andExpect(status().isUnprocessableContent());
+        assertThat(new String(csv, StandardCharsets.UTF_8))
+                .isEqualTo(
+                        "﻿"
+                                + """
+                                mes;categoria;valor\r
+                                2025-03;Ficção Científica;96,00\r
+                                2025-03;Tecnologia;0,00\r
+                                """);
+        mvc.perform(como(1L, marco(get(ROTA + "/exportacao")))).andExpect(status().isUnprocessableContent());
     }
 
     private static MockHttpServletRequestBuilder marco(MockHttpServletRequestBuilder requisicao) {

@@ -1,10 +1,11 @@
 package br.fatec.les.livraria.acesso.infraestrutura.seguranca;
 
-import java.nio.charset.StandardCharsets;
-import java.util.List;
+import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
+import br.fatec.les.livraria.compartilhado.infraestrutura.seguranca.PropriedadesJwt;
+import br.fatec.les.livraria.compartilhado.infraestrutura.seguranca.RespostaDeAcessoNegado;
+import br.fatec.les.livraria.compartilhado.infraestrutura.tempo.RelogioComoClock;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,11 +34,11 @@ import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
-import br.fatec.les.livraria.compartilhado.infraestrutura.seguranca.PropriedadesJwt;
-import br.fatec.les.livraria.compartilhado.infraestrutura.seguranca.RespostaDeAcessoNegado;
-import br.fatec.les.livraria.compartilhado.infraestrutura.tempo.RelogioComoClock;
-import lombok.RequiredArgsConstructor;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Spring Security da API (DEC-08, DEC-15.4): JWT HS256 lido do cookie {@code sessao}, CSRF de SPA, rotas públicas e
@@ -67,21 +68,18 @@ public class ConfiguracaoDeSeguranca {
 
     @Bean
     JwtEncoder jwtEncoder(SecretKey chave) {
-        return NimbusJwtEncoder.withSecretKey(chave)
-                .algorithm(MacAlgorithm.HS256)
-                .build();
+        return NimbusJwtEncoder.withSecretKey(chave).algorithm(MacAlgorithm.HS256).build();
     }
 
     @Bean
     JwtDecoder jwtDecoder(SecretKey chave, Relogio relogio) {
-        NimbusJwtDecoder decodificador = NimbusJwtDecoder.withSecretKey(chave)
-                .macAlgorithm(MacAlgorithm.HS256)
-                .build();
+        NimbusJwtDecoder decodificador = NimbusJwtDecoder.withSecretKey(chave).macAlgorithm(MacAlgorithm.HS256).build();
         JwtTimestampValidator validade = new JwtTimestampValidator();
         validade.setClock(new RelogioComoClock(relogio));
         // A sobrecarga com List evita a criação de array genérico (aviso de unchecked) do varargs.
-        decodificador.setJwtValidator(JwtValidators.createDefaultWithValidators(
-                List.of(new JwtIssuerValidator(EmissorDeToken.EMISSOR), validade)));
+        decodificador.setJwtValidator(
+                JwtValidators.createDefaultWithValidators(
+                        List.of(new JwtIssuerValidator(EmissorDeToken.EMISSOR), validade)));
         return decodificador;
     }
 
@@ -117,9 +115,8 @@ public class ConfiguracaoDeSeguranca {
         http.httpBasic(AbstractHttpConfigurer::disable);
         http.logout(AbstractHttpConfigurer::disable);
 
-        http.exceptionHandling(erros -> erros
-                .authenticationEntryPoint(entradaDeAutenticacao)
-                .accessDeniedHandler(respostaDeAcessoNegado));
+        http.exceptionHandling(erros ->
+                erros.authenticationEntryPoint(entradaDeAutenticacao).accessDeniedHandler(respostaDeAcessoNegado));
 
         /*
          * O resource server é montado à mão em vez de http.oauth2ResourceServer(): o configurador padrão ignora o
@@ -132,8 +129,8 @@ public class ConfiguracaoDeSeguranca {
         // Forma atual da API: o resolvedor vai no conversor, que entra no construtor do filtro.
         BearerTokenAuthenticationConverter conversorDeBearer = new BearerTokenAuthenticationConverter();
         conversorDeBearer.setBearerTokenResolver(resolvedorDeToken);
-        BearerTokenAuthenticationFilter filtroDoToken = new BearerTokenAuthenticationFilter(gerenciador,
-                conversorDeBearer);
+        BearerTokenAuthenticationFilter filtroDoToken =
+                new BearerTokenAuthenticationFilter(gerenciador, conversorDeBearer);
         filtroDoToken.setAuthenticationEntryPoint(entradaDeAutenticacao);
         http.addFilterBefore(filtroDoToken, UsernamePasswordAuthenticationFilter.class);
 

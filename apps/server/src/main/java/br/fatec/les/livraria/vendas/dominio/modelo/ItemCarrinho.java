@@ -3,11 +3,11 @@ package br.fatec.les.livraria.vendas.dominio.modelo;
 import java.util.Objects;
 
 /**
- * Linha do carrinho com um livro e a quantidade desejada (RF-VEN-001, RF-VEN-002). Cada livro aparece uma
- * única vez no carrinho (DEC-16); reincidir na adição soma à linha existente.
+ * Linha do carrinho com um livro e a quantidade desejada (RF-VEN-001, RF-VEN-002). Cada livro aparece uma única vez no
+ * carrinho (DEC-16); reincidir na adição soma à linha existente.
  *
- * <p>O preço não fica aqui: o carrinho mostra o preço de venda atual do catálogo, e o pedido é que copia o
- * preço na finalização (DEC-12, DEC-16).</p>
+ * <p>O preço não fica aqui: o carrinho mostra o preço de venda atual do catálogo, e o pedido é que copia o preço na
+ * finalização (DEC-12, DEC-16).
  */
 public class ItemCarrinho {
 

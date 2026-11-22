@@ -9,8 +9,8 @@ public final class Violacoes {
     private final List<Violacao> itens = new ArrayList<>();
 
     /**
-     * Executa todas as regras sobre {@code alvo} e lança {@link ExcecaoDeNegocio} com a lista completa, se alguma
-     * regra registrar violação.
+     * Executa todas as regras sobre {@code alvo} e lança {@link ExcecaoDeNegocio} com a lista completa, se alguma regra
+     * registrar violação.
      */
     @SafeVarargs
     public static <T> void verificar(T alvo, Regra<? super T>... regras) {

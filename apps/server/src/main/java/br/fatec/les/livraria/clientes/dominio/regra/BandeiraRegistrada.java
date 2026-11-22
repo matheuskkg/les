@@ -1,23 +1,24 @@
 package br.fatec.les.livraria.clientes.dominio.regra;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.acesso.dominio.modelo.Telefone;
 import br.fatec.les.livraria.clientes.dominio.calculo.IdentificarBandeira;
 import br.fatec.les.livraria.clientes.dominio.modelo.Bandeira;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCartao;
 import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Bandeira registrada (RN-CLI-005, DEC-18): a bandeira do cartão é identificada pelo número na tabela do seed, e um
- * número sem bandeira correspondente é recusado. A regra é pura: recebe as bandeiras já carregadas pelo caso de uso.
- * O tamanho conforme a bandeira e o dígito verificador ficam em {@link NumeroDoCartaoValido} (RN-CLI-004).
+ * número sem bandeira correspondente é recusado. A regra é pura: recebe as bandeiras já carregadas pelo caso de uso. O
+ * tamanho conforme a bandeira e o dígito verificador ficam em {@link NumeroDoCartaoValido} (RN-CLI-004).
  */
 @Component
 @RequiredArgsConstructor
@@ -45,8 +46,8 @@ public class BandeiraRegistrada {
         return identificar(cartao, violacoes, bandeiras, "");
     }
 
-    private Optional<Bandeira> identificar(NovoCartao cartao, Violacoes violacoes, List<Bandeira> bandeiras,
-            String prefixo) {
+    private Optional<Bandeira> identificar(
+            NovoCartao cartao, Violacoes violacoes, List<Bandeira> bandeiras, String prefixo) {
         if (cartao == null) {
             return Optional.empty();
         }
@@ -57,9 +58,9 @@ public class BandeiraRegistrada {
         }
         Optional<Bandeira> bandeira = identificarBandeira.identificar(digitos, bandeiras);
         if (bandeira.isEmpty()) {
-            violacoes.adicionar(CODIGO, prefixo.isEmpty()
-                    ? "Bandeira do cartão não aceita."
-                    : prefixo + "bandeira do cartão não aceita.");
+            violacoes.adicionar(
+                    CODIGO,
+                    prefixo.isEmpty() ? "Bandeira do cartão não aceita." : prefixo + "bandeira do cartão não aceita.");
         }
         return bandeira;
     }

@@ -1,5 +1,10 @@
 package br.fatec.les.livraria.acesso.infraestrutura.seguranca;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
@@ -9,17 +14,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
-
 /**
  * Lê o token somente do cookie {@code sessao} (DEC-08). Não há header {@code Authorization}.
  *
  * <p>Nas rotas públicas o cookie é ignorado, para que um token expirado ou de usuário inativo não transforme um GET da
- * vitrine, o autocadastro, o login ou o logout em 401. A exceção é {@code GET /api/sessao}: ele precisa do token
- * válido para dizer quem está logado; se o token for inválido, a entrada de autenticação responde 401 e apaga o
- * cookie.
+ * vitrine, o autocadastro, o login ou o logout em 401. A exceção é {@code GET /api/sessao}: ele precisa do token válido
+ * para dizer quem está logado; se o token for inválido, a entrada de autenticação responde 401 e apaga o cookie.
  */
 @Component
 @RequiredArgsConstructor

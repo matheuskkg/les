@@ -1,21 +1,22 @@
 package br.fatec.les.livraria.clientes.aplicacao.regra;
 
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.acesso.aplicacao.casodeuso.ContasEmUso;
-import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.clientes.aplicacao.porta.ClienteRepositorio;
+import br.fatec.les.livraria.clientes.dominio.modelo.NovoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Cpf;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
 /**
- * Unicidade do CPF entre as contas em uso (RF-CLI-001, DEC-10). Busca os clientes com o CPF e pergunta ao
- * {@code acesso} se o usuário de algum ainda está ativo ou dentro do prazo de reativação; conta encerrada libera o
- * CPF para um novo cadastro.
+ * Unicidade do CPF entre as contas em uso (RF-CLI-001, DEC-10). Busca os clientes com o CPF e pergunta ao {@code
+ * acesso} se o usuário de algum ainda está ativo ou dentro do prazo de reativação; conta encerrada libera o CPF para um
+ * novo cadastro.
  */
 @Component
 @RequiredArgsConstructor

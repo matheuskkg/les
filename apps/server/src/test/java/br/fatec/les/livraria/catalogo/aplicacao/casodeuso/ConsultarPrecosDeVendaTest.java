@@ -3,6 +3,14 @@ package br.fatec.les.livraria.catalogo.aplicacao.casodeuso;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import br.fatec.les.livraria.catalogo.aplicacao.porta.MargemPorLivro;
+import br.fatec.les.livraria.catalogo.dominio.calculo.CalcularPrecoVenda;
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+import br.fatec.les.livraria.estoque.aplicacao.casodeuso.ConsultarMaiorCusto;
+import br.fatec.les.livraria.estoque.aplicacao.porta.MaiorCustoPorLivro;
+
+import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,28 +19,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
-
-import br.fatec.les.livraria.catalogo.aplicacao.porta.MargemPorLivro;
-import br.fatec.les.livraria.catalogo.dominio.calculo.CalcularPrecoVenda;
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
-import br.fatec.les.livraria.estoque.aplicacao.casodeuso.ConsultarMaiorCusto;
-import br.fatec.les.livraria.estoque.aplicacao.porta.MaiorCustoPorLivro;
-
 /** Preço de venda em lote com portas em memória (RF-EST-002, RN-LIV-003). */
 class ConsultarPrecosDeVendaTest {
 
-    private final MargemPorLivroFake margens = new MargemPorLivroFake(Map.of(
-            1L, new BigDecimal("0.2000"),
-            2L, new BigDecimal("0.3500"),
-            20L, new BigDecimal("0.3500")));
+    private final MargemPorLivroFake margens =
+            new MargemPorLivroFake(
+                    Map.of(
+                            1L, new BigDecimal("0.2000"),
+                            2L, new BigDecimal("0.3500"),
+                            20L, new BigDecimal("0.3500")));
 
-    private final MaiorCustoPorLivroFake custos = new MaiorCustoPorLivroFake(Map.of(
-            1L, new BigDecimal("39.90"),
-            2L, new BigDecimal("47.50")));
+    private final MaiorCustoPorLivroFake custos =
+            new MaiorCustoPorLivroFake(
+                    Map.of(
+                            1L, new BigDecimal("39.90"),
+                            2L, new BigDecimal("47.50")));
 
-    private final ConsultarPrecosDeVenda consultarPrecos = new ConsultarPrecosDeVenda(
-            margens, new ConsultarMaiorCusto(custos), new CalcularPrecoVenda());
+    private final ConsultarPrecosDeVenda consultarPrecos =
+            new ConsultarPrecosDeVenda(margens, new ConsultarMaiorCusto(custos), new CalcularPrecoVenda());
 
     @Test
     void rfEst002_calculaOPrecoComAMargemDoGrupoDeCadaLivro() {

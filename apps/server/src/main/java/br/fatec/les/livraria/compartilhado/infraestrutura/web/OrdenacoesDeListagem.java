@@ -1,14 +1,14 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import br.fatec.les.livraria.compartilhado.aplicacao.OrdenacaoPermitida;
+import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 
-import br.fatec.les.livraria.compartilhado.aplicacao.OrdenacaoPermitida;
-import br.fatec.les.livraria.compartilhado.aplicacao.ParametroInvalido;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Monta e valida a {@link OrdenacaoPermitida} de cada método de listagem uma única vez (DEC-07). A configuração é de
@@ -36,9 +36,12 @@ class OrdenacoesDeListagem {
         try {
             return CamposDeListagem.ordenacao(listagem);
         } catch (ParametroInvalido | IllegalArgumentException excecao) {
-            throw new IllegalStateException("Configuração inválida em @Listagem do método "
-                    + metodo.toGenericString() + ": " + excecao.getMessage()
-                    + " Corrija a anotação; este é um erro de programação, não um parâmetro da requisição.",
+            throw new IllegalStateException(
+                    "Configuração inválida em @Listagem do método "
+                            + metodo.toGenericString()
+                            + ": "
+                            + excecao.getMessage()
+                            + " Corrija a anotação; este é um erro de programação, não um parâmetro da requisição.",
                     excecao);
         }
     }

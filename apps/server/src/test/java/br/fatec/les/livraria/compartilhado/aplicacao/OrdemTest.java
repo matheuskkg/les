@@ -24,7 +24,7 @@ class OrdemTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = { " ", "nome", "nome,", ",asc", "nome,asc,desc" })
+    @ValueSource(strings = {" ", "nome", "nome,", ",asc", "nome,asc,desc"})
     void recusaFormatoInvalido(String valor) {
         assertThatThrownBy(() -> Ordem.de(valor))
                 .isInstanceOf(ParametroInvalido.class)

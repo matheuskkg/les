@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,15 +17,17 @@ import lombok.Setter;
 import org.hibernate.envers.Audited;
 
 /**
- * Saldo em mãos por livro (DEC-15.3). O {@code livro_id} é único e referência a outro módulo, sem
- * {@code @ManyToOne} e sem FK (DEC-16).
+ * Saldo em mãos por livro (DEC-15.3). O {@code livro_id} é único e referência a outro módulo, sem {@code @ManyToOne} e
+ * sem FK (DEC-16).
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @Audited
 @Entity
-@Table(name = "estoque", indexes = @Index(name = "uk_estoque_livro", columnList = "livro_id", unique = true),
+@Table(
+        name = "estoque",
+        indexes = @Index(name = "uk_estoque_livro", columnList = "livro_id", unique = true),
         check = @CheckConstraint(constraint = "quantidade >= 0"))
 public class EstoqueJpa {
 

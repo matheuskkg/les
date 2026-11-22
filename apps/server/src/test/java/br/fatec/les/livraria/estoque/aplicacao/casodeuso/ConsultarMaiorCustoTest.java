@@ -2,6 +2,10 @@ package br.fatec.les.livraria.estoque.aplicacao.casodeuso;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import br.fatec.les.livraria.estoque.aplicacao.porta.MaiorCustoPorLivro;
+
+import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,18 +13,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
-
-import br.fatec.les.livraria.estoque.aplicacao.porta.MaiorCustoPorLivro;
-
 /** Consulta em lote do maior custo por livro, delegando a agregação à porta (DEC-15.3). */
 class ConsultarMaiorCustoTest {
 
     @Test
     void devolveOsCustosInformadosPelaPorta() {
-        MaiorCustoPorLivroFake porta = new MaiorCustoPorLivroFake(Map.of(
-                1L, new BigDecimal("39.90"),
-                2L, new BigDecimal("47.50")));
+        MaiorCustoPorLivroFake porta =
+                new MaiorCustoPorLivroFake(
+                        Map.of(
+                                1L, new BigDecimal("39.90"),
+                                2L, new BigDecimal("47.50")));
         ConsultarMaiorCusto consultarMaiorCusto = new ConsultarMaiorCusto(porta);
 
         Map<Long, BigDecimal> resultado = consultarMaiorCusto.executar(List.of(1L, 2L));

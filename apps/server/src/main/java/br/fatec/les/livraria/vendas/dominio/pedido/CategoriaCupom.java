@@ -5,7 +5,6 @@ package br.fatec.les.livraria.vendas.dominio.pedido;
  * os ids podem coincidir: só a categoria diz de onde veio o id da cópia.
  */
 public enum CategoriaCupom {
-
     PROMOCIONAL,
     TROCA
 }

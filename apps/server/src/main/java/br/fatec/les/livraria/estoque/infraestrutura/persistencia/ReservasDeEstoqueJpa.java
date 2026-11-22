@@ -1,16 +1,17 @@
 package br.fatec.les.livraria.estoque.infraestrutura.persistencia;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import br.fatec.les.livraria.estoque.aplicacao.porta.ReservasDeEstoque;
+import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
+import br.fatec.les.livraria.estoque.dominio.modelo.Reserva;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.estoque.aplicacao.porta.ReservasDeEstoque;
-import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
-import br.fatec.les.livraria.estoque.dominio.modelo.Reserva;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 /** Adapter JPA das reservas de estoque (DEC-15.3, DEC-16). */
 @Component
@@ -23,22 +24,19 @@ public class ReservasDeEstoqueJpa implements ReservasDeEstoque {
     @Override
     @Transactional(readOnly = true)
     public Optional<Reserva> buscar(Long livroId, OrigemReserva origem, Long origemId) {
-        return repositorio.findByLivroIdAndOrigemAndOrigemId(livroId, origem, origemId)
-                .map(mapper::paraDominio);
+        return repositorio.findByLivroIdAndOrigemAndOrigemId(livroId, origem, origemId).map(mapper::paraDominio);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Reserva> listarPorOrigem(OrigemReserva origem, Long origemId) {
-        return repositorio.findByOrigemAndOrigemId(origem, origemId).stream()
-                .map(mapper::paraDominio)
-                .toList();
+        return repositorio.findByOrigemAndOrigemId(origem, origemId).stream().map(mapper::paraDominio).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Reserva> listarPorOrigemVencendoDepoisDe(OrigemReserva origem, Long origemId,
-            LocalDateTime vencendoDepoisDe) {
+    public List<Reserva> listarPorOrigemVencendoDepoisDe(
+            OrigemReserva origem, Long origemId, LocalDateTime vencendoDepoisDe) {
         return repositorio.findByOrigemAndOrigemIdAndExpiraEmAfter(origem, origemId, vencendoDepoisDe).stream()
                 .map(mapper::paraDominio)
                 .toList();

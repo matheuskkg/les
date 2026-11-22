@@ -24,8 +24,18 @@ public record EnderecoDaResposta(
         String observacoes) {
 
     public static EnderecoDaResposta de(Endereco endereco) {
-        return new EnderecoDaResposta(endereco.id(), endereco.nomeCurto(), endereco.tipoEndereco(),
-                endereco.tipoLogradouro(), endereco.logradouro(), endereco.numero(), endereco.bairro(),
-                endereco.cep(), endereco.cidade(), endereco.uf(), endereco.pais(), endereco.observacoes());
+        return new EnderecoDaResposta(
+                endereco.id(),
+                endereco.nomeCurto(),
+                endereco.tipoEndereco(),
+                endereco.tipoLogradouro(),
+                endereco.logradouro(),
+                endereco.numero(),
+                endereco.bairro(),
+                endereco.cep(),
+                endereco.cidade(),
+                endereco.uf(),
+                endereco.pais(),
+                endereco.observacoes());
     }
 }

@@ -1,14 +1,14 @@
 package br.fatec.les.livraria.vendas.dominio.regra;
 
-import java.math.BigDecimal;
-import java.util.Objects;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 import br.fatec.les.livraria.vendas.dominio.pagamento.CartoesDaCompra;
 import br.fatec.les.livraria.vendas.dominio.pagamento.PagamentoEmCartao;
+
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
  * Os cartões pagam exatamente o restante depois dos cupons (RN-VEN-004, DEC-11). Restante zero não aceita cartão; com
@@ -31,10 +31,11 @@ public class SomaDosCartoes implements Regra<CartoesDaCompra> {
             violacoes.adicionar(CODIGO, "Informe ao menos um cartão para pagar " + alvo.restante().emReais() + ".");
             return;
         }
-        BigDecimal soma = alvo.cartoes().stream()
-                .map(PagamentoEmCartao::valor)
-                .filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal soma =
+                alvo.cartoes().stream()
+                        .map(PagamentoEmCartao::valor)
+                        .filter(Objects::nonNull)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
         if (soma.compareTo(alvo.restante().valor()) != 0) {
             violacoes.adicionar(CODIGO, "A soma dos cartões deve ser " + alvo.restante().emReais() + ".");
         }

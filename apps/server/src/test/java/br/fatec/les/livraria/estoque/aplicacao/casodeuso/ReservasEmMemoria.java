@@ -1,13 +1,13 @@
 package br.fatec.les.livraria.estoque.aplicacao.casodeuso;
 
+import br.fatec.les.livraria.estoque.aplicacao.porta.ReservasDeEstoque;
+import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
+import br.fatec.les.livraria.estoque.dominio.modelo.Reserva;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import br.fatec.les.livraria.estoque.aplicacao.porta.ReservasDeEstoque;
-import br.fatec.les.livraria.estoque.dominio.modelo.OrigemReserva;
-import br.fatec.les.livraria.estoque.dominio.modelo.Reserva;
 
 /** Reservas em memória para os testes dos casos de uso do estoque. */
 final class ReservasEmMemoria implements ReservasDeEstoque {
@@ -18,8 +18,10 @@ final class ReservasEmMemoria implements ReservasDeEstoque {
     @Override
     public Optional<Reserva> buscar(Long livroId, OrigemReserva origem, Long origemId) {
         return todas.stream()
-                .filter(reserva -> reserva.getLivroId().equals(livroId) && reserva.getOrigem() == origem
-                        && reserva.getOrigemId().equals(origemId))
+                .filter(reserva ->
+                        reserva.getLivroId().equals(livroId)
+                                && reserva.getOrigem() == origem
+                                && reserva.getOrigemId().equals(origemId))
                 .findFirst();
     }
 
@@ -31,11 +33,13 @@ final class ReservasEmMemoria implements ReservasDeEstoque {
     }
 
     @Override
-    public List<Reserva> listarPorOrigemVencendoDepoisDe(OrigemReserva origem, Long origemId,
-            LocalDateTime vencendoDepoisDe) {
+    public List<Reserva> listarPorOrigemVencendoDepoisDe(
+            OrigemReserva origem, Long origemId, LocalDateTime vencendoDepoisDe) {
         return todas.stream()
-                .filter(reserva -> reserva.getOrigem() == origem && reserva.getOrigemId().equals(origemId)
-                        && reserva.getExpiraEm().isAfter(vencendoDepoisDe))
+                .filter(reserva ->
+                        reserva.getOrigem() == origem
+                                && reserva.getOrigemId().equals(origemId)
+                                && reserva.getExpiraEm().isAfter(vencendoDepoisDe))
                 .toList();
     }
 
@@ -44,8 +48,14 @@ final class ReservasEmMemoria implements ReservasDeEstoque {
         if (reserva.getId() != null) {
             return reserva;
         }
-        Reserva salva = new Reserva(proximoId++, reserva.getLivroId(), reserva.getOrigem(),
-                reserva.getOrigemId(), reserva.getQuantidade(), reserva.getExpiraEm());
+        Reserva salva =
+                new Reserva(
+                        proximoId++,
+                        reserva.getLivroId(),
+                        reserva.getOrigem(),
+                        reserva.getOrigemId(),
+                        reserva.getQuantidade(),
+                        reserva.getExpiraEm());
         todas.add(salva);
         return salva;
     }
@@ -58,8 +68,10 @@ final class ReservasEmMemoria implements ReservasDeEstoque {
     @Override
     public int quantidadeReservadaAtivaExceto(Long livroId, LocalDateTime agora, Long reservaExcluida) {
         return todas.stream()
-                .filter(reserva -> reserva.getLivroId().equals(livroId) && reserva.ativaEm(agora)
-                        && !reserva.getId().equals(reservaExcluida))
+                .filter(reserva ->
+                        reserva.getLivroId().equals(livroId)
+                                && reserva.ativaEm(agora)
+                                && !reserva.getId().equals(reservaExcluida))
                 .mapToInt(Reserva::getQuantidade)
                 .sum();
     }

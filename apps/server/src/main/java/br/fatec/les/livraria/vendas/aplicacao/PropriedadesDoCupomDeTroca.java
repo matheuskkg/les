@@ -1,10 +1,10 @@
 package br.fatec.les.livraria.vendas.aplicacao;
 
-import java.time.LocalDate;
-import java.time.Period;
-
 import org.jspecify.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.time.LocalDate;
+import java.time.Period;
 
 /**
  * Parâmetros do cupom de troca (DEC-11), inclusive o de troco (RN-VEN-006).
@@ -20,7 +20,9 @@ public record PropriedadesDoCupomDeTroca(@Nullable Period validade) {
         }
     }
 
-    /** @return o último dia de validade de um cupom gerado em {@code geradoEm}, ou nulo se o cupom não vence */
+    /**
+     * @return o último dia de validade de um cupom gerado em {@code geradoEm}, ou nulo se o cupom não vence
+     */
     public @Nullable LocalDate validadeDeUmCupomGeradoEm(LocalDate geradoEm) {
         return validade == null ? null : geradoEm.plus(validade);
     }

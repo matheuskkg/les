@@ -5,13 +5,10 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.Objects;
 
-/**
- * Prazo de troca (RN-VEN-013, DEC-12): até o fim do dia {@code entregueEm} + {@code livraria.troca.prazo}.
- */
+/** Prazo de troca (RN-VEN-013, DEC-12): até o fim do dia {@code entregueEm} + {@code livraria.troca.prazo}. */
 public final class PrazoDeTroca {
 
-    private PrazoDeTroca() {
-    }
+    private PrazoDeTroca() {}
 
     /** Último dia em que a troca pode ser pedida, inteiro. */
     public static LocalDate ultimoDia(LocalDateTime entregueEm, Period prazo) {

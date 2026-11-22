@@ -1,11 +1,12 @@
 package br.fatec.les.livraria.notificacoes.aplicacao.casodeuso;
 
-import java.util.Objects;
+import br.fatec.les.livraria.notificacoes.aplicacao.porta.CanaisDeEventos;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 
-import br.fatec.les.livraria.notificacoes.aplicacao.porta.CanaisDeEventos;
-import lombok.RequiredArgsConstructor;
+import java.util.Objects;
 
 /**
  * Encerra os canais SSE de um usuário (DEC-13). É o caso de uso público que o logout do {@code acesso} chama: com a

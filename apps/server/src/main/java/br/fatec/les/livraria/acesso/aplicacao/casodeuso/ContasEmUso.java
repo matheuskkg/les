@@ -1,17 +1,18 @@
 package br.fatec.les.livraria.acesso.aplicacao.casodeuso;
 
-import java.util.Collection;
+import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.fatec.les.livraria.acesso.aplicacao.porta.UsuarioRepositorio;
-import lombok.RequiredArgsConstructor;
+import java.util.Collection;
 
 /**
- * Consulta pública do {@code acesso} para as unicidades do cadastro de clientes (DEC-10): e-mail e telefone valem
- * entre as contas em uso, e o CPF só continua bloqueado enquanto o usuário do cliente com aquele CPF não estiver
- * encerrado. A definição do prazo fica no {@code acesso}; os outros módulos não a conhecem.
+ * Consulta pública do {@code acesso} para as unicidades do cadastro de clientes (DEC-10): e-mail e telefone valem entre
+ * as contas em uso, e o CPF só continua bloqueado enquanto o usuário do cliente com aquele CPF não estiver encerrado. A
+ * definição do prazo fica no {@code acesso}; os outros módulos não a conhecem.
  */
 @Component
 @RequiredArgsConstructor

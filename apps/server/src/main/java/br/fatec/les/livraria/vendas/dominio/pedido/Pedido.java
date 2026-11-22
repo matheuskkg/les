@@ -1,11 +1,11 @@
 package br.fatec.les.livraria.vendas.dominio.pedido;
 
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
-import br.fatec.les.livraria.compartilhado.dominio.ExcecaoDeConflito;
 
 /**
  * Pedido criado em cada finalização do checkout (RF-VEN-008, RN-VEN-008, DEC-12). Guarda cópias de tudo o que pode
@@ -30,10 +30,22 @@ public class Pedido {
     private StatusPedido status;
     private LocalDateTime entregueEm;
 
-    public Pedido(Long id, Long checkoutId, Long clienteId, StatusPedido status, LocalDateTime realizadoEm,
-            LocalDateTime entregueEm, ClienteNoPedido cliente, EnderecoNoPedido enderecoEntrega,
-            EnderecoNoPedido enderecoCobranca, List<ItemPedido> itens, List<PagamentoCartao> cartoes,
-            List<CupomPedido> cupons, Dinheiro subtotal, Dinheiro frete, Dinheiro descontoPromocional,
+    public Pedido(
+            Long id,
+            Long checkoutId,
+            Long clienteId,
+            StatusPedido status,
+            LocalDateTime realizadoEm,
+            LocalDateTime entregueEm,
+            ClienteNoPedido cliente,
+            EnderecoNoPedido enderecoEntrega,
+            EnderecoNoPedido enderecoCobranca,
+            List<ItemPedido> itens,
+            List<PagamentoCartao> cartoes,
+            List<CupomPedido> cupons,
+            Dinheiro subtotal,
+            Dinheiro frete,
+            Dinheiro descontoPromocional,
             Dinheiro total) {
         this.id = id;
         this.checkoutId = checkoutId;
@@ -60,17 +72,39 @@ public class Pedido {
      *
      * @throws IllegalArgumentException se não houver itens
      */
-    public static Pedido registrar(Long checkoutId, Long clienteId, LocalDateTime realizadoEm,
-            ClienteNoPedido cliente, EnderecoNoPedido enderecoEntrega, EnderecoNoPedido enderecoCobranca,
-            List<ItemPedido> itens, List<PagamentoCartao> cartoes, List<CupomPedido> cupons, Dinheiro frete,
+    public static Pedido registrar(
+            Long checkoutId,
+            Long clienteId,
+            LocalDateTime realizadoEm,
+            ClienteNoPedido cliente,
+            EnderecoNoPedido enderecoEntrega,
+            EnderecoNoPedido enderecoCobranca,
+            List<ItemPedido> itens,
+            List<PagamentoCartao> cartoes,
+            List<CupomPedido> cupons,
+            Dinheiro frete,
             Dinheiro descontoPromocional) {
         if (itens.isEmpty()) {
             throw new IllegalArgumentException("O pedido precisa de ao menos um item.");
         }
         Dinheiro subtotal = itens.stream().map(ItemPedido::subtotal).reduce(Dinheiro.ZERO, Dinheiro::somar);
         Dinheiro total = subtotal.somar(frete).subtrair(descontoPromocional);
-        return new Pedido(null, checkoutId, clienteId, StatusPedido.EM_PROCESSAMENTO, realizadoEm, null, cliente,
-                enderecoEntrega, enderecoCobranca, itens, cartoes, cupons, subtotal, frete, descontoPromocional,
+        return new Pedido(
+                null,
+                checkoutId,
+                clienteId,
+                StatusPedido.EM_PROCESSAMENTO,
+                realizadoEm,
+                null,
+                cliente,
+                enderecoEntrega,
+                enderecoCobranca,
+                itens,
+                cartoes,
+                cupons,
+                subtotal,
+                frete,
+                descontoPromocional,
                 total);
     }
 
@@ -189,8 +223,8 @@ public class Pedido {
         return itens.stream()
                 .filter(item -> item.id() != null && item.id().equals(itemPedidoId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Item %d não pertence ao pedido %d.".formatted(itemPedidoId, id)));
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Item %d não pertence ao pedido %d.".formatted(itemPedidoId, id)));
     }
 
     public List<PagamentoCartao> getCartoes() {

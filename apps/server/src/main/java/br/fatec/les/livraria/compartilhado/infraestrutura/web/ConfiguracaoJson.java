@@ -1,9 +1,10 @@
 package br.fatec.les.livraria.compartilhado.infraestrutura.web;
 
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
 import tools.jackson.databind.JacksonModule;
 import tools.jackson.databind.module.SimpleModule;
 

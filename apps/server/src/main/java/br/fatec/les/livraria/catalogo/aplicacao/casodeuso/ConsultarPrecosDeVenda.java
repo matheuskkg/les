@@ -1,26 +1,27 @@
 package br.fatec.les.livraria.catalogo.aplicacao.casodeuso;
 
+import br.fatec.les.livraria.catalogo.aplicacao.porta.MargemPorLivro;
+import br.fatec.les.livraria.catalogo.dominio.calculo.CalcularPrecoVenda;
+import br.fatec.les.livraria.compartilhado.aplicacao.Ids;
+import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+import br.fatec.les.livraria.estoque.aplicacao.casodeuso.ConsultarMaiorCusto;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import br.fatec.les.livraria.catalogo.aplicacao.porta.MargemPorLivro;
-import br.fatec.les.livraria.compartilhado.aplicacao.Ids;
-import br.fatec.les.livraria.catalogo.dominio.calculo.CalcularPrecoVenda;
-import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
-import br.fatec.les.livraria.estoque.aplicacao.casodeuso.ConsultarMaiorCusto;
-import lombok.RequiredArgsConstructor;
-
 /**
  * Calcula o preço de venda de vários livros de uma vez (RF-EST-002, RN-EST-002, RN-LIV-003).
  *
- * <p>O preço não é gravado: usa a margem do grupo de precificação do livro e o maior custo entre as
- * entradas de estoque, ambos lidos em lote e agregados por {@link CalcularPrecoVenda}. Um id ausente do
- * mapa devolvido significa que o livro não tem entrada de estoque ou não existe.
+ * <p>O preço não é gravado: usa a margem do grupo de precificação do livro e o maior custo entre as entradas de
+ * estoque, ambos lidos em lote e agregados por {@link CalcularPrecoVenda}. Um id ausente do mapa devolvido significa
+ * que o livro não tem entrada de estoque ou não existe.
  */
 @Component
 @RequiredArgsConstructor

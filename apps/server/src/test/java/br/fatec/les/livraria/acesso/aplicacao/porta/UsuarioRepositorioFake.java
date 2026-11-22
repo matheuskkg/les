@@ -1,8 +1,8 @@
 package br.fatec.les.livraria.acesso.aplicacao.porta;
 
-import java.util.List;
-
 import br.fatec.les.livraria.clientes.ClientesDeTeste;
+
+import java.util.List;
 
 /**
  * Repositório de usuários em memória para os testes de caso de uso que só precisam da lista de administradores

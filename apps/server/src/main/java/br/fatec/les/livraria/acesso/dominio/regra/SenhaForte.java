@@ -1,19 +1,19 @@
 package br.fatec.les.livraria.acesso.dominio.regra;
 
-import java.nio.charset.StandardCharsets;
-
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.acesso.dominio.modelo.SenhaInformada;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Senha;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
 
+import org.springframework.stereotype.Component;
+
+import java.nio.charset.StandardCharsets;
+
 /**
- * Senha forte (RNF-CLI-001): pelo menos 8 caracteres, com letra maiúscula, letra minúscula e caractere especial.
- * Espaço em branco e caractere de controle não contam como especial e são rejeitados. Também limita a senha ao
- * tamanho máximo aceito pelo BCrypt, em bytes UTF-8 (RNF-CLI-003). Uma senha em branco é reportada pela regra de
- * dados obrigatórios da operação; esta regra só avalia o conteúdo das senhas preenchidas.
+ * Senha forte (RNF-CLI-001): pelo menos 8 caracteres, com letra maiúscula, letra minúscula e caractere especial. Espaço
+ * em branco e caractere de controle não contam como especial e são rejeitados. Também limita a senha ao tamanho máximo
+ * aceito pelo BCrypt, em bytes UTF-8 (RNF-CLI-003). Uma senha em branco é reportada pela regra de dados obrigatórios da
+ * operação; esta regra só avalia o conteúdo das senhas preenchidas.
  */
 @Component
 public class SenhaForte implements Regra<SenhaInformada> {
@@ -46,8 +46,7 @@ public class SenhaForte implements Regra<SenhaInformada> {
             violacoes.adicionar(CODIGO, "A senha deve ter pelo menos um caractere especial.");
         }
         if (senha.getBytes(StandardCharsets.UTF_8).length > Senha.TAMANHO_MAXIMO_EM_BYTES) {
-            violacoes.adicionar(CODIGO, "A senha deve ter no máximo "
-                    + Senha.TAMANHO_MAXIMO_EM_BYTES + " bytes.");
+            violacoes.adicionar(CODIGO, "A senha deve ter no máximo " + Senha.TAMANHO_MAXIMO_EM_BYTES + " bytes.");
         }
     }
 
@@ -58,7 +57,6 @@ public class SenhaForte implements Regra<SenhaInformada> {
 
     /** Especial é tudo que não é letra, dígito, espaço em branco nem caractere de controle. */
     private static boolean caractereEspecial(int caractere) {
-        return !Character.isLetterOrDigit(caractere) && !espaco(caractere)
-                && !Character.isISOControl(caractere);
+        return !Character.isLetterOrDigit(caractere) && !espaco(caractere) && !Character.isISOControl(caractere);
     }
 }

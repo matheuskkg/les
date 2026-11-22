@@ -1,10 +1,10 @@
 package br.fatec.les.livraria.analise.dominio.regra;
 
-import org.springframework.stereotype.Component;
-
 import br.fatec.les.livraria.analise.dominio.modelo.SolicitacaoDeAnalise;
 import br.fatec.les.livraria.compartilhado.dominio.Regra;
 import br.fatec.les.livraria.compartilhado.dominio.Violacoes;
+
+import org.springframework.stereotype.Component;
 
 /** A data final da análise não pode ser anterior à inicial (RF-ANA-002). */
 @Component
