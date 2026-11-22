@@ -15,10 +15,20 @@ import br.fatec.les.livraria.acesso.infraestrutura.seguranca.EmissorDeToken;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
 import br.fatec.les.livraria.recomendacao.aplicacao.AssistenteIndisponivel;
 import br.fatec.les.livraria.recomendacao.aplicacao.casodeuso.CadeiaDeProvedores;
+import br.fatec.les.livraria.recomendacao.aplicacao.consulta.Atendimento;
+import br.fatec.les.livraria.recomendacao.aplicacao.porta.AssistenteDeLivros;
+import br.fatec.les.livraria.recomendacao.aplicacao.porta.ChamadasIaRepositorio;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ConversasRepositorio;
+import br.fatec.les.livraria.recomendacao.aplicacao.porta.FerramentasDoAssistente;
+import br.fatec.les.livraria.recomendacao.aplicacao.porta.ProvedoresIaRepositorio;
+import br.fatec.les.livraria.recomendacao.aplicacao.porta.ResumoDeLivro;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.ValidarRespostaDoAssistente;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemAnterior;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.PapelDaMensagem;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.PerfilDoCliente;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
+import br.fatec.les.livraria.recomendacao.dominio.modelo.TipoDeResposta;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarComprasDoCliente;
 
 import com.jayway.jsonpath.JsonPath;
@@ -51,7 +61,8 @@ import javax.sql.DataSource;
 
 /**
  * Chat do assistente sobre o seed, atendido pelo provedor {@code fake} (RNF-REC-001, DEC-03). Ana (usuário 2) e Bruno
- * (usuário 3) são clientes ativos.
+ * (usuário 3) são clientes ativos. Os testes de higiene de ids programam a resposta da cadeia, no lugar de depender do
+ * fake, que nunca escreve ids no texto.
  */
 @SpringBootTest(
         properties = {
@@ -68,6 +79,7 @@ class AssistenteIntegracaoTest {
     private static final Long CLIENTE_DA_ANA = 1L;
     private static final Long O_HOBBIT = 5L;
     private static final AtomicReference<LocalDateTime> AGORA = new AtomicReference<>();
+    private static final AtomicReference<RespostaDoAssistente> RESPOSTA_PROGRAMADA = new AtomicReference<>();
 
     @TestConfiguration
     static class RelogioAjustavel {
@@ -76,6 +88,40 @@ class AssistenteIntegracaoTest {
         @Primary
         Relogio relogioAjustavel() {
             return AGORA::get;
+        }
+    }
+
+    /**
+     * Cadeia programável, {@code @Primary} no lugar da real: sem resposta programada, delega à cadeia do seed, atendida
+     * pelo fake; com uma resposta programada, devolve-a como a de um provedor, sem chamada registrada, para o teste
+     * exercitar o que o server faz com o texto que o modelo escreveu (RNF-REC-001, DEC-03).
+     */
+    @TestConfiguration
+    static class CadeiaProgramavel {
+
+        @Bean
+        @Primary
+        CadeiaDeProvedores cadeiaProgramavel(
+                List<AssistenteDeLivros> assistentes,
+                ProvedoresIaRepositorio provedores,
+                ChamadasIaRepositorio chamadas,
+                Relogio relogio) {
+            return new CadeiaDeProvedores(assistentes, provedores, chamadas, relogio) {
+
+                @Override
+                public Atendimento<RespostaDoAssistente> conversar(
+                        PerfilDoCliente perfil,
+                        List<MensagemAnterior> historico,
+                        String mensagemNova,
+                        FerramentasDoAssistente ferramentas,
+                        List<ResumoDeLivro> catalogo) {
+                    RespostaDoAssistente programada = RESPOSTA_PROGRAMADA.getAndSet(null);
+                    if (programada != null) {
+                        return new Atendimento<>(programada, null, "programado");
+                    }
+                    return super.conversar(perfil, historico, mensagemNova, ferramentas, catalogo);
+                }
+            };
         }
     }
 
@@ -98,6 +144,7 @@ class AssistenteIntegracaoTest {
     @BeforeEach
     void configurar() {
         AGORA.set(LocalDateTime.of(2026, 10, 25, 12, 0));
+        RESPOSTA_PROGRAMADA.set(null);
         mvc = MockMvcBuilders.webAppContextSetup(contexto).apply(springSecurity()).build();
         cadeia.limpar();
     }
@@ -216,6 +263,79 @@ class AssistenteIntegracaoTest {
 
         List<Integer> citados = JsonPath.read(corpo, "$.livros[*].id");
         assertThat(citados).isNotEmpty().doesNotContainAnyElementsOf(comprados);
+    }
+
+    @Test
+    void rnfRec001_textoDoModeloComIdsInternosSaiHigienizadoNoQueSaiGravado() throws Exception {
+        // Caso observado com Gemini e NVIDIA: ids do catálogo anotados no texto apresentado ao cliente.
+        RESPOSTA_PROGRAMADA.set(
+                new RespostaDoAssistente(
+                        TipoDeResposta.RECOMENDACAO,
+                        "Recomendo \"O Hobbit\" (id 5) e \"Fundação\" (id 8)!",
+                        List.of(O_HOBBIT, 8L)));
+
+        enviar(ANA, "me recomende um livro")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.papel").value("ASSISTENTE"))
+                .andExpect(jsonPath("$.tipo").value("RECOMENDACAO"))
+                .andExpect(jsonPath("$.texto").value("Recomendo \"O Hobbit\" e \"Fundação\"!"))
+                .andExpect(jsonPath("$.livros.length()").value(2))
+                .andExpect(jsonPath("$.livros[0].id").value(O_HOBBIT))
+                .andExpect(jsonPath("$.livros[1].id").value(8));
+
+        mvc.perform(como(ANA, get("/api/me/assistente/conversa")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[1].texto").value("Recomendo \"O Hobbit\" e \"Fundação\"!"));
+    }
+
+    @Test
+    void rnfRec001_despejoDeJsonDoModeloSaiHigienizadoNoQueSaiGravado() throws Exception {
+        // Caso observado com a NVIDIA: o catálogo despejado em JSON no texto, com pares "id".
+        RESPOSTA_PROGRAMADA.set(
+                new RespostaDoAssistente(
+                        TipoDeResposta.BUSCA, "```json\n[{\"id\": 5, \"titulo\": \"O Hobbit\"}]", List.of()));
+
+        enviar(ANA, "livros de Tolkien")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tipo").value("BUSCA"))
+                .andExpect(jsonPath("$.texto").value("```json\n[{\"titulo\": \"O Hobbit\"}]"));
+
+        mvc.perform(como(ANA, get("/api/me/assistente/conversa")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[1].texto").value("```json\n[{\"titulo\": \"O Hobbit\"}]"));
+    }
+
+    @Test
+    void rnfRec001_textoDoModeloReduzidoAVazioGanhaOTextoPadraoSemLivros() throws Exception {
+        // O texto do modelo é só a anotação: a higiene, que roda antes da validação, o reduz a vazio, e a validação
+        // grava o texto padrão no lugar de um texto em branco.
+        RESPOSTA_PROGRAMADA.set(new RespostaDoAssistente(TipoDeResposta.DUVIDA, "(id 5)", List.of()));
+
+        enviar(ANA, "qual o livro de id 5")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tipo").value("DUVIDA"))
+                .andExpect(jsonPath("$.texto").value(ValidarRespostaDoAssistente.TEXTO_SEM_RESPOSTA))
+                .andExpect(jsonPath("$.livros.length()").value(0));
+
+        mvc.perform(como(ANA, get("/api/me/assistente/conversa")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[1].texto").value(ValidarRespostaDoAssistente.TEXTO_SEM_RESPOSTA));
+    }
+
+    @Test
+    void rnfRec001_textoDoModeloReduzidoAVazioGanhaOTextoPadraoComOsLivrosCitados() throws Exception {
+        RESPOSTA_PROGRAMADA.set(new RespostaDoAssistente(TipoDeResposta.RECOMENDACAO, "(id 5)", List.of(O_HOBBIT)));
+
+        enviar(ANA, "me recomende um livro")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tipo").value("RECOMENDACAO"))
+                .andExpect(jsonPath("$.texto").value(ValidarRespostaDoAssistente.TEXTO_SO_COM_LIVROS))
+                .andExpect(jsonPath("$.livros.length()").value(1))
+                .andExpect(jsonPath("$.livros[0].id").value(O_HOBBIT));
+
+        mvc.perform(como(ANA, get("/api/me/assistente/conversa")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[1].texto").value(ValidarRespostaDoAssistente.TEXTO_SO_COM_LIVROS));
     }
 
     @Test
