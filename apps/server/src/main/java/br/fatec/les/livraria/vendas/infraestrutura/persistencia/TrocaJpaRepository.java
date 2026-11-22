@@ -17,6 +17,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import br.fatec.les.livraria.vendas.dominio.pedido.LivroNoPedido;
 import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
 import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
 import jakarta.persistence.LockModeType;
@@ -59,14 +60,55 @@ public interface TrocaJpaRepository extends JpaRepository<TrocaJpa, Long>, JpaSp
             @Param("fim") LocalDateTime fimExclusivo);
 
     /**
-     * Quantidade trocada de cada item dos pedidos com um dos status, só nas trocas com o status informado
-     * (RNF-REC-001, DEC-12).
+     * Quantidade trocada de cada item dos pedidos de um cliente com um dos status, só nas trocas com o status
+     * informado (RNF-REC-001, DEC-12). Mesma forma do {@link #somarTrocadasDoPeriodo} — trocas concluídas somadas
+     * por item, sem depender do período —, com o pedido filtrado pelo cliente no banco, na coluna de id do DEC-16,
+     * atendida pelo índice {@code ix_pedido_cliente} (RNF-GER-001): quem lê as compras de um só cliente não carrega
+     * as trocas dos outros.
      */
     @Query("select i.itemPedido.id as itemId, sum(i.quantidade) as quantidade from ItemTrocaJpa i "
             + "join i.troca t join t.pedido p where t.status = :statusDaTroca and p.status in :status "
-            + "group by i.itemPedido.id")
-    List<QuantidadeTrocada> somarTrocadas(@Param("statusDaTroca") StatusTroca statusDaTroca,
+            + "and p.clienteId = :cliente group by i.itemPedido.id")
+    List<QuantidadeTrocada> somarTrocadasDoCliente(@Param("statusDaTroca") StatusTroca statusDaTroca,
+            @Param("status") Collection<StatusPedido> status, @Param("cliente") Long clienteId);
+
+    /**
+     * Quantidade trocada de cada livro dos pedidos com um dos status, só nas trocas com o status informado, já
+     * somada no banco por livro (RNF-REC-001, DEC-12, RNF-GER-001).
+     */
+    @Query("select i.itemPedido.livro as livro, sum(i.quantidade) as quantidade from ItemTrocaJpa i "
+            + "join i.troca t join t.pedido p where t.status = :statusDaTroca and p.status in :status "
+            + "group by i.itemPedido.livro")
+    List<TrocaDoLivro> somarTrocadasPorLivro(@Param("statusDaTroca") StatusTroca statusDaTroca,
             @Param("status") Collection<StatusPedido> status);
+
+    /**
+     * Quantidade trocada por cliente e livro dos pedidos com um dos status, só nas trocas com o status informado
+     * (RNF-REC-001, DEC-12, RNF-GER-001).
+     */
+    @Query("select p.clienteId as clienteId, i.itemPedido.livro as livro, sum(i.quantidade) as quantidade "
+            + "from ItemTrocaJpa i join i.troca t join t.pedido p "
+            + "where t.status = :statusDaTroca and p.status in :status group by p.clienteId, i.itemPedido.livro")
+    List<TrocaDoCliente> somarTrocadasPorClienteELivro(@Param("statusDaTroca") StatusTroca statusDaTroca,
+            @Param("status") Collection<StatusPedido> status);
+
+    /** Troca concluída agregada por livro (RNF-REC-001). */
+    interface TrocaDoLivro {
+
+        LivroNoPedido getLivro();
+
+        Long getQuantidade();
+    }
+
+    /** Troca concluída agregada por cliente e livro (RNF-REC-001). */
+    interface TrocaDoCliente {
+
+        Long getClienteId();
+
+        LivroNoPedido getLivro();
+
+        Long getQuantidade();
+    }
 
     /**
      * Soma dos cupons gerados pelas trocas com o status informado, por pedido dos clientes finalizado desde o

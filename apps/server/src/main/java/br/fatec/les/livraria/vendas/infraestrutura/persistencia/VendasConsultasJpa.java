@@ -2,8 +2,9 @@ package br.fatec.les.livraria.vendas.infraestrutura.persistencia;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,21 +14,27 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.fatec.les.livraria.clientes.dominio.ranking.CompraDoCliente;
 import br.fatec.les.livraria.compartilhado.dominio.Dinheiro;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.CompraDeLivro;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.ItemVendido;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.LivroVendido;
 import br.fatec.les.livraria.vendas.aplicacao.porta.VendasConsultas;
 import br.fatec.les.livraria.vendas.dominio.pedido.CategoriaNoPedido;
 import br.fatec.les.livraria.vendas.dominio.pedido.StatusPedido;
 import br.fatec.les.livraria.vendas.dominio.troca.StatusTroca;
+import br.fatec.les.livraria.vendas.infraestrutura.persistencia.ItemPedidoJpaRepository.UnidadeDoLivro;
 import br.fatec.les.livraria.vendas.infraestrutura.persistencia.PedidoJpaRepository.PedidoDoCliente;
 import br.fatec.les.livraria.vendas.infraestrutura.persistencia.TrocaJpaRepository.CuponsDoPedido;
 import br.fatec.les.livraria.vendas.infraestrutura.persistencia.TrocaJpaRepository.QuantidadeTrocada;
+import br.fatec.les.livraria.vendas.infraestrutura.persistencia.TrocaJpaRepository.TrocaDoCliente;
+import br.fatec.les.livraria.vendas.infraestrutura.persistencia.TrocaJpaRepository.TrocaDoLivro;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Adapter JPA das vendas consideradas na análise e no ranking (RN-ANA-001, RN-ANA-004, RN-CLI-007, DEC-12, DEC-16). As categorias estão no snapshot JSON do
- * livro, então a consulta traz cada item e a agregação por mês e categoria fica em Java, sem SQL de JSON, que
- * difere entre H2 e PostgreSQL. As quantidades trocadas vêm numa segunda consulta, já somadas por item.
+ * Adapter JPA das vendas consideradas na análise, no ranking e na recomendação (RN-ANA-001, RN-ANA-004, RN-CLI-007,
+ * RNF-REC-001, DEC-12, DEC-16). As categorias estão no snapshot JSON do livro, então a consulta traz cada item e a
+ * agregação por mês e categoria fica em Java, sem SQL de JSON, que difere entre H2 e PostgreSQL. Já as consultas da
+ * recomendação, que só precisam do id do livro, agregam por cliente e livro no banco e somam no grupo as trocas
+ * concluídas (RNF-GER-001); o id vem da própria cópia em JSON, única fonte porque não há {@code livro_id} no item.
  */
 @Component
 @RequiredArgsConstructor
@@ -55,10 +62,11 @@ public class VendasConsultasJpa implements VendasConsultas {
 
     @Override
     @Transactional(readOnly = true)
-    public List<LivroVendido> livrosVendidos() {
-        Map<Long, Long> trocadas = trocas.somarTrocadas(StatusTroca.TROCADO, CONTAM_COMO_VENDA).stream()
+    public List<LivroVendido> comprasDoCliente(Long clienteId) {
+        Map<Long, Long> trocadas = trocas
+                .somarTrocadasDoCliente(StatusTroca.TROCADO, CONTAM_COMO_VENDA, clienteId).stream()
                 .collect(Collectors.toMap(QuantidadeTrocada::getItemId, QuantidadeTrocada::getQuantidade));
-        return itens.buscarDosPedidos(CONTAM_COMO_VENDA).stream()
+        return itens.buscarDoCliente(CONTAM_COMO_VENDA, clienteId).stream()
                 .map(item -> new LivroVendido(item.getPedidoId(), item.getClienteId(), item.getLivro().id(),
                         item.getLivro().titulo(), item.getLivro().autores(),
                         item.getLivro().categorias().stream().map(CategoriaNoPedido::nome).toList(),
@@ -66,6 +74,41 @@ public class VendasConsultasJpa implements VendasConsultas {
                         item.getRealizadoEm()))
                 .filter(livro -> livro.quantidade() > 0)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CompraDeLivro> comprasRegistradas() {
+        Map<ParClienteLivro, Long> trocadas = trocas
+                .somarTrocadasPorClienteELivro(StatusTroca.TROCADO, CONTAM_COMO_VENDA).stream()
+                .collect(Collectors.toMap(
+                        troca -> new ParClienteLivro(troca.getClienteId(), troca.getLivro().id()),
+                        TrocaDoCliente::getQuantidade, Long::sum));
+        return itens.somarCompras(CONTAM_COMO_VENDA).stream()
+                .map(compra -> new CompraDeLivro(compra.getClienteId(), compra.getLivro().id(),
+                        Math.toIntExact(compra.getQuantidade() - trocadas.getOrDefault(
+                                new ParClienteLivro(compra.getClienteId(), compra.getLivro().id()), 0L))))
+                .filter(compra -> compra.quantidade() > 0)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<Long, Integer> unidadesVendidasPorLivro() {
+        Map<Long, Long> trocadas = trocas.somarTrocadasPorLivro(StatusTroca.TROCADO, CONTAM_COMO_VENDA).stream()
+                .collect(Collectors.toMap(troca -> troca.getLivro().id(), TrocaDoLivro::getQuantidade, Long::sum));
+        Map<Long, Integer> unidades = new LinkedHashMap<>();
+        for (UnidadeDoLivro vendida : itens.somarVendidas(CONTAM_COMO_VENDA)) {
+            Long livroId = vendida.getLivro().id();
+            int liquida = Math.toIntExact(vendida.getQuantidade() - trocadas.getOrDefault(livroId, 0L));
+            unidades.merge(livroId, liquida, Integer::sum);
+        }
+        unidades.values().removeIf(quantidade -> quantidade <= 0);
+        return unidades;
+    }
+
+    /** Chave de agregação por cliente e livro, para descontar as trocas concluídas (DEC-16). */
+    private record ParClienteLivro(Long clienteId, Long livroId) {
     }
 
     /**

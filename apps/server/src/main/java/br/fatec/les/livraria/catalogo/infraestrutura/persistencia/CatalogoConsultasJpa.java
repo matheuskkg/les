@@ -80,9 +80,9 @@ public class CatalogoConsultasJpa implements CatalogoConsultas {
             autores.computeIfAbsent(autor.getLivroId(), id -> new ArrayList<>()).add(autor.getNome());
         }
 
-        return livros.findByIdIn(livroIds).stream()
-                .map(livro -> new LivroParaVenda(livro.getId(), livro.getTitulo(),
-                        autores.getOrDefault(livro.getId(), List.of()), livro.isAtivo()))
+        return livros.buscarParaVenda(livroIds).stream()
+                .map(livro -> new LivroParaVenda(livro.getLivroId(), livro.getTitulo(),
+                        autores.getOrDefault(livro.getLivroId(), List.of()), livro.isAtivo()))
                 .toList();
     }
 
@@ -91,8 +91,8 @@ public class CatalogoConsultasJpa implements CatalogoConsultas {
         if (livroIds.isEmpty()) {
             return List.of();
         }
-        return livros.findByIdIn(livroIds).stream()
-                .map(livro -> new MedidasDoLivro(livro.getId(), livro.getPeso(), livro.getAltura(),
+        return livros.buscarMedidas(livroIds).stream()
+                .map(livro -> new MedidasDoLivro(livro.getLivroId(), livro.getPeso(), livro.getAltura(),
                         livro.getLargura(), livro.getProfundidade()))
                 .toList();
     }
@@ -102,9 +102,19 @@ public class CatalogoConsultasJpa implements CatalogoConsultas {
         if (livroIds.isEmpty()) {
             return List.of();
         }
-        return livros.findByIdIn(livroIds).stream()
-                .map(livro -> new SinopseDoLivro(livro.getId(), livro.getSinopse()))
+        return livros.buscarSinopses(livroIds).stream()
+                .map(livro -> new SinopseDoLivro(livro.getLivroId(), livro.getSinopse()))
                 .toList();
+    }
+
+    @Override
+    public List<LivroResumo> buscarAtivos(Collection<Long> livroIds) {
+        if (livroIds.isEmpty()) {
+            return List.of();
+        }
+        List<LivroJpa> ativos = livros.findByIdInAndAtivoTrue(livroIds);
+        Relacionamentos relacionamentos = carregar(ativos.stream().map(LivroJpa::getId).toList());
+        return ativos.stream().map(livro -> paraResumo(livro, relacionamentos)).toList();
     }
 
     /** Carrega autores e categorias dos livros informados em lote. */

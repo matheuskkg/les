@@ -1,8 +1,6 @@
 package br.fatec.les.livraria.recomendacao.infraestrutura.persistencia;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -63,12 +61,17 @@ public class ConversasRepositorioJpa implements ConversasRepositorio {
     @Override
     @Transactional(readOnly = true)
     public List<MensagemDaConversa> ultimas(Long conversaId, int limite) {
-        List<MensagemDaConversa> ultimas = new ArrayList<>(
-                mensagens.findByConversaIdOrderByEnviadaEmDescIdDesc(conversaId, Limit.of(limite)).stream()
-                        .map(ConversasRepositorioJpa::paraDominio)
-                        .toList());
-        Collections.reverse(ultimas);
-        return ultimas;
+        // Duas consultas em vez de uma por mensagem: os ids já limitados no banco e o resto com os livros em lote
+        // (RNF-GER-001).
+        List<Long> ids = mensagens.idsDasUltimas(conversaId, Limit.of(limite));
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        return mensagens.buscarPorIds(ids).stream()
+                .sorted(Comparator.comparing(MensagemConversaJpa::getEnviadaEm)
+                        .thenComparing(MensagemConversaJpa::getId))
+                .map(ConversasRepositorioJpa::paraDominio)
+                .toList();
     }
 
     @Override

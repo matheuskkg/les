@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import br.fatec.les.livraria.catalogo.aplicacao.casodeuso.ConsultarLivrosAtivos;
 import br.fatec.les.livraria.catalogo.aplicacao.consulta.LivroListado;
 import br.fatec.les.livraria.clientes.aplicacao.casodeuso.IdentificarCliente;
 import br.fatec.les.livraria.compartilhado.aplicacao.porta.Relogio;
@@ -29,7 +29,9 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.LivroCandidato;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.PerfilDoCliente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.Recomendacao;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDeRecomendacao;
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarLivrosVendidos;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarComprasDoCliente;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarComprasRegistradas;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarUnidadesVendidas;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.LivroVendido;
 import lombok.RequiredArgsConstructor;
 
@@ -39,6 +41,10 @@ import lombok.RequiredArgsConstructor;
  * provedores os ordena e justifica, e só os ids que estavam entre os candidatos são gravados. Se toda a cadeia falhar
  * ou nenhum id da resposta for válido, a recomendação é gravada na ordem da pontuação, sem justificativa e sem
  * chamada associada, e conta como recomendação sem IA nas métricas.
+ *
+ * <p>O caminho comum é o da recomendação ainda válida, e ele consulta só o que precisa (RNF-GER-001): as compras do
+ * cliente e os livros recomendados, por lote de ids. O material completo de geração — vitrine inteira, compras de
+ * todos os clientes e unidades vendidas — só é lido quando não há recomendação reaproveitável.</p>
  *
  * <p>Não há transação em volta da chamada à IA, que pode levar segundos: as leituras usam as transações dos casos
  * de uso de cada módulo, e a gravação a do repositório.</p>
@@ -51,7 +57,10 @@ import lombok.RequiredArgsConstructor;
 public class ConsultarMinhaRecomendacao {
 
     private final IdentificarCliente identificarCliente;
-    private final ConsultarLivrosVendidos consultarLivrosVendidos;
+    private final ConsultarComprasDoCliente consultarComprasDoCliente;
+    private final ConsultarComprasRegistradas consultarComprasRegistradas;
+    private final ConsultarUnidadesVendidas consultarUnidadesVendidas;
+    private final ConsultarLivrosAtivos consultarLivrosAtivos;
     private final LerCatalogo lerCatalogo;
     private final RecomendacoesRepositorio recomendacoes;
     private final MontarPerfilDoCliente montarPerfil;
@@ -64,24 +73,22 @@ public class ConsultarMinhaRecomendacao {
 
     public List<ItemExibido> executar() {
         Long clienteId = identificarCliente.executar();
-        List<LivroVendido> vendidos = consultarLivrosVendidos.executar();
-        List<LivroListado> catalogo = lerCatalogo.ativos();
-        List<LivroVendido> doCliente = vendidos.stream()
-                .filter(vendido -> vendido.clienteId().equals(clienteId))
-                .toList();
-
+        List<LivroVendido> doCliente = consultarComprasDoCliente.executar(clienteId);
         int compras = (int) doCliente.stream().map(LivroVendido::pedidoId).distinct().count();
 
         Optional<Recomendacao> atual = recomendacoes.maisRecente(clienteId)
                 .filter(recomendacao -> aindaValida.valida(recomendacao, relogio.agora(), compras));
-        Recomendacao recomendacao = atual.isPresent() ? atual.get() : gerar(clienteId, compras, vendidos, catalogo);
-        return exibir(recomendacao, catalogo, doCliente.stream().map(LivroVendido::livroId)
+        Recomendacao recomendacao = atual.isPresent() ? atual.get()
+                : gerar(clienteId, compras, doCliente);
+        return exibir(recomendacao, doCliente.stream().map(LivroVendido::livroId)
                 .collect(Collectors.toSet()));
     }
 
-    private Recomendacao gerar(Long clienteId, int compras, List<LivroVendido> vendidos, List<LivroListado> catalogo) {
-        PerfilDoCliente perfil = montarPerfil.montar(clienteId, vendidos, recomendacoes.avaliacoesDoCliente(clienteId));
-        List<LivroCandidato> candidatos = recuperarCandidatos.recuperar(clienteId, perfil, vendidos, catalogo);
+    private Recomendacao gerar(Long clienteId, int compras, List<LivroVendido> doCliente) {
+        PerfilDoCliente perfil = montarPerfil.montar(doCliente, recomendacoes.avaliacoesDoCliente(clienteId));
+        List<LivroCandidato> candidatos = recuperarCandidatos.recuperar(clienteId, perfil,
+                consultarComprasRegistradas.executar(), consultarUnidadesVendidas.executar(),
+                lerCatalogo.ativos());
         if (candidatos.isEmpty()) {
             return new Recomendacao(null, clienteId, null, relogio.agora(), compras, List.of());
         }
@@ -103,10 +110,14 @@ public class ConsultarMinhaRecomendacao {
         return recomendacoes.salvar(new Recomendacao(null, clienteId, chamadaIaId, relogio.agora(), compras, itens));
     }
 
-    private static List<ItemExibido> exibir(Recomendacao recomendacao, List<LivroListado> catalogo,
-            Set<Long> comprados) {
-        Map<Long, LivroListado> porId = catalogo.stream()
-                .collect(Collectors.toMap(livro -> livro.livro().id(), Function.identity()));
+    private List<ItemExibido> exibir(Recomendacao recomendacao, Set<Long> comprados) {
+        List<Long> ids = recomendacao.itens().stream()
+                .filter(item -> item.id() != null && !item.avaliadoNegativamente())
+                .filter(item -> !comprados.contains(item.livroId()))
+                .map(ItemDaRecomendacao::livroId)
+                .distinct()
+                .toList();
+        Map<Long, LivroListado> porId = consultarLivrosAtivos.executar(ids);
         return recomendacao.itens().stream()
                 .filter(item -> item.id() != null && !item.avaliadoNegativamente())
                 .filter(item -> !comprados.contains(item.livroId()))

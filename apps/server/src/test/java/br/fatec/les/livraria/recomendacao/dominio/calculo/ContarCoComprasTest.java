@@ -28,10 +28,4 @@ class ContarCoComprasTest {
     void rnfRec001_clienteSemComprasNaoTemCoCompra() {
         assertThat(new ContarCoCompras().contar(9L, List.of(new CompraRegistrada(1L, 10L, 1)))).isEmpty();
     }
-
-    @Test
-    void rnfRec001_vendidosSomaAsQuantidades() {
-        assertThat(new ContarVendidos().contar(List.of(new CompraRegistrada(1L, 10L, 2),
-                new CompraRegistrada(2L, 10L, 3)))).containsEntry(10L, 5);
-    }
 }

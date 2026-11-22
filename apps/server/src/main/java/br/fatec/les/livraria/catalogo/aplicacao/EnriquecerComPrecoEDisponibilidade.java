@@ -50,6 +50,20 @@ public class EnriquecerComPrecoEDisponibilidade {
         return new LivroConsultado(livro, valor.precoVenda(), valor.disponivel());
     }
 
+    /** Enriquece os livros informados, sem o envelope da paginação. */
+    @Transactional(readOnly = true)
+    public List<LivroListado> enriquecer(List<LivroResumo> livros) {
+        if (livros.isEmpty()) {
+            return List.of();
+        }
+        Map<Long, PrecoEDisponibilidade> valores = calcular(
+                livros.stream().map(LivroResumo::id).toList());
+        return livros.stream().map(livro -> {
+            PrecoEDisponibilidade valor = valores.get(livro.id());
+            return new LivroListado(livro, valor.precoVenda(), valor.disponivel());
+        }).toList();
+    }
+
     private Map<Long, PrecoEDisponibilidade> calcular(List<Long> livroIds) {
         if (livroIds.isEmpty()) {
             return Map.of();

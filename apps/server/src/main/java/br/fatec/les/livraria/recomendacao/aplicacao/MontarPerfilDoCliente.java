@@ -16,6 +16,8 @@ import br.fatec.les.livraria.vendas.aplicacao.consulta.LivroVendido;
 /**
  * Perfil enviado à IA (RNF-REC-001, DEC-03): os livros comprados em pedidos que contam como venda, as
  * {@value #FREQUENTES} categorias e autores mais frequentes entre eles e as avaliações dadas aos itens recomendados.
+ * As compras do cliente já chegam filtradas pelo caso de uso que consulta {@code vendas} (RNF-GER-001); aqui fica a
+ * ordenação pela compra mais recente e o desconto das repetições.
  */
 @Component
 public class MontarPerfilDoCliente {
@@ -23,17 +25,16 @@ public class MontarPerfilDoCliente {
     static final int FREQUENTES = 5;
 
     /**
-     * @param clienteId  cliente do perfil
-     * @param vendidos   livros vendidos de todos os clientes
+     * @param compras    compras do cliente em pedidos que contam como venda
      * @param avaliacoes última avaliação de cada livro recomendado ao cliente
+     * @return o perfil do cliente
      */
-    public PerfilDoCliente montar(Long clienteId, List<LivroVendido> vendidos, List<AvaliacaoDada> avaliacoes) {
+    public PerfilDoCliente montar(List<LivroVendido> compras, List<AvaliacaoDada> avaliacoes) {
         Map<Long, LivroComprado> comprados = new LinkedHashMap<>();
-        vendidos.stream()
-                .filter(vendido -> vendido.clienteId().equals(clienteId))
+        compras.stream()
                 .sorted(Comparator.comparing(LivroVendido::realizadoEm).reversed())
-                .forEach(vendido -> comprados.putIfAbsent(vendido.livroId(), new LivroComprado(vendido.livroId(),
-                        vendido.titulo(), vendido.categorias(), vendido.autores())));
+                .forEach(compra -> comprados.putIfAbsent(compra.livroId(), new LivroComprado(compra.livroId(),
+                        compra.titulo(), compra.categorias(), compra.autores())));
         List<LivroComprado> livros = List.copyOf(comprados.values());
         return new PerfilDoCliente(livros,
                 maisFrequentes(livros.stream().flatMap(livro -> livro.categorias().stream()).toList()),

@@ -49,7 +49,8 @@ class TempoDeRespostaTest {
         mvc = MockMvcBuilders.webAppContextSetup(contexto).apply(springSecurity()).build();
     }
 
-    // Usuário 1 é o admin; o 6 é a Elisa, com os pedidos históricos.
+    // Usuário 1 é o admin; o 6 é a Elisa, com os pedidos históricos; o 3 é o Bruno, sem compras, cuja recomendação
+    // depois de aquecida é o caminho só de cache (ALT-03).
     @ParameterizedTest(name = "{1}")
     @CsvSource(delimiter = '|', value = {
             "1 | /api/livros?tamanho=100",
@@ -68,7 +69,8 @@ class TempoDeRespostaTest {
             "1 | /api/admin/analise/exportacao?inicio=2024-11-01&fim=2026-10-31&categoria=1&categoria=2&categoria=3&categoria=4&categoria=5",
             "6 | /api/me",
             "6 | /api/me/pedidos?tamanho=100",
-            "6 | /api/me/notificacoes?tamanho=100" })
+            "6 | /api/me/notificacoes?tamanho=100",
+            "3 | /api/me/recomendacoes" })
     void rnfGer001_consultaRespondeEmAteUmSegundo(Long usuarioId, String rota) throws Exception {
         Cookie sessao = new Cookie(EmissorDeToken.COOKIE,
                 emissor.emitir(usuarios.buscarPorId(usuarioId).orElseThrow()).valor());
