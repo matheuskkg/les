@@ -16,7 +16,9 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Unidades ainda reservadas para um dono, por livro, para a finalização revalidar o estoque (RN-VEN-002, DEC-12).
- * Reserva vencida não conta: as unidades dela já podem ter ido para outro cliente.
+ * Reserva vencida não conta: as unidades dela já podem ter ido para outro cliente. A consulta descarta no banco
+ * as que já venceram, mas a definição de "ativa" continua no domínio: {@code Reserva.ativaEm} é aplicada ao
+ * resultado (RN-EST-006, RNF-GER-001).
  */
 @Component
 @RequiredArgsConstructor
@@ -31,7 +33,7 @@ public class ConsultarReservasAtivas {
         Objects.requireNonNull(origem, "origem");
         Objects.requireNonNull(origemId, "origemId");
         LocalDateTime agora = relogio.agora();
-        return reservas.listarPorOrigem(origem, origemId).stream()
+        return reservas.listarPorOrigemVencendoDepoisDe(origem, origemId, agora).stream()
                 .filter(reserva -> reserva.ativaEm(agora))
                 .collect(Collectors.toMap(Reserva::getLivroId, Reserva::getQuantidade, Integer::sum));
     }

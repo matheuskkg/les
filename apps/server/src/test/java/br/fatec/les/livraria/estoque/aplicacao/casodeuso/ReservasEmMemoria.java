@@ -31,6 +31,15 @@ final class ReservasEmMemoria implements ReservasDeEstoque {
     }
 
     @Override
+    public List<Reserva> listarPorOrigemVencendoDepoisDe(OrigemReserva origem, Long origemId,
+            LocalDateTime vencendoDepoisDe) {
+        return todas.stream()
+                .filter(reserva -> reserva.getOrigem() == origem && reserva.getOrigemId().equals(origemId)
+                        && reserva.getExpiraEm().isAfter(vencendoDepoisDe))
+                .toList();
+    }
+
+    @Override
     public Reserva salvar(Reserva reserva) {
         if (reserva.getId() != null) {
             return reserva;

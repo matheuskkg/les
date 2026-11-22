@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,11 @@ import br.fatec.les.livraria.clientes.dominio.modelo.Cliente;
 import br.fatec.les.livraria.compartilhado.aplicacao.Pagina;
 import br.fatec.les.livraria.compartilhado.aplicacao.Paginacao;
 import br.fatec.les.livraria.compartilhado.infraestrutura.persistencia.ConversorDePaginacao;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -28,6 +34,7 @@ public class ClientesConsultasJpa implements ClientesConsultas {
 
     private final ClienteJpaRepository clientes;
     private final ClienteMapper mapper;
+    private final EntityManager em;
 
     @Override
     @Transactional(readOnly = true)
@@ -37,12 +44,23 @@ public class ClientesConsultasJpa implements ClientesConsultas {
         return ConversorDePaginacao.paraPagina(pagina, ClientesConsultasJpa::paraResumo);
     }
 
+    /**
+     * Os ids por nome e CPF usam as mesmas {@link EspecificacoesDeCliente} da listagem, mas projetadas só na
+     * coluna {@code id}: o cliente inteiro não vem do banco (RF-VEN-009, RNF-GER-001).
+     */
     @Override
     @Transactional(readOnly = true)
     public Set<Long> buscarIds(String nome, String cpf) {
-        return clientes.findAll(EspecificacoesDeCliente.porNomeECpf(nome, cpf)).stream()
-                .map(ClienteJpa::getId)
-                .collect(Collectors.toUnmodifiableSet());
+        Specification<ClienteJpa> filtro = EspecificacoesDeCliente.porNomeECpf(nome, cpf);
+        CriteriaBuilder construtor = em.getCriteriaBuilder();
+        CriteriaQuery<Long> consulta = construtor.createQuery(Long.class);
+        Root<ClienteJpa> raiz = consulta.from(ClienteJpa.class);
+        consulta.select(raiz.get("id"));
+        Predicate predicado = filtro.toPredicate(raiz, consulta, construtor);
+        if (predicado != null) {
+            consulta.where(predicado);
+        }
+        return em.createQuery(consulta).getResultStream().collect(Collectors.toUnmodifiableSet());
     }
 
     @Override

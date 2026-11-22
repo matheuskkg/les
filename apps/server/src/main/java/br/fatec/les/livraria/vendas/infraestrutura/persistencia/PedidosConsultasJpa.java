@@ -48,7 +48,7 @@ public class PedidosConsultasJpa implements PedidosConsultas {
     @Override
     @Transactional(readOnly = true)
     public Optional<Pedido> buscar(Long id) {
-        return pedidos.findById(id).map(PedidoRepositorioJpa::paraDominio);
+        return pedidos.buscarPorIdComItens(id).map(PedidoRepositorioJpa::paraDominio);
     }
 
     private static PedidoResumo paraResumo(PedidoJpa pedido) {

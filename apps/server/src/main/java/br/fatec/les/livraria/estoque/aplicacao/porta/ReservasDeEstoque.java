@@ -22,6 +22,15 @@ public interface ReservasDeEstoque {
     /** Reservas de um dono, usadas para renovar o prazo de todo o carrinho (DEC-05.1). */
     List<Reserva> listarPorOrigem(OrigemReserva origem, Long origemId);
 
+    /**
+     * Reservas de um dono cujo prazo vence depois do instante informado. É só um pré-filtro de leitura,
+     * nunca mais forte que a definição do domínio: nenhuma reserva ativa é excluída pela consulta, e quem
+     * consulta continua aplicando {@code Reserva.ativaEm} sobre o resultado — é ela que define o que é
+     * uma reserva ativa (RN-VEN-002, RNF-GER-001).
+     */
+    List<Reserva> listarPorOrigemVencendoDepoisDe(OrigemReserva origem, Long origemId,
+            LocalDateTime vencendoDepoisDe);
+
     Reserva salvar(Reserva reserva);
 
     void remover(Long reservaId);
