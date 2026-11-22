@@ -128,7 +128,14 @@ Uma regra por arquivo, testável sem a IA:
    descartado; alterado no REC-07: o adapter controla o loop, com até 3 voltas de tools, 1 correção de formato e o
    total em `max-chamadas`, e o excesso grava o resultado `LIMITE_DE_CHAMADAS`.)
 3. **Depois da chamada:** um livro citado que não existe, está inativo ou sem estoque é removido da resposta. Na
-   vitrine, só valem os ids que estavam entre os candidatos.
+   vitrine, só valem os ids que estavam entre os candidatos. (Alterado depois da rodada de testes de 2026-11-22: o
+   prompt do chat passou a proibir ids e códigos internos no texto que o cliente lê, mandando deixar os ids só no
+   campo de ids da resposta; como o comportamento do modelo é probabilístico, a garantia é a higiene server-side do
+   texto gravado, em `HigienizarIdsDoTexto`: anotações de id entre parênteses/colchetes, como `(id 32)` e `[ID 52]`,
+   e pares de JSON, como `"id": 12,` saem, com os espaços e a pontuação que sobrarem normalizados. O limite está
+   documentado na regra: só a anotação mecânica sai — o eco do que o cliente digitou, como "com o ID 999", e a
+   prosa do modelo, como "o id interno de O Hobbit é 5", ficam como estão, porque a inibição desses casos é do
+   prompt, não da higiene.)
 4. (Acrescentado depois da rodada de testes do chat) **No chat, a recomendação usa os mesmos candidatos da vitrine:**
    a tool `recomendarParaMim` recupera e pontua os livros como a vitrine. Com o tipo `RECOMENDACAO`, os livros que o
    cliente já comprou são removidos da resposta, e, se nenhum sobrar, o texto do modelo é trocado por um texto fixo; `BUSCA` e `DUVIDA` os mantêm, porque o cliente pode perguntar de um
