@@ -387,6 +387,21 @@ class AssistenteDeLivrosOpenAiTest {
     }
 
     @Test
+    void rnfRec001_promptMandaChamarRecomendarParaMimECitarSoOsLivrosQueElaDevolver() {
+        respostas.add(new Resposta(200, chamadaDeResposta("DUVIDA", "Oi! Como posso ajudar?", "[]"), 0));
+
+        assistente("ferramenta", "auto", 5).conversar(PERFIL, List.of(), "Oi", new FerramentasFalsas(), CATALOGO);
+
+        // ALT-01-rec08-so-novos, caso gem-07a da rodada de 22/11: o prompt reforça a tool que já exclui os comprados,
+        // mas a garantia de indicar só livros que o cliente não tem é server-side — o comportamento do modelo é
+        // probabilístico (achado 1 da mesma rodada).
+        assertThat(corpos.getFirst())
+                .contains("Para recomendar, chame recomendarParaMim")
+                .contains("cite só os livros que ela devolver")
+                .contains("Não recomende livros que o cliente já tem");
+    }
+
+    @Test
     void rnfRec001_conversarComResponderEntregaARespostaSemOutraChamada() {
         respostas.add(new Resposta(200, chamadaDeResposta("BUSCA", "Encontrei Dom Casmurro.", "[1]"), 0));
         FerramentasFalsas ferramentas = new FerramentasFalsas();

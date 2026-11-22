@@ -170,7 +170,17 @@ Uma regra por arquivo, testável sem a IA:
    `gem-07a`, achado 7 da rodada de 22/11 — e passou a dizer só que os primeiros livros que o assistente citaria o
    cliente já tem, mantendo a oferta de outro gênero ou autor; o prompt da conversa passou a mandar preferir
    `recomendarParaMim`, que já traz só livros que o cliente não comprou, e a não recomendar livros que o cliente já
-   tem.)
+   tem.) (Alterado em ALT-01-rec08-so-novos, a pedido do time, no caso `gem-07a`: em vez de dizer que o cliente já tem
+   os primeiros livros que seriam indicados e oferecer outro gênero, o server indica os livros que ele ainda não tem.
+   A recomendação que perde todos os citados é completada por `IndicarLivrosQueOClienteNaoTem` com os candidatos da
+   vitrine — os mesmos da tool `recomendarParaMim`, que já excluem comprados e avaliados negativamente —, até o teto
+   de livros citados, com texto fixo curto e sem ids: os livros chegam como cartões pelo campo de citados. As compras
+   registradas e as unidades vendidas, que a recuperação precisa, só são consultadas quando isso acontece
+   (RNF-GER-001), nunca em toda mensagem. O texto fixo sem livros fica só para quem não tem candidato nenhum — já tem
+   ou já avaliou tudo à venda —, caso em que dizer que o cliente já tem o que seria indicado volta a ser fato. O
+   prompt da conversa passou a mandar chamar `recomendarParaMim` e citar só o que ela devolver, mas a garantia é
+   server-side, porque o comportamento do modelo é probabilístico — o `gem-07a` foi justamente um modelo que respondeu
+   do catálogo sem chamar a tool.)
 5. A IA não executa ações: adicionar ao carrinho é um botão da UI sobre os livros devolvidos.
 
 ### Recomendação da vitrine

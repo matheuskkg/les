@@ -65,24 +65,25 @@ class RemoverLivrosCompradosDaRecomendacaoTest {
     }
 
     @Test
-    void rnfRec001_semLivrosRestantesTrocaOTextoQueApresentavaOsComprados() {
-        // Caso gem-07a da rodada de 22/11 (achado 7): o modelo citou só clássicos que a cliente já tinha e o server os
-        // removeu. O texto fixo não pode afirmar que ela já tem tudo — o catálogo ampliado tem fantasia à venda —,
-        // só que os primeiros livros que o assistente citaria ela já tem (revisão em ALT-10).
+    void rnfRec001_semLivrosRestantesFicaSemCitadosParaAIndicacaoDosQueFaltam() {
+        // Caso gem-07a da rodada de 22/11 (achado 7): o modelo citou só clássicos que a cliente já tinha e o server
+        // os removeu. A remoção só esvazia os citados; quem troca o texto e indica os livros que ela ainda não tem é
+        // IndicarLivrosQueOClienteNaoTem, chamada pelo caso de uso nesse caso (ALT-01-rec08-so-novos).
         RespostaDoAssistente resposta =
                 remover.remover(
                         new RespostaDoAssistente(
                                 TipoDeResposta.RECOMENDACAO, "Recomendo estes dois livros.", List.of(1L, 3L)),
                         COMPRADOS);
 
+        assertThat(resposta.tipo()).isEqualTo(TipoDeResposta.RECOMENDACAO);
         assertThat(resposta.livrosCitados()).isEmpty();
-        assertThat(resposta.texto()).isEqualTo(RemoverLivrosCompradosDaRecomendacao.TEXTO_SO_COMPRADOS);
+        assertThat(resposta.texto()).isEqualTo("Recomendo estes dois livros.");
     }
 
     @Test
     void rnfRec001_buscaComTodosCompradosMantemLivrosETexto() {
-        // O texto fixo do REC-08 é só da recomendação: na busca, o cliente pode perguntar de um livro que já tem,
-        // então nem os livros citados nem o texto mudam (caso gem-07a da rodada de 22/11, achado 7).
+        // A indicação dos livros que faltam é só da recomendação: na busca, o cliente pode perguntar de um livro
+        // que já tem, então nem os livros citados nem o texto mudam (caso gem-07a da rodada de 22/11, achado 7).
         RespostaDoAssistente resposta =
                 remover.remover(
                         new RespostaDoAssistente(TipoDeResposta.BUSCA, "Temos estes títulos.", List.of(1L, 3L)),

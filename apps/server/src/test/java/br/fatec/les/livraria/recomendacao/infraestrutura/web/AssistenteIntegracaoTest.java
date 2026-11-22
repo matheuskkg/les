@@ -22,6 +22,7 @@ import br.fatec.les.livraria.recomendacao.aplicacao.porta.ConversasRepositorio;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.FerramentasDoAssistente;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ProvedoresIaRepositorio;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ResumoDeLivro;
+import br.fatec.les.livraria.recomendacao.dominio.calculo.IndicarLivrosQueOClienteNaoTem;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.LimitarTextoDaResposta;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.ValidarRespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemAnterior;
@@ -31,6 +32,11 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.PerfilDoCliente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.TipoDeResposta;
 import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarComprasDoCliente;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarComprasRegistradas;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarUnidadesVendidas;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.CompraDeLivro;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.LivroVendido;
+import br.fatec.les.livraria.vendas.aplicacao.porta.VendasConsultas;
 
 import com.jayway.jsonpath.JsonPath;
 
@@ -56,6 +62,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sql.DataSource;
@@ -81,6 +89,8 @@ class AssistenteIntegracaoTest {
     private static final Long O_HOBBIT = 5L;
     private static final AtomicReference<LocalDateTime> AGORA = new AtomicReference<>();
     private static final AtomicReference<RespostaDoAssistente> RESPOSTA_PROGRAMADA = new AtomicReference<>();
+    private static final AtomicInteger COMPRAS_REGISTRADAS = new AtomicInteger();
+    private static final AtomicInteger UNIDADES_VENDIDAS = new AtomicInteger();
 
     @TestConfiguration
     static class RelogioAjustavel {
@@ -126,6 +136,38 @@ class AssistenteIntegracaoTest {
         }
     }
 
+    /**
+     * Consultas agregadas do {@code vendas} com contador (RNF-GER-001): o teste prova que a indicação dos livros que o
+     * cliente não tem só as roda quando a recomendação perde todos os citados, nunca em toda mensagem.
+     */
+    @TestConfiguration
+    static class ConsultasAgregadasContadas {
+
+        @Bean
+        @Primary
+        ConsultarComprasRegistradas comprasRegistradasContadas(VendasConsultas vendas) {
+            return new ConsultarComprasRegistradas(vendas) {
+                @Override
+                public List<CompraDeLivro> executar() {
+                    COMPRAS_REGISTRADAS.incrementAndGet();
+                    return super.executar();
+                }
+            };
+        }
+
+        @Bean
+        @Primary
+        ConsultarUnidadesVendidas unidadesVendidasContadas(VendasConsultas vendas) {
+            return new ConsultarUnidadesVendidas(vendas) {
+                @Override
+                public Map<Long, Integer> executar() {
+                    UNIDADES_VENDIDAS.incrementAndGet();
+                    return super.executar();
+                }
+            };
+        }
+    }
+
     @Autowired private WebApplicationContext contexto;
 
     @Autowired private UsuarioRepositorio usuarios;
@@ -146,6 +188,8 @@ class AssistenteIntegracaoTest {
     void configurar() {
         AGORA.set(LocalDateTime.of(2026, 10, 25, 12, 0));
         RESPOSTA_PROGRAMADA.set(null);
+        COMPRAS_REGISTRADAS.set(0);
+        UNIDADES_VENDIDAS.set(0);
         mvc = MockMvcBuilders.webAppContextSetup(contexto).apply(springSecurity()).build();
         cadeia.limpar();
     }
@@ -465,6 +509,102 @@ class AssistenteIntegracaoTest {
     @Test
     void rnfRec001_administradorNaoUsaOChat() throws Exception {
         mvc.perform(como(1L, get("/api/me/assistente/conversa"))).andExpect(status().isForbidden());
+    }
+
+    /** Copia o pedido 2, de outro cliente, como compra da Ana, para ela ter livros comprados no seed. */
+    private void comprarComoAnaOPedido2() {
+        copiar("pedido", "id = 2", "id", "900000", "cliente_id", "1");
+        copiar("item_pedido", "pedido_id = 2", "id", "id + 900000", "pedido_id", "900000");
+    }
+
+    /** Ids distintos dos livros que a Ana comprou, citados por uma resposta de recomendação programada. */
+    private List<Long> compradosDaAna() {
+        return comprasDoCliente.executar(CLIENTE_DA_ANA).stream().map(LivroVendido::livroId).distinct().toList();
+    }
+
+    /** Grava uma avaliação negativa da Ana a cada livro ativo: fica candidato nenhum para indicar. */
+    private void avaliarNegativamenteTodosOsLivrosAtivos() {
+        JdbcClient jdbc = JdbcClient.create(dataSource);
+        jdbc.sql(
+                        "insert into recomendacao (id, cliente_id, gerada_em, compras_consideradas) "
+                                + "values (900000, :cliente, '2026-10-25 12:00:00', 0)")
+                .param("cliente", CLIENTE_DA_ANA)
+                .update();
+        jdbc.sql(
+                        "insert into item_recomendacao "
+                                + "(id, recomendacao_id, livro_id, posicao, avaliacao, avaliada_em) "
+                                + "select 900000 + row_number() over (order by id), 900000, id, 0, 'NEGATIVA', "
+                                + "'2026-10-25 12:00:00' from livro where ativo = true")
+                .update();
+    }
+
+    @Test
+    void rnfRec001_recomendacaoQuePerdeTodosOsCitadosIndicaOsLivrosQueOClienteNaoTem() throws Exception {
+        // Caso gem-07a, achado 7 da rodada de 22/11: o modelo citou só clássicos que a cliente já tinha. O server
+        // remove os comprados e, em vez do texto fixo da ALT-10, indica os livros que ela ainda não tem — os
+        // candidatos da vitrine, até o teto de citados, com texto fixo curto e sem ids (ALT-01-rec08-so-novos).
+        comprarComoAnaOPedido2();
+        List<Long> comprados = compradosDaAna();
+        RESPOSTA_PROGRAMADA.set(
+                new RespostaDoAssistente(
+                        TipoDeResposta.RECOMENDACAO, "Recomendo estes clássicos para você.", comprados));
+
+        String corpo =
+                enviar(ANA, "me recomende um livro")
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.papel").value("ASSISTENTE"))
+                        .andExpect(jsonPath("$.tipo").value("RECOMENDACAO"))
+                        .andExpect(jsonPath("$.texto").value(IndicarLivrosQueOClienteNaoTem.TEXTO_COM_LIVROS_NOVOS))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+
+        List<Integer> indicados = JsonPath.read(corpo, "$.livros[*].id");
+        assertThat(indicados)
+                .isNotEmpty()
+                .hasSizeLessThanOrEqualTo(6)
+                .noneMatch(id -> comprados.contains(id.longValue()));
+
+        mvc.perform(como(ANA, get("/api/me/assistente/conversa")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[1].texto").value(IndicarLivrosQueOClienteNaoTem.TEXTO_COM_LIVROS_NOVOS))
+                .andExpect(jsonPath("$[1].livros.length()").value(indicados.size()));
+    }
+
+    @Test
+    void rnfRec001_semCandidatosAIndicacaoFicaComOTextoFixoSemLivros() throws Exception {
+        // A cliente já tem ou avaliou tudo à venda: sem candidato nenhum, dizer que ela já tem o que seria indicado
+        // volta a ser fato, e a resposta fica sem livros (ALT-01-rec08-so-novos, caso gem-07a).
+        comprarComoAnaOPedido2();
+        avaliarNegativamenteTodosOsLivrosAtivos();
+        RESPOSTA_PROGRAMADA.set(
+                new RespostaDoAssistente(
+                        TipoDeResposta.RECOMENDACAO, "Recomendo estes clássicos para você.", compradosDaAna()));
+
+        enviar(ANA, "me recomende um livro")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tipo").value("RECOMENDACAO"))
+                .andExpect(jsonPath("$.texto").value(IndicarLivrosQueOClienteNaoTem.TEXTO_SEM_LIVROS_NOVOS))
+                .andExpect(jsonPath("$.livros.length()").value(0));
+    }
+
+    @Test
+    void rnfRec001_asComprasRegistradasEAsUnidadesVendidasSoCorremQuandoARecomendacaoEsvazia() throws Exception {
+        // RNF-GER-001: as consultas agregadas que a indicação dos livros que faltam precisa não correm em toda
+        // mensagem — só quando a recomendação perde todos os citados.
+        enviar(ANA, "Hobbit").andExpect(status().isOk());
+        assertThat(COMPRAS_REGISTRADAS.get()).isZero();
+        assertThat(UNIDADES_VENDIDAS.get()).isZero();
+
+        comprarComoAnaOPedido2();
+        RESPOSTA_PROGRAMADA.set(
+                new RespostaDoAssistente(
+                        TipoDeResposta.RECOMENDACAO, "Recomendo estes clássicos para você.", compradosDaAna()));
+
+        enviar(ANA, "me recomende um livro").andExpect(status().isOk());
+
+        assertThat(COMPRAS_REGISTRADAS.get()).isEqualTo(1);
+        assertThat(UNIDADES_VENDIDAS.get()).isEqualTo(1);
     }
 
     /**
