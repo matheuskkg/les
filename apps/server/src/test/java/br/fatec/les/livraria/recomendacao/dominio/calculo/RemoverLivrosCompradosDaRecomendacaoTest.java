@@ -66,6 +66,9 @@ class RemoverLivrosCompradosDaRecomendacaoTest {
 
     @Test
     void rnfRec001_semLivrosRestantesTrocaOTextoQueApresentavaOsComprados() {
+        // Caso gem-07a da rodada de 22/11 (achado 7): o modelo citou só clássicos que a cliente já tinha e o server os
+        // removeu. O texto fixo não pode afirmar que ela já tem tudo — o catálogo ampliado tem fantasia à venda —,
+        // só que os primeiros livros que o assistente citaria ela já tem (revisão em ALT-10).
         RespostaDoAssistente resposta =
                 remover.remover(
                         new RespostaDoAssistente(
@@ -74,5 +77,18 @@ class RemoverLivrosCompradosDaRecomendacaoTest {
 
         assertThat(resposta.livrosCitados()).isEmpty();
         assertThat(resposta.texto()).isEqualTo(RemoverLivrosCompradosDaRecomendacao.TEXTO_SO_COMPRADOS);
+    }
+
+    @Test
+    void rnfRec001_buscaComTodosCompradosMantemLivrosETexto() {
+        // O texto fixo do REC-08 é só da recomendação: na busca, o cliente pode perguntar de um livro que já tem,
+        // então nem os livros citados nem o texto mudam (caso gem-07a da rodada de 22/11, achado 7).
+        RespostaDoAssistente resposta =
+                remover.remover(
+                        new RespostaDoAssistente(TipoDeResposta.BUSCA, "Temos estes títulos.", List.of(1L, 3L)),
+                        COMPRADOS);
+
+        assertThat(resposta.livrosCitados()).containsExactly(1L, 3L);
+        assertThat(resposta.texto()).isEqualTo("Temos estes títulos.");
     }
 }
