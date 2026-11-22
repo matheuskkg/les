@@ -70,7 +70,7 @@ livraria:
         max-tokens: 800
       openrouter:
         url-base: https://openrouter.ai/api/v1
-        modelo: ${IA_OPENROUTER_MODELO:google/gemma-4-31b-it:free}
+        modelo: ${IA_OPENROUTER_MODELO:nvidia/nemotron-3.5-super-vl:free}
         chave: ${IA_OPENROUTER_CHAVE:}
         tool-choice: auto
         max-chamadas: 5
