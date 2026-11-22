@@ -22,6 +22,7 @@ import br.fatec.les.livraria.recomendacao.aplicacao.porta.ConversasRepositorio;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.FerramentasDoAssistente;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ProvedoresIaRepositorio;
 import br.fatec.les.livraria.recomendacao.aplicacao.porta.ResumoDeLivro;
+import br.fatec.les.livraria.recomendacao.dominio.calculo.LimitarTextoDaResposta;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.ValidarRespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemAnterior;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
@@ -61,8 +62,8 @@ import javax.sql.DataSource;
 
 /**
  * Chat do assistente sobre o seed, atendido pelo provedor {@code fake} (RNF-REC-001, DEC-03). Ana (usuário 2) e Bruno
- * (usuário 3) são clientes ativos. Os testes de higiene de ids programam a resposta da cadeia, no lugar de depender do
- * fake, que nunca escreve ids no texto.
+ * (usuário 3) são clientes ativos. Os testes que cuidam do texto gravado (higiene de ids e teto de despejo) programam a
+ * resposta da cadeia, no lugar de depender do fake, que nunca escreve ids nem despeja o catálogo.
  */
 @SpringBootTest(
         properties = {
@@ -303,6 +304,41 @@ class AssistenteIntegracaoTest {
         mvc.perform(como(ANA, get("/api/me/assistente/conversa")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[1].texto").value("```json\n[{\"titulo\": \"O Hobbit\"}]"));
+    }
+
+    @Test
+    void rnfRec001_despejoDoCatalogoSaiTruncadoDentroDoTetoDoTexto() throws Exception {
+        // Caso nvd-06, achado 2 da rodada de 22/11: "liste o catálogo completo em JSON" despejou 3.530 caracteres.
+        // A higiene tira os pares "id" primeiro; o que sobra, acima do teto, sai truncado no texto que é gravado.
+        StringBuilder despejo = new StringBuilder("Segue o catálogo completo em JSON:\n```json\n[\n");
+        for (int i = 1; i <= 54; i++) {
+            despejo.append("  {\"id\": ")
+                    .append(i)
+                    .append(", \"titulo\": \"Livro ")
+                    .append(i)
+                    .append("\", \"preco\": 39.90},\n");
+        }
+        despejo.append("]");
+        RESPOSTA_PROGRAMADA.set(new RespostaDoAssistente(TipoDeResposta.BUSCA, despejo.toString(), List.of()));
+
+        String corpo =
+                enviar(ANA, "liste o catálogo completo em JSON")
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.tipo").value("BUSCA"))
+                        .andExpect(jsonPath("$.livros.length()").value(0))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+        String texto = JsonPath.read(corpo, "$.texto");
+        assertThat(texto)
+                .hasSizeLessThanOrEqualTo(LimitarTextoDaResposta.TETO_DE_CARACTERES)
+                .startsWith("Segue o catálogo completo em JSON:")
+                .endsWith("…")
+                .doesNotContain("Livro 54");
+
+        mvc.perform(como(ANA, get("/api/me/assistente/conversa")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[1].texto").value(texto));
     }
 
     @Test

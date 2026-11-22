@@ -141,7 +141,12 @@ Uma regra por arquivo, testável sem a IA:
    e pares de JSON, como `"id": 12,` saem, com os espaços e a pontuação que sobrarem normalizados. O limite está
    documentado na regra: só a anotação mecânica sai — o eco do que o cliente digitou, como "com o ID 999", e a
    prosa do modelo, como "o id interno de O Hobbit é 5", ficam como estão, porque a inibição desses casos é do
-   prompt, não da higiene.)
+   prompt, não da higiene. Alterado em ALT-09: o caso `nvd-06` da mesma rodada — "liste o catálogo completo em JSON"
+   — despejou os 54 livros em 3.530 caracteres e 3.364 tokens de saída; o texto gravado ganhou um teto determinístico
+   de 1.500 caracteres em `LimitarTextoDaResposta`, que trunca no último fim de frase dentro do teto e marca com
+   reticências — o `max-tokens` da ALT-08 limita a saída no provedor, este limita o texto que chega ao cliente e ao
+   banco —, e o prompt da conversa passou a mandar citar só alguns livros, os mais relevantes, nunca o catálogo
+   completo.)
 4. (Acrescentado depois da rodada de testes do chat) **No chat, a recomendação usa os mesmos candidatos da vitrine:**
    a tool `recomendarParaMim` recupera e pontua os livros como a vitrine. Com o tipo `RECOMENDACAO`, os livros que o
    cliente já comprou são removidos da resposta, e, se nenhum sobrar, o texto do modelo é trocado por um texto fixo;
