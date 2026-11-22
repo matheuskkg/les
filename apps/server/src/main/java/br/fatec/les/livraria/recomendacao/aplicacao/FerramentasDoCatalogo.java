@@ -22,7 +22,10 @@ import br.fatec.les.livraria.recomendacao.aplicacao.porta.ResumoDeLivro;
 import br.fatec.les.livraria.recomendacao.aplicacao.regra.LivroAVenda;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.LivroCandidato;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.PerfilDoCliente;
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarLivrosVendidos;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarComprasDoCliente;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarComprasRegistradas;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarUnidadesVendidas;
+import br.fatec.les.livraria.vendas.aplicacao.consulta.CompraDeLivro;
 import br.fatec.les.livraria.vendas.aplicacao.consulta.LivroVendido;
 import lombok.RequiredArgsConstructor;
 
@@ -45,7 +48,9 @@ public class FerramentasDoCatalogo {
 
     private final LerCatalogo lerCatalogo;
     private final ConsultarSinopses consultarSinopses;
-    private final ConsultarLivrosVendidos consultarLivrosVendidos;
+    private final ConsultarComprasDoCliente consultarComprasDoCliente;
+    private final ConsultarComprasRegistradas consultarComprasRegistradas;
+    private final ConsultarUnidadesVendidas consultarUnidadesVendidas;
     private final MontarPerfilDoCliente montarPerfil;
     private final RecuperarCandidatos recuperarCandidatos;
     private final RecomendacoesRepositorio recomendacoes;
@@ -60,7 +65,9 @@ public class FerramentasDoCatalogo {
         private final Long clienteId;
         private @Nullable List<LivroListado> ativos;
         private @Nullable Map<Long, LivroListado> aVenda;
-        private @Nullable List<LivroVendido> vendidos;
+        private @Nullable List<LivroVendido> compras;
+        private @Nullable List<CompraDeLivro> registradas;
+        private @Nullable Map<Long, Integer> unidadesVendidas;
 
         private Ferramentas(Long clienteId) {
             this.clienteId = clienteId;
@@ -85,12 +92,31 @@ public class FerramentasDoCatalogo {
             return aVenda;
         }
 
-        /** Os livros vendidos de todos os clientes, lidos uma vez por mensagem. */
-        private List<LivroVendido> vendidos() {
-            if (vendidos == null) {
-                vendidos = consultarLivrosVendidos.executar();
+        /**
+         * As compras do cliente em pedidos que contam como venda, lidas uma vez por mensagem, direto do seu
+         * histórico (RNF-GER-001).
+         */
+        private List<LivroVendido> minhasCompras() {
+            if (compras == null) {
+                compras = consultarComprasDoCliente.executar(clienteId);
             }
-            return vendidos;
+            return compras;
+        }
+
+        /** As compras de todos os clientes agregadas por cliente e livro, lidas uma vez por mensagem (RNF-GER-001). */
+        private List<CompraDeLivro> comprasRegistradas() {
+            if (registradas == null) {
+                registradas = consultarComprasRegistradas.executar();
+            }
+            return registradas;
+        }
+
+        /** As unidades vendidas por livro, lidas uma vez por mensagem (RNF-GER-001). */
+        private Map<Long, Integer> unidadesVendidas() {
+            if (unidadesVendidas == null) {
+                unidadesVendidas = consultarUnidadesVendidas.executar();
+            }
+            return unidadesVendidas;
         }
 
         @Override
@@ -124,19 +150,18 @@ public class FerramentasDoCatalogo {
 
         @Override
         public List<LivroDoHistorico> verMeuHistorico() {
-            return vendidos().stream()
-                    .filter(vendido -> vendido.clienteId().equals(clienteId))
-                    .map(vendido -> new LivroDoHistorico(vendido.livroId(), vendido.titulo()))
+            return minhasCompras().stream()
+                    .map(compra -> new LivroDoHistorico(compra.livroId(), compra.titulo()))
                     .distinct()
                     .toList();
         }
 
         @Override
         public List<ResumoDeLivro> recomendarParaMim() {
-            List<LivroVendido> vendidos = vendidos();
-            PerfilDoCliente perfil = montarPerfil.montar(clienteId, vendidos,
+            PerfilDoCliente perfil = montarPerfil.montar(minhasCompras(),
                     recomendacoes.avaliacoesDoCliente(clienteId));
-            return recuperarCandidatos.recuperar(clienteId, perfil, vendidos, ativos()).stream()
+            return recuperarCandidatos.recuperar(clienteId, perfil, comprasRegistradas(), unidadesVendidas(),
+                    ativos()).stream()
                     .map(FerramentasDoCatalogo::resumo)
                     .toList();
         }

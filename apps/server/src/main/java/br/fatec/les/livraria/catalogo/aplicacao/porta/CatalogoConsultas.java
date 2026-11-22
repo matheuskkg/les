@@ -69,4 +69,14 @@ public interface CatalogoConsultas {
      * @return as sinopses encontradas, em ordem indeterminada; id inexistente não aparece
      */
     List<SinopseDoLivro> buscarSinopses(Collection<Long> livroIds);
+
+    /**
+     * Livros ativos pelos ids, com autores, categorias e editora, para exibir numa conversa só os citados
+     * (RNF-REC-001, DEC-03). Um id só em vez da vitrine inteira: quem precisa de poucos livros não lê o catálogo
+     * todo (RNF-GER-001).
+     *
+     * @param livroIds livros a consultar
+     * @return os livros ativos encontrados, em ordem indeterminada; inativo ou inexistente não aparece
+     */
+    List<LivroResumo> buscarAtivos(Collection<Long> livroIds);
 }

@@ -47,8 +47,34 @@ public interface LivroJpaRepository extends JpaRepository<LivroJpa, Long>, JpaSp
             """)
     List<AutorDoLivroProjecao> buscarAutoresPorLivro(@Param("livroIds") Collection<Long> livroIds);
 
-    /** Livros pelos ids, inclusive inativos, para a leitura do carrinho (RF-VEN-001). */
-    List<LivroJpa> findByIdIn(Collection<Long> livroIds);
+    /** Livros ativos pelos ids, com a editora, para exibir os citados numa conversa (RNF-REC-001, RNF-GER-001). */
+    @EntityGraph(attributePaths = "editora")
+    List<LivroJpa> findByIdInAndAtivoTrue(Collection<Long> livroIds);
+
+    /** Título e situação dos livros pelos ids, inclusive inativos, sem carregar a entidade (RF-VEN-001, RNF-GER-001). */
+    @Query("""
+            select l.id as livroId, l.titulo as titulo, l.ativo as ativo
+            from LivroJpa l
+            where l.id in :livroIds
+            """)
+    List<LivroParaVendaProjecao> buscarParaVenda(@Param("livroIds") Collection<Long> livroIds);
+
+    /** Peso e dimensões dos livros pelos ids, sem carregar a entidade (RF-VEN-004, RN-LIV-001, RNF-GER-001). */
+    @Query("""
+            select l.id as livroId, l.peso as peso, l.altura as altura, l.largura as largura,
+                   l.profundidade as profundidade
+            from LivroJpa l
+            where l.id in :livroIds
+            """)
+    List<MedidasDoLivroProjecao> buscarMedidas(@Param("livroIds") Collection<Long> livroIds);
+
+    /** Sinopse dos livros pelos ids, sem carregar a entidade (RNF-REC-001, RNF-GER-001). */
+    @Query("""
+            select l.id as livroId, l.sinopse as sinopse
+            from LivroJpa l
+            where l.id in :livroIds
+            """)
+    List<SinopseDoLivroProjecao> buscarSinopses(@Param("livroIds") Collection<Long> livroIds);
 
     /** Categorias dos livros da página em uma única consulta, sem N+1 (RF-LIV-005, RN-LIV-002). */
     @Query("""

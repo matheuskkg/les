@@ -35,7 +35,7 @@ import br.fatec.les.livraria.recomendacao.dominio.modelo.PerfilDoCliente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.RespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.regra.LimiteDeMensagensPorMinuto;
 import br.fatec.les.livraria.recomendacao.dominio.regra.TamanhoDaMensagem;
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarLivrosVendidos;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarComprasDoCliente;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -66,7 +66,7 @@ public class EnviarMensagemAoAssistente {
     private final IdentificarCliente identificarCliente;
     private final ConversasRepositorio conversas;
     private final RecomendacoesRepositorio recomendacoes;
-    private final ConsultarLivrosVendidos consultarLivrosVendidos;
+    private final ConsultarComprasDoCliente consultarComprasDoCliente;
     private final LerCatalogo lerCatalogo;
     private final MontarPerfilDoCliente montarPerfil;
     private final FerramentasDoCatalogo ferramentas;
@@ -110,7 +110,7 @@ public class EnviarMensagemAoAssistente {
                     .toList();
         }
 
-        PerfilDoCliente perfil = montarPerfil.montar(clienteId, consultarLivrosVendidos.executar(),
+        PerfilDoCliente perfil = montarPerfil.montar(consultarComprasDoCliente.executar(clienteId),
                 recomendacoes.avaliacoesDoCliente(clienteId));
         List<LivroListado> ativos = lerCatalogo.ativos();
         List<ResumoDeLivro> catalogo = ativos.stream()

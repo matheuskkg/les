@@ -45,8 +45,7 @@ import br.fatec.les.livraria.recomendacao.aplicacao.porta.ConversasRepositorio;
 import br.fatec.les.livraria.recomendacao.dominio.calculo.ValidarRespostaDoAssistente;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.MensagemDaConversa;
 import br.fatec.les.livraria.recomendacao.dominio.modelo.PapelDaMensagem;
-import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarLivrosVendidos;
-import br.fatec.les.livraria.vendas.aplicacao.consulta.LivroVendido;
+import br.fatec.les.livraria.vendas.aplicacao.casodeuso.ConsultarComprasDoCliente;
 import jakarta.servlet.http.Cookie;
 
 /**
@@ -96,7 +95,7 @@ class AssistenteIntegracaoTest {
     private ConversasRepositorio conversas;
 
     @Autowired
-    private ConsultarLivrosVendidos livrosVendidos;
+    private ConsultarComprasDoCliente comprasDoCliente;
 
     private MockMvc mvc;
 
@@ -187,10 +186,8 @@ class AssistenteIntegracaoTest {
         // Ana não comprou no seed; o pedido 2, de outro cliente, entra como compra dela nesta transação.
         copiar("pedido", "id = 2", "id", "900000", "cliente_id", "1");
         copiar("item_pedido", "pedido_id = 2", "id", "id + 900000", "pedido_id", "900000");
-        List<Integer> comprados = livrosVendidos.executar().stream()
-                .filter(vendido -> vendido.clienteId().equals(CLIENTE_DA_ANA))
-                .map(LivroVendido::livroId)
-                .map(Long::intValue)
+        List<Integer> comprados = comprasDoCliente.executar(CLIENTE_DA_ANA).stream()
+                .map(vendido -> Math.toIntExact(vendido.livroId()))
                 .distinct()
                 .toList();
 

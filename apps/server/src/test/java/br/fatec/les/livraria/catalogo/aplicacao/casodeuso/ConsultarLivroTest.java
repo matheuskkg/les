@@ -153,6 +153,11 @@ class ConsultarLivroTest {
                 java.util.Collection<Long> livroIds) {
             throw new UnsupportedOperationException("Fora do escopo do teste.");
         }
+
+        @Override
+        public List<LivroResumo> buscarAtivos(Collection<Long> livroIds) {
+            throw new UnsupportedOperationException("Fora do escopo do teste.");
+        }
     }
 
     private static final class SaldoDeEstoqueFake implements SaldoDeEstoque {
