@@ -24,6 +24,7 @@ Escopos:
 | [DEC-15.3](DEC-15.3-saldo-de-estoque.md) | Saldo de estoque | Aceita |
 | [DEC-16](DEC-16-modelo-de-dados.md) | Modelo de dados | Aceita |
 | [DEC-17](DEC-17-organizacao-do-web.md) | Organização do código do web | Aceita |
+| [DEC-22](DEC-22-lint-e-formatacao-do-server.md) | Lint e formatação do server | Aceita |
 
 ### Negócio
 

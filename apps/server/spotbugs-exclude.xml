@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter
+        xmlns="https://github.com/spotbugs/filter/4.10.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://github.com/spotbugs/filter/4.10.0 https://raw.githubusercontent.com/spotbugs/spotbugs/4.10.0/spotbugs/etc/findbugsfilter.xsd">
+
+    <!-- Falsos positivos conhecidos (Lombok/JPA/Spring) devem ser listados aqui, com justificativa. -->
+
+    <!-- RecusarTroca recebe motivo anulável por contrato: o cliente pode omiti-lo e a regra
+         MotivoDaRecusaInformado (RF-VEN-012) valida antes do Objects.requireNonNull. -->
+    <Match>
+        <Class name="br.fatec.les.livraria.vendas.aplicacao.casodeuso.RecusarTroca" />
+        <Bug pattern="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE" />
+    </Match>
+
+</FindBugsFilter>
