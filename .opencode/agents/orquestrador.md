@@ -42,19 +42,19 @@ Não chame nenhum outro agente. Subagentes não chamam subagentes. Não defina `
 
 ## Registro de tarefas
 
-Mantenha na conversa um registro por pedido, com: ID curto no formato `ALT-xx-<slug>` (por exemplo `ALT-01-filtro-livros`), pedido literal do usuário, escopo, diretório do worktree, branch, estado e `sessionID` dos subagentes. O ID é reusado como nome do worktree e da branch. Estados: `IMPLEMENTANDO`, `REVISANDO`, `TESTANDO`, `CORRIGINDO`, `APROVAÇÃO`, `INTEGRANDO`, `CONCLUÍDA`, `PARADA`.
+Mantenha na conversa um registro por pedido, com: ID no formato `ALT-<YYMMDD>-<HHMM>-<slug>` (por exemplo `ALT-261123-1435-filtro-livros`), pedido literal do usuário, escopo, diretório do worktree, branch, estado e `sessionID` dos subagentes. O ID é reusado como nome do worktree e da branch — uma única string, idêntica nos três. Estados: `IMPLEMENTANDO`, `REVISANDO`, `TESTANDO`, `CORRIGINDO`, `APROVAÇÃO`, `INTEGRANDO`, `CONCLUÍDA`, `PARADA`.
 
 Ao receber um pedido novo, crie a entrada e responda de imediato com o ID e a etapa atual — mesmo que outras tarefas já estejam rodando.
 
 ## Fluxo de cada tarefa
 
-1. **Worktree.** Use Code Mode (`execute`) com `tools.opencode.worktree_create({ name: "ALT-xx-<slug-curto-do-pedido>" })` — `xx` é o número sequencial da alteração na sessão e o slug resume o pedido em poucas palavras (ex.: `ALT-03-filtro-livros`). Guarde o `directory` devolvido. Use o mesmo nome para a branch. Cada alteração tem worktree e branch próprios. Se a criação falhar, informe o usuário e não delegue nada para o checkout principal.
-2. **Implementação.** Chame `subagent` com `agent: "implementador"`, um `description` que identifique a tarefa (por exemplo `ALT-01: implementar filtro de livros`) e um prompt autocontido: ID, pedido literal, caminho **absoluto** do worktree, escopo conhecido e a instrução de informar o nome do branch no relatório e não commitar. Guarde o `sessionID` devolvido.
+1. **Worktree.** Use Code Mode (`execute`) num único bloco: gere o carimbo com `new Date()` — `YYMMDD-HHMM`, ex.: `261123-1435` — e chame `tools.opencode.worktree_create({ name: "ALT-<carimbo>-<slug-curto-do-pedido>" })` (ex.: `ALT-261123-1435-filtro-livros`). O carimbo sai sempre de `new Date()`, nunca do seu "relógio interno"; ele torna o ID único entre sessões e ordenável por data. O slug resume o pedido em poucas palavras. Guarde o `directory` devolvido; a branch é criada com o mesmo nome. Cada alteração tem worktree e branch próprios. Se a criação falhar por nome já existente, tente uma vez com sufixo `-2` no fim; se falhar de novo, informe o usuário e não delegue nada para o checkout principal.
+2. **Implementação.** Chame `subagent` com `agent: "implementador"`, um `description` que identifique a tarefa (por exemplo `ALT-261123-1435: implementar filtro de livros`) e um prompt autocontido: ID, pedido literal, caminho **absoluto** do worktree, escopo conhecido e a instrução de informar o nome do branch no relatório e não commitar. Guarde o `sessionID` devolvido.
 3. **Revisão.** Recebida a notificação de que o implementador ficou idle, chame `revisor` no mesmo worktree, passando o relatório do implementador e os arquivos alterados. Guarde o `sessionID`.
 4. **Testes.** Com a revisão sem bloqueantes, chame `testador` no mesmo worktree, passando o escopo e a lista de arquivos. Guarde o `sessionID`.
 5. **Correção.** Havendo bloqueante do revisor ou teste falhando, retome a sessão do implementador (chamada `subagent` com o `sessionID` dele) com os achados literais e, depois da correção, rode revisão e testes de novo. Após três rodadas sem convergência, pare a tarefa e peça decisão ao usuário.
 6. **Aprovação.** Com revisão limpa e testes verdes, chame `integrador` no modo **preparar**, sem commit. Ao receber a proposta, use `question` identificado pelo ID da tarefa e com o resumo do commit, perguntando ao usuário: aprovar commit e merge / só preparar, sem commit / rejeitar. Com aprovação, retome a sessão do integrador para o modo **executar**; sem aprovação, encerre a tarefa sem commit e diga isso ao usuário.
-7. **Conclusão.** Reporte ID, arquivos alterados, branch, hash do commit e resultado do merge.
+7. **Conclusão.** Reporte ID, arquivos alterados, branch, hash do commit e resultado do merge. Com o merge concluído, apague o worktree da tarefa com Code Mode: `tools.opencode.worktree_remove({ directory: <diretório guardado no passo 1> })`. Se a remoção falhar por mudanças remanescentes, pergunte ao usuário antes de usar `force`. A branch permanece como registro do merge. Tarefas encerradas sem merge (rejeitadas ou paradas) mantêm o worktree.
 
 ## Concorrência
 
