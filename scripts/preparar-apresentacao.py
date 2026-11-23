@@ -42,7 +42,8 @@ def executar(comando: list[str], diretorio: Path) -> None:
     # No Windows, npm e mvn são .cmd; o CreateProcess não os executa direto.
     if os.name == "nt" and Path(comando[0]).suffix.lower() in (".cmd", ".bat"):
         comando = ["cmd.exe", "/c", *comando]
-    print(f"$ {' '.join(comando)}  ({diretorio.relative_to(RAIZ)})")
+    # flush: sem ele, a linha do comando aparece depois da saída do próprio comando quando a saída é canalizada.
+    print(f"$ {' '.join(comando)}  ({diretorio.relative_to(RAIZ)})", flush=True)
     resultado = subprocess.run(comando, cwd=diretorio, text=True)
     if resultado.returncode != 0:
         raise SystemExit(f"Falhou: {' '.join(comando)}")
@@ -71,7 +72,9 @@ def construir(pular: bool) -> Path:
         if not (WEB / "node_modules").is_dir():
             executar([ferramenta("npm"), "ci"], WEB)
         executar([ferramenta("npm"), "run", "build"], WEB)
-        executar([ferramenta("mvn"), "-DskipTests", "package"], SERVER)
+        # clean evita levar em static/ assets de builds anteriores: os nomes com hash mudam a
+        # cada build e o maven-resources não apaga os antigos de target/classes.
+        executar([ferramenta("mvn"), "-DskipTests", "clean", "package"], SERVER)
 
     jars = [jar for jar in (SERVER / "target").glob("*.jar") if not jar.name.endswith(".original")]
     if not jars:

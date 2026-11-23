@@ -29,12 +29,10 @@ Para desenvolver e gerar o jar:
 
 Para a apresentação presencial:
 
-- uma máquina Windows 10 ou 11, 64 bits;
-- Google Chrome instalado;
+- uma máquina Windows 10 ou 11, 64 bits, com Google Chrome;
 - a pasta do pacote copiada do pendrive. Não é preciso instalar Java, Maven ou Node na máquina.
 
-Para montar o pacote no Linux, você também precisa do Python 3 e de baixar previamente um JRE 21 para Windows e um
-Node para Windows. O jar é independente de sistema; o JRE e o Node não são.
+Para montar o pacote, acrescente o Python 3 e os runtimes de destino ([seção 6](#6-pacote-para-o-pendrive-windows)).
 
 ## 3. Desenvolvimento na sua máquina
 
@@ -47,9 +45,10 @@ cd apps/server
 mvn spring-boot:run -Dspring-boot.run.profiles=h2,dev
 ```
 
-O server fica em `http://localhost:8080`. O schema é criado pelo Hibernate e o seed é executado na inicialização.
-O profile `dev` ativa o provedor `fake`, então o assistente funciona sem rede e sem chave. Sem o `dev`, o `fake` fica
-inativo e o assistente só responde com uma chave real configurada.
+O server fica em `http://localhost:8080`. O schema é criado pelo Hibernate e o seed é executado na inicialização:
+cria os livros, o estoque, as tabelas de domínio e um histórico de pedidos e trocas. O profile `dev` ativa o provedor
+`fake`, então o assistente funciona sem rede e sem chave. Sem o `dev`, o `fake` fica inativo e o assistente só
+responde com uma chave real configurada.
 
 No segundo, suba o Vite:
 
@@ -83,17 +82,18 @@ npm ci
 npm run build
 
 cd ../server
-mvn -DskipTests package
+mvn -DskipTests clean package
 ```
 
-O jar fica em `apps/server/target/livraria-server-0.0.1-SNAPSHOT.jar`. Para subir:
+O `clean` evita levar no jar os assets de builds anteriores: os nomes têm hash e mudam a cada build. O jar fica em
+`apps/server/target/livraria-server-0.0.1-SNAPSHOT.jar`. Para subir:
 
 ```bash
 java -jar target/livraria-server-0.0.1-SNAPSHOT.jar
 ```
 
-Acesse `http://localhost:8080`. Se o Maven for executado sem o `npm run build` antes, o jar sobe só com a API e a
-página do web não aparece.
+Acesse `http://localhost:8080`. Se o `npm run build` não rodou antes, o jar sobe só com a API e a página do web não
+aparece.
 
 ## 5. Testes
 
@@ -127,29 +127,19 @@ relógio controlado. Essas rotas só existem no profile `e2e`.
 
 Os E2E existem só para a apresentação. O comando abre o Playwright UI Mode: a lista de roteiros fica de um lado e,
 ao executar um cenário, o Chrome abre maximizado na resolução da tela, com cada ação esperando meio segundo. Quando a
-validação é sobre um valor que pode ficar abaixo da dobra, o teste rola até o alvo antes de conferir, para o professor
-ver o que está sendo validado. A interface permite rodar todos, repetir um cenário e voltar passo a passo. No CI,
-`npx playwright test` roda em modo headless e sem atraso.
-
-Quando o login não é o cenário, o teste começa já autenticado pela API e vai direto à tela do fluxo. O login e o
-cadastro pela tela ficam reservados ao roteiro que quer demonstrá-los; dados de apoio, como um usuário para outro
-cenário, também podem ser criados pela API.
+validação é sobre um valor que pode ficar abaixo da dobra, o teste rola até o alvo antes de conferir. A interface
+permite rodar todos, repetir um cenário e voltar passo a passo. No CI, `npx playwright test` roda em modo headless e
+sem atraso.
 
 | O que abrir | Comando |
 |---|---|
 | Todos os roteiros | `npm run e2e` |
 | Um fluxo | `npm run e2e -- e2e/apresentacao<Fluxo>.spec.ts` |
-| Cadastro de clientes | `npm run e2e -- e2e/apresentacaoClientes.spec.ts` |
-| Carrinho e estoque | `npm run e2e -- e2e/apresentacaoCarrinho.spec.ts` |
-| Compra e pagamento | `npm run e2e -- e2e/apresentacaoCheckout.spec.ts` |
-| Pedidos e trocas | `npm run e2e -- e2e/apresentacaoPedidosETrocas.spec.ts` |
-| Análise de vendas | `npm run e2e -- e2e/apresentacaoAnalise.spec.ts` |
 | Um cenário do fluxo | `npm run e2e -- e2e/apresentacao<Fluxo>.spec.ts -g "3\."` (o número é o do título do `test`) |
 
-No pacote portátil, o mesmo filtro funciona com `rodar-testes.bat -g "3\."`.
-
-Na janela do Playwright UI, clique em **Run all** ou no botão de executar ao lado do cenário. O botão de repetir roda
-de novo, e a linha do tempo de cada passo permite voltar ao estado anterior.
+No pacote portátil, o mesmo filtro funciona com `rodar-testes.bat -g "3\."`. Na janela do Playwright UI, clique em
+**Run all** ou no botão de executar ao lado do cenário; o botão de repetir roda de novo e a linha do tempo permite
+voltar ao estado anterior.
 
 O modo UI não gera o relatório HTML: o acompanhamento é na própria interface. Para gerar o relatório depois de uma
 execução sem interface (`npx playwright test`), ele fica em `apps/web/playwright-report` e pode ser aberto com:
@@ -158,38 +148,20 @@ execução sem interface (`npx playwright test`), ele fica em `apps/web/playwrig
 npx playwright show-report
 ```
 
-### Roteiro de apresentação de um fluxo
+### Criar um roteiro de apresentação
 
-Todo E2E do projeto é um roteiro de apresentação. O padrão de nomes é:
+Todo E2E do projeto é um roteiro de apresentação: um spec `apresentacao<Fluxo>.spec.ts` em `apps/web/e2e/`, seguindo o
+`fixtures.ts` compartilhado. Para apresentar outro módulo, crie o seu a partir de um roteiro existente. Escolha os
+passos que o professor vai ver, na ordem em que ele vê, e deixe cada `test` contar um cenário, com o requisito no
+título. Quando o login ou o cadastro não é o assunto, comece já autenticado pela API (`entrarNaApi`) e crie dados de
+apoio pela API (`apiDaPagina` e `tokenCsrf`), sem validá-los em tela. Escolha filtros e dados que deem uma cena
+representativa (tabela com várias linhas, gráfico com evolução, status variados) e, antes de conferir conteúdo que
+pode ficar abaixo da dobra, role até o alvo com `rolarAte`.
 
-| Tipo | Padrão | Exemplos |
-|---|---|---|
-| Roteiro de apresentação | `apresentacao<Fluxo>.spec.ts` | `apresentacaoClientes.spec.ts`, `apresentacaoCarrinho.spec.ts`, `apresentacaoCheckout.spec.ts`, `apresentacaoPedidosETrocas.spec.ts`, `apresentacaoAnalise.spec.ts` |
-| Apoio compartilhado | `fixtures.ts` | `fixtures.ts` |
-
-Os testes de apresentação são specs que começam com `apresentacao`, ficam em `apps/web/e2e/` e seguem o `fixtures.ts`
-compartilhado. O prefixo permite rodar todos ou escolher um fluxo:
-
-```bash
-npm run e2e
-npm run e2e -- e2e/apresentacao<Fluxo>.spec.ts
-```
-
-Para apresentar outro módulo, crie `apps/web/e2e/apresentacao<Fluxo>.spec.ts` seguindo um roteiro existente. Escolha
-os passos que o professor vai ver, na ordem em que ele vê, e deixe cada `test` contar um cenário, com o requisito no
-título. Use as telas reais para o que o cenário demonstra. Quando o login ou o cadastro não é o assunto, o teste começa
-já autenticado pela API (`entrarNaApi`) e vai direto à tela do fluxo; dados de apoio também podem ser criados pela API,
-sem validar em tela. Escolha filtros e dados que deem ao professor uma cena representativa (uma tabela com várias
-linhas, um gráfico com evolução, status variados), não o mínimo que só faz a asserção passar. Antes de validar conteúdo
-que pode ficar abaixo da dobra, role até o alvo com `rolarAte`, para o professor ver o que está sendo conferido.
-
-Os cenários de cada fluxo estão documentados nos títulos dos `test` do respectivo spec e, quando houver, na matriz de
-rastreabilidade do requisito em [`docs/requisitos/`](../requisitos/README.md). A ordem dos cenários é definida pelo que
-faz sentido na apresentação de cada fluxo.
-
-Não crie um script por fluxo no `package.json`: use `npm run e2e -- e2e/apresentacao<Fluxo>.spec.ts`. O pacote
-portátil copia a pasta `e2e` inteira; para continuar autossuficiente, o roteiro deve importar só `@playwright/test`,
-`./fixtures` e helpers que estejam dentro de `e2e/`; evite importar código da aplicação.
+O pacote portátil copia a pasta `e2e` inteira; para continuar autossuficiente, importe só `@playwright/test`,
+`./fixtures` e helpers que estejam dentro de `e2e/`. Não crie um script por fluxo no `package.json`: use
+`npm run e2e -- e2e/apresentacao<Fluxo>.spec.ts`. Os cenários de cada fluxo estão nos títulos dos `test` do respectivo
+spec e, quando houver, na matriz de rastreabilidade do requisito em [`docs/requisitos/`](../requisitos/README.md).
 
 ### E2E contra o jar empacotado
 
@@ -206,7 +178,7 @@ npm run e2e -- -c playwright.apresentacao.config.ts
 ```
 
 O `playwright.apresentacao.config.ts` não sobe processo nenhum: ele espera a aplicação em `http://localhost:8080`.
-Por isso o server precisa estar rodando com o profile `e2e`, que expõe as rotas de reset e de relógio usadas pelos
+Por isso o server precisa estar rodando com o profile `e2e`, que expõe as rotas de reset e de relógio usados pelos
 testes. O Playwright UI abre junto com o Chrome maximizado, e as ações continuam desaceleradas.
 
 ## 6. Pacote para o pendrive Windows
@@ -219,7 +191,8 @@ Baixe e extraia, no seu Linux:
    (`https://adoptium.net/temurin/releases/?version=21&os=windows&arch=x64&package=jre`). O diretório extraído deve
    ter `bin/java.exe`.
 2. **Node.js 20 ou superior para Windows x64**, em formato `.zip`
-   (`https://nodejs.org/en/download`). O arquivo `node.exe` fica na raiz do diretório extraído.
+   (`https://nodejs.org/en/download`). Os zips atuais extraem uma pasta `node-vX.Y.Z-win-x64/` com o
+   `node.exe` dentro; aponte `--node` para esse caminho ou mova o conteúdo da pasta para fora dela.
 
 O Chrome deve estar instalado na máquina da apresentação. O pacote não baixa navegador.
 
@@ -251,19 +224,12 @@ dist/apresentacao/
     node_modules/          @playwright/test, playwright e playwright-core
 ```
 
-Se você já gerou o jar e o `dist` do web, e só quer remontar a pasta:
+Variações:
 
-```bash
-python3 scripts/preparar-apresentacao.py --pular-build \
-  --jre ~/portateis/jre-21-windows \
-  --node ~/portateis/node-v22-windows/node.exe
-```
-
-Se o jar estiver em outro caminho, acrescente `--jar /caminho/do/livraria.jar`.
-
-Se preferir montar em uma máquina Windows, instale Python 3 e rode o mesmo script com caminhos do Windows. As opções
-`--jre` e `--node` aceitam o diretório do JRE e o `node.exe`. Para uma apresentação em Linux, use `--so linux` e
-informe um JRE e um Node Linux; o script troca os launchers `.bat` por `.sh`.
+- só remontar a pasta, sem rodar npm/mvn (o jar e o `dist` do web já precisam existir): `--pular-build`;
+- jar em outro caminho: `--jar /caminho/do/livraria.jar`;
+- montar na própria máquina Windows: instale o Python 3 e rode o mesmo script com caminhos do Windows;
+- apresentação em Linux: `--so linux`, informando um JRE e um Node Linux; os launchers viram `.sh`.
 
 ### 6.3 Na máquina da apresentação
 
@@ -282,18 +248,13 @@ Para a IA real na apresentação, coloque o `.env` com as chaves na mesma pasta 
 `application.yml` lê `optional:file:.env`) ou defina as variáveis `IA_*_CHAVE` no sistema antes de abrir o
 `iniciar-app`.
 
-Se o Chrome não estiver instalado, instale-o ou troque `channel: 'chrome'` por `channel: 'msedge'` em
-`testes/playwright.apresentacao.config.ts`. No desenvolvimento, o mesmo ajuste vale para `playwright.config.ts`. O
-Edge já vem no Windows.
-
 ### 6.4 Se a porta 8080 estiver ocupada
 
-Feche o outro processo ou troque a porta nos dois lugares:
+Feche o outro processo ou troque a porta nos três lugares:
 
 - em `iniciar-app.bat`, no argumento `--server.port=8080`;
-- em `testes/playwright.apresentacao.config.ts`, na `baseURL`.
-
-Se usar outra porta, o `rodar-testes.bat` também precisa verificar a nova porta na chamada ao `/v3/api-docs`.
+- em `testes/playwright.apresentacao.config.ts`, na `baseURL`;
+- no endereço do `/v3/api-docs` dentro do `rodar-testes.bat`.
 
 ### 6.5 Sem internet
 
@@ -301,20 +262,7 @@ A apresentação usa os provedores reais de IA; o `fake` fica inativo. Sem inter
 assistente fica indisponível. O restante do sistema continua funcionando, porque o banco é H2 em memória. Para
 ensaiar sem rede com os testes, acrescente o profile `dev` (`h2,e2e,dev`); ele ativa o `fake`.
 
-## 7. Credenciais e dados de teste
-
-| Perfil | Login | Senha |
-|---|---|---|
-| Administrador | `admin@livraria.test` | `Admin@123` |
-| Cliente (Ana Souza) | `ana.souza@livraria.test` | `Senha@123` |
-
-O seed cria os livros, o estoque, as tabelas de domínio e um histórico de pedidos e trocas. Cada roteiro escolhe os
-dados que precisa; quando o cenário não depende deles, crie os dados de apoio pela API com `apiDaPagina` e `tokenCsrf`,
-sem validá-los em tela. Como o reset roda antes de cada teste, um roteiro nunca depende do que o anterior deixou no
-banco. Para entender os dados e as regras de um fluxo específico, veja a matriz de rastreabilidade correspondente em
-[`docs/requisitos/`](../requisitos/README.md).
-
-## 8. Problemas comuns
+## 7. Problemas comuns
 
 **A página abre só com a API ou dá 404 no navegador.** O `mvn package` rodou antes do `npm run build`. Gere o web e
 empacote de novo.
@@ -340,7 +288,7 @@ teste. Reinicie o `iniciar-app.bat` se quiser começar de novo.
 **O comando `e2e` não encontra nenhum teste.** Crie um arquivo `e2e/apresentacao<Fluxo>.spec.ts` ou rode um fluxo
 existente, como `npm run e2e -- e2e/apresentacaoAnalise.spec.ts`.
 
-## 9. Onde estão as decisões
+## 8. Onde estão as decisões
 
 - [DEC-09](../decisoes/DEC-09-topologia-de-execucao.md): topologia dos processos e rotas de apoio do E2E.
 - [DEC-02](../decisoes/DEC-02-framework-e2e.md): Playwright com o Chrome instalado.
